@@ -1,0 +1,24 @@
+{
+  "name": "cspray/annotated-injector",
+  "description": "Create Auryn Injector based off annotated classes and interfaces",
+  "require": {
+    "php": "^8.0",
+    "rdlowrey/auryn": "^1.4",
+    "nikic/php-parser": "^4.10",
+    "monolog/monolog": "^2.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Cspray\\AnnotatedInjector\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Cspray\\AnnotatedInjector\\": "test",
+      "Acme\\AnnotatedInjectorDemo\\": "examples/getting_started/src"
+    }
+  }
+}
