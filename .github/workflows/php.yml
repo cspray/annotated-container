@@ -1,4 +1,4 @@
-name: 'Unit Testing & Code Lint'
+name: 'Unit Tests'
 
 on:
   push:
