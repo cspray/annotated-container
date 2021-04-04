@@ -32,7 +32,7 @@ final class AnnotatedInjectorFactory {
         foreach ($injectorDefinition->getServiceSetup() as $serviceSetupDefinition) {
             $injector->prepare($serviceSetupDefinition->getType(), function($object) use($serviceSetupDefinition, $injector) {
                 $method = $serviceSetupDefinition->getMethod();
-                $object->$method();
+                $injector->execute([$object, $method]);
             });
         }
 

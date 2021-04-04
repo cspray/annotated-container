@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedInjector;
 
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\InterfaceServiceSetup;
+use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServiceSetup;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -37,6 +38,17 @@ class AnnotatedInjectorFactoryTest extends TestCase {
 
         $this->assertInstanceOf(InterfaceServiceSetup\FooImplementation::class, $subject);
         $this->assertEquals(1, $subject->getBarCounter());
+    }
+
+    public function testServiceSetupInvokedOnInjector() {
+        $compiler = new InjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/InjectorExecuteServiceSetup', 'test');
+        $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+
+        $subject = $injector->make(InjectorExecuteServiceSetup\FooInterface::class);
+
+        $this->assertInstanceOf(InjectorExecuteServiceSetup\FooImplementation::class, $subject);
+        $this->assertInstanceOf(InjectorExecuteServiceSetup\BarImplementation::class, $subject->getBar());
     }
 
 }
