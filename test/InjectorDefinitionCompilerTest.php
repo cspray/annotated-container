@@ -183,7 +183,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             $actualTypes[] = $serviceDefinition->getType();
         }
 
-        $this->assertEquals($expectedTypes, $actualTypes);
+        $this->assertEqualsCanonicalizing($expectedTypes, $actualTypes);
     }
 
     protected function assertAliasDefinitionsMap(array $expectedAliasMap, array $aliasDefinitions) : void {
@@ -197,7 +197,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             $actualMap[$aliasDefinition->getOriginalServiceDefinition()->getType()] = $aliasDefinition->getAliasServiceDefinition()->getType();
         }
 
-        $this->assertEquals($expectedAliasMap, $actualMap);
+        $this->assertEqualsCanonicalizing($expectedAliasMap, $actualMap);
     }
 
     protected function assertServicePrepareTypes(array $expectedServicePrepare, array $servicePrepareDefinitions) : void {
@@ -211,6 +211,6 @@ class InjectorDefinitionCompilerTest extends TestCase {
             $actualMap[$servicePrepareDefinition->getType()] = $servicePrepareDefinition->getMethod();
         }
 
-        $this->assertEquals($expectedServicePrepare, $actualMap);
+        $this->assertEqualsCanonicalizing($expectedServicePrepare, $actualMap);
     }
 }
