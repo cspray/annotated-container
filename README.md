@@ -53,15 +53,16 @@ var_dump($injector->make(Foo::class));
 
 ## Attributes Overview
 
-The following Attributes are made available through this library. This is just a brief description of the available
-Attributes. Please read the source documentation for more detailed information.
+The following Attributes are made available through this library. All Attributes listed are under the namespace 
+`Cspray\AnnotatedInjector\Attribute`. This is just a brief description of the available Attributes. Please read the 
+source documentation for more detailed information. 
 
 |Attribute Name | Target | Description
 --- | --- | ---
-|`Cspray\AnnotatedInjector\Attribute\Service`|`Attribute::TARGET_CLASS`|Describes an interface, abstract class, or concrete class as being a service. Will share and alias the types into the Injector based on what's annotated.|
-|`Cspray\AnnotatedInjector\Attribute\ServicePrepare`|`Attribute::TARGET_METHOD`|Describes a method, on an interface or class, that should be invoked when that type is created.|
-|`Cspray\AnnotatedInjector\Attribute\DefineScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method.|
-|`Cspray\AnnotatedInjector\Attribute\DefineService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|
+|`Service`|`Attribute::TARGET_CLASS`|Describes an interface, abstract class, or concrete class as being a service. Will share and alias the types into the Injector based on what's annotated.|
+|`ServicePrepare`|`Attribute::TARGET_METHOD`|Describes a method, on an interface or class, that should be invoked when that type is created.|
+|`DefineScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method.|
+|`DefineService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|
 
 ## Roadmap
 
