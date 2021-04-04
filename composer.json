@@ -1,6 +1,16 @@
 {
   "name": "cspray/annotated-injector",
   "description": "Create Auryn Injector based off annotated classes and interfaces",
+  "keywords": ["attributes", "auryn"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Charles Sprayberry",
+      "email": "771345+cspray@users.noreply.github.com",
+      "homepage": "https://cspray.io",
+      "role": "Project Maintainer"
+    }
+  ],
   "require": {
     "php": "^8.0",
     "rdlowrey/auryn": "^1.4",
