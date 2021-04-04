@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
       - name: Composer 8
         uses: php-actions/composer@v5
         with:
           php_version: 8
-          progress: true
       - name: PHP 8 tests
         uses: php-actions/phpunit@v2
         with:
