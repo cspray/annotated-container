@@ -10,7 +10,7 @@ configuring all Injector options through Attributes.
 - Alias concrete implementations of interfaces annotated with `Service`.
 - Swap out concrete implementations based on environment. For example, run a cloud based storage in production, a 
 local filesystem based storage in development, and a virtual filesystem in test.
-- Execute arbitrary methods after service creation by annotating a method with `ServiceSetup`
+- Execute arbitrary methods after service creation by annotating a method with `ServicePrepare`
 
 This is a new library still in active development! Many features are planned for the future... please check out the 
 Roadmap for more details on what's coming. Additionally, only the most basic use cases have been tested. It is not 
@@ -51,6 +51,18 @@ $injector = \Cspray\AnnotatedInjector\AnnotatedInjectorFactory::fromInjectorDefi
 var_dump($injector->make(Foo::class));
 ```
 
+## Attributes Overview
+
+The following Attributes are made available through this library. This is just a brief description of the available
+Attributes. Please read the source documentation for more detailed information.
+
+|Attribute Name | Target | Description
+--- | --- | ---
+|`Cspray\AnnotatedInjector\Attribute\Service`|`Attribute::TARGET_CLASS`|Describes an interface, abstract class, or concrete class as being a service. Will share and alias the types into the Injector based on what's annotated.|
+|`Cspray\AnnotatedInjector\Attribute\ServicePrepare`|`Attribute::TARGET_METHOD`|Describes a method, on an interface or class, that should be invoked when that type is created.|
+|`Cspray\AnnotatedInjector\Attribute\DefineScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method.|
+|`Cspray\AnnotatedInjector\Attribute\DefineService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|
+
 ## Roadmap
 
 ### 0.1.x
@@ -60,6 +72,7 @@ var_dump($injector->make(Foo::class));
 - Support methods invoked in Injector::prepares ... :heavy_check_mark:
 - Support defining scalar values on parameters ... :x:
 - Support defining specific Service on parameters ... :x:
+- Transition to amphp/injector ... :x:
 
 ### 0.2.x
 
@@ -75,3 +88,5 @@ var_dump($injector->make(Foo::class));
 ### 0.4.x
 
 - Support defining scalar values from an arbitrary source ... :x:
+- Support working with identifiers once feature is in amphp/injector ... :x:
+- Further improve library's use in production environment ... :x:

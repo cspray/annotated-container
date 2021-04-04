@@ -3,9 +3,9 @@
 namespace Cspray\AnnotatedInjector;
 
 use Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Interrogator\ServiceSetupDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator;
 use Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Visitor\ServiceSetupDefinitionVisitor;
+use Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;
@@ -30,13 +30,13 @@ class InjectorDefinitionCompiler {
 
     public function compileDirectory(string $dir, string $environment) : InjectorDefinition {
         $rawServiceDefinitions = [];
-        $rawServiceSetupDefinitions = [];
+        $rawServicePrepareDefinitions = [];
         /** @var Node $node */
         foreach ($this->gatherDefinitions($dir) as $rawDefinition) {
             if ($rawDefinition['definitionType'] === ServiceDefinition::class) {
                 $rawServiceDefinitions[] = $rawDefinition;
-            } else if ($rawDefinition['definitionType'] === ServiceSetupDefinition::class) {
-                $rawServiceSetupDefinitions[] = $rawDefinition;
+            } else if ($rawDefinition['definitionType'] === ServicePrepareDefinition::class) {
+                $rawServicePrepareDefinitions[] = $rawDefinition;
             }
         }
         $serviceDefinitionInterrogator = new ServiceDefinitionInterrogator(
@@ -45,9 +45,9 @@ class InjectorDefinitionCompiler {
         );
         return $this->interrogateDefinitions(
             $serviceDefinitionInterrogator,
-            new ServiceSetupDefinitionInterrogator(
+            new ServicePrepareDefinitionInterrogator(
                 $serviceDefinitionInterrogator,
-                ...$this->marshalRawServiceSetupDefinitions($rawServiceSetupDefinitions)
+                ...$this->marshalRawServicePrepareDefinitions($rawServicePrepareDefinitions)
             )
         );
     }
@@ -103,12 +103,12 @@ class InjectorDefinitionCompiler {
         return $serviceDefinition;
     }
 
-    private function marshalRawServiceSetupDefinitions(array $rawServiceSetupDefinitions) : array {
+    private function marshalRawServicePrepareDefinitions(array $rawServicePrepareDefinitions) : array {
         $marshaledDefinitions = [];
-        foreach ($rawServiceSetupDefinitions as $rawServiceSetupDefinition) {
-            $marshaledDefinitions[] = new ServiceSetupDefinition(
-                $rawServiceSetupDefinition['type'],
-                $rawServiceSetupDefinition['method']
+        foreach ($rawServicePrepareDefinitions as $rawServicePrepareDefinition) {
+            $marshaledDefinitions[] = new ServicePrepareDefinition(
+                $rawServicePrepareDefinition['type'],
+                $rawServicePrepareDefinition['method']
             );
         }
         return $marshaledDefinitions;
@@ -133,26 +133,26 @@ class InjectorDefinitionCompiler {
             $statements = $this->parser->parse(file_get_contents($file->getRealPath()));
 
             $serviceDefinitionVisitor = new ServiceDefinitionVisitor();
-            $serviceSetupDefinitionVisitor = new ServiceSetupDefinitionVisitor();
+            $servicePrepareDefinitionVisitor = new ServicePrepareDefinitionVisitor();
 
             $this->nodeTraverser->addVisitor(new NameResolver());
             $this->nodeTraverser->addVisitor(new NodeConnectingVisitor());
             $this->nodeTraverser->addVisitor($serviceDefinitionVisitor);
-            $this->nodeTraverser->addVisitor($serviceSetupDefinitionVisitor);
+            $this->nodeTraverser->addVisitor($servicePrepareDefinitionVisitor);
             $this->nodeTraverser->traverse($statements);
 
             yield from $serviceDefinitionVisitor->getServiceDefinitions();
-            yield from $serviceSetupDefinitionVisitor->getServiceSetupDefinitions();
+            yield from $servicePrepareDefinitionVisitor->getServicePrepareDefinitions();
         }
     }
 
     private function interrogateDefinitions(
         ServiceDefinitionInterrogator $serviceDefinitionInterrogator,
-        ServiceSetupDefinitionInterrogator $serviceSetupDefinitionInterrogator
+        ServicePrepareDefinitionInterrogator $servicePrepareDefinitionInterrogator
     ) : InjectorDefinition {
         $services = iterator_to_array($serviceDefinitionInterrogator->gatherSharedServices());
         $aliases = iterator_to_array($serviceDefinitionInterrogator->gatherAliases());
-        $setupMethods = iterator_to_array($serviceSetupDefinitionInterrogator->gatherServiceSetup());
+        $setupMethods = iterator_to_array($servicePrepareDefinitionInterrogator->gatherServicePrepare());
 
 
         return new class($services, $aliases, $setupMethods) implements InjectorDefinition {
@@ -171,7 +171,7 @@ class InjectorDefinitionCompiler {
                 return $this->aliases;
             }
 
-            public function getServiceSetup() : array {
+            public function getServicePrepareDefinitions() : array {
                 return $this->setupMethods;
             }
 

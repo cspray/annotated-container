@@ -4,10 +4,10 @@ namespace Cspray\AnnotatedInjector;
 
 use Cspray\AnnotatedInjector\DummyApps\AbstractSharedServices;
 use Cspray\AnnotatedInjector\DummyApps\ClassOnlyServices;
-use Cspray\AnnotatedInjector\DummyApps\ClassOverridesInterfaceServiceSetup;
-use Cspray\AnnotatedInjector\DummyApps\ClassServiceSetupWithoutInterfaceServiceSetup;
+use Cspray\AnnotatedInjector\DummyApps\ClassOverridesInterfaceServicePrepare;
+use Cspray\AnnotatedInjector\DummyApps\ClassServicePrepareWithoutInterfaceServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\EnvironmentResolvedServices;
-use Cspray\AnnotatedInjector\DummyApps\InterfaceServiceSetup;
+use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\MultipleSimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServicesSomeNotAnnotated;
@@ -17,12 +17,12 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \Cspray\AnnotatedInjector\InjectorDefinitionCompiler
  * @covers \Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Visitor\ServiceSetupDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor
  * @covers \Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Interrogator\ServiceSetupDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator
  * @covers \Cspray\AnnotatedInjector\ServiceDefinition
  * @covers \Cspray\AnnotatedInjector\AliasDefinition
- * @covers \Cspray\AnnotatedInjector\ServiceSetupDefinition
+ * @covers \Cspray\AnnotatedInjector\ServicePrepareDefinition
  */
 class InjectorDefinitionCompilerTest extends TestCase {
 
@@ -37,131 +37,131 @@ class InjectorDefinitionCompilerTest extends TestCase {
 
         $this->assertServiceDefinitionsHaveTypes([SimpleServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([SimpleServices\FooInterface::class => SimpleServices\FooImplementation::class], $injectorDefinition->getAliasDefinitions());
-        $this->assertEmpty($injectorDefinition->getServiceSetup());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testMultipleSimpleServices() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/MultipleSimpleServices', 'test');
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/MultipleSimpleServices', 'test');
 
         $this->assertServiceDefinitionsHaveTypes([
             MultipleSimpleServices\BarInterface::class,
             MultipleSimpleServices\FooInterface::class
-        ], $serviceDefinition->getSharedServiceDefinitions());
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             MultipleSimpleServices\FooInterface::class => MultipleSimpleServices\FooImplementation::class,
             MultipleSimpleServices\BarInterface::class => MultipleSimpleServices\BarImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertEmpty($serviceDefinition->getServiceSetup());
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testSimpleServicesSomeNotAnnotated() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleServicesSomeNotAnnotated', 'test');
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleServicesSomeNotAnnotated', 'test');
 
-        $this->assertServiceDefinitionsHaveTypes([SimpleServicesSomeNotAnnotated\FooInterface::class], $serviceDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([SimpleServicesSomeNotAnnotated\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             SimpleServicesSomeNotAnnotated\FooInterface::class => SimpleServicesSomeNotAnnotated\FooImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertEmpty($serviceDefinition->getServiceSetup());
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testEnvironmentResolvedServicesTest() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'test');
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'test');
 
-        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $serviceDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             EnvironmentResolvedServices\FooInterface::class => EnvironmentResolvedServices\TestFooImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertEmpty($serviceDefinition->getServiceSetup());
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testEnvironmentResolvedServicesDev() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'dev');
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'dev');
 
-        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $serviceDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             EnvironmentResolvedServices\FooInterface::class => EnvironmentResolvedServices\DevFooImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertEmpty($serviceDefinition->getServiceSetup());
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testEnvironmentResolvedServicesProd() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'prod');
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'prod');
 
-        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $serviceDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             EnvironmentResolvedServices\FooInterface::class => EnvironmentResolvedServices\ProdFooImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertEmpty($serviceDefinition->getServiceSetup());
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testClassOnlyServices() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassOnlyServices', 'test');
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassOnlyServices', 'test');
 
         $this->assertServiceDefinitionsHaveTypes([
             ClassOnlyServices\BarImplementation::class,
             ClassOnlyServices\BazImplementation::class,
             ClassOnlyServices\FooImplementation::class
-        ], $serviceDefinition->getSharedServiceDefinitions());
-        $this->assertEmpty($serviceDefinition->getAliasDefinitions());
-        $this->assertEmpty($serviceDefinition->getServiceSetup());
+        ], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
-    public function testInterfaceServiceSetup() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/InterfaceServiceSetup', 'test');
+    public function testInterfaceServicePrepare() {
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/InterfaceServicePrepare', 'test');
 
         $this->assertServiceDefinitionsHaveTypes([
-            InterfaceServiceSetup\FooInterface::class
-        ], $serviceDefinition->getSharedServiceDefinitions());
+            InterfaceServicePrepare\FooInterface::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            InterfaceServiceSetup\FooInterface::class => InterfaceServiceSetup\FooImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertServiceSetupMethods([
-            InterfaceServiceSetup\FooInterface::class => 'setBar'
-        ], $serviceDefinition->getServiceSetup());
+            InterfaceServicePrepare\FooInterface::class => InterfaceServicePrepare\FooImplementation::class
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertServicePrepareTypes([
+            InterfaceServicePrepare\FooInterface::class => 'setBar'
+        ], $injectorDefinition->getServicePrepareDefinitions());
     }
 
-    public function testClassOverridesInterfaceServiceSetup() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassOverridesInterfaceServiceSetup', 'test');
+    public function testClassOverridesInterfaceServicePrepare() {
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassOverridesInterfaceServicePrepare', 'test');
 
         $this->assertServiceDefinitionsHaveTypes([
-            ClassOverridesInterfaceServiceSetup\FooInterface::class
-        ], $serviceDefinition->getSharedServiceDefinitions());
+            ClassOverridesInterfaceServicePrepare\FooInterface::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            ClassOverridesInterfaceServiceSetup\FooInterface::class => ClassOverridesInterfaceServiceSetup\FooImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertServiceSetupMethods([
-            ClassOverridesInterfaceServiceSetup\FooInterface::class => 'setBar'
-        ], $serviceDefinition->getServiceSetup());
+            ClassOverridesInterfaceServicePrepare\FooInterface::class => ClassOverridesInterfaceServicePrepare\FooImplementation::class
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertServicePrepareTypes([
+            ClassOverridesInterfaceServicePrepare\FooInterface::class => 'setBar'
+        ], $injectorDefinition->getServicePrepareDefinitions());
     }
 
-    public function testClassServiceSetupWithoutInterfaceServiceSetup() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassServiceSetupWithoutInterfaceServiceSetup', 'test');
+    public function testClassServicePrepareWithoutInterfaceServicePrepare() {
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassServicePrepareWithoutInterfaceServicePrepare', 'test');
 
         $this->assertServiceDefinitionsHaveTypes([
-            ClassServiceSetupWithoutInterfaceServiceSetup\FooInterface::class
-        ], $serviceDefinition->getSharedServiceDefinitions());
+            ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            ClassServiceSetupWithoutInterfaceServiceSetup\FooInterface::class => ClassServiceSetupWithoutInterfaceServiceSetup\FooImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertServiceSetupMethods([
-           ClassServiceSetupWithoutInterfaceServiceSetup\FooImplementation::class => 'setBar'
-        ], $serviceDefinition->getServiceSetup());
+            ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class => ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertServicePrepareTypes([
+           ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class => 'setBar'
+        ], $injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testNestedServices() {
-        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/NestedServices', 'test');
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/NestedServices', 'test');
 
         $this->assertServiceDefinitionsHaveTypes([
             NestedServices\BazInterface::class,
             NestedServices\BarInterface::class,
             NestedServices\FooInterface::class
-        ], $serviceDefinition->getSharedServiceDefinitions());
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             NestedServices\FooInterface::class => NestedServices\Foo\FooImplementation::class,
             NestedServices\BarInterface::class => NestedServices\Foo\Bar\BarImplementation::class,
             NestedServices\BazInterface::class => NestedServices\Foo\Bar\Baz\BazImplementation::class
-        ], $serviceDefinition->getAliasDefinitions());
-        $this->assertEmpty($serviceDefinition->getServiceSetup());
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testAbstractSharedServices() {
@@ -169,7 +169,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
 
         $this->assertServiceDefinitionsHaveTypes([AbstractSharedServices\AbstractFoo::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([AbstractSharedServices\AbstractFoo::class => AbstractSharedServices\FooImplementation::class], $injectorDefinition->getAliasDefinitions());
-        $this->assertEmpty($injectorDefinition->getServiceSetup());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
@@ -200,16 +200,17 @@ class InjectorDefinitionCompilerTest extends TestCase {
         $this->assertEquals($expectedAliasMap, $actualMap);
     }
 
-    protected function assertServiceSetupMethods(array $expectedServiceSetup, array $serviceSetupDefinitions) : void {
-        if (($countExpected = count($expectedServiceSetup)) !== ($countActual = count($serviceSetupDefinitions))) {
-            $this->fail("Expected ${countExpected} ServiceSetupDefinition but received ${countActual}");
+    protected function assertServicePrepareTypes(array $expectedServicePrepare, array $servicePrepareDefinitions) : void {
+        if (($countExpected = count($expectedServicePrepare)) !== ($countActual = count($servicePrepareDefinitions))) {
+            $this->fail("Expected ${countExpected} ServicePrepareDefinition but received ${countActual}");
         }
 
         $actualMap = [];
-        foreach ($serviceSetupDefinitions as $serviceSetupDefinition) {
-            $actualMap[$serviceSetupDefinition->getType()] = $serviceSetupDefinition->getMethod();
+        foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
+            $this->assertInstanceOf(ServicePrepareDefinition::class, $servicePrepareDefinition);
+            $actualMap[$servicePrepareDefinition->getType()] = $servicePrepareDefinition->getMethod();
         }
 
-        $this->assertEquals($expectedServiceSetup, $actualMap);
+        $this->assertEquals($expectedServicePrepare, $actualMap);
     }
 }

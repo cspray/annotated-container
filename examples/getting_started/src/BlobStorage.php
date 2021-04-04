@@ -3,12 +3,12 @@
 namespace Acme\AnnotatedInjectorDemo;
 
 use Cspray\AnnotatedInjector\Attribute\Service;
-use Cspray\AnnotatedInjector\Attribute\ServiceSetup;
+use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
 
 #[Service]
 interface BlobStorage {
 
-    #[ServiceSetup]
+    #[ServicePrepare]
     public function attach(BlobStorageObserver $storageObserver) : void;
 
     public function store(string $blob) : void;

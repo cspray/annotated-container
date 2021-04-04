@@ -2,7 +2,7 @@
 
 namespace Acme\AnnotatedInjectorDemo;
 
-use Cspray\AnnotatedInjector\Attribute\ServiceSetup;
+use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
 
 abstract class AbstractBlobStorage implements BlobStorage {
 

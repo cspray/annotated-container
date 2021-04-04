@@ -29,9 +29,9 @@ final class AnnotatedInjectorFactory {
             );
         }
 
-        foreach ($injectorDefinition->getServiceSetup() as $serviceSetupDefinition) {
-            $injector->prepare($serviceSetupDefinition->getType(), function($object) use($serviceSetupDefinition, $injector) {
-                $method = $serviceSetupDefinition->getMethod();
+        foreach ($injectorDefinition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
+            $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinition, $injector) {
+                $method = $servicePrepareDefinition->getMethod();
                 $injector->execute([$object, $method]);
             });
         }

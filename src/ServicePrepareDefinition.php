@@ -8,7 +8,7 @@ namespace Cspray\AnnotatedInjector;
  *
  * @package Cspray\AnnotatedInjector
  */
-final class ServiceSetupDefinition {
+final class ServicePrepareDefinition {
 
     public function __construct(
         private string $type,

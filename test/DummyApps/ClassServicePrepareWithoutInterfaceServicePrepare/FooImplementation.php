@@ -1,15 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\InterfaceServiceSetup;
+
+namespace Cspray\AnnotatedInjector\DummyApps\ClassServicePrepareWithoutInterfaceServicePrepare;
 
 use Cspray\AnnotatedInjector\Attribute\Service;
-use Cspray\AnnotatedInjector\Attribute\ServiceSetup;
+use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
 
 #[Service]
 class FooImplementation implements FooInterface {
 
     private int $barCounter = 0;
 
+    #[ServicePrepare]
     public function setBar() {
         $this->barCounter++;
     }

@@ -6,6 +6,6 @@ namespace Cspray\AnnotatedInjector\Attribute;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD)]
-class ServiceSetup {
+class ServicePrepare {
 
 }

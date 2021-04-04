@@ -3,20 +3,20 @@
 namespace Cspray\AnnotatedInjector;
 
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
-use Cspray\AnnotatedInjector\DummyApps\InterfaceServiceSetup;
-use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServiceSetup;
+use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
+use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServicePrepare;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \Cspray\AnnotatedInjector\AnnotatedInjectorFactory
  * @covers \Cspray\AnnotatedInjector\InjectorDefinitionCompiler
  * @covers \Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Visitor\ServiceSetupDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor
  * @covers \Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Interrogator\ServiceSetupDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator
  * @covers \Cspray\AnnotatedInjector\ServiceDefinition
  * @covers \Cspray\AnnotatedInjector\AliasDefinition
- * @covers \Cspray\AnnotatedInjector\ServiceSetupDefinition
+ * @covers \Cspray\AnnotatedInjector\ServicePrepareDefinition
  */
 class AnnotatedInjectorFactoryTest extends TestCase {
 
@@ -29,26 +29,26 @@ class AnnotatedInjectorFactoryTest extends TestCase {
         $this->assertInstanceOf(SimpleServices\FooImplementation::class, $subject);
     }
 
-    public function testInterfaceServiceSetup() {
+    public function testInterfaceServicePrepare() {
         $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/InterfaceServiceSetup', 'test');
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/InterfaceServicePrepare', 'test');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
-        $subject = $injector->make(InterfaceServiceSetup\FooInterface::class);
+        $subject = $injector->make(InterfaceServicePrepare\FooInterface::class);
 
-        $this->assertInstanceOf(InterfaceServiceSetup\FooImplementation::class, $subject);
+        $this->assertInstanceOf(InterfaceServicePrepare\FooImplementation::class, $subject);
         $this->assertEquals(1, $subject->getBarCounter());
     }
 
-    public function testServiceSetupInvokedOnInjector() {
+    public function testServicePrepareInvokedOnInjector() {
         $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/InjectorExecuteServiceSetup', 'test');
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/InjectorExecuteServicePrepare', 'test');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
-        $subject = $injector->make(InjectorExecuteServiceSetup\FooInterface::class);
+        $subject = $injector->make(InjectorExecuteServicePrepare\FooInterface::class);
 
-        $this->assertInstanceOf(InjectorExecuteServiceSetup\FooImplementation::class, $subject);
-        $this->assertInstanceOf(InjectorExecuteServiceSetup\BarImplementation::class, $subject->getBar());
+        $this->assertInstanceOf(InjectorExecuteServicePrepare\FooImplementation::class, $subject);
+        $this->assertInstanceOf(InjectorExecuteServicePrepare\BarImplementation::class, $subject->getBar());
     }
 
 }
