@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedInjector;
 
+use Cspray\AnnotatedInjector\DummyApps\AbstractSharedServices;
 use Cspray\AnnotatedInjector\DummyApps\ClassOnlyServices;
 use Cspray\AnnotatedInjector\DummyApps\ClassOverridesInterfaceServiceSetup;
 use Cspray\AnnotatedInjector\DummyApps\ClassServiceSetupWithoutInterfaceServiceSetup;
@@ -10,6 +11,7 @@ use Cspray\AnnotatedInjector\DummyApps\InterfaceServiceSetup;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\MultipleSimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServicesSomeNotAnnotated;
+use Cspray\AnnotatedInjector\DummyApps\NestedServices;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -146,8 +148,32 @@ class InjectorDefinitionCompilerTest extends TestCase {
         ], $serviceDefinition->getServiceSetup());
     }
 
+    public function testNestedServices() {
+        $serviceDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/NestedServices', 'test');
+
+        $this->assertServiceDefinitionsHaveTypes([
+            NestedServices\BazInterface::class,
+            NestedServices\BarInterface::class,
+            NestedServices\FooInterface::class
+        ], $serviceDefinition->getSharedServiceDefinitions());
+        $this->assertAliasDefinitionsMap([
+            NestedServices\FooInterface::class => NestedServices\Foo\FooImplementation::class,
+            NestedServices\BarInterface::class => NestedServices\Foo\Bar\BarImplementation::class,
+            NestedServices\BazInterface::class => NestedServices\Foo\Bar\Baz\BazImplementation::class
+        ], $serviceDefinition->getAliasDefinitions());
+        $this->assertEmpty($serviceDefinition->getServiceSetup());
+    }
+
+    public function testAbstractSharedServices() {
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/AbstractSharedServices', 'test');
+
+        $this->assertServiceDefinitionsHaveTypes([AbstractSharedServices\AbstractFoo::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertAliasDefinitionsMap([AbstractSharedServices\AbstractFoo::class => AbstractSharedServices\FooImplementation::class], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServiceSetup());
+    }
+
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
-        if ($countExpected = count($expectedTypes) !== $countActual = count($serviceDefinitions)) {
+        if (($countExpected = count($expectedTypes)) !== ($countActual = count($serviceDefinitions))) {
             $this->fail("Expected ${countExpected} ServiceDefinitions but received ${countActual}");
         }
 
@@ -161,7 +187,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     protected function assertAliasDefinitionsMap(array $expectedAliasMap, array $aliasDefinitions) : void {
-        if ($countExpected = count($expectedAliasMap) !== $countActual = count($aliasDefinitions)) {
+        if (($countExpected = count($expectedAliasMap)) !== ($countActual = count($aliasDefinitions))) {
             $this->fail("Expected ${countExpected} AliasDefinitions but received ${countActual}");
         }
 
@@ -175,7 +201,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     protected function assertServiceSetupMethods(array $expectedServiceSetup, array $serviceSetupDefinitions) : void {
-        if ($countExpected = count($expectedServiceSetup) !== $countActual = count($serviceSetupDefinitions)) {
+        if (($countExpected = count($expectedServiceSetup)) !== ($countActual = count($serviceSetupDefinitions))) {
             $this->fail("Expected ${countExpected} ServiceSetupDefinition but received ${countActual}");
         }
 

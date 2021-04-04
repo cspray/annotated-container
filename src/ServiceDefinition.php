@@ -13,7 +13,9 @@ final class ServiceDefinition {
         private string $type,
         private array $environments,
         private array $implementedServices,
-        private bool $isInterface
+        private array $extendedServices,
+        private bool $isInterface,
+        private bool $isAbstract,
     ) {}
 
     public function getType() : string {
@@ -32,6 +34,10 @@ final class ServiceDefinition {
         return $this->implementedServices;
     }
 
+    public function getExtendedServices() : array {
+        return $this->extendedServices;
+    }
+
     public function getEnvironments() : array {
         return $this->environments;
     }
@@ -44,5 +50,8 @@ final class ServiceDefinition {
         return !$this->isInterface;
     }
 
+    public function isAbstract() : bool {
+        return $this->isClass() && $this->isAbstract;
+    }
 
 }

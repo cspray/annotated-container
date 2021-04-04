@@ -6,7 +6,6 @@ use Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator;
 use Cspray\AnnotatedInjector\Interrogator\ServiceSetupDefinitionInterrogator;
 use Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor;
 use Cspray\AnnotatedInjector\Visitor\ServiceSetupDefinitionVisitor;
-use Generator;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;
@@ -14,6 +13,10 @@ use PhpParser\NodeVisitor\NodeConnectingVisitor;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
+use FilesystemIterator;
+use Generator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class InjectorDefinitionCompiler {
 
@@ -52,32 +55,52 @@ class InjectorDefinitionCompiler {
     private function marshalRawServiceDefinitions(array $rawServiceDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawServiceDefinitions as $rawServiceDefinition) {
-            $implementServiceDefinitions = [];
-            foreach ($rawServiceDefinition['implements'] as $implementedType) {
-                foreach ($rawServiceDefinitions as $_rawServiceDefinition) {
-                    if ($_rawServiceDefinition['isInterface'] &&                    // only care about interface services because we're marshalling class implements
-                        $implementedType === $_rawServiceDefinition['type'] &&      // actually make sure that the type implemented by the class is the type we're looking at
-                        $implementedType !== $rawServiceDefinition['type']          // make sure it isn't the outer type being looked at
-                    ) {
-                        $implementServiceDefinitions[] = new ServiceDefinition(
-                            $_rawServiceDefinition['type'],
-                            $_rawServiceDefinition['environments'],
-                            [],
-                            true
-                        );
-                    }
-                }
-            }
+            $implementServiceDefinitions = $this->marshalCollectionServiceDefinitionFromTypes(
+                $rawServiceDefinitions,
+                $rawServiceDefinition['implements']
+            );
+
+            $extendedServiceDefinitions = $this->marshalCollectionServiceDefinitionFromTypes(
+                $rawServiceDefinitions,
+                $rawServiceDefinition['extends']
+            );
 
             $marshaledDefinitions[] = new ServiceDefinition(
                 $rawServiceDefinition['type'],
                 $rawServiceDefinition['environments'],
                 $implementServiceDefinitions,
-                $rawServiceDefinition['isInterface']
+                $extendedServiceDefinitions,
+                $rawServiceDefinition['isInterface'],
+                $rawServiceDefinition['isAbstract'],
             );
         }
 
         return $marshaledDefinitions;
+    }
+
+    private function marshalCollectionServiceDefinitionFromTypes(array $rawServiceDefinitions, array $targetTypes) : array {
+        $collection = [];
+        foreach ($targetTypes as $targetType) {
+            $collection[] = $this->marshalServiceDefinitionFromType($rawServiceDefinitions, $targetType);
+        }
+        return $collection;
+    }
+
+    private function marshalServiceDefinitionFromType(array $rawServiceDefinitions, string $targetType) {
+        $serviceDefinition = null;
+        foreach ($rawServiceDefinitions as $rawServiceDefinition) {
+            if ($targetType === $rawServiceDefinition['type']) {
+                $serviceDefinition = new ServiceDefinition(
+                    $rawServiceDefinition['type'],
+                    $rawServiceDefinition['environments'],
+                    $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['implements']),
+                    $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['extends']),
+                    $rawServiceDefinition['isInterface'],
+                    $rawServiceDefinition['isAbstract']
+                );
+            }
+        }
+        return $serviceDefinition;
     }
 
     private function marshalRawServiceSetupDefinitions(array $rawServiceSetupDefinitions) : array {
@@ -92,10 +115,22 @@ class InjectorDefinitionCompiler {
     }
 
     private function gatherDefinitions(string $dir) : Generator {
-        $files = glob($dir . '/*');
-        foreach ($files as $file) {
-            $fileContents = file_get_contents($file);
-            $statements = $this->parser->parse($fileContents);
+        $dirIterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(
+                $dir,
+                FilesystemIterator::KEY_AS_PATHNAME |
+                FilesystemIterator::CURRENT_AS_FILEINFO |
+                FilesystemIterator::SKIP_DOTS
+            )
+        );
+
+        /** @var \SplFileInfo $file */
+        foreach ($dirIterator as $file) {
+            if ($file->isDir()) {
+                continue;
+            }
+
+            $statements = $this->parser->parse(file_get_contents($file->getRealPath()));
 
             $serviceDefinitionVisitor = new ServiceDefinitionVisitor();
             $serviceSetupDefinitionVisitor = new ServiceSetupDefinitionVisitor();

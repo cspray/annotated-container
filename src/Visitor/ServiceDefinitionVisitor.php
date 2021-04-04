@@ -26,7 +26,9 @@ final class ServiceDefinitionVisitor extends NodeVisitorAbstract implements Node
                     'type' => $node->namespacedName->toString(),
                     'environments' => $this->getServiceAttributeEnvironments($serviceAttribute),
                     'implements' => $this->getTypeImplements($node),
-                    'isInterface' => $node instanceof Node\Stmt\Interface_
+                    'extends' => $this->getTypeExtends($node),
+                    'isInterface' => $node instanceof Interface_,
+                    'isAbstract' => $node instanceof Class_ && $node->isAbstract()
                 ];
             }
         }
@@ -52,6 +54,14 @@ final class ServiceDefinitionVisitor extends NodeVisitorAbstract implements Node
             }
         }
         return $implements;
+    }
+
+    private function getTypeExtends(Node $node) : array {
+        if ($node instanceof Class_ && isset($node->extends)) {
+            return [$node->extends->toString()];
+        }
+
+        return [];
     }
 
     private function getServiceAttributeEnvironments(Attribute $attribute) : array {
