@@ -3,9 +3,11 @@
 namespace Cspray\AnnotatedInjector;
 
 use Cspray\AnnotatedInjector\Interrogator\DefineScalarDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Interrogator\DefineServiceDefinitionInterrogator;
 use Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator;
 use Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator;
 use Cspray\AnnotatedInjector\Visitor\DefineScalarDefinitionVisitor;
+use Cspray\AnnotatedInjector\Visitor\DefineServiceDefinitionVisitor;
 use Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor;
 use Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor;
 use PhpParser\Node;
@@ -37,6 +39,7 @@ final class InjectorDefinitionCompiler {
         $rawServiceDefinitions = [];
         $rawServicePrepareDefinitions = [];
         $rawDefineScalarDefinitions = [];
+        $rawDefineServiceDefinitions = [];
         /** @var Node $node */
         foreach ($this->gatherDefinitions($dir) as $rawDefinition) {
             if ($rawDefinition['definitionType'] === ServiceDefinition::class) {
@@ -45,6 +48,8 @@ final class InjectorDefinitionCompiler {
                 $rawServicePrepareDefinitions[] = $rawDefinition;
             } else if ($rawDefinition['definitionType'] === DefineScalarDefinition::class) {
                 $rawDefineScalarDefinitions[] = $rawDefinition;
+            } else if ($rawDefinition['definitionType'] === DefineServiceDefinition::class) {
+                $rawDefineServiceDefinitions[] = $rawDefinition;
             }
         }
         $serviceDefinitionInterrogator = new ServiceDefinitionInterrogator(
@@ -58,11 +63,15 @@ final class InjectorDefinitionCompiler {
         $defineScalarInterrogator = new DefineScalarDefinitionInterrogator(
             ...$this->marshalRawDefineScalarDefinitions($rawDefineScalarDefinitions)
         );
+        $defineServiceInterrogator = new DefineServiceDefinitionInterrogator(
+            ...$this->marshalRawDefineServiceDefinitions($rawDefineServiceDefinitions)
+        );
 
         return $this->interrogateDefinitions(
             $serviceDefinitionInterrogator,
             $servicePrepareInterrogator,
-            $defineScalarInterrogator
+            $defineScalarInterrogator,
+            $defineServiceInterrogator
         );
     }
 
@@ -144,6 +153,20 @@ final class InjectorDefinitionCompiler {
         return $marshaledDefinitions;
     }
 
+    private function marshalRawDefineServiceDefinitions(array $rawDefineServiceDefinitions) : array {
+        $marshaledDefinitions = [];
+        foreach ($rawDefineServiceDefinitions as $rawDefineServiceDefinition) {
+            $marshaledDefinitions[] = new DefineServiceDefinition(
+                $rawDefineServiceDefinition['type'],
+                $rawDefineServiceDefinition['method'],
+                $rawDefineServiceDefinition['param'],
+                $rawDefineServiceDefinition['paramType'],
+                $rawDefineServiceDefinition['value']
+            );
+        }
+        return $marshaledDefinitions;
+    }
+
     private function gatherDefinitions(string $dir) : Generator {
         $dirIterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
@@ -174,39 +197,46 @@ final class InjectorDefinitionCompiler {
             $serviceDefinitionVisitor = new ServiceDefinitionVisitor();
             $servicePrepareDefinitionVisitor = new ServicePrepareDefinitionVisitor();
             $defineScalarDefinitionVisitor = new DefineScalarDefinitionVisitor();
+            $defineServiceDefinitionVisitor = new DefineServiceDefinitionVisitor();
 
             $this->nodeTraverser->addVisitor($serviceDefinitionVisitor);
             $this->nodeTraverser->addVisitor($servicePrepareDefinitionVisitor);
             $this->nodeTraverser->addVisitor($defineScalarDefinitionVisitor);
+            $this->nodeTraverser->addVisitor($defineServiceDefinitionVisitor);
             $this->nodeTraverser->traverse($statements);
 
             $this->nodeTraverser->removeVisitor($serviceDefinitionVisitor);
             $this->nodeTraverser->removeVisitor($servicePrepareDefinitionVisitor);
             $this->nodeTraverser->removeVisitor($defineScalarDefinitionVisitor);
+            $this->nodeTraverser->removeVisitor($defineServiceDefinitionVisitor);
 
             yield from $serviceDefinitionVisitor->getServiceDefinitions();
             yield from $servicePrepareDefinitionVisitor->getServicePrepareDefinitions();
             yield from $defineScalarDefinitionVisitor->getDefineScalarDefinitions();
+            yield from $defineServiceDefinitionVisitor->getDefineServiceDefinitions();
         }
     }
 
     private function interrogateDefinitions(
         ServiceDefinitionInterrogator $serviceDefinitionInterrogator,
         ServicePrepareDefinitionInterrogator $servicePrepareDefinitionInterrogator,
-        DefineScalarDefinitionInterrogator $defineScalarDefinitionInterrogator
+        DefineScalarDefinitionInterrogator $defineScalarDefinitionInterrogator,
+        DefineServiceDefinitionInterrogator $defineServiceDefinitionInterrogator
     ) : InjectorDefinition {
         $services = iterator_to_array($serviceDefinitionInterrogator->gatherSharedServices());
         $aliases = iterator_to_array($serviceDefinitionInterrogator->gatherAliases());
         $setupMethods = iterator_to_array($servicePrepareDefinitionInterrogator->gatherServicePrepare());
         $defineScalars = iterator_to_array($defineScalarDefinitionInterrogator->gatherDefineScalarDefinitions());
+        $defineServices = iterator_to_array($defineServiceDefinitionInterrogator->gatherDefineServiceDefinitions());
 
-        return new class($services, $aliases, $setupMethods, $defineScalars) implements InjectorDefinition {
+        return new class($services, $aliases, $setupMethods, $defineScalars, $defineServices) implements InjectorDefinition {
 
             public function __construct(
                 private array $services,
                 private array $aliases,
                 private array $setupMethods,
-                private array $defineScalarDefinitions
+                private array $defineScalarDefinitions,
+                private array $defineServiceDefinitions
             ) {}
 
             public function getSharedServiceDefinitions() : array {
@@ -223,6 +253,10 @@ final class InjectorDefinitionCompiler {
 
             public function getDefineScalarDefinitions() : array {
                 return $this->defineScalarDefinitions;
+            }
+
+            public function getDefineServiceDefinitions() : array {
+                return $this->defineServiceDefinitions;
             }
 
             public function jsonSerialize() {
