@@ -56,8 +56,11 @@ final class AnnotatedInjectorFactory {
             if ($defineScalarDefinition->getType() === $type && $defineScalarDefinition->getMethod() === $method) {
                 $value = $defineScalarDefinition->getValue();
                 $constRegex = '/^\!const\((.+)\)$/';
+                $envRegex = '/^\!env\((.+)\)$/';
                 if (is_string($value) && preg_match($constRegex, $value, $constMatches) === 1) {
                     $value = constant($constMatches[1]);
+                } else if (is_string($value) && preg_match($envRegex, $value, $envMatches) === 1) {
+                    $value = getenv($envMatches[1]);
                 }
                 $args[':' . $defineScalarDefinition->getParamName()] = $value;
             }

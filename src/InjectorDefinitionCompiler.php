@@ -137,8 +137,8 @@ final class InjectorDefinitionCompiler {
                 $rawDefineScalarDefinition['param'],
                 $rawDefineScalarDefinition['paramType'],
                 $rawDefineScalarDefinition['value'],
-                true,
-                false
+                $rawDefineScalarDefinition['isPlainValue'],
+                $rawDefineScalarDefinition['isEnvironmentVar']
             );
         }
         return $marshaledDefinitions;

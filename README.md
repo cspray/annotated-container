@@ -66,9 +66,8 @@ source documentation for more detailed information.
 - Compiler to parse Attributes from source directories ... :heavy_check_mark:
 - Factory to create Injector based on parsed Attributes ... :heavy_check_mark:
 - Support methods invoked in Injector::prepares ... :heavy_check_mark:
-- Support defining scalar values on parameters ... :x:
+- Support defining scalar values on parameters ... :heavy_check_mark:
 - Support defining specific Service on parameters ... :x:
-- Transition to amphp/injector ... :x:
 
 ### 0.2.x
 
@@ -82,7 +81,8 @@ source documentation for more detailed information.
 - Improve checks against erroneous uses of the library's attributes ... :x:
 - Ensure that complex scenarios that could lead to Injector failure are accounted for ... :x:
   
-### 0.4.x
+### 0.4.x and beyond
 
+- Transition to amphp/injector ... :x:
 - Support working with identifiers once feature is in amphp/injector ... :x:
 - Further improve library's use in production environment ... :x:

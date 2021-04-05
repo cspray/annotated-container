@@ -79,3 +79,71 @@ compile step.
 ### Workaround
 
 The workaround here is pretty simple... configure the correct type of value for the given scalar parameter!
+
+## Multiple Scalar Definitions
+
+There are currently multiple ways to define a scalar value on a param; with either the `DefineScalar` or 
+`DefineScalarFromEnv` Attributes. Take the following example:
+
+```php
+<?php
+
+use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\DefineScalarFromEnv;
+use Cspray\AnnotatedInjector\Attribute\Service;
+
+#[Service]
+class Foo {
+
+    public function __construct(
+        #[DefineScalar('user')]
+        #[DefineScalarFromEnv('USER')]
+        private string $user
+    ) {}
+
+}
+```
+
+In the above example there's 2 definitions for the scalar value of `$user`, which one should we use? 
+There's no reliable way to determine this and having both of these annotations on the same parameter 
+is a logical error. Currently, the behavior of the library is undefined in this scenario. What is 
+likely going to happen is that the last Attribute parsed will "win" and that value will be set. In the
+0.3 push we'll be throwing an exception when you attempt to define a scalar value with more than 1 
+parameter.
+
+### Workaround
+
+The workaround here is pretty simple... don't define multiple scalar values on the same parameter!
+
+## Orphaned Attributes
+
+It's possible that any of the Attributes could be put onto a class or interface not marked as a Service. 
+Take the following example:
+
+```php
+<?php
+
+use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
+
+class Foo {
+
+    public function __construct(
+        #[DefineScalar('cspray')]
+        public string $user
+    ) {}
+
+    #[ServicePrepare]
+    public function setUp() {}
+}
+```
+
+In the above example the 2 Attributes imply that this class is meant to be autowired. However, with the 
+missing `#[Service]` Attribute on the class no functionality would be enabled for this type. It would not
+be shared nor would it be used as an alias. In the 0.3 push we'll be throwing an exception when we encounter 
+an orphaned Attribute.
+
+### Workaround
+
+The workaround here is to ensure that the `#[Service]` Attribute is properly applied to all interfaces and 
+objects that should be managed by the Injector.

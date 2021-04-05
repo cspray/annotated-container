@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedInjector\Visitor;
 
 use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\DefineScalarFromEnv;
 use Cspray\AnnotatedInjector\DefineScalarDefinition;
 use PhpParser\ConstExprEvaluationException;
 use PhpParser\ConstExprEvaluator;
@@ -17,12 +18,22 @@ class DefineScalarDefinitionVisitor extends AbstractNodeVisitor implements NodeV
     public function enterNode(Node $node) {
         if ($node instanceof Param) {
             $defineScalarAttribute = $this->findAttribute(DefineScalar::class, ...$node->attrGroups);
-            if (isset($defineScalarAttribute)) {
+            $defineScalarEnvAttribute = $this->findAttribute(DefineScalarFromEnv::class, ...$node->attrGroups);
+            if (isset($defineScalarAttribute) || $defineScalarEnvAttribute) {
                 // These calls are intentionally not chained together for future work that will do more checks on the
                 // method and class that this attribute is defined on
                 $methodNode = $node->getAttribute('parent');
                 $classNode = $methodNode->getAttribute('parent');
-                $valueArg = $defineScalarAttribute->args[0];
+                if (isset($defineScalarAttribute)) {
+                    $valueArg = $defineScalarAttribute->args[0];
+                } else {
+                    $valueArg = $defineScalarEnvAttribute->args[0];
+                }
+
+                $value = $this->getAttributeArgumentValue($valueArg);
+                if (isset($defineScalarEnvAttribute)) {
+                    $value = "!env($value)";
+                }
 
                 $this->defineScalarDefinitions[] = [
                     'definitionType' => DefineScalarDefinition::class,
@@ -30,9 +41,9 @@ class DefineScalarDefinitionVisitor extends AbstractNodeVisitor implements NodeV
                     'method' => $methodNode->name->toString(),
                     'param' => $node->var->name,
                     'paramType' => $node->type->name,
-                    'value' => $this->getAttributeArgumentValue($valueArg),
-                    'isPlainValue' => true,
-                    'isEnvironmentVar' => false
+                    'value' => $value,
+                    'isPlainValue' => isset($defineScalarAttribute),
+                    'isEnvironmentVar' => isset($defineScalarEnvAttribute)
                 ];
             }
         }

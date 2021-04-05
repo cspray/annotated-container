@@ -17,6 +17,7 @@ use Cspray\AnnotatedInjector\DummyApps\NegativeNumberDefineScalar;
 use Cspray\AnnotatedInjector\DummyApps\MultipleDefineScalars;
 use Cspray\AnnotatedInjector\DummyApps\ClassConstantDefineScalar;
 use Cspray\AnnotatedInjector\DummyApps\ConstantDefineScalar;
+use Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalarFromEnv;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -221,6 +222,8 @@ class InjectorDefinitionCompilerTest extends TestCase {
             SimpleDefineScalar\FooImplementation::class . '::__construct',
             SimpleDefineScalar\FooImplementation::class . '::__construct'
         ], $injectorDefinition->getDefineScalarDefinitions());
+
+        $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
     }
 
     public function testNegativeNumberDefineScalar() {
@@ -239,6 +242,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             NegativeNumberDefineScalar\FooImplementation::class . '::__construct',
             NegativeNumberDefineScalar\FooImplementation::class . '::__construct'
         ], $injectorDefinition->getDefineScalarDefinitions());
+        $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
     }
 
     public function testMultipleDefineScalars() {
@@ -259,6 +263,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             MultipleDefineScalars\FooImplementation::class . '::__construct',
             MultipleDefineScalars\FooImplementation::class . '::setUp'
         ], $injectorDefinition->getDefineScalarDefinitions());
+        $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
     }
 
     public function testClassConstantDefineScalar() {
@@ -275,6 +280,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             // all of our parameters are in the same method so we'd expect to see this 2 times
             ClassConstantDefineScalar\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getDefineScalarDefinitions());
+        $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
     }
 
     public function testConstantDefineScalar() {
@@ -292,6 +298,24 @@ class InjectorDefinitionCompilerTest extends TestCase {
             // all of our parameters are in the same method so we'd expect to see this 2 times
             ConstantDefineScalar\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getDefineScalarDefinitions());
+        $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
+    }
+
+    public function testDefineScalarFromEnv() {
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalarFromEnv', 'test');
+
+        $this->assertServiceDefinitionsHaveTypes([SimpleDefineScalarFromEnv\FooImplementation::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
+        $this->assertDefineScalarParamValues([
+            SimpleDefineScalarFromEnv\FooImplementation::class . '::__construct(user)' => '!env(USER)',
+        ], $injectorDefinition->getDefineScalarDefinitions());
+
+        $this->assertDefineScalarMethod([
+            // all of our parameters are in the same method so we'd expect to see this 2 times
+            SimpleDefineScalarFromEnv\FooImplementation::class . '::__construct',
+        ], $injectorDefinition->getDefineScalarDefinitions());
+        $this->assertDefineScalarAllEnvironment($injectorDefinition->getDefineScalarDefinitions());
     }
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
@@ -373,5 +397,29 @@ class InjectorDefinitionCompilerTest extends TestCase {
         }
 
         $this->assertEqualsCanonicalizing($expectedMethods, $actualMethods);
+    }
+
+    protected function assertDefineScalarAllPlainValue(array $defineScalarDefinitions) : void {
+        $hasNotPlainValue = false;
+        foreach ($defineScalarDefinitions as $defineScalarDefinition) {
+            if (!$defineScalarDefinition->isPlainValue()) {
+                $hasNotPlainValue = true;
+                break;
+            }
+        }
+
+        $this->assertFalse($hasNotPlainValue, 'Expected all DefineScalarDefinitions to be plain values');
+    }
+
+    protected function assertDefineScalarAllEnvironment(array $defineScalarDefinitions) : void {
+        $hasNotEnv = false;
+        foreach ($defineScalarDefinitions as $defineScalarDefinition) {
+            if (!$defineScalarDefinition->isEnvironmentVar()) {
+                $hasNotEnv = true;
+                break;
+            }
+        }
+
+        $this->assertFalse($hasNotEnv, 'Expected all DefineScalarDefinitions to be environment variables');
     }
 }

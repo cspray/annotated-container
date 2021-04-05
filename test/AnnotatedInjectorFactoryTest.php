@@ -8,6 +8,7 @@ use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalar;
 use Cspray\AnnotatedInjector\DummyApps\MultipleDefineScalars;
 use Cspray\AnnotatedInjector\DummyApps\ConstantDefineScalar;
+use Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalarFromEnv;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -92,6 +93,16 @@ class AnnotatedInjectorFactoryTest extends TestCase {
         $subject = $injector->make(ConstantDefineScalar\FooImplementation::class);
 
         $this->assertSame('foo_bar_val', $subject->val);
+    }
+
+    public function testSimpleDefineScalarFromEnv() {
+        $compiler = new InjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalarFromEnv', 'test');
+        $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+
+        $subject = $injector->make(SimpleDefineScalarFromEnv\FooImplementation::class);
+
+        $this->assertSame(getenv('USER'), $subject->user);
     }
 
 }
