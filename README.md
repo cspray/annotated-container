@@ -12,7 +12,7 @@ or resolution conflicts became known. Those issues are expected to be fixed in f
 stabilizing however it is possible that you could run into these problems that could result in weird or unexpected 
 behavior. When logical problems become known that we are planning on fixing, we'll update the "KNOWN_ISSUES.md" file.
 
-:exclamation: Though this library is not yet production ready we're working hard to make it so! Please check back regularly for updates! :exclamation:
+:exclamation: Though this library is not yet production ready we're working hard to make it so! Please check back regularly for updates!
 
 ## Installation
 
@@ -56,7 +56,7 @@ looking to start using the Attributes to configure your `Injector` check out the
 "How it Works" for a detailed look at the underpinnings of the library.
 
 :exclamation: **Wiring your dependencies has serious implications. It is your responsibility to understand what you're doing
-when using this library and the Injector!** :exclamation:
+when using this library and the Injector!**
 
 ## User Guide
 
