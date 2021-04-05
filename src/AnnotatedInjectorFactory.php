@@ -15,41 +15,76 @@ final class AnnotatedInjectorFactory {
 
     static public function fromInjectorDefinition(InjectorDefinition $injectorDefinition) : Injector {
         $injector = new Injector();
+        $servicePrepareDefinitions = $injectorDefinition->getServicePrepareDefinitions();
+        $defineServiceDefinitions = $injectorDefinition->getDefineServiceDefinitions();
         $defineScalarDefinitions = $injectorDefinition->getDefineScalarDefinitions();
 
         foreach ($injectorDefinition->getSharedServiceDefinitions() as $serviceDefinition) {
             $injector->share($serviceDefinition->getType());
         }
 
-        foreach ($injectorDefinition->getAliasDefinitions() as $aliasDefinition) {
-            $injector->alias(
-                $aliasDefinition->getOriginalServiceDefinition()->getType(),
-                $aliasDefinition->getAliasServiceDefinition()->getType()
-            );
+        $aliasedTypes = [];
+        $aliasDefinitions = $injectorDefinition->getAliasDefinitions();
+        foreach ($aliasDefinitions as $aliasDefinition) {
+            if (!in_array($aliasDefinition->getOriginalServiceDefinition(), $aliasedTypes)) {
+                // We are intentionally taking the stance that if there are more than 1 alias possible that it is up
+                // to the developer to properly instantiate the Service. The caller could presume to provide a specific
+                // parameter to the make() call or could potentially have another piece of code that interacts with the
+                // Injector to define these kind of parameters
+                // TODO: Determine if we want to add a strict mode that warns/fails when multiple aliases were resolved
+                $typeAliasDefinitions = self::mapTypesAliasDefinitions($aliasDefinition->getOriginalServiceDefinition()->getType(), $aliasDefinitions);
+                if (count($typeAliasDefinitions) === 1) {
+                    $injector->alias(
+                        $typeAliasDefinitions[0]->getOriginalServiceDefinition()->getType(),
+                        $typeAliasDefinitions[0]->getAliasServiceDefinition()->getType()
+                    );
+                }
+            }
         }
 
-        foreach ($injectorDefinition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
-            $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinition, $injector, $defineScalarDefinitions) {
-                $method = $servicePrepareDefinition->getMethod();
-                $args = self::mapTypesArgMap($servicePrepareDefinition->getType(), $method, $defineScalarDefinitions);
-                $injector->execute([$object, $method], $args);
-            });
+        $preparedTypes = [];
+        foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
+            if (!in_array($servicePrepareDefinition->getType(), $preparedTypes)) {
+                $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $defineScalarDefinitions, $defineServiceDefinitions) {
+                    $methods = self::mapTypesServicePrepares($servicePrepareDefinition->getType(), $servicePrepareDefinitions);
+                    foreach ($methods as $method) {
+                        $scalarArgs = self::mapTypesScalarArgs($servicePrepareDefinition->getType(), $method, $defineScalarDefinitions);
+                        $serviceArgs = self::mapTypesServiceArgs($servicePrepareDefinition->getType(), $method, $defineServiceDefinitions);
+                        $injector->execute([$object, $method], array_merge([], $scalarArgs, $serviceArgs));
+                    }
+                });
+                $preparedTypes[] = $servicePrepareDefinition->getType();
+            }
         }
 
-        $definedTypes = [];
+        $typeArgsMap = [];
         /** @var DefineScalarDefinition $defineScalarDefinition */
         foreach ($defineScalarDefinitions as $defineScalarDefinition) {
-            if (!in_array($defineScalarDefinition->getType(), $definedTypes)) {
-                $args = self::mapTypesArgMap($defineScalarDefinition->getType(), '__construct', $defineScalarDefinitions);
-                $injector->define($defineScalarDefinition->getType(), $args);
-                $definedTypes[] = $defineScalarDefinition->getType();
+            $type = $defineScalarDefinition->getType();
+            if (!isset($typeArgsMap[$type])) {
+                $typeArgsMap[$type] = self::mapTypesScalarArgs($type, '__construct', $defineScalarDefinitions);
             }
+        }
+
+        /** @var DefineServiceDefinition $defineServiceDefinition */
+        foreach ($defineServiceDefinitions as $defineServiceDefinition) {
+            $type = $defineServiceDefinition->getType();
+            $defineArgs = self::mapTypesServiceArgs($type, '__construct', $defineServiceDefinitions);
+            if (isset($typeArgsMap[$type])) {
+                $typeArgsMap[$type] = array_merge($typeArgsMap[$type], $defineArgs);
+            } else {
+                $typeArgsMap[$type] = $defineArgs;
+            }
+        }
+
+        foreach ($typeArgsMap as $type => $args) {
+            $injector->define($type, $args);
         }
 
         return $injector;
     }
 
-    private static function mapTypesArgMap(string $type, string $method, array $defineScalarDefinitions) : array {
+    private static function mapTypesScalarArgs(string $type, string $method, array $defineScalarDefinitions) : array {
         $args = [];
         /** @var DefineScalarDefinition $defineScalarDefinition */
         foreach ($defineScalarDefinitions as $defineScalarDefinition) {
@@ -66,6 +101,39 @@ final class AnnotatedInjectorFactory {
             }
         }
         return $args;
+    }
+
+    private static function mapTypesServiceArgs(string $type, string $method, array $defineServiceDefinitions) : array {
+        $args = [];
+        /** @var DefineServiceDefinition $defineServiceDefinition */
+        foreach ($defineServiceDefinitions as $defineServiceDefinition) {
+            if ($defineServiceDefinition->getType() === $type && $defineServiceDefinition->getMethod() === $method) {
+                $args[$defineServiceDefinition->getParamName()] = $defineServiceDefinition->getValue();
+            }
+        }
+        return $args;
+    }
+
+    static private function mapTypesServicePrepares(string $type, array $servicePreparesDefinition) : array {
+        $methods = [];
+        /** @var ServicePrepareDefinition $servicePrepareDefinition */
+        foreach ($servicePreparesDefinition as $servicePrepareDefinition) {
+            if ($servicePrepareDefinition->getType() === $type) {
+                $methods[] = $servicePrepareDefinition->getMethod();
+            }
+        }
+        return $methods;
+    }
+
+    static private function mapTypesAliasDefinitions(string $type, array $aliasDefinitions) : array {
+        $aliases = [];
+        /** @var AliasDefinition $aliasDefinition */
+        foreach ($aliasDefinitions as $aliasDefinition) {
+            if ($aliasDefinition->getOriginalServiceDefinition()->getType() === $type) {
+                $aliases[] = $aliasDefinition;
+            }
+        }
+        return $aliases;
     }
 
     static public function fromSerializedServiceDefinition(string $serviceDefinitionJson) : Injector {

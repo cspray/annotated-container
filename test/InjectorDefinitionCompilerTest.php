@@ -18,6 +18,8 @@ use Cspray\AnnotatedInjector\DummyApps\MultipleDefineScalars;
 use Cspray\AnnotatedInjector\DummyApps\ClassConstantDefineScalar;
 use Cspray\AnnotatedInjector\DummyApps\ConstantDefineScalar;
 use Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalarFromEnv;
+use Cspray\AnnotatedInjector\DummyApps\SimpleDefineService;
+use Cspray\AnnotatedInjector\DummyApps\MultipleAliasResolution;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -46,9 +48,12 @@ class InjectorDefinitionCompilerTest extends TestCase {
         $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleServices', 'test');
 
         $this->assertServiceDefinitionsHaveTypes([SimpleServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
-        $this->assertAliasDefinitionsMap([SimpleServices\FooInterface::class => SimpleServices\FooImplementation::class], $injectorDefinition->getAliasDefinitions());
+        $this->assertAliasDefinitionsMap([
+            [SimpleServices\FooInterface::class, SimpleServices\FooImplementation::class]
+        ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testMultipleSimpleServices() {
@@ -59,11 +64,12 @@ class InjectorDefinitionCompilerTest extends TestCase {
             MultipleSimpleServices\FooInterface::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            MultipleSimpleServices\FooInterface::class => MultipleSimpleServices\FooImplementation::class,
-            MultipleSimpleServices\BarInterface::class => MultipleSimpleServices\BarImplementation::class
+            [MultipleSimpleServices\FooInterface::class, MultipleSimpleServices\FooImplementation::class],
+            [MultipleSimpleServices\BarInterface::class, MultipleSimpleServices\BarImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testSimpleServicesSomeNotAnnotated() {
@@ -71,10 +77,11 @@ class InjectorDefinitionCompilerTest extends TestCase {
 
         $this->assertServiceDefinitionsHaveTypes([SimpleServicesSomeNotAnnotated\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            SimpleServicesSomeNotAnnotated\FooInterface::class => SimpleServicesSomeNotAnnotated\FooImplementation::class
+            [SimpleServicesSomeNotAnnotated\FooInterface::class, SimpleServicesSomeNotAnnotated\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testEnvironmentResolvedServicesTest() {
@@ -82,10 +89,11 @@ class InjectorDefinitionCompilerTest extends TestCase {
 
         $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            EnvironmentResolvedServices\FooInterface::class => EnvironmentResolvedServices\TestFooImplementation::class
+            [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\TestFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testEnvironmentResolvedServicesDev() {
@@ -93,10 +101,11 @@ class InjectorDefinitionCompilerTest extends TestCase {
 
         $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            EnvironmentResolvedServices\FooInterface::class => EnvironmentResolvedServices\DevFooImplementation::class
+            [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\DevFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testEnvironmentResolvedServicesProd() {
@@ -104,10 +113,11 @@ class InjectorDefinitionCompilerTest extends TestCase {
 
         $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            EnvironmentResolvedServices\FooInterface::class => EnvironmentResolvedServices\ProdFooImplementation::class
+            [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\ProdFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testClassOnlyServices() {
@@ -121,6 +131,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testInterfaceServicePrepare() {
@@ -130,12 +141,13 @@ class InjectorDefinitionCompilerTest extends TestCase {
             InterfaceServicePrepare\FooInterface::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            InterfaceServicePrepare\FooInterface::class => InterfaceServicePrepare\FooImplementation::class
+            [InterfaceServicePrepare\FooInterface::class, InterfaceServicePrepare\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertServicePrepareTypes([
-            InterfaceServicePrepare\FooInterface::class => 'setBar'
+            [InterfaceServicePrepare\FooInterface::class, 'setBar']
         ], $injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testClassOverridesInterfaceServicePrepare() {
@@ -145,12 +157,13 @@ class InjectorDefinitionCompilerTest extends TestCase {
             ClassOverridesInterfaceServicePrepare\FooInterface::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            ClassOverridesInterfaceServicePrepare\FooInterface::class => ClassOverridesInterfaceServicePrepare\FooImplementation::class
+            [ClassOverridesInterfaceServicePrepare\FooInterface::class, ClassOverridesInterfaceServicePrepare\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertServicePrepareTypes([
-            ClassOverridesInterfaceServicePrepare\FooInterface::class => 'setBar'
+            [ClassOverridesInterfaceServicePrepare\FooInterface::class, 'setBar']
         ], $injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testClassServicePrepareWithoutInterfaceServicePrepare() {
@@ -160,12 +173,13 @@ class InjectorDefinitionCompilerTest extends TestCase {
             ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class => ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class
+            [ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class, ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertServicePrepareTypes([
-           ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class => 'setBar'
+            [ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class, 'setBar']
         ], $injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testNestedServices() {
@@ -177,21 +191,25 @@ class InjectorDefinitionCompilerTest extends TestCase {
             NestedServices\FooInterface::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            NestedServices\FooInterface::class => NestedServices\Foo\FooImplementation::class,
-            NestedServices\BarInterface::class => NestedServices\Foo\Bar\BarImplementation::class,
-            NestedServices\BazInterface::class => NestedServices\Foo\Bar\Baz\BazImplementation::class
+            [NestedServices\FooInterface::class, NestedServices\Foo\FooImplementation::class],
+            [NestedServices\BarInterface::class, NestedServices\Foo\Bar\BarImplementation::class],
+            [NestedServices\BazInterface::class, NestedServices\Foo\Bar\Baz\BazImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testAbstractSharedServices() {
         $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/AbstractSharedServices', 'test');
 
         $this->assertServiceDefinitionsHaveTypes([AbstractSharedServices\AbstractFoo::class], $injectorDefinition->getSharedServiceDefinitions());
-        $this->assertAliasDefinitionsMap([AbstractSharedServices\AbstractFoo::class => AbstractSharedServices\FooImplementation::class], $injectorDefinition->getAliasDefinitions());
+        $this->assertAliasDefinitionsMap([
+            [AbstractSharedServices\AbstractFoo::class, AbstractSharedServices\FooImplementation::class]
+        ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testSimpleDefineScalar() {
@@ -224,6 +242,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
         ], $injectorDefinition->getDefineScalarDefinitions());
 
         $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testNegativeNumberDefineScalar() {
@@ -243,6 +262,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             NegativeNumberDefineScalar\FooImplementation::class . '::__construct'
         ], $injectorDefinition->getDefineScalarDefinitions());
         $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testMultipleDefineScalars() {
@@ -251,7 +271,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
         $this->assertServiceDefinitionsHaveTypes([MultipleDefineScalars\FooImplementation::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertServicePrepareTypes([
-            MultipleDefineScalars\FooImplementation::class => 'setUp'
+            [MultipleDefineScalars\FooImplementation::class, 'setUp']
         ], $injectorDefinition->getServicePrepareDefinitions());
         $this->assertDefineScalarParamValues([
             MultipleDefineScalars\FooImplementation::class . '::__construct(stringParam)' => 'constructor param',
@@ -264,6 +284,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             MultipleDefineScalars\FooImplementation::class . '::setUp'
         ], $injectorDefinition->getDefineScalarDefinitions());
         $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testClassConstantDefineScalar() {
@@ -281,6 +302,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             ClassConstantDefineScalar\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getDefineScalarDefinitions());
         $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testConstantDefineScalar() {
@@ -299,6 +321,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
             ConstantDefineScalar\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getDefineScalarDefinitions());
         $this->assertDefineScalarAllPlainValue($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     public function testDefineScalarFromEnv() {
@@ -316,6 +339,52 @@ class InjectorDefinitionCompilerTest extends TestCase {
             SimpleDefineScalarFromEnv\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getDefineScalarDefinitions());
         $this->assertDefineScalarAllEnvironment($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
+    }
+
+    public function testSimpleDefineService() {
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineService', 'test');
+
+        $this->assertServiceDefinitionsHaveTypes([
+            SimpleDefineService\FooInterface::class,
+            SimpleDefineService\SetterInjection::class,
+            SimpleDefineService\ConstructorInjection::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertAliasDefinitionsMap([
+            [SimpleDefineService\FooInterface::class, SimpleDefineService\BarImplementation::class],
+            [SimpleDefineService\FooInterface::class, SimpleDefineService\BazImplementation::class],
+            [SimpleDefineService\FooInterface::class, SimpleDefineService\QuxImplementation::class]
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertServicePrepareTypes([
+            [SimpleDefineService\SetterInjection::class, 'setBar'],
+            [SimpleDefineService\SetterInjection::class, 'setBaz'],
+            [SimpleDefineService\SetterInjection::class, 'setQux']
+        ], $injectorDefinition->getServicePrepareDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertDefineServiceParamValues([
+            SimpleDefineService\SetterInjection::class . '::setBar(foo)' => SimpleDefineService\BarImplementation::class,
+            SimpleDefineService\SetterInjection::class . '::setBaz(foo)' => SimpleDefineService\BazImplementation::class,
+            SimpleDefineService\SetterInjection::class . '::setQux(foo)' => SimpleDefineService\QuxImplementation::class,
+            SimpleDefineService\ConstructorInjection::class . '::__construct(bar)' => SimpleDefineService\BarImplementation::class,
+            SimpleDefineService\ConstructorInjection::class . '::__construct(baz)' => SimpleDefineService\BazImplementation::class,
+            SimpleDefineService\ConstructorInjection::class . '::__construct(qux)' => SimpleDefineService\QuxImplementation::class
+        ], $injectorDefinition->getDefineServiceDefinitions());
+    }
+
+    public function testMultipleAliasResolution() {
+        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/MultipleAliasResolution', 'test');
+
+        $this->assertServiceDefinitionsHaveTypes([
+            MultipleAliasResolution\FooInterface::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertAliasDefinitionsMap([
+            [MultipleAliasResolution\FooInterface::class, MultipleAliasResolution\BarImplementation::class],
+            [MultipleAliasResolution\FooInterface::class, MultipleAliasResolution\BazImplementation::class],
+            [MultipleAliasResolution\FooInterface::class, MultipleAliasResolution\QuxImplementation::class]
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
     }
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
@@ -340,11 +409,14 @@ class InjectorDefinitionCompilerTest extends TestCase {
         $actualMap = [];
         foreach ($aliasDefinitions as $aliasDefinition) {
             $this->assertInstanceOf(AliasDefinition::class, $aliasDefinition);
-            $actualMap[$aliasDefinition->getOriginalServiceDefinition()->getType()] = $aliasDefinition->getAliasServiceDefinition()->getType();
+            $actualMap[] = [
+                $aliasDefinition->getOriginalServiceDefinition()->getType(),
+                $aliasDefinition->getAliasServiceDefinition()->getType()
+            ];
         }
 
-        ksort($actualMap);
-        ksort($expectedAliasMap);
+        array_multisort($actualMap);
+        array_multisort($expectedAliasMap);
         $this->assertEquals($expectedAliasMap, $actualMap);
     }
 
@@ -356,11 +428,12 @@ class InjectorDefinitionCompilerTest extends TestCase {
         $actualMap = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             $this->assertInstanceOf(ServicePrepareDefinition::class, $servicePrepareDefinition);
-            $actualMap[$servicePrepareDefinition->getType()] = $servicePrepareDefinition->getMethod();
+            $key = $servicePrepareDefinition->getType();
+            $actualMap[] = [$key, $servicePrepareDefinition->getMethod()];
         }
 
-        ksort($actualMap);
-        ksort($expectedServicePrepare);
+        array_multisort($actualMap);
+        array_multisort($expectedServicePrepare);
         $this->assertEquals($expectedServicePrepare, $actualMap);
     }
 
@@ -379,6 +452,28 @@ class InjectorDefinitionCompilerTest extends TestCase {
                 $defineScalarDefinition->getParamName()
             );
             $actualMap[$key] = $defineScalarDefinition->getValue();
+        }
+
+        ksort($actualMap);
+        ksort($expectedValueMap);
+        $this->assertEquals($expectedValueMap, $actualMap);
+    }
+
+    protected function assertDefineServiceParamValues(array $expectedValueMap, array $defineServiceDefinitions) : void {
+        if (($countExpected = count($expectedValueMap)) !== ($countActual = count($defineServiceDefinitions))) {
+            $this->fail("Expected ${countExpected} DefineScalarDefinition but received ${countActual}");
+        }
+
+        $actualMap = [];
+        foreach ($defineServiceDefinitions as $defineServiceDefinition) {
+            $this->assertInstanceOf(DefineServiceDefinition::class, $defineServiceDefinition);
+            $key = sprintf(
+                "%s::%s(%s)",
+                $defineServiceDefinition->getType(),
+                $defineServiceDefinition->getMethod(),
+                $defineServiceDefinition->getParamName()
+            );
+            $actualMap[$key] = $defineServiceDefinition->getValue();
         }
 
         ksort($actualMap);

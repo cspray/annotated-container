@@ -45,9 +45,13 @@ final class ServiceDefinitionInterrogator {
                 $hasExtendeds = !empty($serviceDefinition->getExtendedServices());
                 $forEnvironment = empty($serviceDefinition->getEnvironments()) || in_array($this->environment, $serviceDefinition->getEnvironments());
                 if ($hasImplementations && $forEnvironment) {
-                    yield new AliasDefinition($serviceDefinition->getImplementedServices()[0], $serviceDefinition);
+                    foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
+                        yield new AliasDefinition($implementedService, $serviceDefinition);
+                    }
                 } else if ($hasExtendeds && $forEnvironment) {
-                    yield new AliasDefinition($serviceDefinition->getExtendedServices()[0], $serviceDefinition);
+                    foreach ($serviceDefinition->getExtendedServices() as $extendedService) {
+                        yield new AliasDefinition($extendedService, $serviceDefinition);
+                    }
                 }
             }
         }

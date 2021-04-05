@@ -6,9 +6,13 @@ A PHP8 library that will wire an [Auryn Injector](https://github.com/rdlowrey/au
 [Attributes](https://www.php.net/manual/en/language.attributes.php). Aims to provide functionality that enables 
 configuring all Injector options through Attributes.
 
-This is a new library still in active development! Many features are planned for the future... please check out the 
-Roadmap for what has been accomplished and what's coming. Additionally, only the most basic use cases have been tested. It is not 
-recommended using this library in production at this time. We're aiming to be production ready soon though!
+This is a new library still in active development! You should check out 2 things before you start using this library; 
+the "KNOWN_ISSUES.md" file, and the "ROADMAP" in this README. While developing this library several known logical errors 
+or resolution conflicts became known. Those issues are expected to be fixed in future versions, while the API is 
+stabilizing however it is possible that you could run into these problems that could result in weird or unexpected 
+behavior. When logical problems become known that we are planning on fixing, we'll update the "KNOWN_ISSUES.md" file.
+
+Though this library is not yet production ready we're working hard to make it so! Please check back regularly for updates!
 
 ## Installation
 
@@ -18,7 +22,7 @@ composer require cspray/annotated-injector
 
 ## Getting Started
 
-For a more complete, working example check out the `examples/` directory. To get this example to work in your environment 
+For a more complete, working, example check out the `examples/` directory. To get this example to work in your environment 
 you'd have to move the interface and class definitions into the appropriate directory structure.
 
 ```php

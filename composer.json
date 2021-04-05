@@ -27,7 +27,7 @@
   "autoload-dev": {
     "psr-4": {
       "Cspray\\AnnotatedInjector\\": "test",
-      "Acme\\AnnotatedInjectorDemo\\": ["examples/getting_started/src", "examples/scalar_values/src"]
+      "Acme\\AnnotatedInjectorDemo\\": ["examples/getting_started/src", "examples/scalar_values/src", "examples/scalar_and_service_defines/src"]
     },
     "files": [
       "examples/scalar_values/src/constants.php"

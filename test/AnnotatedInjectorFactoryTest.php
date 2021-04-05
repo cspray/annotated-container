@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedInjector;
 
+use Auryn\InjectionException;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServicePrepare;
@@ -9,6 +10,8 @@ use Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalar;
 use Cspray\AnnotatedInjector\DummyApps\MultipleDefineScalars;
 use Cspray\AnnotatedInjector\DummyApps\ConstantDefineScalar;
 use Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalarFromEnv;
+use Cspray\AnnotatedInjector\DummyApps\SimpleDefineService;
+use Cspray\AnnotatedInjector\DummyApps\MultipleAliasResolution;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -103,6 +106,39 @@ class AnnotatedInjectorFactoryTest extends TestCase {
         $subject = $injector->make(SimpleDefineScalarFromEnv\FooImplementation::class);
 
         $this->assertSame(getenv('USER'), $subject->user);
+    }
+
+    public function testSimpleDefineServiceSetterInjection() {
+        $compiler = new InjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineService', 'test');
+        $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+
+        $subject = $injector->make(SimpleDefineService\SetterInjection::class);
+
+        $this->assertInstanceOf(SimpleDefineService\BazImplementation::class, $subject->baz);
+        $this->assertInstanceOf(SimpleDefineService\BarImplementation::class, $subject->bar);
+        $this->assertInstanceOf(SimpleDefineService\QuxImplementation::class, $subject->qux);
+    }
+
+    public function testSimpleDefineServiceConstructorInjection() {
+        $compiler = new InjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineService', 'test');
+        $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+
+        $subject = $injector->make(SimpleDefineService\ConstructorInjection::class);
+
+        $this->assertInstanceOf(SimpleDefineService\BazImplementation::class, $subject->baz);
+        $this->assertInstanceOf(SimpleDefineService\BarImplementation::class, $subject->bar);
+        $this->assertInstanceOf(SimpleDefineService\QuxImplementation::class, $subject->qux);
+    }
+
+    public function testMultipleAliasResolutionNoMakeDefine() {
+        $compiler = new InjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/MultipleAliasResolution', 'test');
+        $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+
+        $this->expectException(InjectionException::class);
+        $injector->make(MultipleAliasResolution\FooInterface::class);
     }
 
 }
