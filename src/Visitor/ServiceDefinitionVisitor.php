@@ -6,20 +6,17 @@ use Cspray\AnnotatedInjector\Attribute\Service;
 use Cspray\AnnotatedInjector\ServiceDefinition;
 use PhpParser\Node;
 use PhpParser\NodeVisitor;
-use PhpParser\NodeVisitorAbstract;
-use PhpParser\Node\AttributeGroup;
 use PhpParser\Node\Attribute;
 use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\Class_;
 
-final class ServiceDefinitionVisitor extends NodeVisitorAbstract implements NodeVisitor {
+final class ServiceDefinitionVisitor extends AbstractNodeVisitor implements NodeVisitor {
 
     private array $serviceDefinitions = [];
 
     public function enterNode(Node $node) {
         if ($node instanceof Class_ || $node instanceof Interface_) {
-            $attributeGroups = $node->attrGroups;
-            $serviceAttribute = $this->findServiceAttribute(...$attributeGroups);
+            $serviceAttribute = $this->findAttribute(Service::class, ...$node->attrGroups);
             if (isset($serviceAttribute)) {
                 $this->serviceDefinitions[] = [
                     'definitionType' => ServiceDefinition::class,
@@ -34,17 +31,6 @@ final class ServiceDefinitionVisitor extends NodeVisitorAbstract implements Node
         }
     }
 
-    private function findServiceAttribute(AttributeGroup... $attributeGroups) : ?Attribute {
-        foreach ($attributeGroups as $attributeGroup) {
-            foreach ($attributeGroup->attrs as $attribute) {
-                if ($attribute->name->toString() === Service::class) {
-                    return $attribute;
-                }
-            }
-        }
-
-        return null;
-    }
 
     private function getTypeImplements(Node $node) : array {
         $implements = [];

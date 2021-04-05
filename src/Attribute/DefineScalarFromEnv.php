@@ -5,10 +5,8 @@ namespace Cspray\AnnotatedInjector\Attribute;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PARAMETER)]
-class DefineScalar {
+class DefineScalarFromEnv {
 
-    public function __construct(
-        private string|int|float|bool|array $value
-    ) {}
+    public function __construct(private string $envVar) {}
 
 }

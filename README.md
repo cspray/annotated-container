@@ -1,19 +1,13 @@
 # Annotated Injector
 
+[![Unit Tests](https://github.com/cspray/annotated-injector/actions/workflows/php.yml/badge.svg)](https://github.com/cspray/annotated-injector/actions/workflows/php.yml)
+
 A PHP8 library that will wire an [Auryn Injector](https://github.com/rdlowrey/auryn) based off of objects annotated with 
 [Attributes](https://www.php.net/manual/en/language.attributes.php). Aims to provide functionality that enables 
 configuring all Injector options through Attributes.
 
-**Supported functionality**
-
-- Share an interface annotated with `Service`.
-- Alias concrete implementations of interfaces annotated with `Service`.
-- Swap out concrete implementations based on environment. For example, run a cloud based storage in production, a 
-local filesystem based storage in development, and a virtual filesystem in test.
-- Execute arbitrary methods after service creation by annotating a method with `ServicePrepare`
-
 This is a new library still in active development! Many features are planned for the future... please check out the 
-Roadmap for more details on what's coming. Additionally, only the most basic use cases have been tested. It is not 
+Roadmap for what has been accomplished and what's coming. Additionally, only the most basic use cases have been tested. It is not 
 recommended using this library in production at this time. We're aiming to be production ready soon though!
 
 ## Installation
@@ -61,7 +55,8 @@ source documentation for more detailed information.
 --- | --- | ---
 |`Service`|`Attribute::TARGET_CLASS`|Describes an interface, abstract class, or concrete class as being a service. Will share and alias the types into the Injector based on what's annotated.|
 |`ServicePrepare`|`Attribute::TARGET_METHOD`|Describes a method, on an interface or class, that should be invoked when that type is created.|
-|`DefineScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method.|
+|`DefineScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be the exact value passed to this Attribute.|
+|`DefineScalarFromEnv`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an environment variable matching this Attribute's value|
 |`DefineService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|
 
 ## Roadmap
@@ -71,23 +66,23 @@ source documentation for more detailed information.
 - Compiler to parse Attributes from source directories ... :heavy_check_mark:
 - Factory to create Injector based on parsed Attributes ... :heavy_check_mark:
 - Support methods invoked in Injector::prepares ... :heavy_check_mark:
-- Support defining scalar values on parameters ... :x:
+- Support defining scalar values on parameters ... :heavy_check_mark:
 - Support defining specific Service on parameters ... :x:
-- Transition to amphp/injector ... :x:
 
 ### 0.2.x
+
+- Support defining scalar values from an arbitrary source ... :x:
+- Support the concept of a Service factory ... :x:
+- Support serializing and caching InjectorDefinition ... :x:
+
+### 0.3.x
 
 - Improved conflict resolution when multiple Services could satisfy an alias ... :x:
 - Improve checks against erroneous uses of the library's attributes ... :x:
 - Ensure that complex scenarios that could lead to Injector failure are accounted for ... :x:
+  
+### 0.4.x and beyond
 
-### 0.3.x
-
-- Support the concept of a Service factory ... :x:
-- Support serializing and caching InjectorDefinition ... :x:
-
-### 0.4.x
-
-- Support defining scalar values from an arbitrary source ... :x:
+- Transition to amphp/injector ... :x:
 - Support working with identifiers once feature is in amphp/injector ... :x:
 - Further improve library's use in production environment ... :x:
