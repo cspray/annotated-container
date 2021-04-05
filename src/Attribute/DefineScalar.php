@@ -8,8 +8,7 @@ use Attribute;
 class DefineScalar {
 
     public function __construct(
-        private string|int|float|bool|array|null $value = null,
-        private ?string $envVar = null
+        private string|int|float|bool|array $value
     ) {}
 
 }

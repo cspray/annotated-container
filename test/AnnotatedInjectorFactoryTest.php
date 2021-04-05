@@ -5,6 +5,9 @@ namespace Cspray\AnnotatedInjector;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServicePrepare;
+use Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalar;
+use Cspray\AnnotatedInjector\DummyApps\MultipleDefineScalars;
+use Cspray\AnnotatedInjector\DummyApps\ConstantDefineScalar;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -12,11 +15,15 @@ use PHPUnit\Framework\TestCase;
  * @covers \Cspray\AnnotatedInjector\InjectorDefinitionCompiler
  * @covers \Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor
  * @covers \Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Visitor\DefineScalarDefinitionVisitor
  * @covers \Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator
  * @covers \Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Interrogator\DefineScalarDefinitionInterrogator
  * @covers \Cspray\AnnotatedInjector\ServiceDefinition
  * @covers \Cspray\AnnotatedInjector\AliasDefinition
  * @covers \Cspray\AnnotatedInjector\ServicePrepareDefinition
+ * @covers \Cspray\AnnotatedInjector\DefineScalarDefinition
+ * @covers \Cspray\AnnotatedInjector\Visitor\AbstractNodeVisitor
  */
 class AnnotatedInjectorFactoryTest extends TestCase {
 
@@ -49,6 +56,42 @@ class AnnotatedInjectorFactoryTest extends TestCase {
 
         $this->assertInstanceOf(InjectorExecuteServicePrepare\FooImplementation::class, $subject);
         $this->assertInstanceOf(InjectorExecuteServicePrepare\BarImplementation::class, $subject->getBar());
+    }
+
+    public function testSimpleDefineScalar() {
+        $compiler = new InjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalar', 'test');
+        $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+
+        $subject = $injector->make(SimpleDefineScalar\FooImplementation::class);
+
+        $this->assertSame('string param test value', $subject->stringParam);
+        $this->assertSame(42, $subject->intParam);
+        $this->assertSame(42.0, $subject->floatParam);
+        $this->assertTrue($subject->boolParam);
+    }
+
+    public function testMultipleDefineScalars() {
+        $compiler = new InjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/MultipleDefineScalars', 'test');
+        $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+
+        $subject = $injector->make(MultipleDefineScalars\FooImplementation::class);
+
+        $this->assertSame('constructor param', $subject->stringParam);
+        $this->assertSame('prepare param', $subject->prepareParam);
+    }
+
+    public function testConstantDefineScalar() {
+        // we need to make sure this file is loaded so that our constant is defined
+        require_once __DIR__ . '/DummyApps/ConstantDefineScalar/FooImplementation.php';
+        $compiler = new InjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/ConstantDefineScalar', 'test');
+        $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+
+        $subject = $injector->make(ConstantDefineScalar\FooImplementation::class);
+
+        $this->assertSame('foo_bar_val', $subject->val);
     }
 
 }

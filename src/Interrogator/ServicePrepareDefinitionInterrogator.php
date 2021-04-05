@@ -24,6 +24,8 @@ final class ServicePrepareDefinitionInterrogator {
             $serviceDefinition = $this->serviceDefinitionInterrogator->findServiceDefinitionForType($servicePrepareDefinition->getType());
             if ($serviceDefinition->isInterface()) {
                 $goodDefinitions[] = $servicePrepareDefinition;
+            } else if (empty($serviceDefinition->getImplementedServices())) {
+                $goodDefinitions[] = $servicePrepareDefinition;
             } else {
                 // we need to account for the scenario that a class has a ServicePrepare attribute while the Service
                 // interface it implements does not. this is likely a code smell but we have to consider the possibility
