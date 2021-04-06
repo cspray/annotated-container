@@ -23,7 +23,7 @@ use Cspray\AnnotatedInjector\DummyApps\MultipleAliasResolution;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Cspray\AnnotatedInjector\InjectorDefinitionCompiler
+ * @covers \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler
  * @covers \Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor
  * @covers \Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor
  * @covers \Cspray\AnnotatedInjector\Visitor\DefineScalarDefinitionVisitor
@@ -36,16 +36,20 @@ use PHPUnit\Framework\TestCase;
  * @covers \Cspray\AnnotatedInjector\DefineScalarDefinition
  * @covers \Cspray\AnnotatedInjector\Visitor\AbstractNodeVisitor
  */
-class InjectorDefinitionCompilerTest extends TestCase {
+class PhpParserInjectorDefinitionCompilerTest extends TestCase {
 
-    private InjectorDefinitionCompiler $subject;
+    private PhpParserInjectorDefinitionCompiler $subject;
 
     public function setUp() : void {
-        $this->subject = new InjectorDefinitionCompiler();
+        $this->subject = new PhpParserInjectorDefinitionCompiler();
+    }
+
+    private function runCompileDirectory(string $dir, string $environment = 'test') : InjectorDefinition {
+        return $this->subject->compileDirectory($environment, $dir);
     }
 
     public function testSimpleServices() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleServices', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleServices');
 
         $this->assertServiceDefinitionsHaveTypes([SimpleServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
@@ -57,7 +61,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testMultipleSimpleServices() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/MultipleSimpleServices', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/MultipleSimpleServices');
 
         $this->assertServiceDefinitionsHaveTypes([
             MultipleSimpleServices\BarInterface::class,
@@ -73,7 +77,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testSimpleServicesSomeNotAnnotated() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleServicesSomeNotAnnotated', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleServicesSomeNotAnnotated');
 
         $this->assertServiceDefinitionsHaveTypes([SimpleServicesSomeNotAnnotated\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
@@ -85,7 +89,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testEnvironmentResolvedServicesTest() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices');
 
         $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
@@ -97,7 +101,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testEnvironmentResolvedServicesDev() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'dev');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'dev');
 
         $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
@@ -109,7 +113,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testEnvironmentResolvedServicesProd() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'prod');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'prod');
 
         $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
@@ -121,7 +125,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testClassOnlyServices() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassOnlyServices', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ClassOnlyServices');
 
         $this->assertServiceDefinitionsHaveTypes([
             ClassOnlyServices\BarImplementation::class,
@@ -135,7 +139,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testInterfaceServicePrepare() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/InterfaceServicePrepare', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/InterfaceServicePrepare');
 
         $this->assertServiceDefinitionsHaveTypes([
             InterfaceServicePrepare\FooInterface::class
@@ -151,7 +155,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testClassOverridesInterfaceServicePrepare() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassOverridesInterfaceServicePrepare', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ClassOverridesInterfaceServicePrepare');
 
         $this->assertServiceDefinitionsHaveTypes([
             ClassOverridesInterfaceServicePrepare\FooInterface::class
@@ -167,7 +171,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testClassServicePrepareWithoutInterfaceServicePrepare() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassServicePrepareWithoutInterfaceServicePrepare', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ClassServicePrepareWithoutInterfaceServicePrepare');
 
         $this->assertServiceDefinitionsHaveTypes([
             ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class
@@ -183,7 +187,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testNestedServices() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/NestedServices', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/NestedServices');
 
         $this->assertServiceDefinitionsHaveTypes([
             NestedServices\BazInterface::class,
@@ -201,7 +205,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testAbstractSharedServices() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/AbstractSharedServices', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/AbstractSharedServices');
 
         $this->assertServiceDefinitionsHaveTypes([AbstractSharedServices\AbstractFoo::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
@@ -213,7 +217,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testSimpleDefineScalar() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalar', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalar');
 
         $this->assertServiceDefinitionsHaveTypes([SimpleDefineScalar\FooImplementation::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
@@ -246,7 +250,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testNegativeNumberDefineScalar() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/NegativeNumberDefineScalar', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/NegativeNumberDefineScalar');
 
         $this->assertServiceDefinitionsHaveTypes([NegativeNumberDefineScalar\FooImplementation::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
@@ -266,7 +270,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testMultipleDefineScalars() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/MultipleDefineScalars', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/MultipleDefineScalars');
 
         $this->assertServiceDefinitionsHaveTypes([MultipleDefineScalars\FooImplementation::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
@@ -288,7 +292,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testClassConstantDefineScalar() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ClassConstantDefineScalar', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ClassConstantDefineScalar');
 
         $this->assertServiceDefinitionsHaveTypes([ClassConstantDefineScalar\FooImplementation::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
@@ -307,7 +311,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
 
     public function testConstantDefineScalar() {
         require_once __DIR__ . '/DummyApps/ConstantDefineScalar/FooImplementation.php';
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/ConstantDefineScalar', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ConstantDefineScalar');
 
         $this->assertServiceDefinitionsHaveTypes([ConstantDefineScalar\FooImplementation::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
@@ -325,7 +329,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testDefineScalarFromEnv() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalarFromEnv', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalarFromEnv');
 
         $this->assertServiceDefinitionsHaveTypes([SimpleDefineScalarFromEnv\FooImplementation::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
@@ -343,7 +347,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testSimpleDefineService() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineService', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleDefineService');
 
         $this->assertServiceDefinitionsHaveTypes([
             SimpleDefineService\FooInterface::class,
@@ -372,7 +376,7 @@ class InjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testMultipleAliasResolution() {
-        $injectorDefinition = $this->subject->compileDirectory(__DIR__ . '/DummyApps/MultipleAliasResolution', 'test');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/MultipleAliasResolution');
 
         $this->assertServiceDefinitionsHaveTypes([
             MultipleAliasResolution\FooInterface::class

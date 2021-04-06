@@ -40,10 +40,10 @@ class FooImplementation {}
 
 use Cspray\AnnotatedInjector\AnnotatedInjectorFactory;
 use Cspray\AnnotatedInjector\Attribute\Service;
-use Cspray\AnnotatedInjector\InjectorDefinitionCompiler;
+use Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler;
 
-$compiler = new InjectorDefinitionCompiler();
-$injectorDefinition = $compiler->compileDirectory(__DIR__ . '/src', 'environment_identifier');
+$compiler = new PhpParserInjectorDefinitionCompiler();
+$injectorDefinition = $compiler->compileDirectory('env_identifier', __DIR__ . '/src');
 $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
 var_dump($injector->make(Foo::class));
@@ -52,7 +52,7 @@ var_dump($injector->make(Foo::class));
 Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It
 is important before you use this library that you understand what opinions it has made and how to use it properly. This
 README aims to be an exhaustive resource for using the Attributes properly as well as for writing internal code. If you're 
-looking to start using the Attributes to configure your `Injector` check out the "User Guide". Otherwise check out 
+looking to start using the Attributes to configure your `Injector` check out the "User Guide". Otherwise, check out 
 "How it Works" for a detailed look at the underpinnings of the library.
 
 :exclamation: **Wiring your dependencies has serious implications. It is your responsibility to understand what you're doing

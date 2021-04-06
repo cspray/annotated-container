@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \Cspray\AnnotatedInjector\AnnotatedInjectorFactory
- * @covers \Cspray\AnnotatedInjector\InjectorDefinitionCompiler
+ * @covers \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler
  * @covers \Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor
  * @covers \Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor
  * @covers \Cspray\AnnotatedInjector\Visitor\DefineScalarDefinitionVisitor
@@ -32,8 +32,8 @@ use PHPUnit\Framework\TestCase;
 class AnnotatedInjectorFactoryTest extends TestCase {
 
     public function testCreateSimpleServices() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleServices', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleServices');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
         $subject = $injector->make(SimpleServices\FooInterface::class);
 
@@ -41,8 +41,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testInterfaceServicePrepare() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/InterfaceServicePrepare', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/InterfaceServicePrepare');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $subject = $injector->make(InterfaceServicePrepare\FooInterface::class);
@@ -52,8 +52,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testServicePrepareInvokedOnInjector() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/InjectorExecuteServicePrepare', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/InjectorExecuteServicePrepare');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $subject = $injector->make(InjectorExecuteServicePrepare\FooInterface::class);
@@ -63,8 +63,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testSimpleDefineScalar() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalar', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleDefineScalar');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $subject = $injector->make(SimpleDefineScalar\FooImplementation::class);
@@ -76,8 +76,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testMultipleDefineScalars() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/MultipleDefineScalars', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/MultipleDefineScalars');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $subject = $injector->make(MultipleDefineScalars\FooImplementation::class);
@@ -89,8 +89,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     public function testConstantDefineScalar() {
         // we need to make sure this file is loaded so that our constant is defined
         require_once __DIR__ . '/DummyApps/ConstantDefineScalar/FooImplementation.php';
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/ConstantDefineScalar', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/ConstantDefineScalar');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $subject = $injector->make(ConstantDefineScalar\FooImplementation::class);
@@ -99,8 +99,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testSimpleDefineScalarFromEnv() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineScalarFromEnv', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleDefineScalarFromEnv');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $subject = $injector->make(SimpleDefineScalarFromEnv\FooImplementation::class);
@@ -109,8 +109,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testSimpleDefineServiceSetterInjection() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineService', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleDefineService');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $subject = $injector->make(SimpleDefineService\SetterInjection::class);
@@ -121,8 +121,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testSimpleDefineServiceConstructorInjection() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/SimpleDefineService', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleDefineService');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $subject = $injector->make(SimpleDefineService\ConstructorInjection::class);
@@ -133,8 +133,8 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testMultipleAliasResolutionNoMakeDefine() {
-        $compiler = new InjectorDefinitionCompiler();
-        $injectorDefinition = $compiler->compileDirectory(__DIR__ . '/DummyApps/MultipleAliasResolution', 'test');
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/MultipleAliasResolution');
         $injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
 
         $this->expectException(InjectionException::class);
