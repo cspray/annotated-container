@@ -6,8 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
 - `Service` Attribute to define an interface or class as a shared service or alias.
 - `ServicePrepare` Attribute to define a method to be invoked after object creation.
 - `DefineService` Attribute to define a parameter on a `Service` constructor or `ServicePrepare` method to use the
