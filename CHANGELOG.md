@@ -6,18 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2021-04-05
-
 ### Added
 
 - `Service` Attribute to define an interface or class as a shared service or alias.
 - `ServicePrepare` Attribute to define a method to be invoked after object creation.
-- `DefineService` Attribute to define a parameter on a `Service` constructor or `ServicePrepare` method to use the 
+- `DefineService` Attribute to define a parameter on a `Service` constructor or `ServicePrepare` method to use the
   provided type to resolve the dependency.
-- `DefineScalar` Attribute to define a hardcoded, non-object value on a `Service` constructor or `ServicePrepare` 
+- `DefineScalar` Attribute to define a hardcoded, non-object value on a `Service` constructor or `ServicePrepare`
   method.
-- `DefineScalarFromEnv` Attribute to define a hardcoded, non-object value to be determined by an environment variable 
+- `DefineScalarFromEnv` Attribute to define a hardcoded, non-object value to be determined by an environment variable
   on a `Service` constructor or `ServicePrepare` method.
-- Compiler to turn annotated PHP source code in a directory into an `InjectorDefinition` which defines how to construct 
+- Compiler to turn annotated PHP source code in a directory into an `InjectorDefinition` which defines how to construct
   the corresponding `Injector`.
 - A factory to take an `InjectorDefinition` and turn it into an `Injector`.
+
+## [0.1.0] - 2021-04-??
