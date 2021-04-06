@@ -9,11 +9,9 @@ use Auryn\Injector;
  *
  * @package Cspray\AnnotatedInjector
  */
-final class AnnotatedInjectorFactory {
+final class AurynInjectorFactory implements InjectorFactory {
 
-    private function __construct() {}
-
-    static public function fromInjectorDefinition(InjectorDefinition $injectorDefinition) : Injector {
+    public function createContainer(InjectorDefinition $injectorDefinition) : Injector {
         $injector = new Injector();
         $servicePrepareDefinitions = $injectorDefinition->getServicePrepareDefinitions();
         $defineServiceDefinitions = $injectorDefinition->getDefineServiceDefinitions();
@@ -134,10 +132,6 @@ final class AnnotatedInjectorFactory {
             }
         }
         return $aliases;
-    }
-
-    static public function fromSerializedServiceDefinition(string $serviceDefinitionJson) : Injector {
-
     }
 
 }

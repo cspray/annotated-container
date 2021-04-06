@@ -4,7 +4,7 @@ require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
 $compiler = new \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler();
 $injectorDefinition = $compiler->compileDirectory('prod', __DIR__ . '/src');
-$injector = \Cspray\AnnotatedInjector\AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+$injector = (new Cspray\AnnotatedInjector\AurynInjectorFactory)->createContainer($injectorDefinition);
 
 $scalarGetter = $injector->make(\Acme\AnnotatedInjectorDemo\ScalarGetter::class);
 
