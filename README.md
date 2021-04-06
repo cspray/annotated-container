@@ -387,6 +387,7 @@ The following Attributes are made available through this library. All Attributes
 |`DefineService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|:heavy_check_mark:|
 |`ServiceDelegate`|`Attribute::TARGET_METHOD`|Defines a method that will be used to generate a defined type.|:x:|
 |`DefineScalarFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated parameters.|:x:|
+|`DefineServiceFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated paramters.|:x:|
 
 ## Roadmap
 
