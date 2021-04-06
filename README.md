@@ -12,7 +12,7 @@ or resolution conflicts became known. Those issues are expected to be fixed in f
 stabilizing however it is possible that you could run into these problems that could result in weird or unexpected 
 behavior. When logical problems become known that we are planning on fixing, we'll update the "KNOWN_ISSUES.md" file.
 
-:exclamation: Though this library is not yet production ready we're working hard to make it so! Please check back regularly for updates! :exclamation:
+:exclamation: Though this library is not yet production ready we're working hard to make it so! Please check back regularly for updates!
 
 ## Installation
 
@@ -38,13 +38,13 @@ interface Foo {}
 #[Service]
 class FooImplementation {}
 
-use Cspray\AnnotatedInjector\AnnotatedInjectorFactory;
+use Cspray\AnnotatedInjector\AurynInjectorFactory;
 use Cspray\AnnotatedInjector\Attribute\Service;
-use Cspray\AnnotatedInjector\InjectorDefinitionCompiler;
+use Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler;
 
-$compiler = new InjectorDefinitionCompiler();
-$injectorDefinition = $compiler->compileDirectory(__DIR__ . '/src', 'environment_identifier');
-$injector = AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+$compiler = new PhpParserInjectorDefinitionCompiler();
+$injectorDefinition = $compiler->compileDirectory('env_identifier', __DIR__ . '/src');
+$injector = (new Cspray\AnnotatedInjector\AurynInjectorFactory)->createContainer($injectorDefinition);
 
 var_dump($injector->make(Foo::class));
 ```
@@ -52,11 +52,11 @@ var_dump($injector->make(Foo::class));
 Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It
 is important before you use this library that you understand what opinions it has made and how to use it properly. This
 README aims to be an exhaustive resource for using the Attributes properly as well as for writing internal code. If you're 
-looking to start using the Attributes to configure your `Injector` check out the "User Guide". Otherwise check out 
+looking to start using the Attributes to configure your `Injector` check out the "User Guide". Otherwise, check out 
 "How it Works" for a detailed look at the underpinnings of the library.
 
 :exclamation: **Wiring your dependencies has serious implications. It is your responsibility to understand what you're doing
-when using this library and the Injector!** :exclamation:
+when using this library and the Injector!**
 
 ## User Guide
 

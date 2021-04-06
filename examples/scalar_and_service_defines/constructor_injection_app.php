@@ -2,9 +2,9 @@
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-$compiler = new \Cspray\AnnotatedInjector\InjectorDefinitionCompiler();
-$injectorDefinition = $compiler->compileDirectory(__DIR__ . '/src', 'dev');
-$injector = \Cspray\AnnotatedInjector\AnnotatedInjectorFactory::fromInjectorDefinition($injectorDefinition);
+$compiler = new \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler();
+$injectorDefinition = $compiler->compileDirectory('dev', __DIR__ . '/src');
+$injector = (new Cspray\AnnotatedInjector\AurynInjectorFactory)->createContainer($injectorDefinition);
 
 $subject = $injector->make(\Acme\AnnotatedInjectorDemo\MixedDefinesConstructorInjection::class);
 
