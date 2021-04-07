@@ -20,21 +20,22 @@ use Cspray\AnnotatedInjector\DummyApps\ConstantDefineScalar;
 use Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalarFromEnv;
 use Cspray\AnnotatedInjector\DummyApps\SimpleDefineService;
 use Cspray\AnnotatedInjector\DummyApps\MultipleAliasResolution;
+use Cspray\AnnotatedInjector\DummyApps\NonPhpFiles;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler
- * @covers \Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Visitor\DefineScalarDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Interrogator\DefineScalarDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Internal\Visitor\DefineScalarDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\DefineScalarDefinitionInterrogator
  * @covers \Cspray\AnnotatedInjector\ServiceDefinition
  * @covers \Cspray\AnnotatedInjector\AliasDefinition
  * @covers \Cspray\AnnotatedInjector\ServicePrepareDefinition
  * @covers \Cspray\AnnotatedInjector\DefineScalarDefinition
- * @covers \Cspray\AnnotatedInjector\Visitor\AbstractNodeVisitor
+ * @covers \Cspray\AnnotatedInjector\Internal\Visitor\AbstractNodeVisitor
  */
 class PhpParserInjectorDefinitionCompilerTest extends TestCase {
 
@@ -44,7 +45,7 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->subject = new PhpParserInjectorDefinitionCompiler();
     }
 
-    private function runCompileDirectory(string $dir, string $environment = 'test') : InjectorDefinition {
+    private function runCompileDirectory(string|array $dir, string $environment = 'test') : InjectorDefinition {
         return $this->subject->compileDirectory($environment, $dir);
     }
 
@@ -385,6 +386,37 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [MultipleAliasResolution\FooInterface::class, MultipleAliasResolution\BarImplementation::class],
             [MultipleAliasResolution\FooInterface::class, MultipleAliasResolution\BazImplementation::class],
             [MultipleAliasResolution\FooInterface::class, MultipleAliasResolution\QuxImplementation::class]
+        ], $injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
+    }
+
+    public function testNonPhpFiles() {
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/NonPhpFiles');
+
+        $this->assertServiceDefinitionsHaveTypes([NonPhpFiles\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getAliasDefinitions());
+        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getDefineServiceDefinitions());
+    }
+
+    public function testMultipleDirs() {
+        $injectorDefinition = $this->runCompileDirectory([
+            __DIR__ . '/DummyApps/MultipleSimpleServices',
+            __DIR__ . '/DummyApps/SimpleServices'
+        ]);
+
+        $this->assertServiceDefinitionsHaveTypes([
+            MultipleSimpleServices\BarInterface::class,
+            MultipleSimpleServices\FooInterface::class,
+            SimpleServices\FooInterface::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertAliasDefinitionsMap([
+            [MultipleSimpleServices\FooInterface::class, MultipleSimpleServices\FooImplementation::class],
+            [MultipleSimpleServices\BarInterface::class, MultipleSimpleServices\BarImplementation::class],
+            [SimpleServices\FooInterface::class, SimpleServices\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getDefineScalarDefinitions());

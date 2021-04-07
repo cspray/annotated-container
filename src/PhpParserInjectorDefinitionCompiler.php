@@ -2,14 +2,14 @@
 
 namespace Cspray\AnnotatedInjector;
 
-use Cspray\AnnotatedInjector\Interrogator\DefineScalarDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Interrogator\DefineServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Visitor\DefineScalarDefinitionVisitor;
-use Cspray\AnnotatedInjector\Visitor\DefineServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor;
+use Cspray\AnnotatedInjector\Internal\Interrogator\DefineScalarDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Internal\Interrogator\DefineServiceDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Internal\Visitor\DefineScalarDefinitionVisitor;
+use Cspray\AnnotatedInjector\Internal\Visitor\DefineServiceDefinitionVisitor;
+use Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor;
+use Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;
@@ -40,6 +40,9 @@ final class PhpParserInjectorDefinitionCompiler implements InjectorDefinitionCom
         $rawServicePrepareDefinitions = [];
         $rawDefineScalarDefinitions = [];
         $rawDefineServiceDefinitions = [];
+        if (is_string($dirs)) {
+            $dirs = [$dirs];
+        }
         /** @var Node $node */
         foreach ($this->gatherDefinitions($dirs) as $rawDefinition) {
             if ($rawDefinition['definitionType'] === ServiceDefinition::class) {
@@ -167,53 +170,55 @@ final class PhpParserInjectorDefinitionCompiler implements InjectorDefinitionCom
         return $marshaledDefinitions;
     }
 
-    private function gatherDefinitions(string $dir) : Generator {
-        $dirIterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(
-                $dir,
-                FilesystemIterator::KEY_AS_PATHNAME |
-                FilesystemIterator::CURRENT_AS_FILEINFO |
-                FilesystemIterator::SKIP_DOTS
-            )
-        );
+    private function gatherDefinitions(array $dirs) : Generator {
+        foreach ($dirs as $dir) {
+            $dirIterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $dir,
+                    FilesystemIterator::KEY_AS_PATHNAME |
+                    FilesystemIterator::CURRENT_AS_FILEINFO |
+                    FilesystemIterator::SKIP_DOTS
+                )
+            );
 
-        /** @var \SplFileInfo $file */
-        foreach ($dirIterator as $file) {
-            if ($file->isDir()) {
-                continue;
+            /** @var \SplFileInfo $file */
+            foreach ($dirIterator as $file) {
+                if ($file->isDir() || $file->getExtension() !== 'php') {
+                    continue;
+                }
+
+                $statements = $this->parser->parse(file_get_contents($file->getRealPath()));
+
+                $nameResolver = new NameResolver();
+                $nodeConnectingVisitor = new NodeConnectingVisitor();
+                $this->nodeTraverser->addVisitor($nameResolver);
+                $this->nodeTraverser->addVisitor($nodeConnectingVisitor);
+                $this->nodeTraverser->traverse($statements);
+
+                $this->nodeTraverser->removeVisitor($nameResolver);
+                $this->nodeTraverser->removeVisitor($nodeConnectingVisitor);
+
+                $serviceDefinitionVisitor = new ServiceDefinitionVisitor();
+                $servicePrepareDefinitionVisitor = new ServicePrepareDefinitionVisitor();
+                $defineScalarDefinitionVisitor = new DefineScalarDefinitionVisitor();
+                $defineServiceDefinitionVisitor = new DefineServiceDefinitionVisitor();
+
+                $this->nodeTraverser->addVisitor($serviceDefinitionVisitor);
+                $this->nodeTraverser->addVisitor($servicePrepareDefinitionVisitor);
+                $this->nodeTraverser->addVisitor($defineScalarDefinitionVisitor);
+                $this->nodeTraverser->addVisitor($defineServiceDefinitionVisitor);
+                $this->nodeTraverser->traverse($statements);
+
+                $this->nodeTraverser->removeVisitor($serviceDefinitionVisitor);
+                $this->nodeTraverser->removeVisitor($servicePrepareDefinitionVisitor);
+                $this->nodeTraverser->removeVisitor($defineScalarDefinitionVisitor);
+                $this->nodeTraverser->removeVisitor($defineServiceDefinitionVisitor);
+
+                yield from $serviceDefinitionVisitor->getServiceDefinitions();
+                yield from $servicePrepareDefinitionVisitor->getServicePrepareDefinitions();
+                yield from $defineScalarDefinitionVisitor->getDefineScalarDefinitions();
+                yield from $defineServiceDefinitionVisitor->getDefineServiceDefinitions();
             }
-
-            $statements = $this->parser->parse(file_get_contents($file->getRealPath()));
-
-            $nameResolver = new NameResolver();
-            $nodeConnectingVisitor = new NodeConnectingVisitor();
-            $this->nodeTraverser->addVisitor($nameResolver);
-            $this->nodeTraverser->addVisitor($nodeConnectingVisitor);
-            $this->nodeTraverser->traverse($statements);
-
-            $this->nodeTraverser->removeVisitor($nameResolver);
-            $this->nodeTraverser->removeVisitor($nodeConnectingVisitor);
-
-            $serviceDefinitionVisitor = new ServiceDefinitionVisitor();
-            $servicePrepareDefinitionVisitor = new ServicePrepareDefinitionVisitor();
-            $defineScalarDefinitionVisitor = new DefineScalarDefinitionVisitor();
-            $defineServiceDefinitionVisitor = new DefineServiceDefinitionVisitor();
-
-            $this->nodeTraverser->addVisitor($serviceDefinitionVisitor);
-            $this->nodeTraverser->addVisitor($servicePrepareDefinitionVisitor);
-            $this->nodeTraverser->addVisitor($defineScalarDefinitionVisitor);
-            $this->nodeTraverser->addVisitor($defineServiceDefinitionVisitor);
-            $this->nodeTraverser->traverse($statements);
-
-            $this->nodeTraverser->removeVisitor($serviceDefinitionVisitor);
-            $this->nodeTraverser->removeVisitor($servicePrepareDefinitionVisitor);
-            $this->nodeTraverser->removeVisitor($defineScalarDefinitionVisitor);
-            $this->nodeTraverser->removeVisitor($defineServiceDefinitionVisitor);
-
-            yield from $serviceDefinitionVisitor->getServiceDefinitions();
-            yield from $servicePrepareDefinitionVisitor->getServicePrepareDefinitions();
-            yield from $defineScalarDefinitionVisitor->getDefineScalarDefinitions();
-            yield from $defineServiceDefinitionVisitor->getDefineServiceDefinitions();
         }
     }
 
