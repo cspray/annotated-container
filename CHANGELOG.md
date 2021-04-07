@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2021-04-06
+
 ### Added
 
 - `Service` Attribute to define an interface or class as a shared service or alias.
@@ -22,4 +24,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `InjectorFactory` to take an `InjectorDefinition` and turn it into a DI container. An implementation that 
   wires an Auryn `Injector` is also provided.
 
-## [0.1.0] - 2021-04-??
+
