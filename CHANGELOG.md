@@ -17,8 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   method.
 - `DefineScalarFromEnv` Attribute to define a hardcoded, non-object value to be determined by an environment variable
   on a `Service` constructor or `ServicePrepare` method.
-- Compiler to turn annotated PHP source code in a directory into an `InjectorDefinition` which defines how to construct
-  the corresponding `Injector`.
-- A factory to take an `InjectorDefinition` and turn it into an `Injector`.
+- `InjectorDefinitionCompiler` to turn annotated PHP source code in a directory into an `InjectorDefinition` which defines how to construct
+  the corresponding `Injector`. An implementation using PHP-Parser is also provided.
+- `InjectorFactory` to take an `InjectorDefinition` and turn it into a DI container. An implementation that 
+  wires an Auryn `Injector` is also provided.
 
 ## [0.1.0] - 2021-04-??

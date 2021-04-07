@@ -17,17 +17,17 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \Cspray\AnnotatedInjector\AurynInjectorFactory
  * @covers \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler
- * @covers \Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Visitor\DefineScalarDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Interrogator\DefineScalarDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Internal\Visitor\DefineScalarDefinitionVisitor
+ * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator
+ * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\DefineScalarDefinitionInterrogator
  * @covers \Cspray\AnnotatedInjector\ServiceDefinition
  * @covers \Cspray\AnnotatedInjector\AliasDefinition
  * @covers \Cspray\AnnotatedInjector\ServicePrepareDefinition
  * @covers \Cspray\AnnotatedInjector\DefineScalarDefinition
- * @covers \Cspray\AnnotatedInjector\Visitor\AbstractNodeVisitor
+ * @covers \Cspray\AnnotatedInjector\Internal\Visitor\AbstractNodeVisitor
  */
 class AnnotatedInjectorFactoryTest extends TestCase {
 

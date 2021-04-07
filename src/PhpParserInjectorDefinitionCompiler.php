@@ -2,14 +2,14 @@
 
 namespace Cspray\AnnotatedInjector;
 
-use Cspray\AnnotatedInjector\Interrogator\DefineScalarDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Interrogator\DefineServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Interrogator\ServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Interrogator\ServicePrepareDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Visitor\DefineScalarDefinitionVisitor;
-use Cspray\AnnotatedInjector\Visitor\DefineServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Visitor\ServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Visitor\ServicePrepareDefinitionVisitor;
+use Cspray\AnnotatedInjector\Internal\Interrogator\DefineScalarDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Internal\Interrogator\DefineServiceDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator;
+use Cspray\AnnotatedInjector\Internal\Visitor\DefineScalarDefinitionVisitor;
+use Cspray\AnnotatedInjector\Internal\Visitor\DefineServiceDefinitionVisitor;
+use Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor;
+use Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;

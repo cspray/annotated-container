@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\Interrogator;
+namespace Cspray\AnnotatedInjector\Internal\Interrogator;
 
 use Cspray\AnnotatedInjector\ServicePrepareDefinition;
 use Generator;

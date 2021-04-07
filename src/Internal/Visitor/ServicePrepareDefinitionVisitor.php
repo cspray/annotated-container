@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\Visitor;
+namespace Cspray\AnnotatedInjector\Internal\Visitor;
 
 use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
 use Cspray\AnnotatedInjector\ServicePrepareDefinition;
