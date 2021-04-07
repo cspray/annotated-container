@@ -2,8 +2,8 @@
 
 namespace Acme\AnnotatedInjectorDemo;
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
-use Cspray\AnnotatedInjector\Attribute\DefineService;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
+use Cspray\AnnotatedInjector\Attribute\UseService;
 use Cspray\AnnotatedInjector\Attribute\Service;
 use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
 
@@ -18,7 +18,7 @@ class MixedDefinesSetterInjection {
 
     #[ServicePrepare]
     public function setFirst(
-        #[DefineService(FirstMixedDefinesImplementation::class)]
+        #[UseService(FirstMixedDefinesImplementation::class)]
         MixedDefinesInterface $first
     ) {
         $this->first = $first;
@@ -26,7 +26,7 @@ class MixedDefinesSetterInjection {
 
     #[ServicePrepare]
     public function setSecond(
-        #[DefineService(SecondMixedDefinesImplementation::class)]
+        #[UseService(SecondMixedDefinesImplementation::class)]
         MixedDefinesInterface $second
     ) {
         $this->second = $second;
@@ -34,7 +34,7 @@ class MixedDefinesSetterInjection {
 
     #[ServicePrepare]
     public function setString(
-        #[DefineScalar("this is the value")]
+        #[UseScalar("this is the value")]
         string $string
     ) {
         $this->stringParam = $string;

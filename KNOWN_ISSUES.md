@@ -15,7 +15,7 @@ a type that's not valid for the parameter it is annotating. Take the following e
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
 use Cspray\AnnotatedInjector\Attribute\Service;
 
 #[Service]
@@ -24,7 +24,7 @@ class Foo {
     private string $bar;
 
     public function __construct(
-        #[DefineScalar(42)]
+        #[UseScalar(42)]
         string $bar
     ) {
         $this->bar = $bar;
@@ -35,7 +35,7 @@ class Foo {
 
 In the above example there's a pretty glaring error that when we attempt to construct `Foo` an `int` value will be 
 passed to a `string`. Currently, the behavior of this library would to fail at runtime when the object is constructed
-with a `TypeError`. The same problem can exist in `DefineService` if you pass a type that doesn't implement the 
+with a `TypeError`. The same problem can exist in `UseService` if you pass a type that doesn't implement the 
 declaration. In the 0.3 push we'll be throwing an exception on invalid types in `Define*` Attributes during the 
 compile step.
 
@@ -45,22 +45,22 @@ The workaround here is pretty simple... configure the correct type of value for 
 
 ## Multiple Scalar Definitions
 
-There are currently multiple ways to define a scalar value on a param; with either the `DefineScalar` or 
-`DefineScalarFromEnv` Attributes. Take the following example:
+There are currently multiple ways to define a scalar value on a param; with either the `UseScalar` or 
+`UseScalarFromEnv` Attributes. Take the following example:
 
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
-use Cspray\AnnotatedInjector\Attribute\DefineScalarFromEnv;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
+use Cspray\AnnotatedInjector\Attribute\UseScalarFromEnv;
 use Cspray\AnnotatedInjector\Attribute\Service;
 
 #[Service]
 class Foo {
 
     public function __construct(
-        #[DefineScalar('user')]
-        #[DefineScalarFromEnv('USER')]
+        #[UseScalar('user')]
+        #[UseScalarFromEnv('USER')]
         private string $user
     ) {}
 
@@ -86,13 +86,13 @@ Take the following example:
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
 use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
 
 class Foo {
 
     public function __construct(
-        #[DefineScalar('cspray')]
+        #[UseScalar('cspray')]
         public string $user
     ) {}
 

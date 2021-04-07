@@ -2,26 +2,26 @@
 
 namespace Cspray\AnnotatedInjector\Internal\Visitor;
 
-use Cspray\AnnotatedInjector\Attribute\DefineService;
-use Cspray\AnnotatedInjector\DefineServiceDefinition;
+use Cspray\AnnotatedInjector\Attribute\UseService;
+use Cspray\AnnotatedInjector\UseServiceDefinition;
 use PhpParser\Node;
 use PhpParser\Node\Param;
 use PhpParser\NodeVisitor;
 
-final class DefineServiceDefinitionVisitor extends AbstractNodeVisitor implements NodeVisitor {
+final class UseServiceDefinitionVisitor extends AbstractNodeVisitor implements NodeVisitor {
 
-    private array $defineServiceDefinitions = [];
+    private array $UseServiceDefinitions = [];
 
     public function enterNode(Node $node) {
         if ($node instanceof Param) {
-            $defineServiceAttribute = $this->findAttribute(DefineService::class, ...$node->attrGroups);
-            if (isset($defineServiceAttribute)) {
+            $UseServiceAttribute = $this->findAttribute(UseService::class, ...$node->attrGroups);
+            if (isset($UseServiceAttribute)) {
                 $methodNode = $node->getAttribute('parent');
                 $classNode = $methodNode->getAttribute('parent');
-                $valueArg = $defineServiceAttribute->args[0];
+                $valueArg = $UseServiceAttribute->args[0];
 
-                $this->defineServiceDefinitions[] = [
-                    'definitionType' => DefineServiceDefinition::class,
+                $this->UseServiceDefinitions[] = [
+                    'definitionType' => UseServiceDefinition::class,
                     'type' => $classNode->namespacedName->toString(),
                     'method' => $methodNode->name->toString(),
                     'param' => $node->var->name,
@@ -32,8 +32,8 @@ final class DefineServiceDefinitionVisitor extends AbstractNodeVisitor implement
         }
     }
 
-    public function getDefineServiceDefinitions() : array {
-        return $this->defineServiceDefinitions;
+    public function getUseServiceDefinitions() : array {
+        return $this->UseServiceDefinitions;
     }
 
 }

@@ -14,8 +14,8 @@ final class AurynInjectorFactory implements InjectorFactory {
     public function createContainer(InjectorDefinition $injectorDefinition) : Injector {
         $injector = new Injector();
         $servicePrepareDefinitions = $injectorDefinition->getServicePrepareDefinitions();
-        $defineServiceDefinitions = $injectorDefinition->getDefineServiceDefinitions();
-        $defineScalarDefinitions = $injectorDefinition->getDefineScalarDefinitions();
+        $UseServiceDefinitions = $injectorDefinition->getUseServiceDefinitions();
+        $UseScalarDefinitions = $injectorDefinition->getUseScalarDefinitions();
 
         foreach ($injectorDefinition->getSharedServiceDefinitions() as $serviceDefinition) {
             $injector->share($serviceDefinition->getType());
@@ -43,11 +43,11 @@ final class AurynInjectorFactory implements InjectorFactory {
         $preparedTypes = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             if (!in_array($servicePrepareDefinition->getType(), $preparedTypes)) {
-                $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $defineScalarDefinitions, $defineServiceDefinitions) {
+                $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $UseScalarDefinitions, $UseServiceDefinitions) {
                     $methods = self::mapTypesServicePrepares($servicePrepareDefinition->getType(), $servicePrepareDefinitions);
                     foreach ($methods as $method) {
-                        $scalarArgs = self::mapTypesScalarArgs($servicePrepareDefinition->getType(), $method, $defineScalarDefinitions);
-                        $serviceArgs = self::mapTypesServiceArgs($servicePrepareDefinition->getType(), $method, $defineServiceDefinitions);
+                        $scalarArgs = self::mapTypesScalarArgs($servicePrepareDefinition->getType(), $method, $UseScalarDefinitions);
+                        $serviceArgs = self::mapTypesServiceArgs($servicePrepareDefinition->getType(), $method, $UseServiceDefinitions);
                         $injector->execute([$object, $method], array_merge([], $scalarArgs, $serviceArgs));
                     }
                 });
@@ -56,18 +56,18 @@ final class AurynInjectorFactory implements InjectorFactory {
         }
 
         $typeArgsMap = [];
-        /** @var DefineScalarDefinition $defineScalarDefinition */
-        foreach ($defineScalarDefinitions as $defineScalarDefinition) {
-            $type = $defineScalarDefinition->getType();
+        /** @var UseScalarDefinition $UseScalarDefinition */
+        foreach ($UseScalarDefinitions as $UseScalarDefinition) {
+            $type = $UseScalarDefinition->getType();
             if (!isset($typeArgsMap[$type])) {
-                $typeArgsMap[$type] = self::mapTypesScalarArgs($type, '__construct', $defineScalarDefinitions);
+                $typeArgsMap[$type] = self::mapTypesScalarArgs($type, '__construct', $UseScalarDefinitions);
             }
         }
 
-        /** @var DefineServiceDefinition $defineServiceDefinition */
-        foreach ($defineServiceDefinitions as $defineServiceDefinition) {
-            $type = $defineServiceDefinition->getType();
-            $defineArgs = self::mapTypesServiceArgs($type, '__construct', $defineServiceDefinitions);
+        /** @var UseServiceDefinition $UseServiceDefinition */
+        foreach ($UseServiceDefinitions as $UseServiceDefinition) {
+            $type = $UseServiceDefinition->getType();
+            $defineArgs = self::mapTypesServiceArgs($type, '__construct', $UseServiceDefinitions);
             if (isset($typeArgsMap[$type])) {
                 $typeArgsMap[$type] = array_merge($typeArgsMap[$type], $defineArgs);
             } else {
@@ -82,12 +82,12 @@ final class AurynInjectorFactory implements InjectorFactory {
         return $injector;
     }
 
-    private static function mapTypesScalarArgs(string $type, string $method, array $defineScalarDefinitions) : array {
+    private static function mapTypesScalarArgs(string $type, string $method, array $UseScalarDefinitions) : array {
         $args = [];
-        /** @var DefineScalarDefinition $defineScalarDefinition */
-        foreach ($defineScalarDefinitions as $defineScalarDefinition) {
-            if ($defineScalarDefinition->getType() === $type && $defineScalarDefinition->getMethod() === $method) {
-                $value = $defineScalarDefinition->getValue();
+        /** @var UseScalarDefinition $UseScalarDefinition */
+        foreach ($UseScalarDefinitions as $UseScalarDefinition) {
+            if ($UseScalarDefinition->getType() === $type && $UseScalarDefinition->getMethod() === $method) {
+                $value = $UseScalarDefinition->getValue();
                 $constRegex = '/^\!const\((.+)\)$/';
                 $envRegex = '/^\!env\((.+)\)$/';
                 if (is_string($value) && preg_match($constRegex, $value, $constMatches) === 1) {
@@ -95,18 +95,18 @@ final class AurynInjectorFactory implements InjectorFactory {
                 } else if (is_string($value) && preg_match($envRegex, $value, $envMatches) === 1) {
                     $value = getenv($envMatches[1]);
                 }
-                $args[':' . $defineScalarDefinition->getParamName()] = $value;
+                $args[':' . $UseScalarDefinition->getParamName()] = $value;
             }
         }
         return $args;
     }
 
-    private static function mapTypesServiceArgs(string $type, string $method, array $defineServiceDefinitions) : array {
+    private static function mapTypesServiceArgs(string $type, string $method, array $UseServiceDefinitions) : array {
         $args = [];
-        /** @var DefineServiceDefinition $defineServiceDefinition */
-        foreach ($defineServiceDefinitions as $defineServiceDefinition) {
-            if ($defineServiceDefinition->getType() === $type && $defineServiceDefinition->getMethod() === $method) {
-                $args[$defineServiceDefinition->getParamName()] = $defineServiceDefinition->getValue();
+        /** @var UseServiceDefinition $UseServiceDefinition */
+        foreach ($UseServiceDefinitions as $UseServiceDefinition) {
+            if ($UseServiceDefinition->getType() === $type && $UseServiceDefinition->getMethod() === $method) {
+                $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getValue();
             }
         }
         return $args;

@@ -2,16 +2,14 @@
 
 namespace Cspray\AnnotatedInjector;
 
-final class DefineScalarDefinition {
+final class UseServiceDefinition {
 
     public function __construct(
         private string $type,
         private string $method,
         private string $param,
         private string $paramType,
-        private string|int|float|bool|array $value,
-        private bool $isPlainValue,
-        private bool $isEnvironmentVar
+        private string $value
     ) {}
 
     public function getType() : string {
@@ -30,16 +28,8 @@ final class DefineScalarDefinition {
         return $this->paramType;
     }
 
-    public function getValue() : string|int|float|bool|array {
+    public function getValue() : string {
         return $this->value;
-    }
-
-    public function isPlainValue() : bool {
-        return $this->isPlainValue;
-    }
-
-    public function isEnvironmentVar() : bool {
-        return $this->isEnvironmentVar;
     }
 
 }

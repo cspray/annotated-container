@@ -8,13 +8,13 @@ use Attribute;
  * Defines a scalar value that should be used for a parameter to a Service constructor or method annotated
  * with ServicePrepare.
  *
- * It is possible to gather scalar values from the environment, {@see DefineScalarFromEnv}. Please also be sure to
+ * It is possible to gather scalar values from the environment, {@see UseScalarFromEnv}. Please also be sure to
  * review the README's documentation on scalar constant resolution.
  *
  * @package Cspray\AnnotatedInjector\Attribute
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
-class DefineScalar {
+class UseScalar {
 
     public function __construct(
         private string|int|float|bool|array $value

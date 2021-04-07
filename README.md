@@ -169,18 +169,18 @@ that one of the implementations can be aliased and now any place you declare `Fo
 concrete implementation will be injected. Nothing else to do here! This problem is solved throughout your codebase!
 
 If you need more control over your injections, or you have multiple implementations that are used in more than 1 environment 
-you can get more specific with the `DefineService` Attribute.
+you can get more specific with the `UseService` Attribute.
 
-#### DefineService Resolution
+#### UseService Resolution
 
 It is possible to annotate parameters in `Service` constructors, as well as methods annotated with `ServicePrepare`, with 
-`DefineService` Attribute. This will inject for the specific method's parameter the defined `Service`. Let's take a look 
+`UseService` Attribute. This will inject for the specific method's parameter the defined `Service`. Let's take a look 
 at our example but resolve the problem with `FooConsumer` for this specific parameter.
 
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\DefineService;
+use Cspray\AnnotatedInjector\Attribute\UseService;
 use Cspray\AnnotatedInjector\Attribute\Service;
 
 #[Service]
@@ -201,7 +201,7 @@ class FooConsumer {
     private Foo $foo;
 
     public function __construct(
-        #[DefineService(Qux::class)]
+        #[UseService(Qux::class)]
         Foo $foo
     ) {
         $this->foo = $foo;
@@ -211,13 +211,13 @@ class FooConsumer {
 ```
 
 Now when we instantiate `FooConsumer` the `Qux` implementation is injected. It is important to note in this use case we 
-_do not_ alias any of the implementations above. It is up to you to ensure that you're using `DefineService` in 
+_do not_ alias any of the implementations above. It is up to you to ensure that you're using `UseService` in 
 appropriate places or that you're specifying these dependencies when you make the object.
 
 Sometimes your `Service` requires a string or something that can't be provided by the `Injector` nor another `Service`. 
 We've got you covered! Next up we'll talk about how to define scalar values your `Service` may need.
 
-### Defining Scalar Values
+### Injected Scalar Values
 
 It is expected that at some point your `Service` will require some scalar value. A prime example is when your `Service` 
 communicates with an HTTP API and has to provide credentials. Let's take a look at a naive example:
@@ -247,13 +247,13 @@ value that should be used.
 
 #### Hardcoded Values
 
-If your desired values can be hardcoded into an Attribute you can use the `DefineScalar` Attribute. There's nothing 
-fancy here... just put the Attribute on the parameter with the desired value. Our previous example, properly annotated:
+If your desired values can be hardcoded into the `UseScalar` Attribute. There's nothing fancy here... just put the 
+Attribute on the parameter with the desired value. Our previous example, properly annotated:
 
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
 use Cspray\AnnotatedInjector\Attribute\Service;
 
 #[Service]
@@ -263,9 +263,9 @@ class FooWebClient {
     private string $apiSecret;
 
     public function __construct(
-        #[DefineScalar("my-client-id")]
+        #[UseScalar("my-client-id")]
         string $clientId,
-        #[DefineScalar("my-api-secret")]
+        #[UseScalar("my-api-secret")]
         string $apiSecret
     ) {
         $this->clientId = $clientId;
@@ -275,10 +275,10 @@ class FooWebClient {
 }
 ```
 
-Now when make `FooWebClient` the strings `"my-client-id"` and `"my-api-secret"` will be passed to the appropriate 
+Now when we make `FooWebClient` the strings `"my-client-id"` and `"my-api-secret"` will be passed to the appropriate 
 parameters! Hardcoded values may be the appropriate way to handle some parameters. It probably isn't the correct 
 way for this implementation. Chances are you won't be able to hardcode these type of values. Additionally, if you 
-don't-event-look-that-close you can see a security problem with the above code. We'll talk about the security flaw 
+don't-even-look-that-close you can see a security problem with the above code. We'll talk about the security flaw 
 later but for now let's take a look at how to avoid hard-coding scalar values. The library provides an additional 
 Attribute for reading a value from an environment variable.
 
@@ -289,7 +289,7 @@ Let's take our previous example and improve it by reading in our client id and s
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalarFromEnv;
+use Cspray\AnnotatedInjector\Attribute\UseScalarFromEnv;
 use Cspray\AnnotatedInjector\Attribute\Service;
 
 #[Service]
@@ -299,9 +299,9 @@ class FooWebClient {
     private string $apiSecret;
 
     public function __construct(
-        #[DefineScalarFromEnv('MY_CLIENT_ID')]
+        #[UseScalarFromEnv('MY_CLIENT_ID')]
         string $clientId,
-        #[DefineScalarFromEnv('MY_API_SECRET')]
+        #[UseScalarFromEnv('MY_API_SECRET')]
         string $apiSecret
     ) {
         $this->clientId = $clientId;
@@ -318,28 +318,28 @@ Next, it is important to understand how the library resolves "dynamic" scalar va
 
 #### Resolving Dynamic Scalar Values
 
-When you pass `DefineScalar` a constant or everytime you use `DefineScalarEnv` you're requesting a value that cannot 
+When you pass `UseScalar` a constant or everytime you use `UseScalarEnv` you're requesting a value that cannot 
 be reliably determined at compile team when we parse your Attributes. For constants the value could potentially be 
 different based on the environment you're running in and how you load those constants. For environment variables their 
 intrinsic nature means they could be different on the machine that does the compiling versus the machine that does the 
 running. To ensure that you don't get bad values we defer the gathering of constant values and environment variables 
 until runtime.
 
-When we encounter the `DefineScalarFromEnv` Attribute or that you're fetching a constant we store a decorated value 
+When we encounter the `UseScalarFromEnv` Attribute or that you're fetching a constant we store a decorated value 
 for this Attribute. In the example above we wouldn't gather the environment variable during compile time, instead we 
 would store the values  as `!env(MY_CLIENT_ID)` and `!env(MY_API_SECRET)`, respectively. At runtime when we parse 
 the compiled definitions we recognize that these values should be derived from an environment variable and make the 
 appropriate PHP calls to read `MY_CLIENT_ID` and `MY_API_SECRET` from the environment. Constants follow a similar 
 pattern with `!env()` replaced with `!const()`.
 
-#### DefineScalar Security Considerations
+#### UseScalar Security Considerations
 
 It is important to keep in mind that the compiled `InjectionDefinition` can be serialized and is intended to be 
 cached in production environments. This means, **the values you pass to the Attributes of this library are stored 
-in plaintext in whatever caching mechanism you use**. This means in our `DefineScalar` example when we annotate 
-`DefineScalar("my-api-secret")` we are committing a mistake and introducing a security flaw into our codebase! Even if 
+in plaintext in whatever caching mechanism you use**. This means in our `UseScalar` example when we annotate 
+`UseScalar("my-api-secret")` we are committing a mistake and introducing a security flaw into our codebase! Even if 
 the repository you're working in is "private" the serialized representation of your annotations could be stored in an 
-insecure manner! You should be cautious about how to use `DefineScalar` and defer to using one of the other attributes 
+insecure manner! You should be cautious about how to use `UseScalar` and defer to using one of the other attributes 
 available when dealing with scalar values.
 
 ### Preparing Services
@@ -385,12 +385,12 @@ The following Attributes are made available through this library. All Attributes
 --- | --- | --- | ---
 |`Service`|`Attribute::TARGET_CLASS`|Describes an interface, abstract class, or concrete class as being a service. Will share and alias the types into the Injector based on what's annotated.|:heavy_check_mark:|
 |`ServicePrepare`|`Attribute::TARGET_METHOD`|Describes a method, on an interface or class, that should be invoked when that type is created.|:heavy_check_mark:|
-|`DefineScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be the exact value passed to this Attribute.|:heavy_check_mark:|
-|`DefineScalarFromEnv`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an environment variable matching this Attribute's value|:heavy_check_mark:|
-|`DefineService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|:heavy_check_mark:|
+|`UseScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be the exact value passed to this Attribute.|:heavy_check_mark:|
+|`UseScalarFromEnv`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an environment variable matching this Attribute's value|:heavy_check_mark:|
+|`UseService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|:heavy_check_mark:|
 |`ServiceDelegate`|`Attribute::TARGET_METHOD`|Defines a method that will be used to generate a defined type.|:x:|
-|`DefineScalarFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated parameters.|:x:|
-|`DefineServiceFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated paramters.|:x:|
+|`UseScalarFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated parameters.|:x:|
+|`UseServiceFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated paramters.|:x:|
 
 ## Roadmap
 
