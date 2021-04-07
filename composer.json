@@ -1,7 +1,7 @@
 {
   "name": "cspray/annotated-injector",
-  "description": "Create Auryn Injector based off annotated classes and interfaces",
-  "keywords": ["attributes", "auryn"],
+  "description": "Create Dependency Injection containers configured with PHP8 Attributes.",
+  "keywords": ["attributes", "auryn", "dependency-injection"],
   "license": "MIT",
   "authors": [
     {
