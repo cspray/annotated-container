@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\SimpleDefineService;
+namespace Cspray\AnnotatedInjector\DummyApps\SimpleUseService;
 
-use Cspray\AnnotatedInjector\Attribute\DefineService;
+use Cspray\AnnotatedInjector\Attribute\UseService;
 use Cspray\AnnotatedInjector\Attribute\Service;
 use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
 
@@ -15,7 +15,7 @@ class SetterInjection {
 
     #[ServicePrepare]
     public function setBaz(
-        #[DefineService(BazImplementation::class)]
+        #[UseService(BazImplementation::class)]
         FooInterface $foo
     ) {
         $this->baz = $foo;
@@ -23,7 +23,7 @@ class SetterInjection {
 
     #[ServicePrepare]
     public function setBar(
-        #[DefineService(BarImplementation::class)]
+        #[UseService(BarImplementation::class)]
         FooInterface $foo
     ) {
         $this->bar = $foo;
@@ -31,7 +31,7 @@ class SetterInjection {
 
     #[ServicePrepare]
     public function setQux(
-        #[DefineService(QuxImplementation::class)]
+        #[UseService(QuxImplementation::class)]
         FooInterface $foo
     ) {
         $this->qux = $foo;

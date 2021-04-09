@@ -11,7 +11,7 @@ use Attribute;
  * @package Cspray\AnnotatedInjector\Attribute
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
-class DefineService {
+class UseService {
 
     public function __construct(
         private string $name

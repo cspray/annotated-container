@@ -2,19 +2,19 @@
 
 namespace Acme\AnnotatedInjectorDemo;
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
-use Cspray\AnnotatedInjector\Attribute\DefineService;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
+use Cspray\AnnotatedInjector\Attribute\UseService;
 use Cspray\AnnotatedInjector\Attribute\Service;
 
 #[Service]
 class MixedDefinesConstructorInjection {
 
     public function __construct(
-        #[DefineService(FirstMixedDefinesImplementation::class)]
+        #[UseService(FirstMixedDefinesImplementation::class)]
         public MixedDefinesInterface $first,
-        #[DefineService(SecondMixedDefinesImplementation::class)]
+        #[UseService(SecondMixedDefinesImplementation::class)]
         public MixedDefinesInterface $second,
-        #[DefineScalar("mixed defines")]
+        #[UseScalar("mixed defines")]
         public string $stringParam
     ) {}
 

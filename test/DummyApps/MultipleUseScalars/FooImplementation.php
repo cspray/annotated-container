@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
 
-namespace Cspray\AnnotatedInjector\DummyApps\MultipleDefineScalars;
+namespace Cspray\AnnotatedInjector\DummyApps\MultipleUseScalars;
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
 use Cspray\AnnotatedInjector\Attribute\Service;
 use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
 
@@ -13,13 +13,13 @@ class FooImplementation {
     public string $prepareParam = '';
 
     public function __construct(
-        #[DefineScalar("constructor param")]
+        #[UseScalar("constructor param")]
         public string $stringParam
     ) {}
 
     #[ServicePrepare]
     public function setUp(
-        #[DefineScalar("prepare param")]
+        #[UseScalar("prepare param")]
         string $stringParam
     ) {
         $this->prepareParam = $stringParam;

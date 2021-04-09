@@ -1,23 +1,23 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\SimpleDefineScalar;
+namespace Cspray\AnnotatedInjector\DummyApps\SimpleUseScalar;
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
 use Cspray\AnnotatedInjector\Attribute\Service;
 
 #[Service]
 class FooImplementation {
 
     public function __construct(
-        #[DefineScalar('string param test value')]
+        #[UseScalar('string param test value')]
         public string $stringParam,
-        #[DefineScalar(42)]
+        #[UseScalar(42)]
         public int $intParam,
-        #[DefineScalar(42.0)]
+        #[UseScalar(42.0)]
         public float $floatParam,
-        #[DefineScalar(true)]
+        #[UseScalar(true)]
         public bool $boolParam,
-        #[DefineScalar([
+        #[UseScalar([
             ['a', 'b', 'c'],
             [1, 2, 3],
             [1.0, 2.0, 3.0],

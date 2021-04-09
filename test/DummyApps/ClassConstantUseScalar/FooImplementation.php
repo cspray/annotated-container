@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\ClassConstantDefineScalar;
+namespace Cspray\AnnotatedInjector\DummyApps\ClassConstantUseScalar;
 
-use Cspray\AnnotatedInjector\Attribute\DefineScalar;
+use Cspray\AnnotatedInjector\Attribute\UseScalar;
 use Cspray\AnnotatedInjector\Attribute\Service;
 
 #[Service]
@@ -11,7 +11,7 @@ class FooImplementation {
     public const VALUE = 'foo_val';
 
     public function __construct(
-        #[DefineScalar(FooImplementation::VALUE)]
+        #[UseScalar(FooImplementation::VALUE)]
         public string $val
     ) {}
 
