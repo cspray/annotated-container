@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
 
-namespace Cspray\AnnotatedInjector\DummyApps\ConstantUseScalar;
+namespace Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar;
 
-use Cspray\AnnotatedInjector\Attribute\UseScalar;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 const FOO_BAR = 'foo_bar_val';
 

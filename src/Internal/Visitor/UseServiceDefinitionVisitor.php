@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\Internal\Visitor;
+namespace Cspray\AnnotatedContainer\Internal\Visitor;
 
-use Cspray\AnnotatedInjector\Attribute\UseService;
-use Cspray\AnnotatedInjector\UseServiceDefinition;
+use Cspray\AnnotatedContainer\Attribute\UseService;
+use Cspray\AnnotatedContainer\UseServiceDefinition;
 use PhpParser\Node;
 use PhpParser\Node\Param;
 use PhpParser\NodeVisitor;

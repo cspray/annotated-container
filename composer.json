@@ -1,5 +1,5 @@
 {
-  "name": "cspray/annotated-injector",
+  "name": "cspray/annotated-container",
   "description": "Create Dependency Injection containers configured with PHP8 Attributes.",
   "keywords": ["attributes", "auryn", "dependency-injection"],
   "license": "MIT",
@@ -13,6 +13,7 @@
   ],
   "require": {
     "php": "^8.0",
+    "psr/container": "^2.0",
     "rdlowrey/auryn": "^1.4",
     "nikic/php-parser": "^4.10"
   },
@@ -21,13 +22,13 @@
   },
   "autoload": {
     "psr-4": {
-      "Cspray\\AnnotatedInjector\\": "src"
+      "Cspray\\AnnotatedContainer\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Cspray\\AnnotatedInjector\\": "test",
-      "Acme\\AnnotatedInjectorDemo\\": ["examples/getting_started/src", "examples/scalar_values/src", "examples/scalar_and_service_defines/src"]
+      "Cspray\\AnnotatedContainer\\": "test",
+      "Acme\\AnnotatedContainerDemo\\": ["examples/getting_started/src", "examples/scalar_values/src", "examples/scalar_and_service_defines/src"]
     },
     "files": [
       "examples/scalar_values/src/constants.php"

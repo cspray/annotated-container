@@ -1,17 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDelegateDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Interrogator\UseScalarDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Interrogator\UseServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Visitor\ServiceDelegateVisitor;
-use Cspray\AnnotatedInjector\Internal\Visitor\UseScalarDefinitionVisitor;
-use Cspray\AnnotatedInjector\Internal\Visitor\UseServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDelegateDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\UseScalarDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\UseServiceDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDelegateVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\UseServiceDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;
@@ -25,9 +25,9 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * @package Cspray\AnnotatedInjector
+ * @package Cspray\AnnotatedContainer
  */
-final class PhpParserInjectorDefinitionCompiler implements InjectorDefinitionCompiler {
+final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionCompiler {
 
     private Parser $parser;
     private NodeTraverserInterface $nodeTraverser;
@@ -37,7 +37,7 @@ final class PhpParserInjectorDefinitionCompiler implements InjectorDefinitionCom
         $this->nodeTraverser = new NodeTraverser();
     }
 
-    public function compileDirectory(string $environment, array|string $dirs) : InjectorDefinition {
+    public function compileDirectory(string $environment, array|string $dirs) : ContainerDefinition {
         $rawServiceDefinitions = [];
         $rawServicePrepareDefinitions = [];
         $rawUseScalarDefinitions = [];
@@ -251,7 +251,7 @@ final class PhpParserInjectorDefinitionCompiler implements InjectorDefinitionCom
         UseScalarDefinitionInterrogator $useScalarDefinitionInterrogator,
         UseServiceDefinitionInterrogator $useServiceDefinitionInterrogator,
         ServiceDelegateDefinitionInterrogator $serviceDelegateDefinitionInterrogator
-    ) : InjectorDefinition {
+    ) : ContainerDefinition {
         $services = iterator_to_array($serviceDefinitionInterrogator->gatherSharedServices());
         $aliases = iterator_to_array($serviceDefinitionInterrogator->gatherAliases());
         $setupMethods = iterator_to_array($servicePrepareDefinitionInterrogator->gatherServicePrepare());
@@ -259,7 +259,7 @@ final class PhpParserInjectorDefinitionCompiler implements InjectorDefinitionCom
         $useServices = iterator_to_array($useServiceDefinitionInterrogator->gatherUseServiceDefinitions());
         $serviceDelegateDefinitions = iterator_to_array($serviceDelegateDefinitionInterrogator->getServiceDelegateDefinitions());
 
-        return new class($services, $aliases, $setupMethods, $useScalars, $useServices, $serviceDelegateDefinitions) implements InjectorDefinition {
+        return new class($services, $aliases, $setupMethods, $useScalars, $useServices, $serviceDelegateDefinitions) implements ContainerDefinition {
 
             public function __construct(
                 private array $services,

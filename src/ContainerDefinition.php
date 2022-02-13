@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
 use JsonSerializable;
 
 /**
- * Interface InjectorDefinition
- * @package Cspray\AnnotatedInjector
+ * Interface ContainerDefinition
+ * @package Cspray\AnnotatedContainer
  */
-interface InjectorDefinition {
+interface ContainerDefinition {
 
     /**
      * Returns a set of ServiceDefinition that are shared with the Injector.

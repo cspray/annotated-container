@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\NestedServices;
+namespace Cspray\AnnotatedContainer\DummyApps\NestedServices;
 
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 interface FooInterface {

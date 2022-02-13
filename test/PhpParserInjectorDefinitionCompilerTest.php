@@ -1,53 +1,53 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedInjector\DummyApps\AbstractSharedServices;
-use Cspray\AnnotatedInjector\DummyApps\ClassOnlyServices;
-use Cspray\AnnotatedInjector\DummyApps\ClassOverridesInterfaceServicePrepare;
-use Cspray\AnnotatedInjector\DummyApps\ClassServicePrepareWithoutInterfaceServicePrepare;
-use Cspray\AnnotatedInjector\DummyApps\EnvironmentResolvedServices;
-use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
-use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate\ServiceFactory;
-use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate\ServiceInterface;
-use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
-use Cspray\AnnotatedInjector\DummyApps\MultipleSimpleServices;
-use Cspray\AnnotatedInjector\DummyApps\SimpleServicesSomeNotAnnotated;
-use Cspray\AnnotatedInjector\DummyApps\NestedServices;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\NegativeNumberUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\MultipleUseScalars;
-use Cspray\AnnotatedInjector\DummyApps\ClassConstantUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\ConstantUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseScalarFromEnv;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseService;
-use Cspray\AnnotatedInjector\DummyApps\MultipleAliasResolution;
-use Cspray\AnnotatedInjector\DummyApps\NonPhpFiles;
+use Cspray\AnnotatedContainer\DummyApps\AbstractSharedServices;
+use Cspray\AnnotatedContainer\DummyApps\ClassOnlyServices;
+use Cspray\AnnotatedContainer\DummyApps\ClassOverridesInterfaceServicePrepare;
+use Cspray\AnnotatedContainer\DummyApps\ClassServicePrepareWithoutInterfaceServicePrepare;
+use Cspray\AnnotatedContainer\DummyApps\EnvironmentResolvedServices;
+use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
+use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceFactory;
+use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceInterface;
+use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
+use Cspray\AnnotatedContainer\DummyApps\MultipleSimpleServices;
+use Cspray\AnnotatedContainer\DummyApps\SimpleServicesSomeNotAnnotated;
+use Cspray\AnnotatedContainer\DummyApps\NestedServices;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\NegativeNumberUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\MultipleUseScalars;
+use Cspray\AnnotatedContainer\DummyApps\ClassConstantUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
+use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
+use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\UseScalarDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\UseScalarDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\ServiceDefinition
- * @covers \Cspray\AnnotatedInjector\AliasDefinition
- * @covers \Cspray\AnnotatedInjector\ServicePrepareDefinition
- * @covers \Cspray\AnnotatedInjector\UseScalarDefinition
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\AbstractNodeVisitor
+ * @covers \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\UseScalarDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\ServiceDefinition
+ * @covers \Cspray\AnnotatedContainer\AliasDefinition
+ * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinition
+ * @covers \Cspray\AnnotatedContainer\UseScalarDefinition
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor
  */
 class PhpParserInjectorDefinitionCompilerTest extends TestCase {
 
-    private PhpParserInjectorDefinitionCompiler $subject;
+    private PhpParserContainerDefinitionCompiler $subject;
 
     public function setUp() : void {
-        $this->subject = new PhpParserInjectorDefinitionCompiler();
+        $this->subject = new PhpParserContainerDefinitionCompiler();
     }
 
-    private function runCompileDirectory(string|array $dir, string $environment = 'test') : InjectorDefinition {
+    private function runCompileDirectory(string|array $dir, string $environment = 'test') : ContainerDefinition {
         return $this->subject->compileDirectory($environment, $dir);
     }
 
@@ -324,7 +324,7 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertUseScalarParamValues([
-            ClassConstantUseScalar\FooImplementation::class . '::__construct(val)' => '!const(Cspray\AnnotatedInjector\DummyApps\ClassConstantUseScalar\FooImplementation::VALUE)',
+            ClassConstantUseScalar\FooImplementation::class . '::__construct(val)' => '!const(Cspray\AnnotatedContainer\DummyApps\ClassConstantUseScalar\FooImplementation::VALUE)',
         ], $injectorDefinition->getUseScalarDefinitions());
 
         $this->assertUseScalarMethod([
@@ -342,7 +342,7 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertUseScalarParamValues([
-            ConstantUseScalar\FooImplementation::class . '::__construct(val)' => '!const(Cspray\AnnotatedInjector\DummyApps\ConstantUseScalar\FOO_BAR)',
+            ConstantUseScalar\FooImplementation::class . '::__construct(val)' => '!const(Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar\FOO_BAR)',
         ], $injectorDefinition->getUseScalarDefinitions());
 
         $this->assertUseScalarMethod([

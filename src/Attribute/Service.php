@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\Attribute;
+namespace Cspray\AnnotatedContainer\Attribute;
 
 use Attribute;
 
@@ -9,7 +9,7 @@ use Attribute;
  *
  * Please be sure to review the README's overview of the Service Attribute.
  *
- * @package Cspray\AnnotatedInjector\Attribute
+ * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 class Service {

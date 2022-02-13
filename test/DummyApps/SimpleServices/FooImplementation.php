@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\SimpleServices;
+namespace Cspray\AnnotatedContainer\DummyApps\SimpleServices;
 
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooImplementation implements FooInterface {

@@ -2,10 +2,10 @@
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-$compiler = new \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler();
+$compiler = new \Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler();
 $injectorDefinition = $compiler->compileDirectory('dev', __DIR__ . '/src');
-$injector = (new Cspray\AnnotatedInjector\AurynInjectorFactory)->createContainer($injectorDefinition);
+$injector = (new Cspray\AnnotatedContainer\AurynInjectorFactory)->createContainer($injectorDefinition);
 
-$subject = $injector->make(\Acme\AnnotatedInjectorDemo\MixedDefinesConstructorInjection::class);
+$subject = $injector->make(\Acme\AnnotatedContainerDemo\MixedDefinesConstructorInjection::class);
 
 var_dump($subject);

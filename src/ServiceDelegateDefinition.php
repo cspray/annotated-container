@@ -1,6 +1,6 @@
 <?php
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
 final class ServiceDelegateDefinition {
 

@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\Internal\Visitor;
+namespace Cspray\AnnotatedContainer\Internal\Visitor;
 
-use Cspray\AnnotatedInjector\Attribute\UseScalar;
-use Cspray\AnnotatedInjector\Attribute\UseScalarFromEnv;
-use Cspray\AnnotatedInjector\UseScalarDefinition;
+use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\UseScalarFromEnv;
+use Cspray\AnnotatedContainer\UseScalarDefinition;
 use PhpParser\Node;
 use PhpParser\NodeVisitor;
 use PhpParser\Node\Param;

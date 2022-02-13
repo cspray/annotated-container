@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
 
-namespace Cspray\AnnotatedInjector\DummyApps\MultipleAliasResolution;
+namespace Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
 
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class BazImplementation implements FooInterface {

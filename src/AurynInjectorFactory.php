@@ -1,29 +1,34 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
 use Auryn\Injector;
+use Psr\Container\ContainerInterface;
 
 /**
- * Wires together an Injector from an InjectorDefinition or a JSON serialization of an InjectorDefinition.
+ * Wires together an Injector from an ContainerDefinition or a JSON serialization of an ContainerDefinition.
  *
- * @package Cspray\AnnotatedInjector
+ * @package Cspray\AnnotatedContainer
  */
-final class AurynInjectorFactory implements InjectorFactory {
+final class AurynInjectorFactory implements ContainerFactory {
 
-    public function createContainer(InjectorDefinition $injectorDefinition) : Injector {
+    public function createContainer(ContainerDefinition $containerDefinition) : ContainerInterface {
+        throw new \RuntimeException('Not Yet Implemented. This method will be implemented in a future commit.');
+    }
+
+    public function createInjector(ContainerDefinition $containerDefinition) : Injector {
         $injector = new Injector();
-        $servicePrepareDefinitions = $injectorDefinition->getServicePrepareDefinitions();
-        $useServiceDefinitions = $injectorDefinition->getUseServiceDefinitions();
-        $useScalarDefinitions = $injectorDefinition->getUseScalarDefinitions();
-        $serviceDelegateDefinitions = $injectorDefinition->getServiceDelegateDefinitions();
+        $servicePrepareDefinitions = $containerDefinition->getServicePrepareDefinitions();
+        $useServiceDefinitions = $containerDefinition->getUseServiceDefinitions();
+        $useScalarDefinitions = $containerDefinition->getUseScalarDefinitions();
+        $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
 
-        foreach ($injectorDefinition->getSharedServiceDefinitions() as $serviceDefinition) {
+        foreach ($containerDefinition->getSharedServiceDefinitions() as $serviceDefinition) {
             $injector->share($serviceDefinition->getType());
         }
 
         $aliasedTypes = [];
-        $aliasDefinitions = $injectorDefinition->getAliasDefinitions();
+        $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
             if (!in_array($aliasDefinition->getOriginalServiceDefinition(), $aliasedTypes)) {
                 // We are intentionally taking the stance that if there are more than 1 alias possible that it is up

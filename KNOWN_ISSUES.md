@@ -15,8 +15,8 @@ a type that's not valid for the parameter it is annotating. Take the following e
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\UseScalar;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class Foo {
@@ -51,9 +51,9 @@ There are currently multiple ways to define a scalar value on a param; with eith
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\UseScalar;
-use Cspray\AnnotatedInjector\Attribute\UseScalarFromEnv;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\UseScalarFromEnv;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class Foo {
@@ -86,8 +86,8 @@ Take the following example:
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\UseScalar;
-use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
+use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 
 class Foo {
 

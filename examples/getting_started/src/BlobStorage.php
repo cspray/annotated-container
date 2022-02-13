@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Acme\AnnotatedInjectorDemo;
+namespace Acme\AnnotatedContainerDemo;
 
-use Cspray\AnnotatedInjector\Attribute\Service;
-use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 
 #[Service]
 interface BlobStorage {

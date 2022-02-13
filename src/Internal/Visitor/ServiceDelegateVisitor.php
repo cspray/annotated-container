@@ -1,9 +1,9 @@
 <?php
 
-namespace Cspray\AnnotatedInjector\Internal\Visitor;
+namespace Cspray\AnnotatedContainer\Internal\Visitor;
 
-use Cspray\AnnotatedInjector\Attribute\ServiceDelegate;
-use Cspray\AnnotatedInjector\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\ClassMethod;
 

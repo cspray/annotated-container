@@ -1,50 +1,50 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
 use Auryn\InjectionException;
-use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate\ServiceInterface;
-use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
-use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
-use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServicePrepare;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\MultipleUseScalars;
-use Cspray\AnnotatedInjector\DummyApps\ConstantUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseScalarFromEnv;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseService;
-use Cspray\AnnotatedInjector\DummyApps\MultipleAliasResolution;
+use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceInterface;
+use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
+use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
+use Cspray\AnnotatedContainer\DummyApps\InjectorExecuteServicePrepare;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\MultipleUseScalars;
+use Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
+use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Cspray\AnnotatedInjector\AurynInjectorFactory
- * @covers \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\UseScalarDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\UseScalarDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\ServiceDefinition
- * @covers \Cspray\AnnotatedInjector\AliasDefinition
- * @covers \Cspray\AnnotatedInjector\ServicePrepareDefinition
- * @covers \Cspray\AnnotatedInjector\UseScalarDefinition
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\AbstractNodeVisitor
+ * @covers \Cspray\AnnotatedContainer\AurynInjectorFactory
+ * @covers \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\UseScalarDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\ServiceDefinition
+ * @covers \Cspray\AnnotatedContainer\AliasDefinition
+ * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinition
+ * @covers \Cspray\AnnotatedContainer\UseScalarDefinition
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor
  */
-class AnnotatedInjectorFactoryTest extends TestCase {
+class AurynInjectorFactoryTest extends TestCase {
 
     public function testCreateSimpleServices() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleServices');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
         $subject = $injector->make(SimpleServices\FooInterface::class);
 
         $this->assertInstanceOf(SimpleServices\FooImplementation::class, $subject);
     }
 
     public function testInterfaceServicePrepare() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/InterfaceServicePrepare');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $subject = $injector->make(InterfaceServicePrepare\FooInterface::class);
 
@@ -53,9 +53,9 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testServicePrepareInvokedOnInjector() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/InjectorExecuteServicePrepare');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $subject = $injector->make(InjectorExecuteServicePrepare\FooInterface::class);
 
@@ -64,9 +64,9 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testSimpleUseScalar() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleUseScalar');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $subject = $injector->make(SimpleUseScalar\FooImplementation::class);
 
@@ -77,9 +77,9 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testMultipleUseScalars() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/MultipleUseScalars');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $subject = $injector->make(MultipleUseScalars\FooImplementation::class);
 
@@ -90,9 +90,9 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     public function testConstantUseScalar() {
         // we need to make sure this file is loaded so that our constant is defined
         require_once __DIR__ . '/DummyApps/ConstantUseScalar/FooImplementation.php';
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/ConstantUseScalar');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $subject = $injector->make(ConstantUseScalar\FooImplementation::class);
 
@@ -100,9 +100,9 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testSimpleUseScalarFromEnv() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleUseScalarFromEnv');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $subject = $injector->make(SimpleUseScalarFromEnv\FooImplementation::class);
 
@@ -110,9 +110,9 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testSimpleUseServiceSetterInjection() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleUseService');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $subject = $injector->make(SimpleUseService\SetterInjection::class);
 
@@ -122,9 +122,9 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testSimpleUseServiceConstructorInjection() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleUseService');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $subject = $injector->make(SimpleUseService\ConstructorInjection::class);
 
@@ -134,18 +134,18 @@ class AnnotatedInjectorFactoryTest extends TestCase {
     }
 
     public function testMultipleAliasResolutionNoMakeDefine() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/MultipleAliasResolution');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $this->expectException(InjectionException::class);
         $injector->make(MultipleAliasResolution\FooInterface::class);
     }
 
     public function testServiceDelegate() {
-        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/ServiceDelegate');
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
         $service = $injector->make(ServiceInterface::class);
 

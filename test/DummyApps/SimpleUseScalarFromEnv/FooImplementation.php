@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\SimpleUseScalarFromEnv;
+namespace Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
 
-use Cspray\AnnotatedInjector\Attribute\UseScalarFromEnv;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseScalarFromEnv;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooImplementation {

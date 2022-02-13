@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Acme\AnnotatedInjectorDemo;
-
-use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
+namespace Acme\AnnotatedContainerDemo;
 
 abstract class AbstractBlobStorage implements BlobStorage {
 

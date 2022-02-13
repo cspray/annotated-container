@@ -1,8 +1,8 @@
 <?php
 
-namespace Cspray\AnnotatedInjector\DummyApps\ServiceDelegate;
+namespace Cspray\AnnotatedContainer\DummyApps\ServiceDelegate;
 
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooService {

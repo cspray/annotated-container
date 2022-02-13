@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
 /**
  * Defines the ServiceDefinition that should be used to generate aliases on the wired Injector.
  *
- * @package Cspray\AnnotatedInjector
+ * @package Cspray\AnnotatedContainer
  */
 final class AliasDefinition {
 

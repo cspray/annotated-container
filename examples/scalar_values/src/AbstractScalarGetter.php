@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 
-namespace Acme\AnnotatedInjectorDemo;
+namespace Acme\AnnotatedContainerDemo;
 
 abstract class AbstractScalarGetter implements ScalarGetter {
 
