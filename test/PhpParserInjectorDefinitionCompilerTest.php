@@ -26,7 +26,7 @@ use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler
+ * @covers \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor
@@ -41,13 +41,13 @@ use PHPUnit\Framework\TestCase;
  */
 class PhpParserInjectorDefinitionCompilerTest extends TestCase {
 
-    private PhpParserInjectorDefinitionCompiler $subject;
+    private PhpParserContainerDefinitionCompiler $subject;
 
     public function setUp() : void {
-        $this->subject = new PhpParserInjectorDefinitionCompiler();
+        $this->subject = new PhpParserContainerDefinitionCompiler();
     }
 
-    private function runCompileDirectory(string|array $dir, string $environment = 'test') : InjectorDefinition {
+    private function runCompileDirectory(string|array $dir, string $environment = 'test') : ContainerDefinition {
         return $this->subject->compileDirectory($environment, $dir);
     }
 

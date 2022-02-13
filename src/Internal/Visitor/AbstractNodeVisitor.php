@@ -30,7 +30,7 @@ abstract class AbstractNodeVisitor extends NodeVisitorAbstract implements NodeVi
                     // encapsulated in the constant values which could also cause failures as unexpected values are encountered
                     // in different environments. If environment values are encapsulated in constants not deferring could also
                     // pose a potential security risk as those potentially sensitive values would be stored in plaintext in the
-                    // serialization of the InjectorDefinition
+                    // serialization of the ContainerDefinition
                     return "!const(${type}::${const})";
                 }
             } else if ($expr instanceof Node\Expr\ConstFetch) {

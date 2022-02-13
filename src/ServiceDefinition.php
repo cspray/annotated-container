@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer;
 /**
  * Defines a Service, a class or interface that should be shared or aliased on the wired Injector.
  *
- * @package Cspray\AnnotatedInjector
+ * @package Cspray\AnnotatedContainer
  */
 final class ServiceDefinition {
 

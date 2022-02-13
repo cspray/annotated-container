@@ -2,10 +2,10 @@
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-$compiler = new \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler();
+$compiler = new \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler();
 $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/src');
-$injector = (new Cspray\AnnotatedInjector\AurynInjectorFactory)->createContainer($injectorDefinition);
+$injector = (new Cspray\AnnotatedContainer\AurynInjectorFactory)->createInjector($injectorDefinition);
 
-$blobStorage = $injector->make(\Acme\AnnotatedInjectorDemo\BlobStorage::class);
+$blobStorage = $injector->make(\Acme\AnnotatedContainerDemo\BlobStorage::class);
 
 $blobStorage->store('example blob');

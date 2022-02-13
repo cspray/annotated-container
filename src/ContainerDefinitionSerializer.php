@@ -4,14 +4,14 @@ namespace Cspray\AnnotatedContainer;
 
 use JsonSerializable;
 
-class InjectorDefinitionSerializer {
+class ContainerDefinitionSerializer {
 
-    public function serialize(InjectorDefinition $injectorDefinition) : JsonSerializable {
+    public function serialize(ContainerDefinition $injectorDefinition) : JsonSerializable {
         return new class($injectorDefinition) implements JsonSerializable {
 
-            private InjectorDefinition $injectorDefinition;
+            private ContainerDefinition $injectorDefinition;
 
-            public function __construct(InjectorDefinition $injectorDefinition) {
+            public function __construct(ContainerDefinition $injectorDefinition) {
                 $this->injectorDefinition = $injectorDefinition;
             }
 
@@ -115,7 +115,7 @@ class InjectorDefinitionSerializer {
         };
     }
 
-    public function deserialize(string $json) : InjectorDefinition {
+    public function deserialize(string $json) : ContainerDefinition {
         $data = json_decode($json, true);
 
         $serviceDefinitions = [];
@@ -182,7 +182,7 @@ class InjectorDefinitionSerializer {
             );
         }
 
-        return new class($sharedServiceDefinitions, $aliasDefinitions, $servicePrepareDefinitions, $useScalarDefinitions, $useServiceDefinitions, $serviceDelegateDefinitions) implements InjectorDefinition {
+        return new class($sharedServiceDefinitions, $aliasDefinitions, $servicePrepareDefinitions, $useScalarDefinitions, $useServiceDefinitions, $serviceDelegateDefinitions) implements ContainerDefinition {
 
             public function __construct(
                 private array $sharedServiceDefinitions,

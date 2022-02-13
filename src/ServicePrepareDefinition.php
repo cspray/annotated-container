@@ -6,7 +6,7 @@ namespace Cspray\AnnotatedContainer;
 /**
  * Defines a method that should be invoked when the given type has been created by the Injector.
  *
- * @package Cspray\AnnotatedInjector
+ * @package Cspray\AnnotatedContainer
  */
 final class ServicePrepareDefinition {
 

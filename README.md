@@ -1,6 +1,6 @@
-# Annotated Injector
+# AnnotatedContainer
 
-[![Unit Tests](https://github.com/cspray/annotated-injector/actions/workflows/php.yml/badge.svg)](https://github.com/cspray/annotated-injector/actions/workflows/php.yml)
+[![Unit Tests](https://github.com/cspray/annotated-container/actions/workflows/php.yml/badge.svg)](https://github.com/cspray/annotated-container/actions/workflows/php.yml)
 
 A PHP8 library that will wire an [Auryn Injector](https://github.com/rdlowrey/auryn) based off of objects annotated with 
 [Attributes](https://www.php.net/manual/en/language.attributes.php). Aims to provide functionality that enables 
@@ -17,7 +17,7 @@ behavior. When logical problems become known that we are planning on fixing, we'
 ## Installation
 
 ```
-composer require cspray/annotated-injector
+composer require cspray/annotated-container
 ```
 
 ## Getting Started
@@ -32,7 +32,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 // interfaces and classes in __DIR__ . '/src'
 
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 interface Foo {}
@@ -42,8 +42,8 @@ class FooImplementation {}
 
 // app bootstrap in __DIR__ . '/app.php'
 
-use Cspray\AnnotatedInjector\AurynInjectorFactory;
-use Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler;
+use Cspray\AnnotatedContainer\AurynInjectorFactory;
+use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
 
 $compiler = new PhpParserInjectorDefinitionCompiler();
 $injectorDefinition = $compiler->compileDirectory('env_identifier', __DIR__ . '/src');
@@ -91,7 +91,7 @@ satisfy a shared interface. Let's take a look at a naive example:
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 interface Foo {}
@@ -137,7 +137,7 @@ we want to use for each environment. Let's take a look at our example again and 
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 interface Foo {}
@@ -180,8 +180,8 @@ at our example but resolve the problem with `FooConsumer` for this specific para
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\UseService;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseService;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 interface Foo {}
@@ -225,7 +225,7 @@ communicates with an HTTP API and has to provide credentials. Let's take a look 
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooWebClient {
@@ -253,8 +253,8 @@ Attribute on the parameter with the desired value. Our previous example, properl
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\UseScalar;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooWebClient {
@@ -290,8 +290,8 @@ Let's take our previous example and improve it by reading in our client id and s
 ```php
 <?php
 
-use Cspray\AnnotatedInjector\Attribute\UseScalarFromEnv;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseScalarFromEnv;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooWebClient {
@@ -352,8 +352,8 @@ The `ServicePrepare` Attribute helps solve the problem with setter injection by 
 object instantiation. Let's take a look at an example.
 
 ```php
-use Cspray\AnnotatedInjector\Attribute\Service;
-use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 
 #[Service]
 class Foo implements Psr\Log\LoggerAwareInterface {
@@ -385,8 +385,8 @@ a factory method. Annotate any class method with `#[ServiceDelegate()]` and pass
 ```php
 <?php
 
-use \Cspray\AnnotatedInjector\Attribute\Service;
-use \Cspray\AnnotatedInjector\Attribute\ServiceDelegate;
+use \Cspray\AnnotatedContainer\Attribute\Service;
+use \Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 
 #[Service]
 interface ServiceInterface {}
@@ -410,7 +410,7 @@ as long as they can be properly instantiated by the injector!
 ## Attributes Overview
 
 The following Attributes are made available through this library. All Attributes listed are under the namespace 
-`Cspray\AnnotatedInjector\Attribute`. 
+`Cspray\AnnotatedContainer\Attribute`. 
 
 |Attribute Name | Target | Description|Implemented|
 --- | --- | --- | ---

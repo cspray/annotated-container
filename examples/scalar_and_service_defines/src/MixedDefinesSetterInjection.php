@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Acme\AnnotatedInjectorDemo;
+namespace Acme\AnnotatedContainerDemo;
 
-use Cspray\AnnotatedInjector\Attribute\UseScalar;
-use Cspray\AnnotatedInjector\Attribute\UseService;
-use Cspray\AnnotatedInjector\Attribute\Service;
-use Cspray\AnnotatedInjector\Attribute\ServicePrepare;
+use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\UseService;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 
 #[Service]
 class MixedDefinesSetterInjection {
