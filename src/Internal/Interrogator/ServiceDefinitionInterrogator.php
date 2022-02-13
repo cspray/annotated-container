@@ -30,9 +30,7 @@ final class ServiceDefinitionInterrogator {
 
     public function gatherSharedServices() : Generator {
         foreach ($this->serviceDefinitions as $serviceDefinition) {
-            if ($serviceDefinition->isInterface() || $serviceDefinition->isAbstract()) {
-                yield $serviceDefinition;
-            } else if (empty($serviceDefinition->getImplementedServices()) && empty($serviceDefinition->getExtendedServices())) {
+            if (empty($serviceDefinition->getEnvironments()) || in_array($this->environment, $serviceDefinition->getEnvironments())) {
                 yield $serviceDefinition;
             }
         }

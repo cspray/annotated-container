@@ -54,7 +54,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     public function testSimpleServices() {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleServices');
 
-        $this->assertServiceDefinitionsHaveTypes([SimpleServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([
+            SimpleServices\FooInterface::class,
+            SimpleServices\FooImplementation::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [SimpleServices\FooInterface::class, SimpleServices\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
@@ -67,7 +70,9 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/MultipleSimpleServices');
 
         $this->assertServiceDefinitionsHaveTypes([
+            MultipleSimpleServices\BarImplementation::class,
             MultipleSimpleServices\BarInterface::class,
+            MultipleSimpleServices\FooImplementation::class,
             MultipleSimpleServices\FooInterface::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
@@ -82,7 +87,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     public function testSimpleServicesSomeNotAnnotated() {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleServicesSomeNotAnnotated');
 
-        $this->assertServiceDefinitionsHaveTypes([SimpleServicesSomeNotAnnotated\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([
+            SimpleServicesSomeNotAnnotated\FooInterface::class,
+            SimpleServicesSomeNotAnnotated\FooImplementation::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [SimpleServicesSomeNotAnnotated\FooInterface::class, SimpleServicesSomeNotAnnotated\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
@@ -94,7 +102,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     public function testEnvironmentResolvedServicesTest() {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices');
 
-        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([
+            EnvironmentResolvedServices\FooInterface::class,
+            EnvironmentResolvedServices\TestFooImplementation::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\TestFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
@@ -106,7 +117,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     public function testEnvironmentResolvedServicesDev() {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'dev');
 
-        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([
+            EnvironmentResolvedServices\FooInterface::class,
+            EnvironmentResolvedServices\DevFooImplementation::class,
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\DevFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
@@ -118,7 +132,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     public function testEnvironmentResolvedServicesProd() {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'prod');
 
-        $this->assertServiceDefinitionsHaveTypes([EnvironmentResolvedServices\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([
+            EnvironmentResolvedServices\FooInterface::class,
+            EnvironmentResolvedServices\ProdFooImplementation::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\ProdFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
@@ -145,7 +162,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/InterfaceServicePrepare');
 
         $this->assertServiceDefinitionsHaveTypes([
-            InterfaceServicePrepare\FooInterface::class
+            InterfaceServicePrepare\FooInterface::class,
+            InterfaceServicePrepare\FooImplementation::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [InterfaceServicePrepare\FooInterface::class, InterfaceServicePrepare\FooImplementation::class]
@@ -161,7 +179,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ClassOverridesInterfaceServicePrepare');
 
         $this->assertServiceDefinitionsHaveTypes([
-            ClassOverridesInterfaceServicePrepare\FooInterface::class
+            ClassOverridesInterfaceServicePrepare\FooInterface::class,
+            ClassOverridesInterfaceServicePrepare\FooImplementation::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [ClassOverridesInterfaceServicePrepare\FooInterface::class, ClassOverridesInterfaceServicePrepare\FooImplementation::class]
@@ -177,7 +196,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ClassServicePrepareWithoutInterfaceServicePrepare');
 
         $this->assertServiceDefinitionsHaveTypes([
-            ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class
+            ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class,
+            ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [ClassServicePrepareWithoutInterfaceServicePrepare\FooInterface::class, ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class]
@@ -195,7 +215,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertServiceDefinitionsHaveTypes([
             NestedServices\BazInterface::class,
             NestedServices\BarInterface::class,
-            NestedServices\FooInterface::class
+            NestedServices\FooInterface::class,
+            NestedServices\Foo\Bar\BarImplementation::class,
+            NestedServices\Foo\Bar\Baz\BazImplementation::class,
+            NestedServices\Foo\FooImplementation::class,
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [NestedServices\FooInterface::class, NestedServices\Foo\FooImplementation::class],
@@ -210,7 +233,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     public function testAbstractSharedServices() {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/AbstractSharedServices');
 
-        $this->assertServiceDefinitionsHaveTypes([AbstractSharedServices\AbstractFoo::class], $injectorDefinition->getSharedServiceDefinitions());
+        $this->assertServiceDefinitionsHaveTypes([
+            AbstractSharedServices\AbstractFoo::class,
+            AbstractSharedServices\FooImplementation::class
+        ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [AbstractSharedServices\AbstractFoo::class, AbstractSharedServices\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
@@ -233,9 +259,9 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             SimpleUseScalar\FooImplementation::class . '::__construct(arrayParam)' => [
                 ['a', 'b', 'c'],
                 [1, 2, 3],
-                [1.0, 2.0, 3.0],
+                [1.1, 2.1, 3.1],
                 [true, false, true],
-                [['a', 'b', 'c'], [1, 2, 3], [1.0, 2.0, 3.0], [true, false, true]]
+                [['a', 'b', 'c'], [1, 2, 3], [1.1, 2.1, 3.1], [true, false, true]]
             ]
         ], $injectorDefinition->getUseScalarDefinitions());
 
@@ -347,9 +373,12 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleUseService');
 
         $this->assertServiceDefinitionsHaveTypes([
+            SimpleUseService\BarImplementation::class,
+            SimpleUseService\BazImplementation::class,
+            SimpleUseService\QuxImplementation::class,
             SimpleUseService\FooInterface::class,
             SimpleUseService\SetterInjection::class,
-            SimpleUseService\ConstructorInjection::class
+            SimpleUseService\ConstructorInjection::class,
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [SimpleUseService\FooInterface::class, SimpleUseService\BarImplementation::class],
@@ -376,7 +405,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/MultipleAliasResolution');
 
         $this->assertServiceDefinitionsHaveTypes([
-            MultipleAliasResolution\FooInterface::class
+            MultipleAliasResolution\FooInterface::class,
+            MultipleAliasResolution\BazImplementation::class,
+            MultipleAliasResolution\BarImplementation::class,
+            MultipleAliasResolution\QuxImplementation::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [MultipleAliasResolution\FooInterface::class, MultipleAliasResolution\BarImplementation::class],
@@ -407,7 +439,10 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertServiceDefinitionsHaveTypes([
             MultipleSimpleServices\BarInterface::class,
             MultipleSimpleServices\FooInterface::class,
-            SimpleServices\FooInterface::class
+            SimpleServices\FooInterface::class,
+            MultipleSimpleServices\BarImplementation::class,
+            MultipleSimpleServices\FooImplementation::class,
+            SimpleServices\FooImplementation::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
             [MultipleSimpleServices\FooInterface::class, MultipleSimpleServices\FooImplementation::class],

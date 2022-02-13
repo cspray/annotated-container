@@ -116,7 +116,107 @@ class InjectorDefinitionSerializer {
     }
 
     public function deserialize(string $json) : InjectorDefinition {
+        $data = json_decode($json, true);
 
+        $serviceDefinitions = [];
+        foreach ($data['compiledServiceDefinitions'] as $serviceHash => $compiledServiceDefinition) {
+            $serviceDefinitions[$serviceHash] = new ServiceDefinition(
+                $compiledServiceDefinition['type'],
+                [],
+                $compiledServiceDefinition['implementedServices'],
+                $compiledServiceDefinition['extendedServices'],
+                $compiledServiceDefinition['isInterface'],
+                $compiledServiceDefinition['isAbstract']
+            );
+        }
+
+        $sharedServiceDefinitions = [];
+        foreach ($data['sharedServiceDefinitions'] as $serviceHash) {
+            $sharedServiceDefinitions[] = $serviceDefinitions[$serviceHash];
+        }
+
+        $aliasDefinitions = [];
+        foreach ($data['aliasDefinitions'] as $aliasDefinition) {
+            $aliasDefinitions[] = new AliasDefinition(
+                $serviceDefinitions[$aliasDefinition['original']],
+                $serviceDefinitions[$aliasDefinition['alias']]
+            );
+        }
+
+        $servicePrepareDefinitions = [];
+        foreach ($data['servicePrepareDefinitions'] as $servicePrepareDefinition) {
+            $servicePrepareDefinitions[] = new ServicePrepareDefinition(
+                $servicePrepareDefinition['type'],
+                $servicePrepareDefinition['method']
+            );
+        }
+
+        $useScalarDefinitions = [];
+        foreach ($data['useScalarDefinitions'] as $useScalarDefinition) {
+            $useScalarDefinitions[] = new UseScalarDefinition(
+                $useScalarDefinition['type'],
+                $useScalarDefinition['method'],
+                $useScalarDefinition['paramName'],
+                $useScalarDefinition['paramType'],
+                $useScalarDefinition['value']
+            );
+        }
+
+        $useServiceDefinitions = [];
+        foreach ($data['useServiceDefinitions'] as $useServiceDefinition) {
+            $useServiceDefinitions[] = new UseServiceDefinition(
+                $useServiceDefinition['type'],
+                $useServiceDefinition['method'],
+                $useServiceDefinition['paramName'],
+                $useServiceDefinition['paramType'],
+                $useServiceDefinition['value']
+            );
+        }
+
+        $serviceDelegateDefinitions = [];
+        foreach ($data['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
+            $serviceDelegateDefinitions[] = new ServiceDelegateDefinition(
+                $serviceDelegateDefinition['delegateType'],
+                $serviceDelegateDefinition['delegateMethod'],
+                $serviceDelegateDefinition['serviceType']
+            );
+        }
+
+        return new class($sharedServiceDefinitions, $aliasDefinitions, $servicePrepareDefinitions, $useScalarDefinitions, $useServiceDefinitions, $serviceDelegateDefinitions) implements InjectorDefinition {
+
+            public function __construct(
+                private array $sharedServiceDefinitions,
+                private array $aliasDefinitions,
+                private array $servicePrepareDefinitions,
+                private array $useScalarDefinitions,
+                private array $useServiceDefinitions,
+                private array $serviceDelegateDefinitions
+            ) {}
+
+            public function getSharedServiceDefinitions(): array {
+                return $this->sharedServiceDefinitions;
+            }
+
+            public function getAliasDefinitions(): array {
+                return $this->aliasDefinitions;
+            }
+
+            public function getServicePrepareDefinitions(): array {
+                return $this->servicePrepareDefinitions;
+            }
+
+            public function getUseScalarDefinitions(): array {
+                return $this->useScalarDefinitions;
+            }
+
+            public function getUseServiceDefinitions(): array {
+                return $this->useServiceDefinitions;
+            }
+
+            public function getServiceDelegateDefinitions(): array {
+                return $this->serviceDelegateDefinitions;
+            }
+        };
     }
 
 }

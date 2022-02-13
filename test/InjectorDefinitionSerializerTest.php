@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedInjector;
 
 use Cspray\AnnotatedInjector\DummyApps\AbstractSharedServices;
+use Cspray\AnnotatedInjector\DummyApps\EnvironmentResolvedServices;
 use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
@@ -20,7 +21,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
         $this->injectorDefinitionCompiler = new PhpParserInjectorDefinitionCompiler();
     }
 
-    public function testSerializingSimpleServices() {
+    public function testSerializeSimpleServices() {
         $injectorDefinition = $this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleServices');
 
         $expected = [
@@ -44,7 +45,10 @@ class InjectorDefinitionSerializerTest extends TestCase {
                     'isAbstract' => false
                 ]
             ],
-            'sharedServiceDefinitions' => [md5(SimpleServices\FooInterface::class)],
+            'sharedServiceDefinitions' => [
+                md5(SimpleServices\FooImplementation::class),
+                md5(SimpleServices\FooInterface::class)
+            ],
             'aliasDefinitions' => [
                 [
                     'original' => md5(SimpleServices\FooInterface::class),
@@ -59,7 +63,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
 
-    public function testSerializerMultipleSimpleServices() {
+    public function testSerializeMultipleSimpleServices() {
         $injectorDefinition = $this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/MultipleSimpleServices');
 
         $expected = [
@@ -101,7 +105,12 @@ class InjectorDefinitionSerializerTest extends TestCase {
                     'isAbstract' => false
                 ]
             ],
-            'sharedServiceDefinitions' => [md5(MultipleSimpleServices\BarInterface::class), md5(MultipleSimpleServices\FooInterface::class)],
+            'sharedServiceDefinitions' => [
+                md5(MultipleSimpleServices\BarImplementation::class),
+                md5(MultipleSimpleServices\BarInterface::class),
+                md5(MultipleSimpleServices\FooImplementation::class),
+                md5(MultipleSimpleServices\FooInterface::class)
+            ],
             'aliasDefinitions' => [
                 [
                     'original' => md5(MultipleSimpleServices\BarInterface::class),
@@ -120,7 +129,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
 
-    public function testSerializerAbstractSharedServices() {
+    public function testSerializeAbstractSharedServices() {
         $injectorDefinition = $this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/AbstractSharedServices');
 
         $expected = [
@@ -144,7 +153,10 @@ class InjectorDefinitionSerializerTest extends TestCase {
                     'isAbstract' => false
                 ]
             ],
-            'sharedServiceDefinitions' => [md5(AbstractSharedServices\AbstractFoo::class)],
+            'sharedServiceDefinitions' => [
+                md5(AbstractSharedServices\AbstractFoo::class),
+                md5(AbstractSharedServices\FooImplementation::class)
+            ],
             'aliasDefinitions' => [
                 [
                     'original' => md5(AbstractSharedServices\AbstractFoo::class),
@@ -159,7 +171,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
 
-    public function testInterfaceServicePrepare() {
+    public function testSerializeInterfaceServicePrepare() {
         $injectorDefinition = $this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/InterfaceServicePrepare');
 
         $expected = [
@@ -183,7 +195,10 @@ class InjectorDefinitionSerializerTest extends TestCase {
                     'isAbstract' => false
                 ]
             ],
-            'sharedServiceDefinitions' => [md5(InterfaceServicePrepare\FooInterface::class)],
+            'sharedServiceDefinitions' => [
+                md5(InterfaceServicePrepare\FooImplementation::class),
+                md5(InterfaceServicePrepare\FooInterface::class)
+            ],
             'aliasDefinitions' => [
                 [
                     'original' => md5(InterfaceServicePrepare\FooInterface::class),
@@ -203,7 +218,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
 
-    public function testSimpleUseScalar() {
+    public function testSerializeSimpleUseScalar() {
         $injectorDefinition = $this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleUseScalar');
 
         $expected = [
@@ -258,9 +273,9 @@ class InjectorDefinitionSerializerTest extends TestCase {
                     'value' => [
                         ['a', 'b', 'c'],
                         [1, 2, 3],
-                        [1.0, 2.0, 3.0],
+                        [1.1, 2.1, 3.1],
                         [true, false, true],
-                        [['a', 'b', 'c'], [1, 2, 3], [1.0, 2.0, 3.0], [true, false, true]]
+                        [['a', 'b', 'c'], [1, 2, 3], [1.1, 2.1, 3.1], [true, false, true]]
                     ]
                 ]
             ],
@@ -270,7 +285,49 @@ class InjectorDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
 
-    public function testSimpleUseService() {
+    public function testSerializeSimpleUserScalarFromEnv() {
+        $injectorDefinition = $this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/EnvironmentResolvedServices');
+
+        $expected = [
+            'compiledServiceDefinitions' => [
+                md5(EnvironmentResolvedServices\FooInterface::class) => [
+                    'type' => EnvironmentResolvedServices\FooInterface::class,
+                    'implementedServices' => [],
+                    'extendedServices' => [],
+                    'environments' => [],
+                    'isInterface' => true,
+                    'isClass' => false,
+                    'isAbstract' => false
+                ],
+                md5(EnvironmentResolvedServices\TestFooImplementation::class) => [
+                    'type' => EnvironmentResolvedServices\TestFooImplementation::class,
+                    'implementedServices' => [md5(EnvironmentResolvedServices\FooInterface::class)],
+                    'extendedServices' => [],
+                    'environments' => ['test'],
+                    'isInterface' => false,
+                    'isClass' => true,
+                    'isAbstract' => false
+                ]
+            ],
+            'sharedServiceDefinitions' => [
+                md5(EnvironmentResolvedServices\FooInterface::class),
+                md5(EnvironmentResolvedServices\TestFooImplementation::class)
+            ],
+            'aliasDefinitions' => [
+                [
+                    'original' => md5(EnvironmentResolvedServices\FooInterface::class),
+                    'alias' => md5(EnvironmentResolvedServices\TestFooImplementation::class)
+                ]
+            ],
+            'servicePrepareDefinitions' => [],
+            'useScalarDefinitions' => [],
+            'useServiceDefinitions' => [],
+            'serviceDelegateDefinitions' => []
+        ];
+        $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
+    }
+
+    public function testSerializeSimpleUseService() {
         $injectorDefinition = $this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleUseService');
 
         $expected = [
@@ -331,8 +388,11 @@ class InjectorDefinitionSerializerTest extends TestCase {
                 ],
             ],
             'sharedServiceDefinitions' => [
+                md5(SimpleUseService\BarImplementation::class),
+                md5(SimpleUseService\BazImplementation::class),
                 md5(SimpleUseService\ConstructorInjection::class),
                 md5(SimpleUseService\FooInterface::class),
+                md5(SimpleUseService\QuxImplementation::class),
                 md5(SimpleUseService\SetterInjection::class)
             ],
             'aliasDefinitions' => [
@@ -414,7 +474,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expected, $actual);
     }
 
-    public function testServiceDelegate() {
+    public function testSerializeServiceDelegate() {
         $injectorDefinition = $this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/ServiceDelegate');
 
         $expected = [
@@ -456,4 +516,92 @@ class InjectorDefinitionSerializerTest extends TestCase {
         ];
         $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
+
+    public function testDeserializeSimpleServices() {
+        $serializer = new InjectorDefinitionSerializer();
+        $json = json_encode($serializer->serialize($this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleServices')));
+        $injectorDefinition = $serializer->deserialize($json);
+
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+
+        $foo1 = $injector->make(SimpleServices\FooInterface::class);
+
+        $this->assertInstanceOf(SimpleServices\FooImplementation::class, $foo1);
+
+        $foo2 = $injector->make(SimpleServices\FooInterface::class);
+
+        $this->assertSame($foo1, $foo2);
+    }
+
+    public function testDeserializeInterfaceServicePrepare() {
+        $serializer = new InjectorDefinitionSerializer();
+        $json = json_encode($serializer->serialize($this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/InterfaceServicePrepare')));
+        $injectorDefinition = $serializer->deserialize($json);
+
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+
+        $foo = $injector->make(InterfaceServicePrepare\FooInterface::class);
+
+        $this->assertInstanceOf(InterfaceServicePrepare\FooImplementation::class, $foo);
+
+        $this->assertSame(1, $foo->getBarCounter());
+    }
+
+    public function testDeserializeSimpleUseScalar() {
+        $serializer = new InjectorDefinitionSerializer();
+        $json = json_encode($serializer->serialize($this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleUseScalar')));
+        $injectorDefinition = $serializer->deserialize($json);
+
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+
+        $foo = $injector->make(SimpleUseScalar\FooImplementation::class);
+
+        $this->assertSame('string param test value', $foo->stringParam);
+        $this->assertSame(42, $foo->intParam);
+        $this->assertSame(42.0, $foo->floatParam);
+        $this->assertTrue($foo->boolParam);
+        $this->assertSame([
+            ['a', 'b', 'c'],
+            [1, 2, 3],
+            [1.1, 2.1, 3.1],
+            [true, false, true],
+            [['a', 'b', 'c'], [1, 2, 3], [1.1, 2.1, 3.1], [true, false, true]]
+        ], $foo->arrayParam);
+    }
+
+    public function testDeserializeSimpleUseService() {
+        $serializer = new InjectorDefinitionSerializer();
+        $json = json_encode($serializer->serialize($this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/SimpleUseService')));
+        $injectorDefinition = $serializer->deserialize($json);
+
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+
+        $constructorInjection = $injector->make(SimpleUseService\ConstructorInjection::class);
+
+        $this->assertSame(
+            $injector->make(SimpleUseService\BarImplementation::class),
+            $constructorInjection->bar
+        );
+        $this->assertSame(
+            $injector->make(SimpleUseService\BazImplementation::class),
+            $constructorInjection->baz
+        );
+        $this->assertSame(
+            $injector->make(SimpleUseService\QuxImplementation::class),
+            $constructorInjection->qux
+        );
+    }
+
+    public function testDeserializeServiceDelegate() {
+        $serializer = new InjectorDefinitionSerializer();
+        $json = json_encode($serializer->serialize($this->injectorDefinitionCompiler->compileDirectory('test', __DIR__ . '/DummyApps/ServiceDelegate')));
+        $injectorDefinition = $serializer->deserialize($json);
+
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+
+        $service = $injector->make(ServiceDelegate\ServiceInterface::class);
+
+        $this->assertSame('From ServiceFactory From FooService', $service->getValue());
+    }
+
 }
