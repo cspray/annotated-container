@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
 /**
  * Defines a method that should be invoked when the given type has been created by the Injector.

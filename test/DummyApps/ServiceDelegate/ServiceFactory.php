@@ -1,8 +1,8 @@
 <?php
 
-namespace Cspray\AnnotatedInjector\DummyApps\ServiceDelegate;
+namespace Cspray\AnnotatedContainer\DummyApps\ServiceDelegate;
 
-use Cspray\AnnotatedInjector\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 
 class ServiceFactory {
 

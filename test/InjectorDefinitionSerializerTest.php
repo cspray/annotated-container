@@ -1,15 +1,15 @@
 <?php
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedInjector\DummyApps\AbstractSharedServices;
-use Cspray\AnnotatedInjector\DummyApps\EnvironmentResolvedServices;
-use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
-use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate;
-use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseService;
-use Cspray\AnnotatedInjector\DummyApps\MultipleSimpleServices;
+use Cspray\AnnotatedContainer\DummyApps\AbstractSharedServices;
+use Cspray\AnnotatedContainer\DummyApps\EnvironmentResolvedServices;
+use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
+use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate;
+use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
+use Cspray\AnnotatedContainer\DummyApps\MultipleSimpleServices;
 use PHPUnit\Framework\TestCase;
 
 class InjectorDefinitionSerializerTest extends TestCase {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cspray\AnnotatedInjector\Attribute;
+namespace Cspray\AnnotatedContainer\Attribute;
 
 use Attribute;
 

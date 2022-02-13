@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\NestedServices\Foo\Bar;
+namespace Cspray\AnnotatedContainer\DummyApps\NestedServices\Foo\Bar;
 
-use Cspray\AnnotatedInjector\Attribute\Service;
-use Cspray\AnnotatedInjector\DummyApps\NestedServices\BarInterface;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\DummyApps\NestedServices\BarInterface;
 
 #[Service]
 class BarImplementation implements BarInterface {

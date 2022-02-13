@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 
-namespace Cspray\AnnotatedInjector\DummyApps\SimpleServicesSomeNotAnnotated;
+namespace Cspray\AnnotatedContainer\DummyApps\SimpleServicesSomeNotAnnotated;
 
 
 class NotAnnotatedBarImplementation implements NotAnnotatedBarInterface {

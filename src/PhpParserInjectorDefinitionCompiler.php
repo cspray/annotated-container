@@ -1,17 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDelegateDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Interrogator\UseScalarDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Interrogator\UseServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator;
-use Cspray\AnnotatedInjector\Internal\Visitor\ServiceDelegateVisitor;
-use Cspray\AnnotatedInjector\Internal\Visitor\UseScalarDefinitionVisitor;
-use Cspray\AnnotatedInjector\Internal\Visitor\UseServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor;
-use Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDelegateDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\UseScalarDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\UseServiceDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDelegateVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\UseServiceDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;

@@ -1,11 +1,9 @@
 <?php declare(strict_types=1);
 
+namespace Cspray\AnnotatedContainer\Internal\Interrogator;
 
-namespace Cspray\AnnotatedInjector\Internal\Interrogator;
-
-
-use Cspray\AnnotatedInjector\AliasDefinition;
-use Cspray\AnnotatedInjector\ServiceDefinition;
+use Cspray\AnnotatedContainer\AliasDefinition;
+use Cspray\AnnotatedContainer\ServiceDefinition;
 use Generator;
 
 final class ServiceDefinitionInterrogator {

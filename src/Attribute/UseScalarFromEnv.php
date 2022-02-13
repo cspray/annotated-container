@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\Attribute;
+namespace Cspray\AnnotatedContainer\Attribute;
 
 use Attribute;
 
@@ -11,7 +11,7 @@ use Attribute;
  * It is possible to pass a scalar's plain value, {@see UseScalar}. Please also be sure to review the README's
  * documentation for environment variable resolution.
  *
- * @package Cspray\AnnotatedInjector\Attribute
+ * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class UseScalarFromEnv {

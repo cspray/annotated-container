@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\DummyApps\ClassConstantUseScalar;
+namespace Cspray\AnnotatedContainer\DummyApps\ClassConstantUseScalar;
 
-use Cspray\AnnotatedInjector\Attribute\UseScalar;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooImplementation {

@@ -1,34 +1,34 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector;
+namespace Cspray\AnnotatedContainer;
 
 use Auryn\InjectionException;
-use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate\ServiceInterface;
-use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
-use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
-use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServicePrepare;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\MultipleUseScalars;
-use Cspray\AnnotatedInjector\DummyApps\ConstantUseScalar;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseScalarFromEnv;
-use Cspray\AnnotatedInjector\DummyApps\SimpleUseService;
-use Cspray\AnnotatedInjector\DummyApps\MultipleAliasResolution;
+use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceInterface;
+use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
+use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
+use Cspray\AnnotatedContainer\DummyApps\InjectorExecuteServicePrepare;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\MultipleUseScalars;
+use Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
+use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
+use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Cspray\AnnotatedInjector\AurynInjectorFactory
- * @covers \Cspray\AnnotatedInjector\PhpParserInjectorDefinitionCompiler
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServiceDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\ServicePrepareDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\UseScalarDefinitionVisitor
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServiceDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\ServicePrepareDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\Internal\Interrogator\UseScalarDefinitionInterrogator
- * @covers \Cspray\AnnotatedInjector\ServiceDefinition
- * @covers \Cspray\AnnotatedInjector\AliasDefinition
- * @covers \Cspray\AnnotatedInjector\ServicePrepareDefinition
- * @covers \Cspray\AnnotatedInjector\UseScalarDefinition
- * @covers \Cspray\AnnotatedInjector\Internal\Visitor\AbstractNodeVisitor
+ * @covers \Cspray\AnnotatedContainer\AurynInjectorFactory
+ * @covers \Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\UseScalarDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\ServiceDefinition
+ * @covers \Cspray\AnnotatedContainer\AliasDefinition
+ * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinition
+ * @covers \Cspray\AnnotatedContainer\UseScalarDefinition
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor
  */
 class AnnotatedInjectorFactoryTest extends TestCase {
 

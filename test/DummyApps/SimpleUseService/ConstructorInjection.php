@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
 
-namespace Cspray\AnnotatedInjector\DummyApps\SimpleUseService;
+namespace Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
 
-use Cspray\AnnotatedInjector\Attribute\UseService;
-use Cspray\AnnotatedInjector\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\UseService;
+use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class ConstructorInjection {

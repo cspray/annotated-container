@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\Internal\Interrogator;
+namespace Cspray\AnnotatedContainer\Internal\Interrogator;
 
-use Cspray\AnnotatedInjector\UseServiceDefinition;
+use Cspray\AnnotatedContainer\UseServiceDefinition;
 use Generator;
 
 final class UseServiceDefinitionInterrogator {

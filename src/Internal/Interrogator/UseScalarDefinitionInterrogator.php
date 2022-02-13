@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
 
-namespace Cspray\AnnotatedInjector\Internal\Interrogator;
+namespace Cspray\AnnotatedContainer\Internal\Interrogator;
 
-use Cspray\AnnotatedInjector\UseScalarDefinition;
+use Cspray\AnnotatedContainer\UseScalarDefinition;
 use Generator;
 
 final class UseScalarDefinitionInterrogator {

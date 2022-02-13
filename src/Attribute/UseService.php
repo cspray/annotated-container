@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedInjector\Attribute;
+namespace Cspray\AnnotatedContainer\Attribute;
 
 use Attribute;
 
@@ -8,7 +8,7 @@ use Attribute;
  * Define a Service that should be used as a param to a Service constructor method or method annotated with
  * ServicePrepare.
  *
- * @package Cspray\AnnotatedInjector\Attribute
+ * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class UseService {
