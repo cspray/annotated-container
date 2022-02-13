@@ -413,7 +413,7 @@ The following Attributes are made available through this library. All Attributes
 `Cspray\AnnotatedInjector\Attribute`. 
 
 |Attribute Name | Target | Description|Implemented|
---- | --- | --- | --
+--- | --- | --- | ---
 |`Service`|`Attribute::TARGET_CLASS`|Describes an interface, abstract class, or concrete class as being a service. Will share and alias the types into the Injector based on what's annotated.|:heavy_check_mark:|
 |`ServicePrepare`|`Attribute::TARGET_METHOD`|Describes a method, on an interface or class, that should be invoked when that type is created.|:heavy_check_mark:|
 |`UseScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be the exact value passed to this Attribute.|:heavy_check_mark:|
