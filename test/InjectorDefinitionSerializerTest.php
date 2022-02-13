@@ -126,7 +126,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
             'useServiceDefinitions' => [],
             'serviceDelegateDefinitions' => []
         ];
-        $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
+        $this->assertEqualsCanonicalizing($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
 
     public function testSerializeAbstractSharedServices() {
@@ -168,7 +168,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
             'useServiceDefinitions' => [],
             'serviceDelegateDefinitions' => []
         ];
-        $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
+        $this->assertEqualsCanonicalizing($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
 
     public function testSerializeInterfaceServicePrepare() {
@@ -215,7 +215,7 @@ class InjectorDefinitionSerializerTest extends TestCase {
             'useServiceDefinitions' => [],
             'serviceDelegateDefinitions' => []
         ];
-        $this->assertEquals($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
+        $this->assertEqualsCanonicalizing($expected, (new InjectorDefinitionSerializer())->serialize($injectorDefinition)->jsonSerialize());
     }
 
     public function testSerializeSimpleUseScalar() {
