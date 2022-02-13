@@ -48,4 +48,9 @@ interface InjectorDefinition extends JsonSerializable {
      */
     public function getUseServiceDefinitions() : array;
 
+    /**
+     * @return ServiceDelegateDefinition[]
+     */
+    public function getServiceDelegateDefinitions() : array;
+
 }

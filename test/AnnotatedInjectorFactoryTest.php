@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedInjector;
 
 use Auryn\InjectionException;
+use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate\ServiceInterface;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\InjectorExecuteServicePrepare;
@@ -139,6 +140,16 @@ class AnnotatedInjectorFactoryTest extends TestCase {
 
         $this->expectException(InjectionException::class);
         $injector->make(MultipleAliasResolution\FooInterface::class);
+    }
+
+    public function testServiceDelegate() {
+        $compiler = new PhpParserInjectorDefinitionCompiler();
+        $injectorDefinition = $compiler->compileDirectory('test', __DIR__ . '/DummyApps/ServiceDelegate');
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+
+        $service = $injector->make(ServiceInterface::class);
+
+        $this->assertSame('From ServiceFactory From FooService', $service->getValue());
     }
 
 }

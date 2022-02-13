@@ -267,7 +267,8 @@ class FooWebClient {
         string $clientId,
         #[UseScalar("my-api-secret")]
         string $apiSecret
-    ) {
+    ) 
+{
         $this->clientId = $clientId;
         $this->apiSecret = $apiSecret;
     }
@@ -376,6 +377,36 @@ it with `Injector::make`! A class or interface can define as many `ServicePrepar
 if you're relying on this functionality too much it could be a code smell and that you should be relying more on 
 constructor injection.
 
+## Using a Factory
+
+Sometimes a Service needs to be constructed by a Factory. Fortunately there's a simple way to declare a class method as 
+a factory method. Annotate any class method with `#[ServiceDelegate()]` and pass the type the factory creates.
+
+```php
+<?php
+
+use \Cspray\AnnotatedInjector\Attribute\Service;
+use \Cspray\AnnotatedInjector\Attribute\ServiceDelegate;
+
+#[Service]
+interface ServiceInterface {}
+
+class ServiceFactory {
+
+    #[ServiceDelegate(ServiceInterface::class)]
+    public function create() : ServiceInterface {
+        return new class implements ServiceInterFace {};
+    }
+
+}
+
+?>
+```
+
+With this configuration anytime you declare `ServiceInterface` the `ServiceFactory::create` method will be used to create 
+the object. The factory method is executed with `Injector::execute`, meaning your factory can depend on other services 
+as long as they can be properly instantiated by the injector!
+
 ## Attributes Overview
 
 The following Attributes are made available through this library. All Attributes listed are under the namespace 
@@ -388,7 +419,7 @@ The following Attributes are made available through this library. All Attributes
 |`UseScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be the exact value passed to this Attribute.|:heavy_check_mark:|
 |`UseScalarFromEnv`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an environment variable matching this Attribute's value|:heavy_check_mark:|
 |`UseService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|:heavy_check_mark:|
-|`ServiceDelegate`|`Attribute::TARGET_METHOD`|Defines a method that will be used to generate a defined type.|:x:|
+|`ServiceDelegate`|`Attribute::TARGET_METHOD`|Defines a method that will be used to generate a defined type.|:heavy_check_mark:|
 |`UseScalarFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated parameters.|:x:|
 |`UseServiceFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated paramters.|:x:|
 
@@ -404,13 +435,13 @@ The following Attributes are made available through this library. All Attributes
 
 ### 0.2.x
 
-- Support defining scalar values from an arbitrary source ... :x:
-- Support the concept of a Service factory ... :x:
+- Support the concept of a Service factory ... :heavy_check_mark:
 - Support serializing and caching InjectorDefinition ... :x:
 - Improve handling of low-hanging fruit logical errors... :x:
 
 ### 0.3.x
 
+- Support defining scalar values from an arbitrary source ... :x:
 - Improve handling of logical errors... :x:
 - Harden library for production use ... :x:
 

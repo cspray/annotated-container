@@ -14,8 +14,9 @@ final class AurynInjectorFactory implements InjectorFactory {
     public function createContainer(InjectorDefinition $injectorDefinition) : Injector {
         $injector = new Injector();
         $servicePrepareDefinitions = $injectorDefinition->getServicePrepareDefinitions();
-        $UseServiceDefinitions = $injectorDefinition->getUseServiceDefinitions();
-        $UseScalarDefinitions = $injectorDefinition->getUseScalarDefinitions();
+        $useServiceDefinitions = $injectorDefinition->getUseServiceDefinitions();
+        $useScalarDefinitions = $injectorDefinition->getUseScalarDefinitions();
+        $serviceDelegateDefinitions = $injectorDefinition->getServiceDelegateDefinitions();
 
         foreach ($injectorDefinition->getSharedServiceDefinitions() as $serviceDefinition) {
             $injector->share($serviceDefinition->getType());
@@ -43,11 +44,11 @@ final class AurynInjectorFactory implements InjectorFactory {
         $preparedTypes = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             if (!in_array($servicePrepareDefinition->getType(), $preparedTypes)) {
-                $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $UseScalarDefinitions, $UseServiceDefinitions) {
+                $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $useScalarDefinitions, $useServiceDefinitions) {
                     $methods = self::mapTypesServicePrepares($servicePrepareDefinition->getType(), $servicePrepareDefinitions);
                     foreach ($methods as $method) {
-                        $scalarArgs = self::mapTypesScalarArgs($servicePrepareDefinition->getType(), $method, $UseScalarDefinitions);
-                        $serviceArgs = self::mapTypesServiceArgs($servicePrepareDefinition->getType(), $method, $UseServiceDefinitions);
+                        $scalarArgs = self::mapTypesScalarArgs($servicePrepareDefinition->getType(), $method, $useScalarDefinitions);
+                        $serviceArgs = self::mapTypesServiceArgs($servicePrepareDefinition->getType(), $method, $useServiceDefinitions);
                         $injector->execute([$object, $method], array_merge([], $scalarArgs, $serviceArgs));
                     }
                 });
@@ -56,18 +57,16 @@ final class AurynInjectorFactory implements InjectorFactory {
         }
 
         $typeArgsMap = [];
-        /** @var UseScalarDefinition $UseScalarDefinition */
-        foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            $type = $UseScalarDefinition->getType();
+        foreach ($useScalarDefinitions as $useScalarDefinition) {
+            $type = $useScalarDefinition->getType();
             if (!isset($typeArgsMap[$type])) {
-                $typeArgsMap[$type] = self::mapTypesScalarArgs($type, '__construct', $UseScalarDefinitions);
+                $typeArgsMap[$type] = self::mapTypesScalarArgs($type, '__construct', $useScalarDefinitions);
             }
         }
 
-        /** @var UseServiceDefinition $UseServiceDefinition */
-        foreach ($UseServiceDefinitions as $UseServiceDefinition) {
-            $type = $UseServiceDefinition->getType();
-            $defineArgs = self::mapTypesServiceArgs($type, '__construct', $UseServiceDefinitions);
+        foreach ($useServiceDefinitions as $useServiceDefinition) {
+            $type = $useServiceDefinition->getType();
+            $defineArgs = self::mapTypesServiceArgs($type, '__construct', $useServiceDefinitions);
             if (isset($typeArgsMap[$type])) {
                 $typeArgsMap[$type] = array_merge($typeArgsMap[$type], $defineArgs);
             } else {
@@ -77,6 +76,13 @@ final class AurynInjectorFactory implements InjectorFactory {
 
         foreach ($typeArgsMap as $type => $args) {
             $injector->define($type, $args);
+        }
+
+        foreach ($serviceDelegateDefinitions as $serviceDelegateDefinition) {
+            $injector->delegate(
+                $serviceDelegateDefinition->getServiceType(),
+                [$serviceDelegateDefinition->getDelegateType(), $serviceDelegateDefinition->getDelegateMethod()]
+            );
         }
 
         return $injector;
