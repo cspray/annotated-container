@@ -248,7 +248,6 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             SimpleUseScalar\FooImplementation::class . '::__construct'
         ], $injectorDefinition->getUseScalarDefinitions());
 
-        $this->assertUseScalarAllPlainValue($injectorDefinition->getUseScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
     }
 
@@ -268,7 +267,6 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             NegativeNumberUseScalar\FooImplementation::class . '::__construct',
             NegativeNumberUseScalar\FooImplementation::class . '::__construct'
         ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertUseScalarAllPlainValue($injectorDefinition->getUseScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
     }
 
@@ -290,7 +288,6 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             MultipleUseScalars\FooImplementation::class . '::__construct',
             MultipleUseScalars\FooImplementation::class . '::setUp'
         ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertUseScalarAllPlainValue($injectorDefinition->getUseScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
     }
 
@@ -308,7 +305,6 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             // all of our parameters are in the same method so we'd expect to see this 2 times
             ClassConstantUseScalar\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertUseScalarAllPlainValue($injectorDefinition->getUseScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
     }
 
@@ -327,7 +323,6 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             // all of our parameters are in the same method so we'd expect to see this 2 times
             ConstantUseScalar\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertUseScalarAllPlainValue($injectorDefinition->getUseScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
     }
 
@@ -345,7 +340,6 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             // all of our parameters are in the same method so we'd expect to see this 2 times
             SimpleUseScalarFromEnv\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertUseScalarAllEnvironment($injectorDefinition->getUseScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
     }
 
@@ -542,29 +536,5 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         }
 
         $this->assertEqualsCanonicalizing($expectedMethods, $actualMethods);
-    }
-
-    protected function assertUseScalarAllPlainValue(array $UseScalarDefinitions) : void {
-        $hasNotPlainValue = false;
-        foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            if (!$UseScalarDefinition->isPlainValue()) {
-                $hasNotPlainValue = true;
-                break;
-            }
-        }
-
-        $this->assertFalse($hasNotPlainValue, 'Expected all UseScalarDefinitions to be plain values');
-    }
-
-    protected function assertUseScalarAllEnvironment(array $UseScalarDefinitions) : void {
-        $hasNotEnv = false;
-        foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            if (!$UseScalarDefinition->isEnvironmentVar()) {
-                $hasNotEnv = true;
-                break;
-            }
-        }
-
-        $this->assertFalse($hasNotEnv, 'Expected all UseScalarDefinitions to be environment variables');
     }
 }

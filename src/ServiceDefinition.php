@@ -34,6 +34,9 @@ final class ServiceDefinition {
         return $this->implementedServices;
     }
 
+    /**
+     * @return ServiceDefinition[]
+     */
     public function getExtendedServices() : array {
         return $this->extendedServices;
     }

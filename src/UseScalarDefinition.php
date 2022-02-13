@@ -9,9 +9,7 @@ final class UseScalarDefinition {
         private string $method,
         private string $param,
         private string $paramType,
-        private string|int|float|bool|array $value,
-        private bool $isPlainValue,
-        private bool $isEnvironmentVar
+        private string|int|float|bool|array $value
     ) {}
 
     public function getType() : string {
@@ -32,14 +30,6 @@ final class UseScalarDefinition {
 
     public function getValue() : string|int|float|bool|array {
         return $this->value;
-    }
-
-    public function isPlainValue() : bool {
-        return $this->isPlainValue;
-    }
-
-    public function isEnvironmentVar() : bool {
-        return $this->isEnvironmentVar;
     }
 
 }
