@@ -8,6 +8,8 @@ use Cspray\AnnotatedInjector\DummyApps\ClassOverridesInterfaceServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\ClassServicePrepareWithoutInterfaceServicePrepare;
 use Cspray\AnnotatedInjector\DummyApps\EnvironmentResolvedServices;
 use Cspray\AnnotatedInjector\DummyApps\InterfaceServicePrepare;
+use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate\ServiceFactory;
+use Cspray\AnnotatedInjector\DummyApps\ServiceDelegate\ServiceInterface;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\MultipleSimpleServices;
 use Cspray\AnnotatedInjector\DummyApps\SimpleServicesSomeNotAnnotated;
@@ -421,6 +423,18 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+    }
+
+    public function testServiceDelegate() {
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ServiceDelegate');
+        $serviceDelegateDefinitions = $injectorDefinition->getServiceDelegateDefinitions();
+
+        $this->assertCount(1, $serviceDelegateDefinitions);
+        $serviceDelegateDefinition = $serviceDelegateDefinitions[0];
+
+        $this->assertSame(ServiceFactory::class, $serviceDelegateDefinition->getDelegateType());
+        $this->assertSame('createService', $serviceDelegateDefinition->getDelegateMethod());
+        $this->assertSame(ServiceInterface::class, $serviceDelegateDefinition->getServiceType());
     }
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
