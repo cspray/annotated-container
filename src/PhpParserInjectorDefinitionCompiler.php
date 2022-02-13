@@ -157,9 +157,7 @@ final class PhpParserInjectorDefinitionCompiler implements InjectorDefinitionCom
                 $rawUseScalarDefinition['method'],
                 $rawUseScalarDefinition['param'],
                 $rawUseScalarDefinition['paramType'],
-                $rawUseScalarDefinition['value'],
-                $rawUseScalarDefinition['isPlainValue'],
-                $rawUseScalarDefinition['isEnvironmentVar']
+                $rawUseScalarDefinition['value']
             );
         }
         return $marshaledDefinitions;
@@ -294,10 +292,6 @@ final class PhpParserInjectorDefinitionCompiler implements InjectorDefinitionCom
 
             public function getServiceDelegateDefinitions(): array {
                 return $this->serviceDelegateDefinitions;
-            }
-
-            public function jsonSerialize() {
-                return [];
             }
         };
     }

@@ -8,7 +8,7 @@ use JsonSerializable;
  * Interface InjectorDefinition
  * @package Cspray\AnnotatedInjector
  */
-interface InjectorDefinition extends JsonSerializable {
+interface InjectorDefinition {
 
     /**
      * Returns a set of ServiceDefinition that are shared with the Injector.

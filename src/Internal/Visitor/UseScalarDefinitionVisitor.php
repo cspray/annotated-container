@@ -15,21 +15,21 @@ final class UseScalarDefinitionVisitor extends AbstractNodeVisitor implements No
 
     public function enterNode(Node $node) {
         if ($node instanceof Param) {
-            $UseScalarAttribute = $this->findAttribute(UseScalar::class, ...$node->attrGroups);
-            $UseScalarEnvAttribute = $this->findAttribute(UseScalarFromEnv::class, ...$node->attrGroups);
-            if (isset($UseScalarAttribute) || $UseScalarEnvAttribute) {
+            $useScalarAttribute = $this->findAttribute(UseScalar::class, ...$node->attrGroups);
+            $useScalarEnvAttribute = $this->findAttribute(UseScalarFromEnv::class, ...$node->attrGroups);
+            if (isset($useScalarAttribute) || $useScalarEnvAttribute) {
                 // These calls are intentionally not chained together for future work that will do more checks on the
                 // method and class that this attribute is defined on
                 $methodNode = $node->getAttribute('parent');
                 $classNode = $methodNode->getAttribute('parent');
-                if (isset($UseScalarAttribute)) {
-                    $valueArg = $UseScalarAttribute->args[0];
+                if (isset($useScalarAttribute)) {
+                    $valueArg = $useScalarAttribute->args[0];
                 } else {
-                    $valueArg = $UseScalarEnvAttribute->args[0];
+                    $valueArg = $useScalarEnvAttribute->args[0];
                 }
 
                 $value = $this->getAttributeArgumentValue($valueArg);
-                if (isset($UseScalarEnvAttribute)) {
+                if (isset($useScalarEnvAttribute)) {
                     $value = "!env($value)";
                 }
 
@@ -39,9 +39,7 @@ final class UseScalarDefinitionVisitor extends AbstractNodeVisitor implements No
                     'method' => $methodNode->name->toString(),
                     'param' => $node->var->name,
                     'paramType' => $node->type->name,
-                    'value' => $value,
-                    'isPlainValue' => isset($UseScalarAttribute),
-                    'isEnvironmentVar' => isset($UseScalarEnvAttribute)
+                    'value' => $value
                 ];
             }
         }
