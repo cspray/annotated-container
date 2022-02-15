@@ -2,14 +2,14 @@
 
 namespace Cspray\AnnotatedContainer;
 
-final class UseServiceDefinition {
+final class InjectScalarDefinition {
 
     public function __construct(
         private string $type,
         private string $method,
         private string $param,
         private string $paramType,
-        private string $value
+        private string|int|float|bool|array $value
     ) {}
 
     public function getType() : string {
@@ -28,7 +28,7 @@ final class UseServiceDefinition {
         return $this->paramType;
     }
 
-    public function getValue() : string {
+    public function getValue() : string|int|float|bool|array {
         return $this->value;
     }
 

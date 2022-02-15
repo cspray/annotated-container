@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+
+$app = new Application('annotated-container', '0.1.0');
+
+$app->add(new \Cspray\AnnotatedContainer\Console\CompileContainerCommand(
+    new \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler(),
+    new \Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer(),
+    getcwd()
+));
+
+$app->run();

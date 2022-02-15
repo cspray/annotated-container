@@ -20,14 +20,14 @@ use PHPUnit\Framework\TestCase;
  * @covers \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor
- * @covers \Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\InjectScalarDefinitionVisitor
  * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator
  * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator
- * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\UseScalarDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\InjectScalarDefinitionInterrogator
  * @covers \Cspray\AnnotatedContainer\ServiceDefinition
  * @covers \Cspray\AnnotatedContainer\AliasDefinition
  * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinition
- * @covers \Cspray\AnnotatedContainer\UseScalarDefinition
+ * @covers \Cspray\AnnotatedContainer\InjectScalarDefinition
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor
  */
 class AurynInjectorFactoryTest extends TestCase {

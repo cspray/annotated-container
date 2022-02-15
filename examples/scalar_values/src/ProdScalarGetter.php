@@ -4,20 +4,20 @@
 namespace Acme\AnnotatedContainerDemo;
 
 
-use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service(environments: ['prod'])]
 class ProdScalarGetter extends AbstractScalarGetter implements ScalarGetter {
 
     public function __construct(
-        #[UseScalar('prod string')]
+        #[InjectScalar('prod string')]
         string $stringParam,
-        #[UseScalar(42)]
+        #[InjectScalar(42)]
         int $intParam,
-        #[UseScalar(6.28)]
+        #[InjectScalar(6.28)]
         float $floatParam,
-        #[UseScalar(false)]
+        #[InjectScalar(false)]
         bool $boolParam
     ) {
         parent::__construct($stringParam, $intParam, $floatParam, $boolParam);

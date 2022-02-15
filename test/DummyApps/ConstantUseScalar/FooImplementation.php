@@ -3,7 +3,7 @@
 
 namespace Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar;
 
-use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 const FOO_BAR = 'foo_bar_val';
@@ -12,7 +12,7 @@ const FOO_BAR = 'foo_bar_val';
 class FooImplementation {
 
     public function __construct(
-        #[UseScalar(FOO_BAR)]
+        #[InjectScalar(FOO_BAR)]
         public string $val
     ) {}
 

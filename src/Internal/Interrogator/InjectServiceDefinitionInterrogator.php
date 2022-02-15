@@ -2,14 +2,14 @@
 
 namespace Cspray\AnnotatedContainer\Internal\Interrogator;
 
-use Cspray\AnnotatedContainer\UseServiceDefinition;
+use Cspray\AnnotatedContainer\InjectServiceDefinition;
 use Generator;
 
-final class UseServiceDefinitionInterrogator {
+final class InjectServiceDefinitionInterrogator {
 
     private array $UseServiceDefinitions;
 
-    public function __construct(UseServiceDefinition... $UseServiceDefinitions) {
+    public function __construct(InjectServiceDefinition... $UseServiceDefinitions) {
         $this->UseServiceDefinitions = $UseServiceDefinitions;
     }
 

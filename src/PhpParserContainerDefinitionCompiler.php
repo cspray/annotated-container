@@ -3,13 +3,13 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDelegateDefinitionInterrogator;
-use Cspray\AnnotatedContainer\Internal\Interrogator\UseScalarDefinitionInterrogator;
-use Cspray\AnnotatedContainer\Internal\Interrogator\UseServiceDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\InjectScalarDefinitionInterrogator;
+use Cspray\AnnotatedContainer\Internal\Interrogator\InjectServiceDefinitionInterrogator;
 use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator;
 use Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator;
 use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDelegateVisitor;
-use Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor;
-use Cspray\AnnotatedContainer\Internal\Visitor\UseServiceDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\InjectScalarDefinitionVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\InjectServiceDefinitionVisitor;
 use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor;
 use Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor;
 use PhpParser\Node;
@@ -52,9 +52,9 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 $rawServiceDefinitions[] = $rawDefinition;
             } else if ($rawDefinition['definitionType'] === ServicePrepareDefinition::class) {
                 $rawServicePrepareDefinitions[] = $rawDefinition;
-            } else if ($rawDefinition['definitionType'] === UseScalarDefinition::class) {
+            } else if ($rawDefinition['definitionType'] === InjectScalarDefinition::class) {
                 $rawUseScalarDefinitions[] = $rawDefinition;
-            } else if ($rawDefinition['definitionType'] === UseServiceDefinition::class) {
+            } else if ($rawDefinition['definitionType'] === InjectServiceDefinition::class) {
                 $rawUseServiceDefinitions[] = $rawDefinition;
             } else if ($rawDefinition['definitionType'] === ServiceDelegateDefinition::class) {
                 $rawServiceDelegateDefinitions[] = $rawDefinition;
@@ -68,10 +68,10 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             $serviceDefinitionInterrogator,
             ...$this->marshalRawServicePrepareDefinitions($rawServicePrepareDefinitions)
         );
-        $useScalarInterrogator = new UseScalarDefinitionInterrogator(
+        $useScalarInterrogator = new InjectScalarDefinitionInterrogator(
             ...$this->marshalRawUseScalarDefinitions($rawUseScalarDefinitions)
         );
-        $useServiceInterrogator = new UseServiceDefinitionInterrogator(
+        $useServiceInterrogator = new InjectServiceDefinitionInterrogator(
             ...$this->marshalRawUseServiceDefinitions($rawUseServiceDefinitions)
         );
         $serviceDelegateInterrogator = new ServiceDelegateDefinitionInterrogator(
@@ -152,7 +152,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     private function marshalRawUseScalarDefinitions(array $rawUseScalarDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawUseScalarDefinitions as $rawUseScalarDefinition) {
-            $marshaledDefinitions[] = new UseScalarDefinition(
+            $marshaledDefinitions[] = new InjectScalarDefinition(
                 $rawUseScalarDefinition['type'],
                 $rawUseScalarDefinition['method'],
                 $rawUseScalarDefinition['param'],
@@ -166,7 +166,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     private function marshalRawUseServiceDefinitions(array $rawUseServiceDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawUseServiceDefinitions as $rawUseServiceDefinition) {
-            $marshaledDefinitions[] = new UseServiceDefinition(
+            $marshaledDefinitions[] = new InjectServiceDefinition(
                 $rawUseServiceDefinition['type'],
                 $rawUseServiceDefinition['method'],
                 $rawUseServiceDefinition['param'],
@@ -219,8 +219,8 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
 
                 $serviceDefinitionVisitor = new ServiceDefinitionVisitor();
                 $servicePrepareDefinitionVisitor = new ServicePrepareDefinitionVisitor();
-                $useScalarDefinitionVisitor = new UseScalarDefinitionVisitor();
-                $useServiceDefinitionVisitor = new UseServiceDefinitionVisitor();
+                $useScalarDefinitionVisitor = new InjectScalarDefinitionVisitor();
+                $useServiceDefinitionVisitor = new InjectServiceDefinitionVisitor();
                 $serviceDelegateDefinitionVisitor = new ServiceDelegateVisitor();
 
                 $this->nodeTraverser->addVisitor($serviceDefinitionVisitor);
@@ -246,10 +246,10 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     }
 
     private function interrogateDefinitions(
-        ServiceDefinitionInterrogator $serviceDefinitionInterrogator,
-        ServicePrepareDefinitionInterrogator $servicePrepareDefinitionInterrogator,
-        UseScalarDefinitionInterrogator $useScalarDefinitionInterrogator,
-        UseServiceDefinitionInterrogator $useServiceDefinitionInterrogator,
+        ServiceDefinitionInterrogator         $serviceDefinitionInterrogator,
+        ServicePrepareDefinitionInterrogator  $servicePrepareDefinitionInterrogator,
+        InjectScalarDefinitionInterrogator    $useScalarDefinitionInterrogator,
+        InjectServiceDefinitionInterrogator   $useServiceDefinitionInterrogator,
         ServiceDelegateDefinitionInterrogator $serviceDelegateDefinitionInterrogator
     ) : ContainerDefinition {
         $services = iterator_to_array($serviceDefinitionInterrogator->gatherSharedServices());

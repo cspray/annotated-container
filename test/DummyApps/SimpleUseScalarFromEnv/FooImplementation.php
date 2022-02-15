@@ -2,14 +2,14 @@
 
 namespace Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
 
-use Cspray\AnnotatedContainer\Attribute\UseScalarFromEnv;
+use Cspray\AnnotatedContainer\Attribute\InjectEnv;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooImplementation {
 
     public function __construct(
-        #[UseScalarFromEnv('USER')]
+        #[InjectEnv('USER')]
         public string $user
     ) {}
 
