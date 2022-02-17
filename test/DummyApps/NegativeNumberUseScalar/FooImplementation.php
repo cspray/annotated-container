@@ -2,16 +2,16 @@
 
 namespace Cspray\AnnotatedContainer\DummyApps\NegativeNumberUseScalar;
 
-use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooImplementation {
 
     public function __construct(
-        #[UseScalar(-1)]
+        #[InjectScalar(-1)]
         public int $intParam,
-        #[UseScalar(-42.0)]
+        #[InjectScalar(-42.0)]
         public float $floatParam
     ) {}
 

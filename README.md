@@ -180,7 +180,7 @@ at our example but resolve the problem with `FooConsumer` for this specific para
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Attribute\UseService;
+use Cspray\AnnotatedContainer\Attribute\InjectService;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
@@ -201,7 +201,7 @@ class FooConsumer {
     private Foo $foo;
 
     public function __construct(
-        #[UseService(Qux::class)]
+        #[InjectService(Qux::class)]
         Foo $foo
     ) {
         $this->foo = $foo;
@@ -253,7 +253,7 @@ Attribute on the parameter with the desired value. Our previous example, properl
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
@@ -263,9 +263,9 @@ class FooWebClient {
     private string $apiSecret;
 
     public function __construct(
-        #[UseScalar("my-client-id")]
+        #[InjectScalar("my-client-id")]
         string $clientId,
-        #[UseScalar("my-api-secret")]
+        #[InjectScalar("my-api-secret")]
         string $apiSecret
     ) 
 {
@@ -290,7 +290,7 @@ Let's take our previous example and improve it by reading in our client id and s
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Attribute\UseScalarFromEnv;
+use Cspray\AnnotatedContainer\Attribute\InjectEnv;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
@@ -300,9 +300,9 @@ class FooWebClient {
     private string $apiSecret;
 
     public function __construct(
-        #[UseScalarFromEnv('MY_CLIENT_ID')]
+        #[InjectEnv('MY_CLIENT_ID')]
         string $clientId,
-        #[UseScalarFromEnv('MY_API_SECRET')]
+        #[InjectEnv('MY_API_SECRET')]
         string $apiSecret
     ) {
         $this->clientId = $clientId;
@@ -428,7 +428,7 @@ The following Attributes are made available through this library. All Attributes
 ### 0.1.x
 
 - Compiler to parse Attributes from source directories ... :heavy_check_mark:
-- Factory to create Injector based on parsed Attributes ... :heavy_check_mark:
+- Factory to create Container based on parsed Attributes ... :heavy_check_mark:
 - Support methods invoked in Injector::prepares ... :heavy_check_mark:
 - Support defining scalar values on parameters ... :heavy_check_mark:
 - Support defining specific Service on parameters ... :heavy_check_mark:
@@ -436,18 +436,25 @@ The following Attributes are made available through this library. All Attributes
 ### 0.2.x
 
 - Support the concept of a Service factory ... :heavy_check_mark:
-- Support serializing and caching InjectorDefinition ... :x:
-- Improve handling of low-hanging fruit logical errors... :x:
+- Support a PSR ContainerInterface Factory ... :heavy_check_mark:
+- Support serializing and caching ContainerDefinition ... :x:
+- Handle when abstract Service does not have corresponding alias ... :x:
+- Handle when an abstract Service might have more than 1 alias ... :x:
+- Handle when Attributes on parameters and methods are not annotated with correct class Attributes ... :x:
 
 ### 0.3.x
 
-- Support defining scalar values from an arbitrary source ... :x:
+- Support for amphp/injector ... :x:
+- Support for PrototypeServices, or an unshared Service ... :x:
+- Support Profiles instead of Environments ... :x:
+
+### 0.4.x
+
+- Support creating a ContainerDefinition for libraries that can't be Annotated ... :x:
+- Support a Service having an explicit name that is not the FQCN ... :x:
+- Have convenience functions that abstracts away common boilerplate ... :x:
+
+### 1.0 and beyond
+
 - Improve handling of logical errors... :x:
-- Harden library for production use ... :x:
-
-### 0.4.x and beyond
-
-- Add support for amphp/injector ... :x:
-- Support working with identifiers once feature is in amphp/injector ... :x:
-- Research potentially supporting other containers ... :question:
-- Further improve library's use in production environment ... :x:
+- Support defining scalar values from an arbitrary source ... :question_mark:

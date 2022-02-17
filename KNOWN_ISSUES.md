@@ -15,7 +15,7 @@ a type that's not valid for the parameter it is annotating. Take the following e
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
@@ -24,7 +24,7 @@ class Foo {
     private string $bar;
 
     public function __construct(
-        #[UseScalar(42)]
+        #[InjectScalar(42)]
         string $bar
     ) {
         $this->bar = $bar;
@@ -51,16 +51,16 @@ There are currently multiple ways to define a scalar value on a param; with eith
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Attribute\UseScalar;
-use Cspray\AnnotatedContainer\Attribute\UseScalarFromEnv;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectEnv;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class Foo {
 
     public function __construct(
-        #[UseScalar('user')]
-        #[UseScalarFromEnv('USER')]
+        #[InjectScalar('user')]
+        #[InjectEnv('USER')]
         private string $user
     ) {}
 
@@ -86,13 +86,13 @@ Take the following example:
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 
 class Foo {
 
     public function __construct(
-        #[UseScalar('cspray')]
+        #[InjectScalar('cspray')]
         public string $user
     ) {}
 

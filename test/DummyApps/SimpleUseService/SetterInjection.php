@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
 
-use Cspray\AnnotatedContainer\Attribute\UseService;
+use Cspray\AnnotatedContainer\Attribute\InjectService;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 
@@ -15,7 +15,7 @@ class SetterInjection {
 
     #[ServicePrepare]
     public function setBaz(
-        #[UseService(BazImplementation::class)]
+        #[InjectService(BazImplementation::class)]
         FooInterface $foo
     ) {
         $this->baz = $foo;
@@ -23,7 +23,7 @@ class SetterInjection {
 
     #[ServicePrepare]
     public function setBar(
-        #[UseService(BarImplementation::class)]
+        #[InjectService(BarImplementation::class)]
         FooInterface $foo
     ) {
         $this->bar = $foo;
@@ -31,7 +31,7 @@ class SetterInjection {
 
     #[ServicePrepare]
     public function setQux(
-        #[UseService(QuxImplementation::class)]
+        #[InjectService(QuxImplementation::class)]
         FooInterface $foo
     ) {
         $this->qux = $foo;

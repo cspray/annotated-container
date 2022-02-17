@@ -3,14 +3,14 @@
 
 namespace Cspray\AnnotatedContainer\Internal\Interrogator;
 
-use Cspray\AnnotatedContainer\UseScalarDefinition;
+use Cspray\AnnotatedContainer\InjectScalarDefinition;
 use Generator;
 
-final class UseScalarDefinitionInterrogator {
+final class InjectScalarDefinitionInterrogator {
 
     private array $UseScalarDefinitions;
 
-    public function __construct(UseScalarDefinition... $UseScalarDefinitions) {
+    public function __construct(InjectScalarDefinition... $UseScalarDefinitions) {
         $this->UseScalarDefinitions = $UseScalarDefinitions;
     }
 

@@ -2,22 +2,22 @@
 
 namespace Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
 
-use Cspray\AnnotatedContainer\Attribute\UseScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
 use Cspray\AnnotatedContainer\Attribute\Service;
 
 #[Service]
 class FooImplementation {
 
     public function __construct(
-        #[UseScalar('string param test value')]
+        #[InjectScalar('string param test value')]
         public string $stringParam,
-        #[UseScalar(42)]
+        #[InjectScalar(42)]
         public int $intParam,
-        #[UseScalar(42.0)]
+        #[InjectScalar(42.0)]
         public float $floatParam,
-        #[UseScalar(true)]
+        #[InjectScalar(true)]
         public bool $boolParam,
-        #[UseScalar([
+        #[InjectScalar([
             ['a', 'b', 'c'],
             [1, 2, 3],
             [1.1, 2.1, 3.1],

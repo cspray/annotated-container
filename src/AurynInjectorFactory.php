@@ -95,7 +95,7 @@ final class AurynInjectorFactory implements ContainerFactory {
 
     private static function mapTypesScalarArgs(string $type, string $method, array $UseScalarDefinitions) : array {
         $args = [];
-        /** @var UseScalarDefinition $UseScalarDefinition */
+        /** @var InjectScalarDefinition $UseScalarDefinition */
         foreach ($UseScalarDefinitions as $UseScalarDefinition) {
             if ($UseScalarDefinition->getType() === $type && $UseScalarDefinition->getMethod() === $method) {
                 $value = $UseScalarDefinition->getValue();
@@ -114,7 +114,7 @@ final class AurynInjectorFactory implements ContainerFactory {
 
     private static function mapTypesServiceArgs(string $type, string $method, array $UseServiceDefinitions) : array {
         $args = [];
-        /** @var UseServiceDefinition $UseServiceDefinition */
+        /** @var InjectServiceDefinition $UseServiceDefinition */
         foreach ($UseServiceDefinitions as $UseServiceDefinition) {
             if ($UseServiceDefinition->getType() === $type && $UseServiceDefinition->getMethod() === $method) {
                 $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getValue();

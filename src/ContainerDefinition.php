@@ -39,12 +39,12 @@ interface ContainerDefinition {
     public function getServicePrepareDefinitions() : array;
 
     /**
-     * @return UseScalarDefinition[]
+     * @return InjectScalarDefinition[]
      */
     public function getUseScalarDefinitions() : array;
 
     /**
-     * @return UseServiceDefinition[]
+     * @return InjectServiceDefinition[]
      */
     public function getUseServiceDefinitions() : array;
 

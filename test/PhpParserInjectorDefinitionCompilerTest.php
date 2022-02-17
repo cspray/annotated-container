@@ -29,14 +29,14 @@ use PHPUnit\Framework\TestCase;
  * @covers \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor
- * @covers \Cspray\AnnotatedContainer\Internal\Visitor\UseScalarDefinitionVisitor
+ * @covers \Cspray\AnnotatedContainer\Internal\Visitor\InjectScalarDefinitionVisitor
  * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator
  * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator
- * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\UseScalarDefinitionInterrogator
+ * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\InjectScalarDefinitionInterrogator
  * @covers \Cspray\AnnotatedContainer\ServiceDefinition
  * @covers \Cspray\AnnotatedContainer\AliasDefinition
  * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinition
- * @covers \Cspray\AnnotatedContainer\UseScalarDefinition
+ * @covers \Cspray\AnnotatedContainer\InjectScalarDefinition
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor
  */
 class PhpParserInjectorDefinitionCompilerTest extends TestCase {
@@ -518,12 +518,12 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
 
     protected function assertUseScalarParamValues(array $expectedValueMap, array $UseScalarDefinitions) : void {
         if (($countExpected = count($expectedValueMap)) !== ($countActual = count($UseScalarDefinitions))) {
-            $this->fail("Expected ${countExpected} UseScalarDefinition but received ${countActual}");
+            $this->fail("Expected ${countExpected} InjectScalarDefinition but received ${countActual}");
         }
 
         $actualMap = [];
         foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            $this->assertInstanceOf(UseScalarDefinition::class, $UseScalarDefinition);
+            $this->assertInstanceOf(InjectScalarDefinition::class, $UseScalarDefinition);
             $key = sprintf(
                 "%s::%s(%s)",
                 $UseScalarDefinition->getType(),
@@ -540,12 +540,12 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
 
     protected function assertUseServiceParamValues(array $expectedValueMap, array $UseServiceDefinitions) : void {
         if (($countExpected = count($expectedValueMap)) !== ($countActual = count($UseServiceDefinitions))) {
-            $this->fail("Expected ${countExpected} UseScalarDefinition but received ${countActual}");
+            $this->fail("Expected ${countExpected} InjectScalarDefinition but received ${countActual}");
         }
 
         $actualMap = [];
         foreach ($UseServiceDefinitions as $UseServiceDefinition) {
-            $this->assertInstanceOf(UseServiceDefinition::class, $UseServiceDefinition);
+            $this->assertInstanceOf(InjectServiceDefinition::class, $UseServiceDefinition);
             $key = sprintf(
                 "%s::%s(%s)",
                 $UseServiceDefinition->getType(),
@@ -562,7 +562,7 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
 
     protected function assertUseScalarMethod(array $expectedMethods, array $UseScalarDefinitions) : void {
         if (($countExpected = count($expectedMethods)) !== ($countActual = count($UseScalarDefinitions))) {
-            $this->fail("Expected ${countExpected} UseScalarDefinition but received ${countActual}");
+            $this->fail("Expected ${countExpected} InjectScalarDefinition but received ${countActual}");
         }
 
         $actualMethods = [];
