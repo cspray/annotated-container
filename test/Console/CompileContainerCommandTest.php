@@ -7,16 +7,16 @@ use Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
 use Cspray\AnnotatedContainer\DummyApps\EnvironmentResolvedServices;
 use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
-use Vfs\FileSystem;
-use Vfs\Node\Directory;
 
 class CompileContainerCommandTest extends TestCase {
 
     private Application $application;
-    private FileSystem $fileSystem;
+    private vfsStreamDirectory $root;
 
     protected function setUp(): void {
         $this->application = new Application('annotated-container-test', '0.1.0');
@@ -25,14 +25,9 @@ class CompileContainerCommandTest extends TestCase {
             new JsonContainerDefinitionSerializer(),
             dirname(__DIR__) . '/DummyApps'
         ));
-        $this->fileSystem = FileSystem::factory('vfs://');
-        $this->fileSystem->get('/')->add('cache', new Directory());
-        $this->fileSystem->mount();
+        $this->root = vfsStream::setup();
     }
 
-    protected function tearDown(): void {
-        $this->fileSystem->unmount();
-    }
 
     public function testCompileContainerCommandName() {
         $command = $this->application->find('compile');
@@ -214,13 +209,13 @@ class CompileContainerCommandTest extends TestCase {
         $tester->execute([
             'dirs' => ['NonPhpFiles'],
             '--pretty-print' => true,
-            '--cache-dir' => 'vfs://cache'
+            '--cache-dir' => vfsStream::url('root')
         ], ['capture_stderr_separately' => true]);
 
         $tester->assertCommandIsSuccessful();
         $this->assertNotEmpty($tester->getDisplay());
-        $this->assertSame('The compiled ContainerDefinition was written to vfs://cache/' . md5('devNonPhpFiles'), trim($tester->getDisplay()));
-        $this->assertSame($this->getExpectedNonPhpFilesPrettyPrint(), $this->fileSystem->get('/cache/' . md5('devNonPhpFiles'))->getContent());
+        $this->assertSame('The compiled ContainerDefinition was written to vfs://root/' . md5('devNonPhpFiles'), trim($tester->getDisplay()));
+        $this->assertSame($this->getExpectedNonPhpFilesPrettyPrint(), $this->root->getChild(md5('devNonPhpFiles'))->getContent());
     }
 
     public function testOutputFlagNotWritableThrowsError() {
