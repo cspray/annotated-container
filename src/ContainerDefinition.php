@@ -2,10 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use JsonSerializable;
-
 /**
- * Interface ContainerDefinition
+ *
+ *
  * @package Cspray\AnnotatedContainer
  */
 interface ContainerDefinition {

@@ -35,7 +35,6 @@ final class AurynInjectorFactory implements ContainerFactory {
                 // to the developer to properly instantiate the Service. The caller could presume to provide a specific
                 // parameter to the make() call or could potentially have another piece of code that interacts with the
                 // Injector to define these kind of parameters
-                // TODO: Determine if we want to add a strict mode that warns/fails when multiple aliases were resolved
                 $typeAliasDefinitions = self::mapTypesAliasDefinitions($aliasDefinition->getOriginalServiceDefinition()->getType(), $aliasDefinitions);
                 if (count($typeAliasDefinitions) === 1) {
                     $injector->alias(

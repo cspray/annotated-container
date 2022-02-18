@@ -13,7 +13,7 @@
   ],
   "bin": ["bin/annotated-container"],
   "require": {
-    "php": "^8.0",
+    "php": "^8.1",
     "psr/container": "^2.0",
     "rdlowrey/auryn": "^1.4",
     "nikic/php-parser": "^4.10",

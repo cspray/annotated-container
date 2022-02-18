@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-class JsonContainerDefinitionSerializer implements ContainerDefinitionSerializer {
+final class JsonContainerDefinitionSerializer implements ContainerDefinitionSerializer {
 
     public function serialize(ContainerDefinition $containerDefinition, ContainerDefinitionSerializerOptions $options = null) : string {
         $compiledServiceDefinitions = [];
