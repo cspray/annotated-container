@@ -22,7 +22,10 @@ final class ServicePrepareDefinitionInterrogator {
         $goodDefinitions = [];
         foreach ($this->servicePrepareDefinitions as $servicePrepareDefinition) {
             $serviceDefinition = $this->serviceDefinitionInterrogator->findServiceDefinitionForType($servicePrepareDefinition->getType());
-            if ($serviceDefinition->isInterface()) {
+            if (!isset($serviceDefinition)) {
+                // This technically isn't a "good" definition but the compilation process
+                $goodDefinitions[] = $servicePrepareDefinition;
+            } else if ($serviceDefinition->isInterface()) {
                 $goodDefinitions[] = $servicePrepareDefinition;
             } else if (empty($serviceDefinition->getImplementedServices())) {
                 $goodDefinitions[] = $servicePrepareDefinition;

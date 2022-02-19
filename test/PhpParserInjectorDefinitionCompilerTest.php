@@ -23,6 +23,7 @@ use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
 use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
 use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
 use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
+use Cspray\AnnotatedContainer\LogicalErrorApps\ServicePrepareNotService;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -464,6 +465,15 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertSame(ServiceFactory::class, $serviceDelegateDefinition->getDelegateType());
         $this->assertSame('createService', $serviceDelegateDefinition->getDelegateMethod());
         $this->assertSame(ServiceInterface::class, $serviceDelegateDefinition->getServiceType());
+    }
+
+    public function testServicePrepareNotOnServiceCompilesCorrectly() {
+        $containerDefinition = $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
+
+        $this->assertEmpty($containerDefinition->getSharedServiceDefinitions());
+        $this->assertServicePrepareTypes([
+            [ServicePrepareNotService\FooImplementation::class, 'postConstruct']
+        ], $containerDefinition->getServicePrepareDefinitions());
     }
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
