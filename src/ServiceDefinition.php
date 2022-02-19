@@ -11,7 +11,7 @@ final class ServiceDefinition {
 
     public function __construct(
         private string $type,
-        private array $environments,
+        private array $profiles,
         private array $implementedServices,
         private array $extendedServices,
         private bool $isInterface,
@@ -41,8 +41,8 @@ final class ServiceDefinition {
         return $this->extendedServices;
     }
 
-    public function getEnvironments() : array {
-        return $this->environments;
+    public function getProfiles() : array {
+        return $this->profiles;
     }
 
     public function isInterface() : bool {

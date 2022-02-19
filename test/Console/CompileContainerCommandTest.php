@@ -5,10 +5,11 @@ namespace Cspray\AnnotatedContainer\Console;
 use Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
-use Cspray\AnnotatedContainer\DummyApps\EnvironmentResolvedServices;
+use Cspray\AnnotatedContainer\DummyApps\ProfileResolvedServices;
 use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use phpDocumentor\Reflection\File;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -93,100 +94,92 @@ class CompileContainerCommandTest extends TestCase {
         $this->assertSame('The directory provided, "not a directory", could not be read from.' . PHP_EOL, $tester->getErrorOutput());
     }
 
-    public function testCompileContainerCommandDirectoryArgumentIsSubDirectoryOfRoot() {
+    private function executeSuccessTester(array $args) : array {
         $command = $this->application->find('compile');
         $tester = new CommandTester($command);
 
-        $tester->execute(['dirs' => ['SimpleServices']], ['capture_stderr_separately' => true]);
+        $tester->execute($args, ['capture_stderr_separately' => true]);
         $tester->assertCommandIsSuccessful();
 
         $this->assertNotEmpty($tester->getDisplay());
-        $actual = json_decode($tester->getDisplay(), true);
-        $expected = [
-            'compiledServiceDefinitions' => [
-                md5(SimpleServices\FooInterface::class) => [
-                    'type' => SimpleServices\FooInterface::class,
-                    'implementedServices' => [],
-                    'extendedServices' => [],
-                    'environments' => [],
-                    'isInterface' => true,
-                    'isClass' => false,
-                    'isAbstract' => false
-                ],
-                md5(SimpleServices\FooImplementation::class) => [
-                    'type' => SimpleServices\FooImplementation::class,
-                    'implementedServices' => [md5(SimpleServices\FooInterface::class)],
-                    'extendedServices' => [],
-                    'environments' => [],
-                    'isInterface' => false,
-                    'isClass' => true,
-                    'isAbstract' => false
-                ]
-            ],
-            'sharedServiceDefinitions' => [
-                md5(SimpleServices\FooImplementation::class),
-                md5(SimpleServices\FooInterface::class)
-            ],
-            'aliasDefinitions' => [
-                [
-                    'original' => md5(SimpleServices\FooInterface::class),
-                    'alias' => md5(SimpleServices\FooImplementation::class)
-                ]
-            ],
-            'servicePrepareDefinitions' => [],
-            'useScalarDefinitions' => [],
-            'useServiceDefinitions' => [],
-            'serviceDelegateDefinitions' => []
-        ];
-        $this->assertEqualsCanonicalizing($expected, $actual);
+        return json_decode($tester->getDisplay(), true);
+    }
+
+    public function testCompileContainerCommandSimpleServicesHasCompiledServiceDefinitions() {
+        $actual = $this->executeSuccessTester(['dirs' => ['SimpleServices']]);
+        $this->assertArrayHasKey('compiledServiceDefinitions', $actual);
+        $this->assertCount(2, $actual['compiledServiceDefinitions']);
+
+        $this->assertArrayHasKey(md5(SimpleServices\FooInterface::class), $actual['compiledServiceDefinitions']);
+        $this->assertEquals([
+            'type' => SimpleServices\FooInterface::class,
+            'implementedServices' => [],
+            'extendedServices' => [],
+            'profiles' => [],
+            'isInterface' => true,
+            'isClass' => false,
+            'isAbstract' => false
+        ], $actual['compiledServiceDefinitions'][md5(SimpleServices\FooInterface::class)]);
+
+        $this->assertArrayHasKey(md5(SimpleServices\FooImplementation::class), $actual['compiledServiceDefinitions']);
+        $this->assertEquals([
+            'type' => SimpleServices\FooImplementation::class,
+            'implementedServices' => [md5(SimpleServices\FooInterface::class)],
+            'extendedServices' => [],
+            'profiles' => [],
+            'isInterface' => false,
+            'isClass' => true,
+            'isAbstract' => false
+        ], $actual['compiledServiceDefinitions'][md5(SimpleServices\FooImplementation::class)]);
+    }
+
+    public function testCompileContainerCommandSimpleServicesHasSharedServiceDefinitions() {
+        $actual = $this->executeSuccessTester(['dirs' => ['SimpleServices']]);
+
+        $this->assertArrayHasKey('sharedServiceDefinitions', $actual);
+        $this->assertContains(md5(SimpleServices\FooInterface::class), $actual['sharedServiceDefinitions']);
+        $this->assertContains(md5(SimpleServices\FooImplementation::class), $actual['sharedServiceDefinitions']);
+    }
+
+    public function testCompileContainerCommandSimpleServicesHasAliasDefinitions() {
+        $actual = $this->executeSuccessTester(['dirs' => ['SimpleServices']]);
+
+        $this->assertArrayHasKey('aliasDefinitions', $actual);
+        $this->assertCount(1, $actual['aliasDefinitions']);
+        $this->assertEquals([
+            'original' => md5(SimpleServices\FooInterface::class),
+            'alias' => md5(SimpleServices\FooImplementation::class)
+        ], $actual['aliasDefinitions'][0]);
+    }
+
+    public function testCompileContainerCommandSimpleServicesHasNoServicePrepareDefinitions() {
+        $actual = $this->executeSuccessTester(['dirs' => ['SimpleServices']]);
+
+        $this->assertArrayHasKey('servicePrepareDefinitions', $actual);
+        $this->assertEmpty($actual['servicePrepareDefinitions']);
+    }
+
+    public function testCompileContainerCommandSimpleServicesHasNoInjectServiceDefinitions() {
+        $actual = $this->executeSuccessTester(['dirs' => ['SimpleServices']]);
+
+        $this->assertArrayHasKey('injectServiceDefinitions', $actual);
+        $this->assertEmpty($actual['injectServiceDefinitions']);
     }
 
     public function testCompileContainerCommandRespectsEnvironmentFlag() {
         $command = $this->application->find('compile');
         $tester = new CommandTester($command);
 
-        $tester->execute(['dirs' => ['EnvironmentResolvedServices']], ['capture_stderr_separately' => true]);
+        $tester->execute(['dirs' => ['ProfileResolvedServices']], ['capture_stderr_separately' => true]);
         $tester->assertCommandIsSuccessful();
 
         $this->assertNotEmpty($tester->getDisplay());
         $actual = json_decode($tester->getDisplay(), true);
-        $expected = [
-            'compiledServiceDefinitions' => [
-                md5(EnvironmentResolvedServices\FooInterface::class) => [
-                    'type' => EnvironmentResolvedServices\FooInterface::class,
-                    'implementedServices' => [],
-                    'extendedServices' => [],
-                    'environments' => [],
-                    'isInterface' => true,
-                    'isClass' => false,
-                    'isAbstract' => false
-                ],
-                md5(EnvironmentResolvedServices\DevFooImplementation::class) => [
-                    'type' => EnvironmentResolvedServices\DevFooImplementation::class,
-                    'implementedServices' => [md5(EnvironmentResolvedServices\FooInterface::class)],
-                    'extendedServices' => [],
-                    'environments' => ['dev'],
-                    'isInterface' => false,
-                    'isClass' => true,
-                    'isAbstract' => false
-                ]
-            ],
-            'sharedServiceDefinitions' => [
-                md5(EnvironmentResolvedServices\FooInterface::class),
-                md5(EnvironmentResolvedServices\DevFooImplementation::class)
-            ],
-            'aliasDefinitions' => [
-                [
-                    'original' => md5(EnvironmentResolvedServices\FooInterface::class),
-                    'alias' => md5(EnvironmentResolvedServices\DevFooImplementation::class)
-                ]
-            ],
-            'servicePrepareDefinitions' => [],
-            'useScalarDefinitions' => [],
-            'useServiceDefinitions' => [],
-            'serviceDelegateDefinitions' => []
-        ];
-        $this->assertEqualsCanonicalizing($expected, $actual);
+
+        $this->assertArrayHasKey('compiledServiceDefinitions', $actual);
+        $this->assertCount(2, $actual['compiledServiceDefinitions']);
+        $this->assertArrayHasKey(md5(ProfileResolvedServices\FooInterface::class), $actual['compiledServiceDefinitions']);
+        $this->assertArrayHasKey(md5(ProfileResolvedServices\DevFooImplementation::class), $actual['compiledServiceDefinitions']);
     }
 
     public function testCompileContainerCommandRespectsPrettyPrintFlag() {
@@ -254,7 +247,7 @@ class CompileContainerCommandTest extends TestCase {
             "type": "Cspray\\\\AnnotatedContainer\\\\DummyApps\\\\NonPhpFiles\\\\FooInterface",
             "implementedServices": [],
             "extendedServices": [],
-            "environments": [],
+            "profiles": [],
             "isInterface": true,
             "isClass": false,
             "isAbstract": false
@@ -265,8 +258,8 @@ class CompileContainerCommandTest extends TestCase {
     ],
     "aliasDefinitions": [],
     "servicePrepareDefinitions": [],
-    "useScalarDefinitions": [],
-    "useServiceDefinitions": [],
+    "injectScalarDefinitions": [],
+    "injectServiceDefinitions": [],
     "serviceDelegateDefinitions": []
 }
 JSON;

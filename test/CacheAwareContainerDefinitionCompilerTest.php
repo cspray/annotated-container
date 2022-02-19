@@ -35,7 +35,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testFileDoesExistDoesNotCallCompiler() {
-        $dir = __DIR__ . '/DummyApps/EnvironmentResolvedServices';
+        $dir = __DIR__ . '/DummyApps/ProfileResolvedServices';
         $containerDefinition = $this->phpParserContainerDefinitionCompiler->compileDirectory('test', $dir);
         $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
@@ -56,7 +56,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testFailingToWriteCacheFileThrowsException() {
-        $dir = __DIR__ . '/DummyApps/EnvironmentResolvedServices';
+        $dir = __DIR__ . '/DummyApps/ProfileResolvedServices';
         $subject = new CacheAwareContainerDefinitionCompiler(
             $this->phpParserContainerDefinitionCompiler = new PhpParserContainerDefinitionCompiler(),
             $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),

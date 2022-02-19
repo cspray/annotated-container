@@ -26,7 +26,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                     'type' => $serviceDefinition->getType(),
                     'implementedServices' => $implementedServices,
                     'extendedServices' => $extendedServices,
-                    'environments' => $serviceDefinition->getEnvironments(),
+                    'profiles' => $serviceDefinition->getProfiles(),
                     'isInterface' => $serviceDefinition->isInterface(),
                     'isClass' => $serviceDefinition->isClass(),
                     'isAbstract' => $serviceDefinition->isAbstract()
@@ -60,25 +60,25 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             ];
         }
 
-        $useScalarDefinitions = [];
-        foreach ($containerDefinition->getUseScalarDefinitions() as $useScalarDefinition) {
-            $useScalarDefinitions[] = [
-                'type' => $useScalarDefinition->getType(),
-                'method' => $useScalarDefinition->getMethod(),
-                'paramName' => $useScalarDefinition->getParamName(),
-                'paramType' => $useScalarDefinition->getParamType(),
-                'value' => $useScalarDefinition->getValue()
+        $injectScalarDefinitions = [];
+        foreach ($containerDefinition->getUseScalarDefinitions() as $injectScalarDefinition) {
+            $injectScalarDefinitions[] = [
+                'type' => $injectScalarDefinition->getType(),
+                'method' => $injectScalarDefinition->getMethod(),
+                'paramName' => $injectScalarDefinition->getParamName(),
+                'paramType' => $injectScalarDefinition->getParamType(),
+                'value' => $injectScalarDefinition->getValue()
             ];
         }
 
-        $useServiceDefinitions = [];
-        foreach ($containerDefinition->getUseServiceDefinitions() as $useServiceDefinition) {
-            $useServiceDefinitions[] = [
-                'type' => $useServiceDefinition->getType(),
-                'method' => $useServiceDefinition->getMethod(),
-                'paramName' => $useServiceDefinition->getParamName(),
-                'paramType' => $useServiceDefinition->getParamType(),
-                'value' => $useServiceDefinition->getValue()
+        $injectServiceDefinitions = [];
+        foreach ($containerDefinition->getUseServiceDefinitions() as $injectServiceDefinition) {
+            $injectServiceDefinitions[] = [
+                'type' => $injectServiceDefinition->getType(),
+                'method' => $injectServiceDefinition->getMethod(),
+                'paramName' => $injectServiceDefinition->getParamName(),
+                'paramType' => $injectServiceDefinition->getParamType(),
+                'value' => $injectServiceDefinition->getValue()
             ];
         }
 
@@ -101,8 +101,8 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             'sharedServiceDefinitions' => $serviceDefinitions,
             'aliasDefinitions' => $aliasDefinitions,
             'servicePrepareDefinitions' => $servicePrepareDefinitions,
-            'useScalarDefinitions' => $useScalarDefinitions,
-            'useServiceDefinitions' => $useServiceDefinitions,
+            'injectScalarDefinitions' => $injectScalarDefinitions,
+            'injectServiceDefinitions' => $injectServiceDefinitions,
             'serviceDelegateDefinitions' => $serviceDelegateDefinitions
         ], $flags);
     }
@@ -143,7 +143,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         }
 
         $useScalarDefinitions = [];
-        foreach ($data['useScalarDefinitions'] as $useScalarDefinition) {
+        foreach ($data['injectScalarDefinitions'] as $useScalarDefinition) {
             $useScalarDefinitions[] = new InjectScalarDefinition(
                 $useScalarDefinition['type'],
                 $useScalarDefinition['method'],
@@ -154,7 +154,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         }
 
         $useServiceDefinitions = [];
-        foreach ($data['useServiceDefinitions'] as $useServiceDefinition) {
+        foreach ($data['injectServiceDefinitions'] as $useServiceDefinition) {
             $useServiceDefinitions[] = new InjectServiceDefinition(
                 $useServiceDefinition['type'],
                 $useServiceDefinition['method'],
@@ -229,7 +229,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
             $serviceDefinitionCacheMap[$serviceHash] = new ServiceDefinition(
                 $type,
-                $compiledServiceDefinition['environments'],
+                $compiledServiceDefinition['profiles'],
                 $implementedServices,
                 $extendedServices,
                 $compiledServiceDefinition['isInterface'],

@@ -28,7 +28,7 @@ final class ServiceDefinitionInterrogator {
 
     public function gatherSharedServices() : Generator {
         foreach ($this->serviceDefinitions as $serviceDefinition) {
-            if (empty($serviceDefinition->getEnvironments()) || in_array($this->environment, $serviceDefinition->getEnvironments())) {
+            if (empty($serviceDefinition->getProfiles()) || in_array($this->environment, $serviceDefinition->getProfiles())) {
                 yield $serviceDefinition;
             }
         }
@@ -39,7 +39,7 @@ final class ServiceDefinitionInterrogator {
             if ($serviceDefinition->isClass()) {
                 $hasImplementations = !empty($serviceDefinition->getImplementedServices());
                 $hasExtendeds = !empty($serviceDefinition->getExtendedServices());
-                $forEnvironment = empty($serviceDefinition->getEnvironments()) || in_array($this->environment, $serviceDefinition->getEnvironments());
+                $forEnvironment = empty($serviceDefinition->getProfiles()) || in_array($this->environment, $serviceDefinition->getProfiles());
                 if ($hasImplementations && $forEnvironment) {
                     foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
                         yield new AliasDefinition($implementedService, $serviceDefinition);

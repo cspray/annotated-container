@@ -102,7 +102,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
 
             $marshaledDefinitions[] = new ServiceDefinition(
                 $rawServiceDefinition['type'],
-                $rawServiceDefinition['environments'],
+                $rawServiceDefinition['profiles'],
                 $implementServiceDefinitions,
                 $extendedServiceDefinitions,
                 $rawServiceDefinition['isInterface'],
@@ -127,7 +127,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             if ($targetType === $rawServiceDefinition['type']) {
                 $serviceDefinition = new ServiceDefinition(
                     $rawServiceDefinition['type'],
-                    $rawServiceDefinition['environments'],
+                    $rawServiceDefinition['profiles'],
                     $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['implements']),
                     $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['extends']),
                     $rawServiceDefinition['isInterface'],

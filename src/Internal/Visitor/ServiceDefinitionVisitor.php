@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Internal\Visitor;
 
 use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServiceProfile;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use PhpParser\Node;
 use PhpParser\NodeVisitor;
@@ -21,7 +22,7 @@ final class ServiceDefinitionVisitor extends AbstractNodeVisitor implements Node
                 $this->serviceDefinitions[] = [
                     'definitionType' => ServiceDefinition::class,
                     'type' => $node->namespacedName->toString(),
-                    'environments' => $this->getServiceAttributeEnvironments($serviceAttribute),
+                    'profiles' => $this->getServiceAttributeEnvironments($node),
                     'implements' => $this->getTypeImplements($node),
                     'extends' => $this->getTypeExtends($node),
                     'isInterface' => $node instanceof Interface_,
@@ -50,17 +51,14 @@ final class ServiceDefinitionVisitor extends AbstractNodeVisitor implements Node
         return [];
     }
 
-    private function getServiceAttributeEnvironments(Attribute $attribute) : array {
-        $environments = [];
-        foreach ($attribute->args as $arg) {
-            if ($arg->name->toString() === 'environments') {
-                foreach ($arg->value->items as $argItem) {
-                    $environments[] = $argItem->value->value;
-                }
-            }
+    private function getServiceAttributeEnvironments(Node $node) : array {
+        $attribute = $this->findAttribute(ServiceProfile::class, ...$node->attrGroups);
+        if ($attribute === null) {
+            return [];
         }
-
-        return $environments;
+        $profiles = [];
+        $profiles[] = $attribute->args[0]->value->items[0]->value->value;
+        return $profiles;
     }
 
     public function getServiceDefinitions() : array {
