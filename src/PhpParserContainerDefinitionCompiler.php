@@ -37,17 +37,14 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         $this->nodeTraverser = new NodeTraverser();
     }
 
-    public function compileDirectory(string $environment, array|string $dirs) : ContainerDefinition {
+    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
         $rawServiceDefinitions = [];
         $rawServicePrepareDefinitions = [];
         $rawUseScalarDefinitions = [];
         $rawUseServiceDefinitions = [];
         $rawServiceDelegateDefinitions = [];
-        if (is_string($dirs)) {
-            $dirs = [$dirs];
-        }
         /** @var Node $node */
-        foreach ($this->gatherDefinitions($dirs) as $rawDefinition) {
+        foreach ($this->gatherDefinitions($containerDefinitionCompileOptions->getScanDirectories()) as $rawDefinition) {
             if ($rawDefinition['definitionType'] === ServiceDefinition::class) {
                 $rawServiceDefinitions[] = $rawDefinition;
             } else if ($rawDefinition['definitionType'] === ServicePrepareDefinition::class) {
@@ -61,7 +58,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             }
         }
         $serviceDefinitionInterrogator = new ServiceDefinitionInterrogator(
-            $environment,
+            $containerDefinitionCompileOptions->getProfiles()[0] ?? 'default',
             ...$this->marshalRawServiceDefinitions($rawServiceDefinitions)
         );
         $servicePrepareInterrogator = new ServicePrepareDefinitionInterrogator(

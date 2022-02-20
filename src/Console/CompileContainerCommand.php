@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Console;
 
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\ContainerDefinitionSerializerOptions;
@@ -32,11 +33,10 @@ class CompileContainerCommand extends Command {
     protected function configure() : void {
         $this->setName('compile')
             ->addOption(
-                name: 'env',
-                shortcut: 'e',
-                mode: InputOption::VALUE_REQUIRED,
-                description: 'The environment to use when compiling a ContainerDefinition.',
-                default: 'dev'
+                name: 'profiles',
+                mode: InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                description: 'The profiles to use when compiling a ContainerDefinition.',
+                default: ['default']
             )
             ->addOption(
                 name: 'cache-dir',
@@ -72,8 +72,12 @@ class CompileContainerCommand extends Command {
             }
         }
 
-        $environment = $input->getOption('env');
-        $injectorDefinition = $this->containerDefinitionCompiler->compileDirectory($environment, $goodDirs);
+        $profiles = $input->getOption('profiles');
+        $injectorDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$goodDirs)
+                ->withProfiles(...$profiles)
+                ->build()
+        );
         $serializerOptions = new ContainerDefinitionSerializerOptions();
         if ($input->getOption('pretty-print')) {
             $serializerOptions = $serializerOptions->withPrettyFormatting();
@@ -84,7 +88,7 @@ class CompileContainerCommand extends Command {
         if (!isset($cacheDir)) {
             $output->writeln($json);
         } else {
-            $outputTarget = sprintf('%s/%s', $cacheDir, md5($environment . join($directories)));
+            $outputTarget = sprintf('%s/%s', $cacheDir, md5(join($profiles) . join($directories)));
             $contentWritten = @file_put_contents($outputTarget, $json);
             // intentionally checking for 0 bytes written... if we didn't write anything that's still an error
             if (!$contentWritten) {

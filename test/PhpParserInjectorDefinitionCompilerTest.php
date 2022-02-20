@@ -48,8 +48,11 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->subject = new PhpParserContainerDefinitionCompiler();
     }
 
-    private function runCompileDirectory(string|array $dir, string $environment = 'test') : ContainerDefinition {
-        return $this->subject->compileDirectory($environment, $dir);
+    private function runCompileDirectory(array|string $dir, string $environment = 'test') : ContainerDefinition {
+        if (is_string($dir)) {
+            $dir = [$dir];
+        }
+        return $this->subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dir)->withProfiles($environment)->build());
     }
 
     public function testSimpleServices() {

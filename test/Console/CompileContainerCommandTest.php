@@ -9,7 +9,6 @@ use Cspray\AnnotatedContainer\DummyApps\ProfileResolvedServices;
 use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
-use phpDocumentor\Reflection\File;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -65,14 +64,14 @@ class CompileContainerCommandTest extends TestCase {
 
     public function testCompileContainerCommandEnvironmentFlag() {
         $command = $this->application->find('compile');
-        $envOption = $command->getDefinition()->getOption('env');
+        $envOption = $command->getDefinition()->getOption('profiles');
 
-        $this->assertSame('e', $envOption->getShortcut());
+        $this->assertNull($envOption->getShortcut());
         $this->assertTrue($envOption->isValueRequired());
         $this->assertFalse($envOption->isNegatable());
-        $this->assertFalse($envOption->isArray());
-        $this->assertSame('The environment to use when compiling a ContainerDefinition.', $envOption->getDescription());
-        $this->assertSame('dev', $envOption->getDefault());
+        $this->assertTrue($envOption->isArray());
+        $this->assertSame('The profiles to use when compiling a ContainerDefinition.', $envOption->getDescription());
+        $this->assertSame(['default'], $envOption->getDefault());
     }
 
     public function testCompileContainerCommandDirArguments() {
@@ -170,7 +169,10 @@ class CompileContainerCommandTest extends TestCase {
         $command = $this->application->find('compile');
         $tester = new CommandTester($command);
 
-        $tester->execute(['dirs' => ['ProfileResolvedServices']], ['capture_stderr_separately' => true]);
+        $tester->execute([
+            'dirs' => ['ProfileResolvedServices'],
+            '--profiles' => ['dev']
+        ], ['capture_stderr_separately' => true]);
         $tester->assertCommandIsSuccessful();
 
         $this->assertNotEmpty($tester->getDisplay());
@@ -207,8 +209,8 @@ class CompileContainerCommandTest extends TestCase {
 
         $tester->assertCommandIsSuccessful();
         $this->assertNotEmpty($tester->getDisplay());
-        $this->assertSame('The compiled ContainerDefinition was written to vfs://root/' . md5('devNonPhpFiles'), trim($tester->getDisplay()));
-        $this->assertSame($this->getExpectedNonPhpFilesPrettyPrint(), $this->root->getChild(md5('devNonPhpFiles'))->getContent());
+        $this->assertSame('The compiled ContainerDefinition was written to vfs://root/' . md5('defaultNonPhpFiles'), trim($tester->getDisplay()));
+        $this->assertSame($this->getExpectedNonPhpFilesPrettyPrint(), $this->root->getChild(md5('defaultNonPhpFiles'))->getContent());
     }
 
     public function testOutputFlagNotWritableThrowsError() {

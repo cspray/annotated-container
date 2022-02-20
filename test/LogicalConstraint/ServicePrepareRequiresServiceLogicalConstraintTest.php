@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\LogicalErrorApps;
 use Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler;
@@ -18,7 +19,9 @@ class ServicePrepareRequiresServiceLogicalConstraintTest extends TestCase {
     }
 
     public function testServicePrepareNotOnServiceViolation() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('test', dirname(__DIR__) . '/LogicalErrorApps/ServicePrepareNotService');
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/ServicePrepareNotService')->build()
+        );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
         $this->assertCount(1, $violations);

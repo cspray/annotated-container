@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler;
@@ -18,7 +19,9 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
     }
 
     public function testMultipleAliasResolvedHasWarning() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('test', dirname(__DIR__) . '/DummyApps/MultipleAliasResolution');
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/DummyApps/MultipleAliasResolution')->build()
+        );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
@@ -28,7 +31,9 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
     }
 
     public function testNoAliasResolvedHasNoViolations() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('test', dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias');
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
+        );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
@@ -36,7 +41,9 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
     }
 
     public function testSingleAliasResolvedHasNoViolations() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('test', dirname(__DIR__) . '/DummyApps/SimpleServices');
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/DummyApps/SimpleServices')->build()
+        );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 

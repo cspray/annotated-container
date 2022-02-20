@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\LogicalErrorApps\NoInterfaceServiceAlias;
@@ -18,18 +19,20 @@ class LogicalConstraintValidatorTest extends TestCase {
     }
 
     public function testValidatorRunsAllConstraints() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('test', [
+        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(
             dirname(__DIR__) . '/DummyApps/MultipleAliasResolution',
             dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias',
             dirname(__DIR__) . '/LogicalErrorApps/ServicePrepareNotService'
-        ]);
+        )->build());
         $violations = $this->subject->validate($containerDefinition);
 
         $this->assertCount(3, $violations);
     }
 
     public function testValidatorHasCorrectViolationMessages() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('dev', [dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias']);
+        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(
+            dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias'
+        )->build());
         $violations = $this->subject->validate($containerDefinition);
 
         $this->assertCount(1, $violations);

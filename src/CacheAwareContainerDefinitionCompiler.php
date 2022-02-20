@@ -16,13 +16,15 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
         $this->cacheDir = $cacheDir;
     }
 
-    public function compileDirectory(string $environment, array|string $dirs): ContainerDefinition {
-        $dirs = is_string($dirs) ? [$dirs] : $dirs;
-        $cacheFile = $this->getCacheFile($environment, $dirs);
+    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions): ContainerDefinition {
+        $cacheFile = $this->getCacheFile(
+            $containerDefinitionCompileOptions->getProfiles(),
+            $containerDefinitionCompileOptions->getScanDirectories()
+        );
         if (is_file($cacheFile)) {
             $containerDefinition = $this->containerDefinitionSerializer->deserialize(file_get_contents($cacheFile));
         } else {
-            $containerDefinition = $this->containerDefinitionCompiler->compileDirectory($environment, $dirs);
+            $containerDefinition = $this->containerDefinitionCompiler->compile($containerDefinitionCompileOptions);
             $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
             $contentWritten = @file_put_contents($cacheFile, $serialized);
             if (!$contentWritten) {
@@ -32,11 +34,11 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
         return $containerDefinition;
     }
 
-    private function getCacheFile(string $environment, array $dirs) : string {
+    private function getCacheFile(array $profiles, array $dirs) : string {
         return sprintf(
             '%s/%s',
             $this->cacheDir,
-            md5($environment . join($dirs))
+            md5(join($profiles) . join($dirs))
         );
     }
 }
