@@ -9,7 +9,7 @@ final class NoAbstractServiceAliasLogicalConstraint implements LogicalConstraint
 
     public function getConstraintViolations(ContainerDefinition $containerDefinition): LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();
-        foreach ($containerDefinition->getSharedServiceDefinitions() as $sharedServiceDefinition) {
+        foreach ($containerDefinition->getServiceDefinitions() as $sharedServiceDefinition) {
             if ($sharedServiceDefinition->isInterface() || $sharedServiceDefinition->isAbstract()) {
                 if (!$this->doesServiceDefinitionHaveAlias($containerDefinition, $sharedServiceDefinition)) {
                     $abstractType = $sharedServiceDefinition->isInterface() ? 'interface' : 'abstract class';

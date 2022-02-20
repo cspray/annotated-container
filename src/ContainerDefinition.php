@@ -18,7 +18,7 @@ interface ContainerDefinition {
      *
      * @return ServiceDefinition[]
      */
-    public function getSharedServiceDefinitions() : array;
+    public function getServiceDefinitions() : array;
 
     /**
      * Returns a set of AliasDefinition that define which concrete implementations are meant to be used for a given
@@ -40,12 +40,12 @@ interface ContainerDefinition {
     /**
      * @return InjectScalarDefinition[]
      */
-    public function getUseScalarDefinitions() : array;
+    public function getInjectScalarDefinitions() : array;
 
     /**
      * @return InjectServiceDefinition[]
      */
-    public function getUseServiceDefinitions() : array;
+    public function getInjectServiceDefinitions() : array;
 
     /**
      * @return ServiceDelegateDefinition[]

@@ -20,7 +20,7 @@ class ServicePrepareRequiresServiceLogicalConstraintTest extends TestCase {
 
     public function testServicePrepareNotOnServiceViolation() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/ServicePrepareNotService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/ServicePrepareNotService')->withProfiles('default')->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 

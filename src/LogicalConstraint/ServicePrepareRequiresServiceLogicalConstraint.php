@@ -27,7 +27,7 @@ final class ServicePrepareRequiresServiceLogicalConstraint implements LogicalCon
     }
 
     private function getServiceDefinition(ContainerDefinition $containerDefinition, ServicePrepareDefinition $servicePrepareDefinition) : ?ServiceDefinition {
-        foreach ($containerDefinition->getSharedServiceDefinitions() as $sharedServiceDefinition) {
+        foreach ($containerDefinition->getServiceDefinitions() as $sharedServiceDefinition) {
             if ($sharedServiceDefinition->getType() === $servicePrepareDefinition->getType()) {
                 return $sharedServiceDefinition;
             }

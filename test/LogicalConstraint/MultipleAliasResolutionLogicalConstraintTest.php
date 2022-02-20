@@ -32,7 +32,7 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
 
     public function testNoAliasResolvedHasNoViolations() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->withProfiles('default')->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
@@ -42,7 +42,7 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
 
     public function testSingleAliasResolvedHasNoViolations() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/DummyApps/SimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/DummyApps/SimpleServices')->withProfiles('default')->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
