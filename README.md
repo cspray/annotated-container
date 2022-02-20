@@ -2,17 +2,15 @@
 
 [![Unit Tests](https://github.com/cspray/annotated-container/actions/workflows/php.yml/badge.svg)](https://github.com/cspray/annotated-container/actions/workflows/php.yml)
 
-A PHP8 library that will wire an [Auryn Injector](https://github.com/rdlowrey/auryn) based off of objects annotated with 
-[Attributes](https://www.php.net/manual/en/language.attributes.php). Aims to provide functionality that enables 
-configuring all Injector options through Attributes.
+A library to configure an autowireable Dependency Injection Container using [PHP 8 Attributes](https://www.php.net/manual/en/language.attributes.php). 
+Key features include:
 
-This is a new library still in active development! You should check out 2 things before you start using this library; 
-the "KNOWN_ISSUES.md" file, and the "ROADMAP" in this README. While developing this library several known logical errors 
-or resolution conflicts became known. Those issues are expected to be fixed in future versions, while the API is 
-stabilizing however it is possible that you could run into these problems that could result in weird or unexpected 
-behavior. When logical problems become known that we are planning on fixing, we'll update the "KNOWN_ISSUES.md" file.
-
-:exclamation: Though this library is not yet production ready we're working hard to make it so! Please check back regularly for updates!
+- Compile and analyze the configuration for a Container without ever running any code
+- Designate an interface as a Service and easily configure which concrete implementations to use
+- Delegate service construction to a factory
+- Inject scalar values, environment variables, and other services into your constructors and setters
+- Automatically invoke methods after the service is constructed
+- Use Profiles to easily use different services in different running environments
 
 ## Installation
 
@@ -20,10 +18,11 @@ behavior. When logical problems become known that we are planning on fixing, we'
 composer require cspray/annotated-container
 ```
 
-## Getting Started
+## Quick Start
 
-For a more complete, working, example check out the `examples/` directory. To get this example to work in your environment 
-you'd have to move the interface and class definitions into the appropriate directory structure.
+This is a very short example to get started with one of the most important features with configuring your Container; 
+setting up a singleton Service that implements an interface. There's a lot more to review and you should check out the 
+`docs/` directory for more information.
 
 ```php
 <?php
@@ -44,12 +43,16 @@ class FooImplementation {}
 
 use Cspray\AnnotatedContainer\AurynContainerFactory;
 use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 
 $compiler = new PhpParserInjectorDefinitionCompiler();
-$injectorDefinition = $compiler->compileDirectory('env_identifier', __DIR__ . '/src');
-$injector = (new AurynContainerFactory)->createContainer($injectorDefinition);
+$containerDefinition = $compiler->compile(
+    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->withProfiles('default')->build()
+);
+$container = (new AurynInjectorFactory)->createContainer($injectorDefinition);
 
-var_dump($injector->make(Foo::class));
+var_dump($container->get(Foo::class));
+var_dump($container->get(Foo::class) === $container->get(Foo::class));
 ```
 
 Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It
