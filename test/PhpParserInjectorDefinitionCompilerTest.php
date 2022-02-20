@@ -66,8 +66,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [SimpleServices\FooInterface::class, SimpleServices\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testSimpleServicesHasDefaultProfile() {
@@ -92,8 +92,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [MultipleSimpleServices\BarInterface::class, MultipleSimpleServices\BarImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testSimpleServicesSomeNotAnnotated() {
@@ -107,8 +107,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [SimpleServicesSomeNotAnnotated\FooInterface::class, SimpleServicesSomeNotAnnotated\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testEnvironmentResolvedServicesTest() {
@@ -122,8 +122,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [ProfileResolvedServices\FooInterface::class, ProfileResolvedServices\TestFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testEnvironmentResolvedServicesDev() {
@@ -137,8 +137,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [ProfileResolvedServices\FooInterface::class, ProfileResolvedServices\DevFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testEnvironmentResolvedServicesProd() {
@@ -152,8 +152,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [ProfileResolvedServices\FooInterface::class, ProfileResolvedServices\ProdFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testClassOnlyServices() {
@@ -166,8 +166,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testInterfaceServicePrepare() {
@@ -183,8 +183,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertServicePrepareTypes([
             [InterfaceServicePrepare\FooInterface::class, 'setBar']
         ], $injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testClassOverridesInterfaceServicePrepare() {
@@ -200,8 +200,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertServicePrepareTypes([
             [ClassOverridesInterfaceServicePrepare\FooInterface::class, 'setBar']
         ], $injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testClassServicePrepareWithoutInterfaceServicePrepare() {
@@ -217,8 +217,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertServicePrepareTypes([
             [ClassServicePrepareWithoutInterfaceServicePrepare\FooImplementation::class, 'setBar']
         ], $injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testNestedServices() {
@@ -238,8 +238,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [NestedServices\BazInterface::class, NestedServices\Foo\Bar\Baz\BazImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testAbstractSharedServices() {
@@ -253,8 +253,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [AbstractSharedServices\AbstractFoo::class, AbstractSharedServices\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testSimpleUseScalar() {
@@ -275,7 +275,7 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
                 [true, false, true],
                 [['a', 'b', 'c'], [1, 2, 3], [1.1, 2.1, 3.1], [true, false, true]]
             ]
-        ], $injectorDefinition->getUseScalarDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertUseScalarMethod([
             // all of our parameters are in the same method so we'd expect to see this 5 times
@@ -284,9 +284,9 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             SimpleUseScalar\FooImplementation::class . '::__construct',
             SimpleUseScalar\FooImplementation::class . '::__construct',
             SimpleUseScalar\FooImplementation::class . '::__construct'
-        ], $injectorDefinition->getUseScalarDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
 
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testNegativeNumberUseScalar() {
@@ -298,14 +298,14 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertUseScalarParamValues([
             NegativeNumberUseScalar\FooImplementation::class . '::__construct(intParam)' => -1,
             NegativeNumberUseScalar\FooImplementation::class . '::__construct(floatParam)' => -42.0,
-        ], $injectorDefinition->getUseScalarDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertUseScalarMethod([
             // all of our parameters are in the same method so we'd expect to see this 2 times
             NegativeNumberUseScalar\FooImplementation::class . '::__construct',
             NegativeNumberUseScalar\FooImplementation::class . '::__construct'
-        ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testMultipleUseScalars() {
@@ -319,14 +319,14 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertUseScalarParamValues([
             MultipleUseScalars\FooImplementation::class . '::__construct(stringParam)' => 'constructor param',
             MultipleUseScalars\FooImplementation::class . '::setUp(stringParam)' => 'prepare param',
-        ], $injectorDefinition->getUseScalarDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertUseScalarMethod([
             // all of our parameters are in the same method so we'd expect to see this 2 times
             MultipleUseScalars\FooImplementation::class . '::__construct',
             MultipleUseScalars\FooImplementation::class . '::setUp'
-        ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testClassConstantUseScalar() {
@@ -337,13 +337,13 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertUseScalarParamValues([
             ClassConstantUseScalar\FooImplementation::class . '::__construct(val)' => '!const(Cspray\AnnotatedContainer\DummyApps\ClassConstantUseScalar\FooImplementation::VALUE)',
-        ], $injectorDefinition->getUseScalarDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertUseScalarMethod([
             // all of our parameters are in the same method so we'd expect to see this 2 times
             ClassConstantUseScalar\FooImplementation::class . '::__construct',
-        ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testConstantUseScalar() {
@@ -355,13 +355,13 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertUseScalarParamValues([
             ConstantUseScalar\FooImplementation::class . '::__construct(val)' => '!const(Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar\FOO_BAR)',
-        ], $injectorDefinition->getUseScalarDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertUseScalarMethod([
             // all of our parameters are in the same method so we'd expect to see this 2 times
             ConstantUseScalar\FooImplementation::class . '::__construct',
-        ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testUseScalarFromEnv() {
@@ -372,13 +372,13 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertUseScalarParamValues([
             SimpleUseScalarFromEnv\FooImplementation::class . '::__construct(user)' => '!env(USER)',
-        ], $injectorDefinition->getUseScalarDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertUseScalarMethod([
             // all of our parameters are in the same method so we'd expect to see this 2 times
             SimpleUseScalarFromEnv\FooImplementation::class . '::__construct',
-        ], $injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        ], $injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testSimpleUseService() {
@@ -402,7 +402,7 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [SimpleUseService\SetterInjection::class, 'setBaz'],
             [SimpleUseService\SetterInjection::class, 'setQux']
         ], $injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
         $this->assertUseServiceParamValues([
             SimpleUseService\SetterInjection::class . '::setBar(foo)' => SimpleUseService\BarImplementation::class,
             SimpleUseService\SetterInjection::class . '::setBaz(foo)' => SimpleUseService\BazImplementation::class,
@@ -410,7 +410,7 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             SimpleUseService\ConstructorInjection::class . '::__construct(bar)' => SimpleUseService\BarImplementation::class,
             SimpleUseService\ConstructorInjection::class . '::__construct(baz)' => SimpleUseService\BazImplementation::class,
             SimpleUseService\ConstructorInjection::class . '::__construct(qux)' => SimpleUseService\QuxImplementation::class
-        ], $injectorDefinition->getUseServiceDefinitions());
+        ], $injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testMultipleAliasResolution() {
@@ -428,8 +428,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [MultipleAliasResolution\FooInterface::class, MultipleAliasResolution\QuxImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testNonPhpFiles() {
@@ -438,8 +438,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertServiceDefinitionsHaveTypes([NonPhpFiles\FooInterface::class], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testMultipleDirs() {
@@ -462,8 +462,8 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
             [SimpleServices\FooInterface::class, SimpleServices\FooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
-        $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectScalarDefinitions());
+        $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
     public function testServiceDelegate() {

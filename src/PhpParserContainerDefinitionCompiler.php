@@ -280,11 +280,11 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 return $this->setupMethods;
             }
 
-            public function getUseScalarDefinitions() : array {
+            public function getInjectScalarDefinitions() : array {
                 return $this->useScalarDefinitions;
             }
 
-            public function getUseServiceDefinitions() : array {
+            public function getInjectServiceDefinitions() : array {
                 return $this->useServiceDefinitions;
             }
 

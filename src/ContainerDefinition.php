@@ -40,12 +40,12 @@ interface ContainerDefinition {
     /**
      * @return InjectScalarDefinition[]
      */
-    public function getUseScalarDefinitions() : array;
+    public function getInjectScalarDefinitions() : array;
 
     /**
      * @return InjectServiceDefinition[]
      */
-    public function getUseServiceDefinitions() : array;
+    public function getInjectServiceDefinitions() : array;
 
     /**
      * @return ServiceDelegateDefinition[]

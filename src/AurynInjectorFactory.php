@@ -19,8 +19,8 @@ final class AurynInjectorFactory implements ContainerFactory {
     public function createInjector(ContainerDefinition $containerDefinition) : Injector {
         $injector = new Injector();
         $servicePrepareDefinitions = $containerDefinition->getServicePrepareDefinitions();
-        $useServiceDefinitions = $containerDefinition->getUseServiceDefinitions();
-        $useScalarDefinitions = $containerDefinition->getUseScalarDefinitions();
+        $useServiceDefinitions = $containerDefinition->getInjectServiceDefinitions();
+        $useScalarDefinitions = $containerDefinition->getInjectScalarDefinitions();
         $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
 
         foreach ($containerDefinition->getSharedServiceDefinitions() as $serviceDefinition) {

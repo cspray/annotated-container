@@ -61,7 +61,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         }
 
         $injectScalarDefinitions = [];
-        foreach ($containerDefinition->getUseScalarDefinitions() as $injectScalarDefinition) {
+        foreach ($containerDefinition->getInjectScalarDefinitions() as $injectScalarDefinition) {
             $injectScalarDefinitions[] = [
                 'type' => $injectScalarDefinition->getType(),
                 'method' => $injectScalarDefinition->getMethod(),
@@ -72,7 +72,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         }
 
         $injectServiceDefinitions = [];
-        foreach ($containerDefinition->getUseServiceDefinitions() as $injectServiceDefinition) {
+        foreach ($containerDefinition->getInjectServiceDefinitions() as $injectServiceDefinition) {
             $injectServiceDefinitions[] = [
                 'type' => $injectServiceDefinition->getType(),
                 'method' => $injectServiceDefinition->getMethod(),
@@ -196,11 +196,11 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 return $this->servicePrepareDefinitions;
             }
 
-            public function getUseScalarDefinitions(): array {
+            public function getInjectScalarDefinitions(): array {
                 return $this->useScalarDefinitions;
             }
 
-            public function getUseServiceDefinitions(): array {
+            public function getInjectServiceDefinitions(): array {
                 return $this->useServiceDefinitions;
             }
 
