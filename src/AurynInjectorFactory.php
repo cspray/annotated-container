@@ -30,16 +30,16 @@ final class AurynInjectorFactory implements ContainerFactory {
         $aliasedTypes = [];
         $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
-            if (!in_array($aliasDefinition->getOriginalServiceDefinition(), $aliasedTypes)) {
+            if (!in_array($aliasDefinition->getAbstractService(), $aliasedTypes)) {
                 // We are intentionally taking the stance that if there are more than 1 alias possible that it is up
                 // to the developer to properly instantiate the Service. The caller could presume to provide a specific
                 // parameter to the make() call or could potentially have another piece of code that interacts with the
                 // Injector to define these kind of parameters
-                $typeAliasDefinitions = self::mapTypesAliasDefinitions($aliasDefinition->getOriginalServiceDefinition()->getType(), $aliasDefinitions);
+                $typeAliasDefinitions = self::mapTypesAliasDefinitions($aliasDefinition->getAbstractService()->getType(), $aliasDefinitions);
                 if (count($typeAliasDefinitions) === 1) {
                     $injector->alias(
-                        $typeAliasDefinitions[0]->getOriginalServiceDefinition()->getType(),
-                        $typeAliasDefinitions[0]->getAliasServiceDefinition()->getType()
+                        $typeAliasDefinitions[0]->getAbstractService()->getType(),
+                        $typeAliasDefinitions[0]->getConcreteService()->getType()
                     );
                 }
             }
@@ -137,7 +137,7 @@ final class AurynInjectorFactory implements ContainerFactory {
         $aliases = [];
         /** @var AliasDefinition $aliasDefinition */
         foreach ($aliasDefinitions as $aliasDefinition) {
-            if ($aliasDefinition->getOriginalServiceDefinition()->getType() === $type) {
+            if ($aliasDefinition->getAbstractService()->getType() === $type) {
                 $aliases[] = $aliasDefinition;
             }
         }

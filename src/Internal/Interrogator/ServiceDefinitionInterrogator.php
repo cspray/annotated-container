@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Internal\Interrogator;
 
 use Cspray\AnnotatedContainer\AliasDefinition;
+use Cspray\AnnotatedContainer\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Generator;
 
@@ -41,7 +42,7 @@ final class ServiceDefinitionInterrogator {
                 $forEnvironment = $this->isServiceDefinitionForActiveProfile($serviceDefinition);
                 if ($hasImplementations && $forEnvironment) {
                     foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
-                        yield new AliasDefinition($implementedService, $serviceDefinition);
+                        yield AliasDefinitionBuilder::forAbstract($implementedService)->withConcrete($serviceDefinition)->build();
                     }
                 }
             }

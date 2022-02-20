@@ -33,10 +33,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $aliasDefinitions = [];
         foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
-            $originalKey = md5($aliasDefinition->getOriginalServiceDefinition()->getType());
-            $addCompiledServiceDefinition($originalKey, $aliasDefinition->getOriginalServiceDefinition());
-            $aliasKey = md5($aliasDefinition->getAliasServiceDefinition()->getType());
-            $addCompiledServiceDefinition($aliasKey, $aliasDefinition->getAliasServiceDefinition());
+            $originalKey = md5($aliasDefinition->getAbstractService()->getType());
+            $addCompiledServiceDefinition($originalKey, $aliasDefinition->getAbstractService());
+            $aliasKey = md5($aliasDefinition->getConcreteService()->getType());
+            $addCompiledServiceDefinition($aliasKey, $aliasDefinition->getConcreteService());
             $aliasDefinitions[] = [
                 'original' => $originalKey,
                 'alias' => $aliasKey
@@ -119,10 +119,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $aliasDefinitions = [];
         foreach ($data['aliasDefinitions'] as $aliasDefinition) {
-            $aliasDefinitions[] = new AliasDefinition(
-                $serviceDefinitions[$aliasDefinition['original']],
-                $serviceDefinitions[$aliasDefinition['alias']]
-            );
+            $aliasDefinitions[] = AliasDefinitionBuilder::forAbstract($serviceDefinitions[$aliasDefinition['original']])->withConcrete($serviceDefinitions[$aliasDefinition['alias']])->build();
         }
 
         $servicePrepareDefinitions = [];

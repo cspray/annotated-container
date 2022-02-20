@@ -522,8 +522,8 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         foreach ($aliasDefinitions as $aliasDefinition) {
             $this->assertInstanceOf(AliasDefinition::class, $aliasDefinition);
             $actualMap[] = [
-                $aliasDefinition->getOriginalServiceDefinition()->getType(),
-                $aliasDefinition->getAliasServiceDefinition()->getType()
+                $aliasDefinition->getAbstractService()->getType(),
+                $aliasDefinition->getConcreteService()->getType()
             ];
         }
 
