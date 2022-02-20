@@ -12,6 +12,7 @@ use Cspray\AnnotatedContainer\Internal\Visitor\InjectScalarDefinitionVisitor;
 use Cspray\AnnotatedContainer\Internal\Visitor\InjectServiceDefinitionVisitor;
 use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor;
 use Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor;
+use InvalidArgumentException;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;
@@ -39,6 +40,18 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     }
 
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
+        if (empty($containerDefinitionCompileOptions->getScanDirectories())) {
+            throw new InvalidArgumentException(sprintf(
+                'The ContainerDefinitionCompileOptions passed to %s must include at least 1 directory to scan, but none were provided.',
+                self::class
+            ));
+        } else if (empty($containerDefinitionCompileOptions->getProfiles())) {
+            throw new InvalidArgumentException(sprintf(
+                'The ContainerDefinitionCompileOptions passed to %s must include at least 1 active profile, but none were provided.',
+                self::class
+            ));
+        }
+
         $rawServiceDefinitions = [];
         $rawServicePrepareDefinitions = [];
         $rawUseScalarDefinitions = [];

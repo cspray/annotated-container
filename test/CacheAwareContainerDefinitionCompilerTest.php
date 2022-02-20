@@ -41,7 +41,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     public function testFileDoesExistDoesNotCallCompiler() {
         $dir = __DIR__ . '/DummyApps/ProfileResolvedServices';
         $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->withProfiles('default')->build()
         );
         $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
@@ -75,7 +75,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('The cache directory, vfs://cache, could not be written to. Please ensure it exists and is writeable.');
 
-        $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build());
+        $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->withProfiles('default')->build());
     }
 
 

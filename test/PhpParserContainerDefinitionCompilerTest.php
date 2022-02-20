@@ -40,7 +40,7 @@ use PHPUnit\Framework\TestCase;
  * @covers \Cspray\AnnotatedContainer\InjectScalarDefinition
  * @covers \Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor
  */
-class PhpParserInjectorDefinitionCompilerTest extends TestCase {
+class PhpParserContainerDefinitionCompilerTest extends TestCase {
 
     private PhpParserContainerDefinitionCompiler $subject;
 
@@ -485,6 +485,18 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertServicePrepareTypes([
             [ServicePrepareNotService\FooImplementation::class, 'postConstruct']
         ], $containerDefinition->getServicePrepareDefinitions());
+    }
+
+    public function testEmptyScanDirectoriesThrowsException() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . PhpParserContainerDefinitionCompiler::class . ' must include at least 1 directory to scan, but none were provided.');
+        $this->runCompileDirectory([]);
+    }
+
+    public function testEmptyProfilesThrowsException() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . PhpParserContainerDefinitionCompiler::class . ' must include at least 1 active profile, but none were provided.');
+        $this->runCompileDirectory([__DIR__ . '/DummyApps/SimpleServices'], []);
     }
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
