@@ -4,6 +4,6 @@ namespace Cspray\AnnotatedContainer;
 
 interface ContainerDefinitionCompiler {
 
-    public function compileDirectory(string $environment, array|string $dirs) : ContainerDefinition;
+    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition;
 
 }

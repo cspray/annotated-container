@@ -12,16 +12,6 @@ use Attribute;
  * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class Service {
-
-    public function __construct(
-        /**
-         * The environment in which this service is used; if no environments are provided the service is used for all
-         * environments.
-         *
-         * Please be sure to review the README's details on multiple alias resolution with the environment.
-         */
-        private array $environments = []
-    ) {}
+final class Service {
 
 }

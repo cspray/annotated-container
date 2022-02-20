@@ -6,7 +6,7 @@ use Cspray\AnnotatedContainer\DummyApps\AbstractSharedServices;
 use Cspray\AnnotatedContainer\DummyApps\ClassOnlyServices;
 use Cspray\AnnotatedContainer\DummyApps\ClassOverridesInterfaceServicePrepare;
 use Cspray\AnnotatedContainer\DummyApps\ClassServicePrepareWithoutInterfaceServicePrepare;
-use Cspray\AnnotatedContainer\DummyApps\EnvironmentResolvedServices;
+use Cspray\AnnotatedContainer\DummyApps\ProfileResolvedServices;
 use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceFactory;
 use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceInterface;
@@ -48,8 +48,11 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->subject = new PhpParserContainerDefinitionCompiler();
     }
 
-    private function runCompileDirectory(string|array $dir, string $environment = 'test') : ContainerDefinition {
-        return $this->subject->compileDirectory($environment, $dir);
+    private function runCompileDirectory(array|string $dir, array $profiles = ['default']) : ContainerDefinition {
+        if (is_string($dir)) {
+            $dir = [$dir];
+        }
+        return $this->subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dir)->withProfiles(...$profiles)->build());
     }
 
     public function testSimpleServices() {
@@ -65,6 +68,14 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getUseServiceDefinitions());
+    }
+
+    public function testSimpleServicesHasDefaultProfile() {
+        $containerDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/SimpleServices');
+
+        $this->assertCount(2, $containerDefinition->getSharedServiceDefinitions());
+        $this->assertEquals(['default'], $containerDefinition->getSharedServiceDefinitions()[0]->getProfiles());
+        $this->assertEquals(['default'], $containerDefinition->getSharedServiceDefinitions()[1]->getProfiles());
     }
 
     public function testMultipleSimpleServices() {
@@ -101,14 +112,14 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testEnvironmentResolvedServicesTest() {
-        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ProfileResolvedServices', ['default', 'test']);
 
         $this->assertServiceDefinitionsHaveTypes([
-            EnvironmentResolvedServices\FooInterface::class,
-            EnvironmentResolvedServices\TestFooImplementation::class
+            ProfileResolvedServices\FooInterface::class,
+            ProfileResolvedServices\TestFooImplementation::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\TestFooImplementation::class]
+            [ProfileResolvedServices\FooInterface::class, ProfileResolvedServices\TestFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
@@ -116,14 +127,14 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testEnvironmentResolvedServicesDev() {
-        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'dev');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ProfileResolvedServices', ['default', 'dev']);
 
         $this->assertServiceDefinitionsHaveTypes([
-            EnvironmentResolvedServices\FooInterface::class,
-            EnvironmentResolvedServices\DevFooImplementation::class,
+            ProfileResolvedServices\FooInterface::class,
+            ProfileResolvedServices\DevFooImplementation::class,
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\DevFooImplementation::class]
+            [ProfileResolvedServices\FooInterface::class, ProfileResolvedServices\DevFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());
@@ -131,14 +142,14 @@ class PhpParserInjectorDefinitionCompilerTest extends TestCase {
     }
 
     public function testEnvironmentResolvedServicesProd() {
-        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/EnvironmentResolvedServices', 'prod');
+        $injectorDefinition = $this->runCompileDirectory(__DIR__ . '/DummyApps/ProfileResolvedServices', ['default', 'prod']);
 
         $this->assertServiceDefinitionsHaveTypes([
-            EnvironmentResolvedServices\FooInterface::class,
-            EnvironmentResolvedServices\ProdFooImplementation::class
+            ProfileResolvedServices\FooInterface::class,
+            ProfileResolvedServices\ProdFooImplementation::class
         ], $injectorDefinition->getSharedServiceDefinitions());
         $this->assertAliasDefinitionsMap([
-            [EnvironmentResolvedServices\FooInterface::class, EnvironmentResolvedServices\ProdFooImplementation::class]
+            [ProfileResolvedServices\FooInterface::class, ProfileResolvedServices\ProdFooImplementation::class]
         ], $injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertEmpty($injectorDefinition->getUseScalarDefinitions());

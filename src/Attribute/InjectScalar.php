@@ -14,7 +14,7 @@ use Attribute;
  * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
-class InjectScalar {
+final class InjectScalar {
 
     public function __construct(
         private string|int|float|bool|array $value

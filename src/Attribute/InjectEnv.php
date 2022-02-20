@@ -14,7 +14,7 @@ use Attribute;
  * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
-class InjectEnv {
+final class InjectEnv {
 
     public function __construct(private string $envVar) {}
 

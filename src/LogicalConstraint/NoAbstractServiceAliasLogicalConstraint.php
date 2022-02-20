@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\LogicalConstraint;
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 
-class NoAbstractServiceAliasLogicalConstraint implements LogicalConstraint {
+final class NoAbstractServiceAliasLogicalConstraint implements LogicalConstraint {
 
     public function getConstraintViolations(ContainerDefinition $containerDefinition): LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();

@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\Attribute;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD)]
-class ServiceDelegate {
+final class ServiceDelegate {
 
     private string $forService;
 

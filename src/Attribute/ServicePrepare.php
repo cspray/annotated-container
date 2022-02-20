@@ -11,6 +11,6 @@ use Attribute;
  * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_METHOD)]
-class ServicePrepare {
+final class ServicePrepare {
 
 }

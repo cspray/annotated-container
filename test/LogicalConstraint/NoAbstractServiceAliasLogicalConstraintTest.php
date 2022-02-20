@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +18,9 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     }
 
     public function testViolationsForNoInterfaceServiceAlias() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('test', dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias');
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->withProfiles('default')->build()
+        );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
         $this->assertCount(1, $violations);
@@ -32,7 +35,9 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     }
 
     public function testViolationsForNoAbstractServiceAlias() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('test', dirname(__DIR__) . '/LogicalErrorApps/NoAbstractServiceAlias');
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoAbstractServiceAlias')->withProfiles('default')->build()
+        );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
         $this->assertCount(1, $violations);
@@ -47,7 +52,9 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     }
 
     public function testNoViolationsForInterfaceWithServiceAlias() {
-        $containerDefinition = $this->containerDefinitionCompiler->compileDirectory('test', dirname(__DIR__) . '/DummyApps/SimpleServices');
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/DummyApps/SimpleServices')->withProfiles('default')->build()
+        );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
         $this->assertCount(0, $violations);

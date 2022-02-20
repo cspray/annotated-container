@@ -23,6 +23,7 @@ use FilesystemIterator;
 use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 
 /**
  * @package Cspray\AnnotatedContainer
@@ -37,17 +38,14 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         $this->nodeTraverser = new NodeTraverser();
     }
 
-    public function compileDirectory(string $environment, array|string $dirs) : ContainerDefinition {
+    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
         $rawServiceDefinitions = [];
         $rawServicePrepareDefinitions = [];
         $rawUseScalarDefinitions = [];
         $rawUseServiceDefinitions = [];
         $rawServiceDelegateDefinitions = [];
-        if (is_string($dirs)) {
-            $dirs = [$dirs];
-        }
         /** @var Node $node */
-        foreach ($this->gatherDefinitions($dirs) as $rawDefinition) {
+        foreach ($this->gatherDefinitions($containerDefinitionCompileOptions->getScanDirectories()) as $rawDefinition) {
             if ($rawDefinition['definitionType'] === ServiceDefinition::class) {
                 $rawServiceDefinitions[] = $rawDefinition;
             } else if ($rawDefinition['definitionType'] === ServicePrepareDefinition::class) {
@@ -61,7 +59,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             }
         }
         $serviceDefinitionInterrogator = new ServiceDefinitionInterrogator(
-            $environment,
+            $containerDefinitionCompileOptions->getProfiles(),
             ...$this->marshalRawServiceDefinitions($rawServiceDefinitions)
         );
         $servicePrepareInterrogator = new ServicePrepareDefinitionInterrogator(
@@ -102,7 +100,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
 
             $marshaledDefinitions[] = new ServiceDefinition(
                 $rawServiceDefinition['type'],
-                $rawServiceDefinition['environments'],
+                $rawServiceDefinition['profiles'],
                 $implementServiceDefinitions,
                 $extendedServiceDefinitions,
                 $rawServiceDefinition['isInterface'],
@@ -127,7 +125,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             if ($targetType === $rawServiceDefinition['type']) {
                 $serviceDefinition = new ServiceDefinition(
                     $rawServiceDefinition['type'],
-                    $rawServiceDefinition['environments'],
+                    $rawServiceDefinition['profiles'],
                     $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['implements']),
                     $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['extends']),
                     $rawServiceDefinition['isInterface'],
@@ -200,7 +198,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 )
             );
 
-            /** @var \SplFileInfo $file */
+            /** @var SplFileInfo $file */
             foreach ($dirIterator as $file) {
                 if ($file->isDir() || $file->getExtension() !== 'php') {
                     continue;

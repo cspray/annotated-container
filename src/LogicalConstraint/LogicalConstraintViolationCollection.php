@@ -7,7 +7,7 @@ use Countable;
 use IteratorAggregate;
 use Traversable;
 
-class LogicalConstraintViolationCollection implements Countable, IteratorAggregate {
+final class LogicalConstraintViolationCollection implements Countable, IteratorAggregate {
 
     private array $constraintViolations = [];
 
