@@ -47,16 +47,17 @@ final class AurynInjectorFactory implements ContainerFactory {
 
         $preparedTypes = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
-            if (!in_array($servicePrepareDefinition->getType(), $preparedTypes)) {
-                $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $useScalarDefinitions, $useServiceDefinitions) {
-                    $methods = self::mapTypesServicePrepares($servicePrepareDefinition->getType(), $servicePrepareDefinitions);
+            $type = $servicePrepareDefinition->getService()->getType();
+            if (!in_array($type, $preparedTypes)) {
+                $injector->prepare($type, function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $useScalarDefinitions, $useServiceDefinitions, $type) {
+                    $methods = self::mapTypesServicePrepares($type, $servicePrepareDefinitions);
                     foreach ($methods as $method) {
-                        $scalarArgs = self::mapTypesScalarArgs($servicePrepareDefinition->getType(), $method, $useScalarDefinitions);
-                        $serviceArgs = self::mapTypesServiceArgs($servicePrepareDefinition->getType(), $method, $useServiceDefinitions);
+                        $scalarArgs = self::mapTypesScalarArgs($type, $method, $useScalarDefinitions);
+                        $serviceArgs = self::mapTypesServiceArgs($type, $method, $useServiceDefinitions);
                         $injector->execute([$object, $method], array_merge([], $scalarArgs, $serviceArgs));
                     }
                 });
-                $preparedTypes[] = $servicePrepareDefinition->getType();
+                $preparedTypes[] = $type;
             }
         }
 
@@ -126,7 +127,7 @@ final class AurynInjectorFactory implements ContainerFactory {
         $methods = [];
         /** @var ServicePrepareDefinition $servicePrepareDefinition */
         foreach ($servicePreparesDefinition as $servicePrepareDefinition) {
-            if ($servicePrepareDefinition->getType() === $type) {
+            if ($servicePrepareDefinition->getService()->getType() === $type) {
                 $methods[] = $servicePrepareDefinition->getMethod();
             }
         }

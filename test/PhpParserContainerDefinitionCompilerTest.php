@@ -478,13 +478,10 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertSame(ServiceInterface::class, $serviceDelegateDefinition->getServiceType()->getType());
     }
 
-    public function testServicePrepareNotOnServiceCompilesCorrectly() {
-        $containerDefinition = $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
-
-        $this->assertEmpty($containerDefinition->getServiceDefinitions());
-        $this->assertServicePrepareTypes([
-            [ServicePrepareNotService\FooImplementation::class, 'postConstruct']
-        ], $containerDefinition->getServicePrepareDefinitions());
+    public function testServicePrepareNotOnServiceThrowsException() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The #[ServicePrepare] Attribute on ' . LogicalErrorApps\ServicePrepareNotService\FooImplementation::class . '::postConstruct is not on a type marked as a #[Service].');;
+        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
     }
 
     public function testEmptyScanDirectoriesThrowsException() {
@@ -540,7 +537,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $actualMap = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             $this->assertInstanceOf(ServicePrepareDefinition::class, $servicePrepareDefinition);
-            $key = $servicePrepareDefinition->getType();
+            $key = $servicePrepareDefinition->getService()->getType();
             $actualMap[] = [$key, $servicePrepareDefinition->getMethod()];
         }
 

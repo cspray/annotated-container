@@ -78,7 +78,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         );
         $servicePrepareInterrogator = new ServicePrepareDefinitionInterrogator(
             $serviceDefinitionInterrogator,
-            ...$this->marshalRawServicePrepareDefinitions($rawServicePrepareDefinitions)
+            ...$this->marshalRawServicePrepareDefinitions($serviceDefinitions, $rawServicePrepareDefinitions)
         );
         $useScalarInterrogator = new InjectScalarDefinitionInterrogator(
             ...$this->marshalRawUseScalarDefinitions($serviceDefinitions, $rawUseScalarDefinitions)
@@ -163,13 +163,24 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         return $serviceDefinition;
     }
 
-    private function marshalRawServicePrepareDefinitions(array $rawServicePrepareDefinitions) : array {
+    private function marshalRawServicePrepareDefinitions(array $serviceDefinitions, array $rawServicePrepareDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawServicePrepareDefinitions as $rawServicePrepareDefinition) {
-            $marshaledDefinitions[] = new ServicePrepareDefinition(
-                $rawServicePrepareDefinition['type'],
-                $rawServicePrepareDefinition['method']
-            );
+            $service = null;
+            foreach ($serviceDefinitions as $serviceDefinition) {
+                if ($serviceDefinition->getType() === $rawServicePrepareDefinition['type']) {
+                    $service = $serviceDefinition;
+                    break;
+                }
+            }
+            if (is_null($service)) {
+                throw new InvalidArgumentException(sprintf(
+                    'The #[ServicePrepare] Attribute on %s::%s is not on a type marked as a #[Service].',
+                    $rawServicePrepareDefinition['type'],
+                    $rawServicePrepareDefinition['method']
+                ));
+            }
+            $marshaledDefinitions[] = ServicePrepareDefinitionBuilder::forMethod($service, $rawServicePrepareDefinition['method'])->build();
         }
         return $marshaledDefinitions;
     }

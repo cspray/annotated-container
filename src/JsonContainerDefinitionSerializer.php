@@ -46,7 +46,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $servicePrepareDefinitions = [];
         foreach ($containerDefinition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
             $servicePrepareDefinitions[] = [
-                'type' => $servicePrepareDefinition->getType(),
+                'type' => $servicePrepareDefinition->getService()->getType(),
                 'method' => $servicePrepareDefinition->getMethod()
             ];
         }
@@ -124,10 +124,8 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $servicePrepareDefinitions = [];
         foreach ($data['servicePrepareDefinitions'] as $servicePrepareDefinition) {
-            $servicePrepareDefinitions[] = new ServicePrepareDefinition(
-                $servicePrepareDefinition['type'],
-                $servicePrepareDefinition['method']
-            );
+            $service = $serviceDefinitions[md5($servicePrepareDefinition['type'])];
+            $servicePrepareDefinitions[] = ServicePrepareDefinitionBuilder::forMethod($service, $servicePrepareDefinition['method'])->build();
         }
 
         $useScalarDefinitions = [];
