@@ -268,7 +268,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 private array $serviceDelegateDefinitions
             ) {}
 
-            public function getSharedServiceDefinitions() : array {
+            public function getServiceDefinitions() : array {
                 return $this->services;
             }
 

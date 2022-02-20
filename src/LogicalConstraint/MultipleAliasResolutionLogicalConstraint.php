@@ -10,7 +10,7 @@ final class MultipleAliasResolutionLogicalConstraint implements LogicalConstrain
 
     public function getConstraintViolations(ContainerDefinition $containerDefinition): LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();
-        foreach ($containerDefinition->getSharedServiceDefinitions() as $serviceDefinition) {
+        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             $aliasCount = $this->getAliasCount($containerDefinition, $serviceDefinition);
             if ($aliasCount > 1) {
                 $collection->add(new LogicalConstraintViolation(

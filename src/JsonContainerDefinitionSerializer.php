@@ -34,7 +34,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             }
         };
         $serviceDefinitions = [];
-        foreach ($containerDefinition->getSharedServiceDefinitions() as $serviceDefinition) {
+        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             $key = md5($serviceDefinition->getType());
             $addCompiledServiceDefinition($key, $serviceDefinition);
             $serviceDefinitions[] = $key;
@@ -184,7 +184,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 private array $serviceDelegateDefinitions
             ) {}
 
-            public function getSharedServiceDefinitions(): array {
+            public function getServiceDefinitions(): array {
                 return $this->sharedServiceDefinitions;
             }
 

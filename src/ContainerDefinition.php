@@ -18,7 +18,7 @@ interface ContainerDefinition {
      *
      * @return ServiceDefinition[]
      */
-    public function getSharedServiceDefinitions() : array;
+    public function getServiceDefinitions() : array;
 
     /**
      * Returns a set of AliasDefinition that define which concrete implementations are meant to be used for a given
