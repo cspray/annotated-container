@@ -39,8 +39,8 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
-        $subject = $injector->make(SimpleServices\FooInterface::class);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $subject = $injector->get(SimpleServices\FooInterface::class);
 
         $this->assertInstanceOf(SimpleServices\FooImplementation::class, $subject);
     }
@@ -52,9 +52,9 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $subject = $injector->make(InterfaceServicePrepare\FooInterface::class);
+        $subject = $injector->get(InterfaceServicePrepare\FooInterface::class);
 
         $this->assertInstanceOf(InterfaceServicePrepare\FooImplementation::class, $subject);
         $this->assertEquals(1, $subject->getBarCounter());
@@ -67,9 +67,9 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $subject = $injector->make(InjectorExecuteServicePrepare\FooInterface::class);
+        $subject = $injector->get(InjectorExecuteServicePrepare\FooInterface::class);
 
         $this->assertInstanceOf(InjectorExecuteServicePrepare\FooImplementation::class, $subject);
         $this->assertInstanceOf(InjectorExecuteServicePrepare\BarImplementation::class, $subject->getBar());
@@ -82,9 +82,9 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $subject = $injector->make(SimpleUseScalar\FooImplementation::class);
+        $subject = $injector->get(SimpleUseScalar\FooImplementation::class);
 
         $this->assertSame('string param test value', $subject->stringParam);
         $this->assertSame(42, $subject->intParam);
@@ -99,9 +99,9 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $subject = $injector->make(MultipleUseScalars\FooImplementation::class);
+        $subject = $injector->get(MultipleUseScalars\FooImplementation::class);
 
         $this->assertSame('constructor param', $subject->stringParam);
         $this->assertSame('prepare param', $subject->prepareParam);
@@ -116,9 +116,9 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $subject = $injector->make(ConstantUseScalar\FooImplementation::class);
+        $subject = $injector->get(ConstantUseScalar\FooImplementation::class);
 
         $this->assertSame('foo_bar_val', $subject->val);
     }
@@ -130,9 +130,9 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $subject = $injector->make(SimpleUseScalarFromEnv\FooImplementation::class);
+        $subject = $injector->get(SimpleUseScalarFromEnv\FooImplementation::class);
 
         $this->assertSame(getenv('USER'), $subject->user);
     }
@@ -144,9 +144,9 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $subject = $injector->make(SimpleUseService\SetterInjection::class);
+        $subject = $injector->get(SimpleUseService\SetterInjection::class);
 
         $this->assertInstanceOf(SimpleUseService\BazImplementation::class, $subject->baz);
         $this->assertInstanceOf(SimpleUseService\BarImplementation::class, $subject->bar);
@@ -160,9 +160,9 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $subject = $injector->make(SimpleUseService\ConstructorInjection::class);
+        $subject = $injector->get(SimpleUseService\ConstructorInjection::class);
 
         $this->assertInstanceOf(SimpleUseService\BazImplementation::class, $subject->baz);
         $this->assertInstanceOf(SimpleUseService\BarImplementation::class, $subject->bar);
@@ -176,10 +176,10 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
         $this->expectException(InjectionException::class);
-        $injector->make(MultipleAliasResolution\FooInterface::class);
+        $injector->get(MultipleAliasResolution\FooInterface::class);
     }
 
     public function testServiceDelegate() {
@@ -189,11 +189,24 @@ class AurynInjectorFactoryTest extends TestCase {
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $service = $injector->make(ServiceInterface::class);
+        $service = $injector->get(ServiceInterface::class);
 
         $this->assertSame('From ServiceFactory From FooService', $service->getValue());
+    }
+
+    public function testHasServiceIfCompiled() {
+        $compiler = new PhpParserContainerDefinitionCompiler();
+        $injectorDefinition = $compiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories( __DIR__ . '/DummyApps/SimpleServices')
+                ->withProfiles('default')
+                ->build()
+        );
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+
+        $this->assertTrue($injector->has(DummyApps\SimpleServices\FooInterface::class));
+        $this->assertFalse($injector->has(DummyApps\MultipleSimpleServices\FooInterface::class));
     }
 
 }
