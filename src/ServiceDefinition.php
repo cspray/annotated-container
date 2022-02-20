@@ -7,54 +7,47 @@ namespace Cspray\AnnotatedContainer;
  *
  * @package Cspray\AnnotatedContainer
  */
-final class ServiceDefinition {
-
-    public function __construct(
-        private string $type,
-        private array $profiles,
-        private array $implementedServices,
-        private array $extendedServices,
-        private bool $isInterface,
-        private bool $isAbstract,
-    ) {}
-
-    public function getType() : string {
-        return $this->type;
-    }
+interface ServiceDefinition {
 
     /**
-     * Returns an array of ServiceDefinition for each Service interface implemented.
+     * Returns the fully-qualified class/interface name for the given Service.
      *
-     * Please note that this IS NOT an exhaustive list of every possible interface for the given $type. Instead it only
-     * lists those that interfaces that the $type implements that are also annotated with the Service attribute.
+     * @return string
+     */
+    public function getType() : string;
+
+    /**
+     * Returns an array of ServiceDefinition for each Service interface or abstract class implemented.
+     *
+     * Please note that this IS NOT an exhaustive list of every possible interface for the given $type. Instead, it only
+     * lists those interfaces or abstract classes that the $type implements that are also annotated with the Service attribute.
      *
      * @return ServiceDefinition[]
      */
-    public function getImplementedServices() : array {
-        return $this->implementedServices;
-    }
+    public function getImplementedServices() : array;
 
     /**
-     * @return ServiceDefinition[]
+     * Returns an array of profiles that this service is attached to.
+     *
+     * A ServiceDefinition MUST have at least 1 profile; if a profile is not explicitly set for a given Service it should
+     * be given the 'default' profile.
+     *
+     * @return string[]
      */
-    public function getExtendedServices() : array {
-        return $this->extendedServices;
-    }
+    public function getProfiles() : array;
 
-    public function getProfiles() : array {
-        return $this->profiles;
-    }
+    /**
+     * Returns whether the defined Service is a concrete class that can be instantiated.
+     *
+     * @return bool
+     */
+    public function isConcrete() : bool;
 
-    public function isInterface() : bool {
-        return $this->isInterface;
-    }
-
-    public function isClass() : bool {
-        return !$this->isInterface;
-    }
-
-    public function isAbstract() : bool {
-        return $this->isClass() && $this->isAbstract;
-    }
+    /**
+     * Returns whether the defined Service is an abstract class or interface that cannot be instantiated.
+     *
+     * @return bool
+     */
+    public function isAbstract() : bool;
 
 }

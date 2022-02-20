@@ -71,22 +71,23 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 $rawServiceDelegateDefinitions[] = $rawDefinition;
             }
         }
+        $serviceDefinitions = $this->marshalRawServiceDefinitions($rawServiceDefinitions);
         $serviceDefinitionInterrogator = new ServiceDefinitionInterrogator(
             $containerDefinitionCompileOptions->getProfiles(),
-            ...$this->marshalRawServiceDefinitions($rawServiceDefinitions)
+            ...$serviceDefinitions
         );
         $servicePrepareInterrogator = new ServicePrepareDefinitionInterrogator(
             $serviceDefinitionInterrogator,
-            ...$this->marshalRawServicePrepareDefinitions($rawServicePrepareDefinitions)
+            ...$this->marshalRawServicePrepareDefinitions($serviceDefinitions, $rawServicePrepareDefinitions)
         );
         $useScalarInterrogator = new InjectScalarDefinitionInterrogator(
-            ...$this->marshalRawUseScalarDefinitions($rawUseScalarDefinitions)
+            ...$this->marshalRawUseScalarDefinitions($serviceDefinitions, $rawUseScalarDefinitions)
         );
         $useServiceInterrogator = new InjectServiceDefinitionInterrogator(
-            ...$this->marshalRawUseServiceDefinitions($rawUseServiceDefinitions)
+            ...$this->marshalRawUseServiceDefinitions($serviceDefinitions, $rawUseServiceDefinitions)
         );
         $serviceDelegateInterrogator = new ServiceDelegateDefinitionInterrogator(
-            ...$this->marshalRawServiceDelegateDefinitions($rawServiceDelegateDefinitions)
+            ...$this->marshalRawServiceDelegateDefinitions($serviceDefinitions, $rawServiceDelegateDefinitions)
         );
 
         return $this->interrogateDefinitions(
@@ -111,14 +112,20 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 $rawServiceDefinition['extends']
             );
 
-            $marshaledDefinitions[] = new ServiceDefinition(
-                $rawServiceDefinition['type'],
-                $rawServiceDefinition['profiles'],
-                $implementServiceDefinitions,
-                $extendedServiceDefinitions,
-                $rawServiceDefinition['isInterface'],
-                $rawServiceDefinition['isAbstract'],
-            );
+            if ($rawServiceDefinition['isAbstract'] || $rawServiceDefinition['isInterface']) {
+                $factoryMethod = 'forAbstract';
+            } else {
+                $factoryMethod = 'forConcrete';
+            }
+
+            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($rawServiceDefinition['type'])
+                ->withProfiles(...$rawServiceDefinition['profiles']);
+
+            foreach (array_merge($implementServiceDefinitions, $extendedServiceDefinitions) as $serviceDefinition) {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($serviceDefinition);
+            }
+
+            $marshaledDefinitions[] = $serviceDefinitionBuilder->build();
         }
 
         return $marshaledDefinitions;
@@ -136,66 +143,99 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         $serviceDefinition = null;
         foreach ($rawServiceDefinitions as $rawServiceDefinition) {
             if ($targetType === $rawServiceDefinition['type']) {
-                $serviceDefinition = new ServiceDefinition(
-                    $rawServiceDefinition['type'],
-                    $rawServiceDefinition['profiles'],
-                    $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['implements']),
-                    $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['extends']),
-                    $rawServiceDefinition['isInterface'],
-                    $rawServiceDefinition['isAbstract']
-                );
+                if ($rawServiceDefinition['isAbstract'] || $rawServiceDefinition['isInterface']) {
+                    $factoryMethod = 'forAbstract';
+                } else {
+                    $factoryMethod = 'forConcrete';
+                }
+                $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($rawServiceDefinition['type'])
+                    ->withProfiles(...$rawServiceDefinition['profiles']);
+                $implements = $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['implements']);
+                $extends = $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['extends']);
+
+                foreach (array_merge($implements, $extends) as $implementedService) {
+                    $serviceDefinitionBuilder->withImplementedService($implementedService);
+                }
+
+                $serviceDefinition = $serviceDefinitionBuilder->build();
             }
         }
         return $serviceDefinition;
     }
 
-    private function marshalRawServicePrepareDefinitions(array $rawServicePrepareDefinitions) : array {
+    private function marshalRawServicePrepareDefinitions(array $serviceDefinitions, array $rawServicePrepareDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawServicePrepareDefinitions as $rawServicePrepareDefinition) {
-            $marshaledDefinitions[] = new ServicePrepareDefinition(
-                $rawServicePrepareDefinition['type'],
-                $rawServicePrepareDefinition['method']
-            );
+            $service = null;
+            foreach ($serviceDefinitions as $serviceDefinition) {
+                if ($serviceDefinition->getType() === $rawServicePrepareDefinition['type']) {
+                    $service = $serviceDefinition;
+                    break;
+                }
+            }
+            if (is_null($service)) {
+                throw new InvalidArgumentException(sprintf(
+                    'The #[ServicePrepare] Attribute on %s::%s is not on a type marked as a #[Service].',
+                    $rawServicePrepareDefinition['type'],
+                    $rawServicePrepareDefinition['method']
+                ));
+            }
+            $marshaledDefinitions[] = ServicePrepareDefinitionBuilder::forMethod($service, $rawServicePrepareDefinition['method'])->build();
         }
         return $marshaledDefinitions;
     }
 
-    private function marshalRawUseScalarDefinitions(array $rawUseScalarDefinitions) : array {
+    private function marshalRawUseScalarDefinitions(array $serviceDefinitions, array $rawUseScalarDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawUseScalarDefinitions as $rawUseScalarDefinition) {
-            $marshaledDefinitions[] = new InjectScalarDefinition(
-                $rawUseScalarDefinition['type'],
-                $rawUseScalarDefinition['method'],
-                $rawUseScalarDefinition['param'],
-                $rawUseScalarDefinition['paramType'],
-                $rawUseScalarDefinition['value']
-            );
+            $injectScalarDefinition = null;
+            foreach ($serviceDefinitions as $serviceDefinition) {
+                if ($rawUseScalarDefinition['type'] === $serviceDefinition->getType()) {
+                    $injectScalarDefinition = $serviceDefinition;
+                    break;
+                }
+            }
+            $marshaledDefinitions[] = InjectScalarDefinitionBuilder::forMethod($injectScalarDefinition, $rawUseScalarDefinition['method'])
+                ->withParam(ScalarType::fromName($rawUseScalarDefinition['paramType']), $rawUseScalarDefinition['param'])
+                ->withValue($rawUseScalarDefinition['value'])
+                ->build();
         }
         return $marshaledDefinitions;
     }
 
-    private function marshalRawUseServiceDefinitions(array $rawUseServiceDefinitions) : array {
+    private function marshalRawUseServiceDefinitions(array $serviceDefinitions, array $rawUseServiceDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawUseServiceDefinitions as $rawUseServiceDefinition) {
-            $marshaledDefinitions[] = new InjectServiceDefinition(
-                $rawUseServiceDefinition['type'],
-                $rawUseServiceDefinition['method'],
-                $rawUseServiceDefinition['param'],
-                $rawUseServiceDefinition['paramType'],
-                $rawUseServiceDefinition['value']
-            );
+            $targetDefinition = null;
+            $injectDefinition = null;
+            foreach ($serviceDefinitions as $serviceDefinition) {
+                if ($rawUseServiceDefinition['type'] === $serviceDefinition->getType()) {
+                    $targetDefinition = $serviceDefinition;
+                } else if ($rawUseServiceDefinition['value'] === $serviceDefinition->getType()) {
+                    $injectDefinition = $serviceDefinition;
+                }
+            }
+            $marshaledDefinitions[] = InjectServiceDefinitionBuilder::forMethod($targetDefinition, $rawUseServiceDefinition['method'])
+                ->withParam($rawUseServiceDefinition['paramType'], $rawUseServiceDefinition['param'])
+                ->withInjectedService($injectDefinition)
+                ->build();
         }
         return $marshaledDefinitions;
     }
 
-    private function marshalRawServiceDelegateDefinitions(array $rawServiceDelegateDefinitions) : array {
+    private function marshalRawServiceDelegateDefinitions(array $serviceDefinitions, array $rawServiceDelegateDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawServiceDelegateDefinitions as $rawServiceDelegateDefinition) {
-            $marshaledDefinitions[] = new ServiceDelegateDefinition(
-                $rawServiceDelegateDefinition['delegateType'],
-                $rawServiceDelegateDefinition['delegateMethod'],
-                $rawServiceDelegateDefinition['serviceType']
-            );
+            $service = null;
+            foreach ($serviceDefinitions as $serviceDefinition) {
+                if ($serviceDefinition->getType() === $rawServiceDelegateDefinition['serviceType']) {
+                    $service = $serviceDefinition;
+                    break;
+                }
+            }
+            $marshaledDefinitions[] = ServiceDelegateDefinitionBuilder::forService($service)
+                ->withDelegateMethod($rawServiceDelegateDefinition['delegateType'], $rawServiceDelegateDefinition['delegateMethod'])
+                ->build();
         }
         return $marshaledDefinitions;
     }

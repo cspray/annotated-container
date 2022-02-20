@@ -7,20 +7,10 @@ namespace Cspray\AnnotatedContainer;
  *
  * @package Cspray\AnnotatedContainer
  */
-final class AliasDefinition {
+interface AliasDefinition {
 
-    public function __construct(
-        private ServiceDefinition $originalService,
-        private ServiceDefinition $aliasService
-    ) {}
+    public function getAbstractService() : ServiceDefinition;
 
-    public function getOriginalServiceDefinition() : ServiceDefinition {
-        return $this->originalService;
-    }
-
-    public function getAliasServiceDefinition() : ServiceDefinition {
-        return $this->aliasService;
-    }
-
+    public function getConcreteService() : ServiceDefinition;
 
 }

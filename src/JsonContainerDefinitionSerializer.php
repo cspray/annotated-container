@@ -15,21 +15,12 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                     $implementedServices[] = $implementedKey;
                 }
 
-                $extendedServices = [];
-                foreach ($serviceDefinition->getExtendedServices() as $extendedService) {
-                    $extendedKey = md5($extendedService->getType());
-                    $addCompiledServiceDefinition($extendedKey, $extendedService);
-                    $extendedServices[] = $extendedKey;
-                }
-
                 $compiledServiceDefinitions[$key] = [
                     'type' => $serviceDefinition->getType(),
                     'implementedServices' => $implementedServices,
-                    'extendedServices' => $extendedServices,
                     'profiles' => $serviceDefinition->getProfiles(),
-                    'isInterface' => $serviceDefinition->isInterface(),
-                    'isClass' => $serviceDefinition->isClass(),
-                    'isAbstract' => $serviceDefinition->isAbstract()
+                    'isAbstract' => $serviceDefinition->isAbstract(),
+                    'isConcrete' => $serviceDefinition->isConcrete(),
                 ];
             }
         };
@@ -42,10 +33,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $aliasDefinitions = [];
         foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
-            $originalKey = md5($aliasDefinition->getOriginalServiceDefinition()->getType());
-            $addCompiledServiceDefinition($originalKey, $aliasDefinition->getOriginalServiceDefinition());
-            $aliasKey = md5($aliasDefinition->getAliasServiceDefinition()->getType());
-            $addCompiledServiceDefinition($aliasKey, $aliasDefinition->getAliasServiceDefinition());
+            $originalKey = md5($aliasDefinition->getAbstractService()->getType());
+            $addCompiledServiceDefinition($originalKey, $aliasDefinition->getAbstractService());
+            $aliasKey = md5($aliasDefinition->getConcreteService()->getType());
+            $addCompiledServiceDefinition($aliasKey, $aliasDefinition->getConcreteService());
             $aliasDefinitions[] = [
                 'original' => $originalKey,
                 'alias' => $aliasKey
@@ -55,7 +46,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $servicePrepareDefinitions = [];
         foreach ($containerDefinition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
             $servicePrepareDefinitions[] = [
-                'type' => $servicePrepareDefinition->getType(),
+                'type' => $servicePrepareDefinition->getService()->getType(),
                 'method' => $servicePrepareDefinition->getMethod()
             ];
         }
@@ -63,10 +54,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $injectScalarDefinitions = [];
         foreach ($containerDefinition->getInjectScalarDefinitions() as $injectScalarDefinition) {
             $injectScalarDefinitions[] = [
-                'type' => $injectScalarDefinition->getType(),
+                'type' => $injectScalarDefinition->getService()->getType(),
                 'method' => $injectScalarDefinition->getMethod(),
                 'paramName' => $injectScalarDefinition->getParamName(),
-                'paramType' => $injectScalarDefinition->getParamType(),
+                'paramType' => strtolower($injectScalarDefinition->getParamType()->name),
                 'value' => $injectScalarDefinition->getValue()
             ];
         }
@@ -74,11 +65,11 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $injectServiceDefinitions = [];
         foreach ($containerDefinition->getInjectServiceDefinitions() as $injectServiceDefinition) {
             $injectServiceDefinitions[] = [
-                'type' => $injectServiceDefinition->getType(),
+                'type' => $injectServiceDefinition->getService()->getType(),
                 'method' => $injectServiceDefinition->getMethod(),
                 'paramName' => $injectServiceDefinition->getParamName(),
                 'paramType' => $injectServiceDefinition->getParamType(),
-                'value' => $injectServiceDefinition->getValue()
+                'value' => $injectServiceDefinition->getInjectedService()->getType()
             ];
         }
 
@@ -87,7 +78,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             $serviceDelegateDefinitions[] = [
                 'delegateType' => $serviceDelegateDefinition->getDelegateType(),
                 'delegateMethod' => $serviceDelegateDefinition->getDelegateMethod(),
-                'serviceType' => $serviceDelegateDefinition->getServiceType()
+                'serviceType' => $serviceDelegateDefinition->getServiceType()->getType()
             ];
         }
 
@@ -128,49 +119,40 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $aliasDefinitions = [];
         foreach ($data['aliasDefinitions'] as $aliasDefinition) {
-            $aliasDefinitions[] = new AliasDefinition(
-                $serviceDefinitions[$aliasDefinition['original']],
-                $serviceDefinitions[$aliasDefinition['alias']]
-            );
+            $aliasDefinitions[] = AliasDefinitionBuilder::forAbstract($serviceDefinitions[$aliasDefinition['original']])->withConcrete($serviceDefinitions[$aliasDefinition['alias']])->build();
         }
 
         $servicePrepareDefinitions = [];
         foreach ($data['servicePrepareDefinitions'] as $servicePrepareDefinition) {
-            $servicePrepareDefinitions[] = new ServicePrepareDefinition(
-                $servicePrepareDefinition['type'],
-                $servicePrepareDefinition['method']
-            );
+            $service = $serviceDefinitions[md5($servicePrepareDefinition['type'])];
+            $servicePrepareDefinitions[] = ServicePrepareDefinitionBuilder::forMethod($service, $servicePrepareDefinition['method'])->build();
         }
 
         $useScalarDefinitions = [];
         foreach ($data['injectScalarDefinitions'] as $useScalarDefinition) {
-            $useScalarDefinitions[] = new InjectScalarDefinition(
-                $useScalarDefinition['type'],
-                $useScalarDefinition['method'],
-                $useScalarDefinition['paramName'],
-                $useScalarDefinition['paramType'],
-                $useScalarDefinition['value']
-            );
+            $service = $serviceDefinitions[md5($useScalarDefinition['type'])];
+            $useScalarDefinitions[] = InjectScalarDefinitionBuilder::forMethod($service, $useScalarDefinition['method'])
+                ->withParam(ScalarType::String, $useScalarDefinition['paramName'])
+                ->withValue($useScalarDefinition['value'])
+                ->build();
         }
 
         $useServiceDefinitions = [];
         foreach ($data['injectServiceDefinitions'] as $useServiceDefinition) {
-            $useServiceDefinitions[] = new InjectServiceDefinition(
-                $useServiceDefinition['type'],
-                $useServiceDefinition['method'],
-                $useServiceDefinition['paramName'],
-                $useServiceDefinition['paramType'],
-                $useServiceDefinition['value']
-            );
+            $targetService = $serviceDefinitions[md5($useServiceDefinition['type'])];
+            $injectService = $serviceDefinitions[md5($useServiceDefinition['value'])];
+            $useServiceDefinitions[] = InjectServiceDefinitionBuilder::forMethod($targetService, $useServiceDefinition['method'])
+                ->withParam($useServiceDefinition['paramType'], $useServiceDefinition['paramName'])
+                ->withInjectedService($injectService)
+                ->build();
         }
 
         $serviceDelegateDefinitions = [];
         foreach ($data['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
-            $serviceDelegateDefinitions[] = new ServiceDelegateDefinition(
-                $serviceDelegateDefinition['delegateType'],
-                $serviceDelegateDefinition['delegateMethod'],
-                $serviceDelegateDefinition['serviceType']
-            );
+            $service = $serviceDefinitions[md5($serviceDelegateDefinition['serviceType'])];
+            $serviceDelegateDefinitions[] = ServiceDelegateDefinitionBuilder::forService($service)
+                ->withDelegateMethod($serviceDelegateDefinition['delegateType'], $serviceDelegateDefinition['delegateMethod'])
+                ->build();
         }
 
         return new class($sharedServiceDefinitions, $aliasDefinitions, $servicePrepareDefinitions, $useScalarDefinitions, $useServiceDefinitions, $serviceDelegateDefinitions) implements ContainerDefinition {
@@ -214,27 +196,21 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $serviceHash = md5($type);
         if (!isset($serviceDefinitionCacheMap[$serviceHash])) {
             $compiledServiceDefinition = $compiledServiceDefinitions[$serviceHash];
+            if ($compiledServiceDefinition['isAbstract']) {
+                $factoryMethod = 'forAbstract';
+            } else {
+                $factoryMethod = 'forConcrete';
+            }
+            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($type)->withProfiles(...$compiledServiceDefinition['profiles']);
 
-            $implementedServices = [];
             foreach ($compiledServiceDefinition['implementedServices'] as $implementedServiceHash) {
                 $implementedType = $compiledServiceDefinitions[$implementedServiceHash]['type'];
-                $implementedServices[] = $this->getDeserializeServiceDefinition($compiledServiceDefinitions, $serviceDefinitionCacheMap, $implementedType);
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService(
+                    $this->getDeserializeServiceDefinition($compiledServiceDefinitions, $serviceDefinitionCacheMap, $implementedType)
+                );
             }
 
-            $extendedServices = [];
-            foreach ($compiledServiceDefinition['extendedServices'] as $extendedServiceHash) {
-                $extendedType = $compiledServiceDefinitions[$extendedServiceHash]['type'];
-                $extendedServices[] = $this->getDeserializeServiceDefinition($compiledServiceDefinitions, $serviceDefinitionCacheMap, $extendedType);
-            }
-
-            $serviceDefinitionCacheMap[$serviceHash] = new ServiceDefinition(
-                $type,
-                $compiledServiceDefinition['profiles'],
-                $implementedServices,
-                $extendedServices,
-                $compiledServiceDefinition['isInterface'],
-                $compiledServiceDefinition['isAbstract']
-            );
+            $serviceDefinitionCacheMap[$serviceHash] = $serviceDefinitionBuilder->build();
         }
 
         return $serviceDefinitionCacheMap[$serviceHash];

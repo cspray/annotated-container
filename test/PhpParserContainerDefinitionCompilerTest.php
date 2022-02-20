@@ -475,16 +475,13 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
 
         $this->assertSame(ServiceFactory::class, $serviceDelegateDefinition->getDelegateType());
         $this->assertSame('createService', $serviceDelegateDefinition->getDelegateMethod());
-        $this->assertSame(ServiceInterface::class, $serviceDelegateDefinition->getServiceType());
+        $this->assertSame(ServiceInterface::class, $serviceDelegateDefinition->getServiceType()->getType());
     }
 
-    public function testServicePrepareNotOnServiceCompilesCorrectly() {
-        $containerDefinition = $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
-
-        $this->assertEmpty($containerDefinition->getServiceDefinitions());
-        $this->assertServicePrepareTypes([
-            [ServicePrepareNotService\FooImplementation::class, 'postConstruct']
-        ], $containerDefinition->getServicePrepareDefinitions());
+    public function testServicePrepareNotOnServiceThrowsException() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The #[ServicePrepare] Attribute on ' . LogicalErrorApps\ServicePrepareNotService\FooImplementation::class . '::postConstruct is not on a type marked as a #[Service].');;
+        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
     }
 
     public function testEmptyScanDirectoriesThrowsException() {
@@ -522,8 +519,8 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         foreach ($aliasDefinitions as $aliasDefinition) {
             $this->assertInstanceOf(AliasDefinition::class, $aliasDefinition);
             $actualMap[] = [
-                $aliasDefinition->getOriginalServiceDefinition()->getType(),
-                $aliasDefinition->getAliasServiceDefinition()->getType()
+                $aliasDefinition->getAbstractService()->getType(),
+                $aliasDefinition->getConcreteService()->getType()
             ];
         }
 
@@ -540,7 +537,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $actualMap = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             $this->assertInstanceOf(ServicePrepareDefinition::class, $servicePrepareDefinition);
-            $key = $servicePrepareDefinition->getType();
+            $key = $servicePrepareDefinition->getService()->getType();
             $actualMap[] = [$key, $servicePrepareDefinition->getMethod()];
         }
 
@@ -559,7 +556,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             $this->assertInstanceOf(InjectScalarDefinition::class, $UseScalarDefinition);
             $key = sprintf(
                 "%s::%s(%s)",
-                $UseScalarDefinition->getType(),
+                $UseScalarDefinition->getService()->getType(),
                 $UseScalarDefinition->getMethod(),
                 $UseScalarDefinition->getParamName()
             );
@@ -581,11 +578,11 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             $this->assertInstanceOf(InjectServiceDefinition::class, $UseServiceDefinition);
             $key = sprintf(
                 "%s::%s(%s)",
-                $UseServiceDefinition->getType(),
+                $UseServiceDefinition->getService()->getType(),
                 $UseServiceDefinition->getMethod(),
                 $UseServiceDefinition->getParamName()
             );
-            $actualMap[$key] = $UseServiceDefinition->getValue();
+            $actualMap[$key] = $UseServiceDefinition->getInjectedService()->getType();
         }
 
         ksort($actualMap);
@@ -600,7 +597,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
 
         $actualMethods = [];
         foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            $actualMethods[] = $UseScalarDefinition->getType() . "::" . $UseScalarDefinition->getMethod();
+            $actualMethods[] = $UseScalarDefinition->getService()->getType() . "::" . $UseScalarDefinition->getMethod();
         }
 
         $this->assertEqualsCanonicalizing($expectedMethods, $actualMethods);

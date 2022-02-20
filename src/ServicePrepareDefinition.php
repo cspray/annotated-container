@@ -8,19 +8,10 @@ namespace Cspray\AnnotatedContainer;
  *
  * @package Cspray\AnnotatedContainer
  */
-final class ServicePrepareDefinition {
+interface ServicePrepareDefinition {
 
-    public function __construct(
-        private string $type,
-        private string $method
-    ) {}
+    public function getService() : ServiceDefinition;
 
-    public function getType() : string {
-        return $this->type;
-    }
-
-    public function getMethod() : string {
-        return $this->method;
-    }
+    public function getMethod() : string;
 
 }

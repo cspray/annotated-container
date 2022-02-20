@@ -30,16 +30,16 @@ final class AurynInjectorFactory implements ContainerFactory {
         $aliasedTypes = [];
         $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
-            if (!in_array($aliasDefinition->getOriginalServiceDefinition(), $aliasedTypes)) {
+            if (!in_array($aliasDefinition->getAbstractService(), $aliasedTypes)) {
                 // We are intentionally taking the stance that if there are more than 1 alias possible that it is up
                 // to the developer to properly instantiate the Service. The caller could presume to provide a specific
                 // parameter to the make() call or could potentially have another piece of code that interacts with the
                 // Injector to define these kind of parameters
-                $typeAliasDefinitions = self::mapTypesAliasDefinitions($aliasDefinition->getOriginalServiceDefinition()->getType(), $aliasDefinitions);
+                $typeAliasDefinitions = self::mapTypesAliasDefinitions($aliasDefinition->getAbstractService()->getType(), $aliasDefinitions);
                 if (count($typeAliasDefinitions) === 1) {
                     $injector->alias(
-                        $typeAliasDefinitions[0]->getOriginalServiceDefinition()->getType(),
-                        $typeAliasDefinitions[0]->getAliasServiceDefinition()->getType()
+                        $typeAliasDefinitions[0]->getAbstractService()->getType(),
+                        $typeAliasDefinitions[0]->getConcreteService()->getType()
                     );
                 }
             }
@@ -47,29 +47,30 @@ final class AurynInjectorFactory implements ContainerFactory {
 
         $preparedTypes = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
-            if (!in_array($servicePrepareDefinition->getType(), $preparedTypes)) {
-                $injector->prepare($servicePrepareDefinition->getType(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $useScalarDefinitions, $useServiceDefinitions) {
-                    $methods = self::mapTypesServicePrepares($servicePrepareDefinition->getType(), $servicePrepareDefinitions);
+            $type = $servicePrepareDefinition->getService()->getType();
+            if (!in_array($type, $preparedTypes)) {
+                $injector->prepare($type, function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $useScalarDefinitions, $useServiceDefinitions, $type) {
+                    $methods = self::mapTypesServicePrepares($type, $servicePrepareDefinitions);
                     foreach ($methods as $method) {
-                        $scalarArgs = self::mapTypesScalarArgs($servicePrepareDefinition->getType(), $method, $useScalarDefinitions);
-                        $serviceArgs = self::mapTypesServiceArgs($servicePrepareDefinition->getType(), $method, $useServiceDefinitions);
+                        $scalarArgs = self::mapTypesScalarArgs($type, $method, $useScalarDefinitions);
+                        $serviceArgs = self::mapTypesServiceArgs($type, $method, $useServiceDefinitions);
                         $injector->execute([$object, $method], array_merge([], $scalarArgs, $serviceArgs));
                     }
                 });
-                $preparedTypes[] = $servicePrepareDefinition->getType();
+                $preparedTypes[] = $type;
             }
         }
 
         $typeArgsMap = [];
         foreach ($useScalarDefinitions as $useScalarDefinition) {
-            $type = $useScalarDefinition->getType();
+            $type = $useScalarDefinition->getService()->getType();
             if (!isset($typeArgsMap[$type])) {
                 $typeArgsMap[$type] = self::mapTypesScalarArgs($type, '__construct', $useScalarDefinitions);
             }
         }
 
         foreach ($useServiceDefinitions as $useServiceDefinition) {
-            $type = $useServiceDefinition->getType();
+            $type = $useServiceDefinition->getService()->getType();
             $defineArgs = self::mapTypesServiceArgs($type, '__construct', $useServiceDefinitions);
             if (isset($typeArgsMap[$type])) {
                 $typeArgsMap[$type] = array_merge($typeArgsMap[$type], $defineArgs);
@@ -84,7 +85,7 @@ final class AurynInjectorFactory implements ContainerFactory {
 
         foreach ($serviceDelegateDefinitions as $serviceDelegateDefinition) {
             $injector->delegate(
-                $serviceDelegateDefinition->getServiceType(),
+                $serviceDelegateDefinition->getServiceType()->getType(),
                 [$serviceDelegateDefinition->getDelegateType(), $serviceDelegateDefinition->getDelegateMethod()]
             );
         }
@@ -96,7 +97,7 @@ final class AurynInjectorFactory implements ContainerFactory {
         $args = [];
         /** @var InjectScalarDefinition $UseScalarDefinition */
         foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            if ($UseScalarDefinition->getType() === $type && $UseScalarDefinition->getMethod() === $method) {
+            if ($UseScalarDefinition->getService()->getType() === $type && $UseScalarDefinition->getMethod() === $method) {
                 $value = $UseScalarDefinition->getValue();
                 $constRegex = '/^\!const\((.+)\)$/';
                 $envRegex = '/^\!env\((.+)\)$/';
@@ -115,8 +116,8 @@ final class AurynInjectorFactory implements ContainerFactory {
         $args = [];
         /** @var InjectServiceDefinition $UseServiceDefinition */
         foreach ($UseServiceDefinitions as $UseServiceDefinition) {
-            if ($UseServiceDefinition->getType() === $type && $UseServiceDefinition->getMethod() === $method) {
-                $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getValue();
+            if ($UseServiceDefinition->getService()->getType() === $type && $UseServiceDefinition->getMethod() === $method) {
+                $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getInjectedService()->getType();
             }
         }
         return $args;
@@ -126,7 +127,7 @@ final class AurynInjectorFactory implements ContainerFactory {
         $methods = [];
         /** @var ServicePrepareDefinition $servicePrepareDefinition */
         foreach ($servicePreparesDefinition as $servicePrepareDefinition) {
-            if ($servicePrepareDefinition->getType() === $type) {
+            if ($servicePrepareDefinition->getService()->getType() === $type) {
                 $methods[] = $servicePrepareDefinition->getMethod();
             }
         }
@@ -137,7 +138,7 @@ final class AurynInjectorFactory implements ContainerFactory {
         $aliases = [];
         /** @var AliasDefinition $aliasDefinition */
         foreach ($aliasDefinitions as $aliasDefinition) {
-            if ($aliasDefinition->getOriginalServiceDefinition()->getType() === $type) {
+            if ($aliasDefinition->getAbstractService()->getType() === $type) {
                 $aliases[] = $aliasDefinition;
             }
         }

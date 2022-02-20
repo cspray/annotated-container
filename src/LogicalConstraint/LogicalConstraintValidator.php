@@ -12,7 +12,6 @@ final class LogicalConstraintValidator {
     public function __construct() {
         $this->logicalConstraints[] = new MultipleAliasResolutionLogicalConstraint();
         $this->logicalConstraints[] = new NoAbstractServiceAliasLogicalConstraint();
-        $this->logicalConstraints[] = new ServicePrepareRequiresServiceLogicalConstraint();
     }
 
     public function validate(ContainerDefinition $containerDefinition) : LogicalConstraintViolationCollection {

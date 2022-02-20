@@ -21,11 +21,11 @@ final class ServicePrepareDefinitionInterrogator {
     public function gatherServicePrepare() : Generator {
         $goodDefinitions = [];
         foreach ($this->servicePrepareDefinitions as $servicePrepareDefinition) {
-            $serviceDefinition = $this->serviceDefinitionInterrogator->findServiceDefinitionForType($servicePrepareDefinition->getType());
+            $serviceDefinition = $servicePrepareDefinition->getService();
             if (!isset($serviceDefinition)) {
                 // This technically isn't a "good" definition but the compilation process
                 $goodDefinitions[] = $servicePrepareDefinition;
-            } else if ($serviceDefinition->isInterface()) {
+            } else if ($serviceDefinition->isAbstract()) {
                 $goodDefinitions[] = $servicePrepareDefinition;
             } else if (empty($serviceDefinition->getImplementedServices())) {
                 $goodDefinitions[] = $servicePrepareDefinition;
@@ -41,7 +41,7 @@ final class ServicePrepareDefinitionInterrogator {
                         // this is almost certainly brittle code that could be susceptible to failure where a Service
                         // implements multiple other Service interfaces with one or more ServicePrepare methods attributed
                         // TODO: determine a more thorough test case and make this code less brittle
-                        if ($_servicePrepareDefinition->getType() === $implementedService->getType()) {
+                        if ($_servicePrepareDefinition->getService()->getType() === $implementedService->getType()) {
                             $hasInterfaceSetup = true;
                         }
                     }

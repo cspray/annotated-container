@@ -21,12 +21,11 @@ class LogicalConstraintValidatorTest extends TestCase {
     public function testValidatorRunsAllConstraints() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(
             dirname(__DIR__) . '/DummyApps/MultipleAliasResolution',
-            dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias',
-            dirname(__DIR__) . '/LogicalErrorApps/ServicePrepareNotService'
+            dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias'
         )->withProfiles('default')->build());
         $violations = $this->subject->validate($containerDefinition);
 
-        $this->assertCount(3, $violations);
+        $this->assertCount(2, $violations);
     }
 
     public function testValidatorHasCorrectViolationMessages() {
@@ -36,7 +35,7 @@ class LogicalConstraintValidatorTest extends TestCase {
         $violations = $this->subject->validate($containerDefinition);
 
         $this->assertCount(1, $violations);
-        $this->assertSame('The interface, ' . NoInterfaceServiceAlias\FooInterface::class . ', does not have an alias. Create a concrete class that implements this interface and annotate it with a #[Service] Attribute.', $violations->get(0)->getMessage());
+        $this->assertSame('The abstract, ' . NoInterfaceServiceAlias\FooInterface::class . ', does not have an alias. Create a concrete class that implements this type and annotate it with a #[Service] Attribute.', $violations->get(0)->getMessage());
         $this->assertSame(LogicalConstraintViolationType::Warning, $violations->get(0)->getViolationType());
     }
 
