@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
-class LogicalConstraintViolation {
+final class LogicalConstraintViolation {
 
     private string $message;
     private LogicalConstraintViolationType $violationType;

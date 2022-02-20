@@ -12,6 +12,6 @@ use Attribute;
  * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class Service {
+final class Service {
 
 }

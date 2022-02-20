@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CompileContainerCommand extends Command {
+final class CompileContainerCommand extends Command {
 
     private ContainerDefinitionCompiler $containerDefinitionCompiler;
     private ContainerDefinitionSerializer $containerDefinitionSerializer;

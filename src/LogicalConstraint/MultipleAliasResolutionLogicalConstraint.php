@@ -6,7 +6,7 @@ use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\DummyApps;
 
-class MultipleAliasResolutionLogicalConstraint implements LogicalConstraint {
+final class MultipleAliasResolutionLogicalConstraint implements LogicalConstraint {
 
     public function getConstraintViolations(ContainerDefinition $containerDefinition): LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();

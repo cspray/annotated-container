@@ -6,7 +6,7 @@ use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
 
-class ServicePrepareRequiresServiceLogicalConstraint implements LogicalConstraint {
+final class ServicePrepareRequiresServiceLogicalConstraint implements LogicalConstraint {
 
     public function getConstraintViolations(ContainerDefinition $containerDefinition): LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();

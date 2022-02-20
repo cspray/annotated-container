@@ -23,6 +23,7 @@ use FilesystemIterator;
 use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 
 /**
  * @package Cspray\AnnotatedContainer
@@ -197,7 +198,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 )
             );
 
-            /** @var \SplFileInfo $file */
+            /** @var SplFileInfo $file */
             foreach ($dirIterator as $file) {
                 if ($file->isDir() || $file->getExtension() !== 'php') {
                     continue;
