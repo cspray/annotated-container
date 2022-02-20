@@ -3,7 +3,9 @@
 namespace Cspray\AnnotatedContainer;
 
 use Auryn\Injector;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Wires together an Injector from an ContainerDefinition or a JSON serialization of an ContainerDefinition.
@@ -13,10 +15,29 @@ use Psr\Container\ContainerInterface;
 final class AurynInjectorFactory implements ContainerFactory {
 
     public function createContainer(ContainerDefinition $containerDefinition) : ContainerInterface {
-        throw new \RuntimeException('Not Yet Implemented. This method will be implemented in a future commit.');
+        return new class($this->createInjector($containerDefinition)) implements ContainerInterface {
+
+            private Injector $injector;
+
+            public function __construct(Injector $injector) {
+                $this->injector = $injector;
+            }
+
+            public function get(string $id) {
+                return $this->injector->make($id);
+            }
+
+            public function has(string $id): bool {
+                $anyDefined = 0;
+                foreach ($this->injector->inspect($id) as $definitions) {
+                    $anyDefined += count($definitions);
+                }
+                return $anyDefined > 0;
+            }
+        };
     }
 
-    public function createInjector(ContainerDefinition $containerDefinition) : Injector {
+    private function createInjector(ContainerDefinition $containerDefinition) : Injector {
         $injector = new Injector();
         $servicePrepareDefinitions = $containerDefinition->getServicePrepareDefinitions();
         $useServiceDefinitions = $containerDefinition->getInjectServiceDefinitions();

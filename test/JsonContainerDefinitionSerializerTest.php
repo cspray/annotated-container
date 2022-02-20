@@ -862,13 +862,13 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $foo1 = $injector->make(SimpleServices\FooInterface::class);
+        $foo1 = $injector->get(SimpleServices\FooInterface::class);
 
         $this->assertInstanceOf(SimpleServices\FooImplementation::class, $foo1);
 
-        $foo2 = $injector->make(SimpleServices\FooInterface::class);
+        $foo2 = $injector->get(SimpleServices\FooInterface::class);
 
         $this->assertSame($foo1, $foo2);
     }
@@ -880,9 +880,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $foo = $injector->make(InterfaceServicePrepare\FooInterface::class);
+        $foo = $injector->get(InterfaceServicePrepare\FooInterface::class);
 
         $this->assertInstanceOf(InterfaceServicePrepare\FooImplementation::class, $foo);
 
@@ -896,9 +896,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $foo = $injector->make(SimpleUseScalar\FooImplementation::class);
+        $foo = $injector->get(SimpleUseScalar\FooImplementation::class);
 
         $this->assertSame('string param test value', $foo->stringParam);
         $this->assertSame(42, $foo->intParam);
@@ -920,20 +920,20 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $constructorInjection = $injector->make(SimpleUseService\ConstructorInjection::class);
+        $constructorInjection = $injector->get(SimpleUseService\ConstructorInjection::class);
 
         $this->assertSame(
-            $injector->make(SimpleUseService\BarImplementation::class),
+            $injector->get(SimpleUseService\BarImplementation::class),
             $constructorInjection->bar
         );
         $this->assertSame(
-            $injector->make(SimpleUseService\BazImplementation::class),
+            $injector->get(SimpleUseService\BazImplementation::class),
             $constructorInjection->baz
         );
         $this->assertSame(
-            $injector->make(SimpleUseService\QuxImplementation::class),
+            $injector->get(SimpleUseService\QuxImplementation::class),
             $constructorInjection->qux
         );
     }
@@ -945,9 +945,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
+        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $service = $injector->make(ServiceDelegate\ServiceInterface::class);
+        $service = $injector->get(ServiceDelegate\ServiceInterface::class);
 
         $this->assertSame('From ServiceFactory From FooService', $service->getValue());
     }
