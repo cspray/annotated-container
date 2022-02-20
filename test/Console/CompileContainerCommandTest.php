@@ -114,7 +114,9 @@ class CompileContainerCommandTest extends TestCase {
             'type' => SimpleServices\FooInterface::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => [
+                'default'
+            ],
             'isInterface' => true,
             'isClass' => false,
             'isAbstract' => false
@@ -125,7 +127,9 @@ class CompileContainerCommandTest extends TestCase {
             'type' => SimpleServices\FooImplementation::class,
             'implementedServices' => [md5(SimpleServices\FooInterface::class)],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => [
+                'default'
+            ],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -249,7 +253,9 @@ class CompileContainerCommandTest extends TestCase {
             "type": "Cspray\\\\AnnotatedContainer\\\\DummyApps\\\\NonPhpFiles\\\\FooInterface",
             "implementedServices": [],
             "extendedServices": [],
-            "profiles": [],
+            "profiles": [
+                "default"
+            ],
             "isInterface": true,
             "isClass": false,
             "isAbstract": false

@@ -58,7 +58,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             }
         }
         $serviceDefinitionInterrogator = new ServiceDefinitionInterrogator(
-            $containerDefinitionCompileOptions->getProfiles()[0] ?? 'default',
+            $containerDefinitionCompileOptions->getProfiles(),
             ...$this->marshalRawServiceDefinitions($rawServiceDefinitions)
         );
         $servicePrepareInterrogator = new ServicePrepareDefinitionInterrogator(

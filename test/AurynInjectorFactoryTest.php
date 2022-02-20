@@ -35,7 +35,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testCreateSimpleServices() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories( __DIR__ . '/DummyApps/SimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories( __DIR__ . '/DummyApps/SimpleServices')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
         $subject = $injector->make(SimpleServices\FooInterface::class);
@@ -46,7 +48,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testInterfaceServicePrepare() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -59,7 +63,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testServicePrepareInvokedOnInjector() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InjectorExecuteServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InjectorExecuteServicePrepare')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -72,7 +78,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testSimpleUseScalar() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -86,8 +94,10 @@ class AurynInjectorFactoryTest extends TestCase {
 
     public function testMultipleUseScalars() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(
-            __DIR__ . '/DummyApps/MultipleUseScalars')->build()
+        $injectorDefinition = $compiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleUseScalars')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -102,7 +112,9 @@ class AurynInjectorFactoryTest extends TestCase {
         require_once __DIR__ . '/DummyApps/ConstantUseScalar/FooImplementation.php';
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ConstantUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ConstantUseScalar')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -114,7 +126,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testSimpleUseScalarFromEnv() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalarFromEnv')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalarFromEnv')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -126,7 +140,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testSimpleUseServiceSetterInjection() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -140,7 +156,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testSimpleUseServiceConstructorInjection() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -154,7 +172,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testMultipleAliasResolutionNoMakeDefine() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleAliasResolution')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleAliasResolution')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 
@@ -165,7 +185,9 @@ class AurynInjectorFactoryTest extends TestCase {
     public function testServiceDelegate() {
         $compiler = new PhpParserContainerDefinitionCompiler();
         $injectorDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')
+                ->withProfiles('default')
+                ->build()
         );
         $injector = (new AurynInjectorFactory())->createInjector($injectorDefinition);
 

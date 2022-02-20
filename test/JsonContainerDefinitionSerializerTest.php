@@ -26,14 +26,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleServicesHasCompiledServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')
+                ->withProfiles('default')
+                ->build()
         );
 
         $expectedFooInterface = [
             'type' => SimpleServices\FooInterface::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => true,
             'isClass' => false,
             'isAbstract' => false
@@ -42,7 +44,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleServices\FooImplementation::class,
             'implementedServices' => [md5(SimpleServices\FooInterface::class)],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -60,7 +62,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     }
 
     public function testSerializeSimpleServicesHasSharedServiceDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->build());
+        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')
+            ->withProfiles('default')
+            ->build());
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
         $this->assertArrayHasKey('sharedServiceDefinitions', $actual);
@@ -70,7 +74,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     }
 
     public function testSerializeSimpleServicesHasAliasDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->build());
+        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')
+            ->withProfiles('default')
+            ->build());
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
         $this->assertArrayHasKey('aliasDefinitions', $actual);
@@ -83,7 +89,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleServicesHasEmptyServicePrepareDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -92,7 +98,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     }
 
     public function testSerializeSimpleServicesHasEmptyInjectServiceDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->build());
+        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->withProfiles('default')->build());
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
         $this->assertArrayHasKey('injectServiceDefinitions', $actual);
@@ -101,7 +107,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleServicesHasEmptyInjectScalarDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -111,7 +117,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleServicesHasEmptyServiceDelegateDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -121,7 +127,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeMultipleSimpleServicesHasCompiledServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -129,7 +135,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => MultipleSimpleServices\FooInterface::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => true,
             'isClass' => false,
             'isAbstract' => false
@@ -138,7 +144,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => MultipleSimpleServices\FooImplementation::class,
             'implementedServices' => [md5(MultipleSimpleServices\FooInterface::class)],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -148,7 +154,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => MultipleSimpleServices\BarInterface::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => true,
             'isClass' => false,
             'isAbstract' => false
@@ -157,7 +163,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => MultipleSimpleServices\BarImplementation::class,
             'implementedServices' => [md5(MultipleSimpleServices\BarInterface::class)],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -179,7 +185,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeMultipleSimpleServicesHasSharedServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -193,7 +199,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeMultipleServicesHasAliasDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -211,7 +217,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeMultipleSimpleServicesHasEmptyServicePrepareDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -221,7 +227,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeMultipleSimpleServicesHasEmptyInjectServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -231,7 +237,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeMultipleSimpleServicesHasEmptyInjectScalarDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -241,7 +247,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeMultipleSimpleServicesHasEmptyServiceDelegateDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/MultipleSimpleServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -251,14 +257,14 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeAbstractSharedServicesHasCompiledServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->withProfiles('default')->build()
         );
 
         $expectedAbstractFoo = [
             'type' => AbstractSharedServices\AbstractFoo::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => true
@@ -267,7 +273,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => AbstractSharedServices\FooImplementation::class,
             'implementedServices' => [],
             'extendedServices' => [md5(AbstractSharedServices\AbstractFoo::class)],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -287,7 +293,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeAbstractSharedServicesHasSharedServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -299,7 +305,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeAbstractSharedServicesHasAliasDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -313,7 +319,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeAbstractSharedServicesHasEmptyServicePrepareDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -323,7 +329,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeAbstractSharedServicesHasEmptyInjectServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -333,7 +339,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeAbstractSharedServicesHasEmptyInjectScalarDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -343,7 +349,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeAbstractSharedServicesHasEmptyServiceDelegateDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/AbstractSharedServices')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -353,14 +359,14 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeInterfaceServicePrepareHasCompiledServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->withProfiles('default')->build()
         );
 
         $expectedFooInterface = [
             'type' => InterfaceServicePrepare\FooInterface::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => true,
             'isClass' => false,
             'isAbstract' => false
@@ -369,7 +375,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => InterfaceServicePrepare\FooImplementation::class,
             'implementedServices' => [md5(InterfaceServicePrepare\FooInterface::class)],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -388,7 +394,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeInterfaceServicePrepareHasSharedServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -400,7 +406,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeInterfaceServicePrepareHasAliasDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -414,7 +420,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeInterfaceServicePrepareHasServicePrepareDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -428,7 +434,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeInterfaceServicePrepareHasEmptyInjectServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -438,7 +444,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeInterfaceServicePrepareHasEmptyInjectScalarDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -448,7 +454,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeInterfaceServicePrepareHasEmptyServiceDelegateDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -458,7 +464,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleInjectScalarHasCompiledServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -466,7 +472,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseScalar\FooImplementation::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -481,7 +487,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleInjectScalarHasSharedServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -492,7 +498,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleInjectScalarHasNoAliasDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -502,7 +508,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleInjectScalarHasNoServicePrepareDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -511,7 +517,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     }
 
     public function testSerializeSimpleInjectScalarHasInjectScalarDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build());
+        $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build());
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
         $this->assertArrayHasKey('injectScalarDefinitions', $actual);
@@ -561,7 +567,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseScalarHasNoInjectServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -571,7 +577,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseScalarHasNoServiceDelegateDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -581,7 +587,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseServiceHasCompiledServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -592,7 +598,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\BarImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -604,7 +610,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\BazImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -616,7 +622,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\ConstructorInjection::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -628,7 +634,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\FooInterface::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => true,
             'isClass' => false,
             'isAbstract' => false
@@ -640,7 +646,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\SetterInjection::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -652,7 +658,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\QuxImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -663,7 +669,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseServiceHasSharedServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -679,7 +685,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseServiceHasAliasDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -701,7 +707,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseServiceHasServicePrepareDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -723,7 +729,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseServiceHasNoInjectScalarDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -733,7 +739,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseServiceHasInjectServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -785,7 +791,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeSimpleUseServiceHasNoServiceDelegateDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -795,7 +801,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeServiceDelegateHasCompiledServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -806,7 +812,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => ServiceDelegate\ServiceInterface::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => true,
             'isClass' => false,
             'isAbstract' => false
@@ -818,7 +824,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => ServiceDelegate\FooService::class,
             'implementedServices' => [],
             'extendedServices' => [],
-            'profiles' => [],
+            'profiles' => ['default'],
             'isInterface' => false,
             'isClass' => true,
             'isAbstract' => false
@@ -829,7 +835,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeServiceDelegateHasSharedServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -841,7 +847,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeServiceDelegateHasNoAliasDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -851,7 +857,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeServiceDelegateHasNoInjectScalarDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -861,7 +867,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeServiceDelegateHasNoInjectServiceDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -871,7 +877,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     public function testSerializeServiceDelegateHasServiceDelegateDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -889,7 +895,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     public function testDeserializeSimpleServices() {
         $serializer = new JsonContainerDefinitionSerializer();
         $json = $serializer->serialize($this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleServices')->withProfiles('default')->build()
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
@@ -907,7 +913,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     public function testDeserializeInterfaceServicePrepare() {
         $serializer = new JsonContainerDefinitionSerializer();
         $json = $serializer->serialize($this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/InterfaceServicePrepare')->withProfiles('default')->build()
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
@@ -923,7 +929,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     public function testDeserializeSimpleUseScalar() {
         $serializer = new JsonContainerDefinitionSerializer();
         $json = $serializer->serialize($this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build()
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
@@ -947,7 +953,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     public function testDeserializeSimpleUseService() {
         $serializer = new JsonContainerDefinitionSerializer();
         $json = $serializer->serialize($this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseService')->withProfiles('default')->build()
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
@@ -972,7 +978,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     public function testDeserializeServiceDelegate() {
         $serializer = new JsonContainerDefinitionSerializer();
         $json = $serializer->serialize($this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/ServiceDelegate')->withProfiles('default')->build()
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
@@ -997,7 +1003,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     public function testSerializingDeserializedContainerDefinitionIsCompatible(string $dir) {
         $serializer = new JsonContainerDefinitionSerializer();
         $containerDefinition1 = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->withProfiles('default')->build()
         );
 
         // Ensure that serialize -> deserialize -> serialize results in compatible container definition with original compilation

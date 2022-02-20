@@ -22,7 +22,7 @@ final class ServiceDefinitionVisitor extends AbstractNodeVisitor implements Node
                 $this->serviceDefinitions[] = [
                     'definitionType' => ServiceDefinition::class,
                     'type' => $node->namespacedName->toString(),
-                    'profiles' => $this->getServiceAttributeEnvironments($node),
+                    'profiles' => $this->getServiceProfiles($node),
                     'implements' => $this->getTypeImplements($node),
                     'extends' => $this->getTypeExtends($node),
                     'isInterface' => $node instanceof Interface_,
@@ -51,10 +51,10 @@ final class ServiceDefinitionVisitor extends AbstractNodeVisitor implements Node
         return [];
     }
 
-    private function getServiceAttributeEnvironments(Node $node) : array {
+    private function getServiceProfiles(Node $node) : array {
         $attribute = $this->findAttribute(ServiceProfile::class, ...$node->attrGroups);
         if ($attribute === null) {
-            return [];
+            return ['default'];
         }
         $profiles = [];
         $profiles[] = $attribute->args[0]->value->items[0]->value->value;

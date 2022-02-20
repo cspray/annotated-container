@@ -8,11 +8,11 @@ use Generator;
 
 final class ServiceDefinitionInterrogator {
 
-    private string $environment;
+    private array $profiles;
     private array $serviceDefinitions;
 
-    public function __construct(string $environment, ServiceDefinition... $serviceDefinitions) {
-        $this->environment = $environment;
+    public function __construct(array $profiles, ServiceDefinition... $serviceDefinitions) {
+        $this->profiles = $profiles;
         $this->serviceDefinitions = $serviceDefinitions;
     }
 
@@ -28,7 +28,7 @@ final class ServiceDefinitionInterrogator {
 
     public function gatherSharedServices() : Generator {
         foreach ($this->serviceDefinitions as $serviceDefinition) {
-            if (empty($serviceDefinition->getProfiles()) || in_array($this->environment, $serviceDefinition->getProfiles())) {
+            if ($this->isServiceDefinitionForActiveProfile($serviceDefinition)) {
                 yield $serviceDefinition;
             }
         }
@@ -39,7 +39,7 @@ final class ServiceDefinitionInterrogator {
             if ($serviceDefinition->isClass()) {
                 $hasImplementations = !empty($serviceDefinition->getImplementedServices());
                 $hasExtendeds = !empty($serviceDefinition->getExtendedServices());
-                $forEnvironment = empty($serviceDefinition->getProfiles()) || in_array($this->environment, $serviceDefinition->getProfiles());
+                $forEnvironment = $this->isServiceDefinitionForActiveProfile($serviceDefinition);
                 if ($hasImplementations && $forEnvironment) {
                     foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
                         yield new AliasDefinition($implementedService, $serviceDefinition);
@@ -51,6 +51,16 @@ final class ServiceDefinitionInterrogator {
                 }
             }
         }
+    }
+
+    private function isServiceDefinitionForActiveProfile(ServiceDefinition $serviceDefinition) : bool {
+        foreach ($this->profiles as $activeProfile) {
+            if (in_array($activeProfile, $serviceDefinition->getProfiles())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

@@ -20,7 +20,7 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
 
     public function testMultipleAliasResolvedHasWarning() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/DummyApps/MultipleAliasResolution')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/DummyApps/MultipleAliasResolution')->withProfiles('default')->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
