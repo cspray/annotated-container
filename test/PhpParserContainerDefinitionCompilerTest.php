@@ -475,7 +475,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
 
         $this->assertSame(ServiceFactory::class, $serviceDelegateDefinition->getDelegateType());
         $this->assertSame('createService', $serviceDelegateDefinition->getDelegateMethod());
-        $this->assertSame(ServiceInterface::class, $serviceDelegateDefinition->getServiceType());
+        $this->assertSame(ServiceInterface::class, $serviceDelegateDefinition->getServiceType()->getType());
     }
 
     public function testServicePrepareNotOnServiceCompilesCorrectly() {

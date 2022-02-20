@@ -84,7 +84,7 @@ final class AurynInjectorFactory implements ContainerFactory {
 
         foreach ($serviceDelegateDefinitions as $serviceDelegateDefinition) {
             $injector->delegate(
-                $serviceDelegateDefinition->getServiceType(),
+                $serviceDelegateDefinition->getServiceType()->getType(),
                 [$serviceDelegateDefinition->getDelegateType(), $serviceDelegateDefinition->getDelegateMethod()]
             );
         }

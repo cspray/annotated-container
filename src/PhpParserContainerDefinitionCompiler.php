@@ -87,7 +87,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             ...$this->marshalRawUseServiceDefinitions($serviceDefinitions, $rawUseServiceDefinitions)
         );
         $serviceDelegateInterrogator = new ServiceDelegateDefinitionInterrogator(
-            ...$this->marshalRawServiceDelegateDefinitions($rawServiceDelegateDefinitions)
+            ...$this->marshalRawServiceDelegateDefinitions($serviceDefinitions, $rawServiceDelegateDefinitions)
         );
 
         return $this->interrogateDefinitions(
@@ -212,14 +212,19 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         return $marshaledDefinitions;
     }
 
-    private function marshalRawServiceDelegateDefinitions(array $rawServiceDelegateDefinitions) : array {
+    private function marshalRawServiceDelegateDefinitions(array $serviceDefinitions, array $rawServiceDelegateDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawServiceDelegateDefinitions as $rawServiceDelegateDefinition) {
-            $marshaledDefinitions[] = new ServiceDelegateDefinition(
-                $rawServiceDelegateDefinition['delegateType'],
-                $rawServiceDelegateDefinition['delegateMethod'],
-                $rawServiceDelegateDefinition['serviceType']
-            );
+            $service = null;
+            foreach ($serviceDefinitions as $serviceDefinition) {
+                if ($serviceDefinition->getType() === $rawServiceDelegateDefinition['serviceType']) {
+                    $service = $serviceDefinition;
+                    break;
+                }
+            }
+            $marshaledDefinitions[] = ServiceDelegateDefinitionBuilder::forService($service)
+                ->withDelegateMethod($rawServiceDelegateDefinition['delegateType'], $rawServiceDelegateDefinition['delegateMethod'])
+                ->build();
         }
         return $marshaledDefinitions;
     }

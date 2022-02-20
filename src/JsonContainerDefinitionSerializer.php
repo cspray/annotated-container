@@ -78,7 +78,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             $serviceDelegateDefinitions[] = [
                 'delegateType' => $serviceDelegateDefinition->getDelegateType(),
                 'delegateMethod' => $serviceDelegateDefinition->getDelegateMethod(),
-                'serviceType' => $serviceDelegateDefinition->getServiceType()
+                'serviceType' => $serviceDelegateDefinition->getServiceType()->getType()
             ];
         }
 
@@ -151,11 +151,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $serviceDelegateDefinitions = [];
         foreach ($data['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
-            $serviceDelegateDefinitions[] = new ServiceDelegateDefinition(
-                $serviceDelegateDefinition['delegateType'],
-                $serviceDelegateDefinition['delegateMethod'],
-                $serviceDelegateDefinition['serviceType']
-            );
+            $service = $serviceDefinitions[md5($serviceDelegateDefinition['serviceType'])];
+            $serviceDelegateDefinitions[] = ServiceDelegateDefinitionBuilder::forService($service)
+                ->withDelegateMethod($serviceDelegateDefinition['delegateType'], $serviceDelegateDefinition['delegateMethod'])
+                ->build();
         }
 
         return new class($sharedServiceDefinitions, $aliasDefinitions, $servicePrepareDefinitions, $useScalarDefinitions, $useServiceDefinitions, $serviceDelegateDefinitions) implements ContainerDefinition {
