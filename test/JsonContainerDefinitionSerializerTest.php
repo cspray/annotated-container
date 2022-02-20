@@ -447,6 +447,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/DummyApps/SimpleUseScalar')->withProfiles('default')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
+        $this->assertIsArray($actual);
 
         $expectedFooImplementation = [
             'type' => SimpleUseScalar\FooImplementation::class,

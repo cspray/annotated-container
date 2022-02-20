@@ -71,16 +71,17 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 $rawServiceDelegateDefinitions[] = $rawDefinition;
             }
         }
+        $serviceDefinitions = $this->marshalRawServiceDefinitions($rawServiceDefinitions);
         $serviceDefinitionInterrogator = new ServiceDefinitionInterrogator(
             $containerDefinitionCompileOptions->getProfiles(),
-            ...$this->marshalRawServiceDefinitions($rawServiceDefinitions)
+            ...$serviceDefinitions
         );
         $servicePrepareInterrogator = new ServicePrepareDefinitionInterrogator(
             $serviceDefinitionInterrogator,
             ...$this->marshalRawServicePrepareDefinitions($rawServicePrepareDefinitions)
         );
         $useScalarInterrogator = new InjectScalarDefinitionInterrogator(
-            ...$this->marshalRawUseScalarDefinitions($rawUseScalarDefinitions)
+            ...$this->marshalRawUseScalarDefinitions($serviceDefinitions, $rawUseScalarDefinitions)
         );
         $useServiceInterrogator = new InjectServiceDefinitionInterrogator(
             ...$this->marshalRawUseServiceDefinitions($rawUseServiceDefinitions)
@@ -173,16 +174,20 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         return $marshaledDefinitions;
     }
 
-    private function marshalRawUseScalarDefinitions(array $rawUseScalarDefinitions) : array {
+    private function marshalRawUseScalarDefinitions(array $serviceDefinitions, array $rawUseScalarDefinitions) : array {
         $marshaledDefinitions = [];
         foreach ($rawUseScalarDefinitions as $rawUseScalarDefinition) {
-            $marshaledDefinitions[] = new InjectScalarDefinition(
-                $rawUseScalarDefinition['type'],
-                $rawUseScalarDefinition['method'],
-                $rawUseScalarDefinition['param'],
-                $rawUseScalarDefinition['paramType'],
-                $rawUseScalarDefinition['value']
-            );
+            $injectServiceDefinition = null;
+            foreach ($serviceDefinitions as $serviceDefinition) {
+                if ($rawUseScalarDefinition['type'] === $serviceDefinition->getType()) {
+                    $injectServiceDefinition = $serviceDefinition;
+                    break;
+                }
+            }
+            $marshaledDefinitions[] = InjectScalarDefinitionBuilder::forMethod($injectServiceDefinition, $rawUseScalarDefinition['method'])
+                ->withParam(ScalarType::fromName($rawUseScalarDefinition['paramType']), $rawUseScalarDefinition['param'])
+                ->withValue($rawUseScalarDefinition['value'])
+                ->build();
         }
         return $marshaledDefinitions;
     }

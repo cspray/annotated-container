@@ -559,7 +559,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             $this->assertInstanceOf(InjectScalarDefinition::class, $UseScalarDefinition);
             $key = sprintf(
                 "%s::%s(%s)",
-                $UseScalarDefinition->getType(),
+                $UseScalarDefinition->getService()->getType(),
                 $UseScalarDefinition->getMethod(),
                 $UseScalarDefinition->getParamName()
             );
@@ -600,7 +600,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
 
         $actualMethods = [];
         foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            $actualMethods[] = $UseScalarDefinition->getType() . "::" . $UseScalarDefinition->getMethod();
+            $actualMethods[] = $UseScalarDefinition->getService()->getType() . "::" . $UseScalarDefinition->getMethod();
         }
 
         $this->assertEqualsCanonicalizing($expectedMethods, $actualMethods);

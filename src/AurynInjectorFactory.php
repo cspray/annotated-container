@@ -62,7 +62,7 @@ final class AurynInjectorFactory implements ContainerFactory {
 
         $typeArgsMap = [];
         foreach ($useScalarDefinitions as $useScalarDefinition) {
-            $type = $useScalarDefinition->getType();
+            $type = $useScalarDefinition->getService()->getType();
             if (!isset($typeArgsMap[$type])) {
                 $typeArgsMap[$type] = self::mapTypesScalarArgs($type, '__construct', $useScalarDefinitions);
             }
@@ -96,7 +96,7 @@ final class AurynInjectorFactory implements ContainerFactory {
         $args = [];
         /** @var InjectScalarDefinition $UseScalarDefinition */
         foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            if ($UseScalarDefinition->getType() === $type && $UseScalarDefinition->getMethod() === $method) {
+            if ($UseScalarDefinition->getService()->getType() === $type && $UseScalarDefinition->getMethod() === $method) {
                 $value = $UseScalarDefinition->getValue();
                 $constRegex = '/^\!const\((.+)\)$/';
                 $envRegex = '/^\!env\((.+)\)$/';

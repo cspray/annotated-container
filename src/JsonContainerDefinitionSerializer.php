@@ -54,10 +54,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $injectScalarDefinitions = [];
         foreach ($containerDefinition->getInjectScalarDefinitions() as $injectScalarDefinition) {
             $injectScalarDefinitions[] = [
-                'type' => $injectScalarDefinition->getType(),
+                'type' => $injectScalarDefinition->getService()->getType(),
                 'method' => $injectScalarDefinition->getMethod(),
                 'paramName' => $injectScalarDefinition->getParamName(),
-                'paramType' => $injectScalarDefinition->getParamType(),
+                'paramType' => strtolower($injectScalarDefinition->getParamType()->name),
                 'value' => $injectScalarDefinition->getValue()
             ];
         }
@@ -132,13 +132,11 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $useScalarDefinitions = [];
         foreach ($data['injectScalarDefinitions'] as $useScalarDefinition) {
-            $useScalarDefinitions[] = new InjectScalarDefinition(
-                $useScalarDefinition['type'],
-                $useScalarDefinition['method'],
-                $useScalarDefinition['paramName'],
-                $useScalarDefinition['paramType'],
-                $useScalarDefinition['value']
-            );
+            $service = $serviceDefinitions[md5($useScalarDefinition['type'])];
+            $useScalarDefinitions[] = InjectScalarDefinitionBuilder::forMethod($service, $useScalarDefinition['method'])
+                ->withParam(ScalarType::String, $useScalarDefinition['paramName'])
+                ->withValue($useScalarDefinition['value'])
+                ->build();
         }
 
         $useServiceDefinitions = [];
