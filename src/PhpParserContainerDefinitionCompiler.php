@@ -111,14 +111,20 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 $rawServiceDefinition['extends']
             );
 
-            $marshaledDefinitions[] = new ServiceDefinition(
-                $rawServiceDefinition['type'],
-                $rawServiceDefinition['profiles'],
-                $implementServiceDefinitions,
-                $extendedServiceDefinitions,
-                $rawServiceDefinition['isInterface'],
-                $rawServiceDefinition['isAbstract'],
-            );
+            if ($rawServiceDefinition['isAbstract'] || $rawServiceDefinition['isInterface']) {
+                $factoryMethod = 'forAbstract';
+            } else {
+                $factoryMethod = 'forConcrete';
+            }
+
+            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($rawServiceDefinition['type'])
+                ->withProfiles(...$rawServiceDefinition['profiles']);
+
+            foreach (array_merge($implementServiceDefinitions, $extendedServiceDefinitions) as $serviceDefinition) {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($serviceDefinition);
+            }
+
+            $marshaledDefinitions[] = $serviceDefinitionBuilder->build();
         }
 
         return $marshaledDefinitions;
@@ -136,14 +142,21 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         $serviceDefinition = null;
         foreach ($rawServiceDefinitions as $rawServiceDefinition) {
             if ($targetType === $rawServiceDefinition['type']) {
-                $serviceDefinition = new ServiceDefinition(
-                    $rawServiceDefinition['type'],
-                    $rawServiceDefinition['profiles'],
-                    $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['implements']),
-                    $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['extends']),
-                    $rawServiceDefinition['isInterface'],
-                    $rawServiceDefinition['isAbstract']
-                );
+                if ($rawServiceDefinition['isAbstract'] || $rawServiceDefinition['isInterface']) {
+                    $factoryMethod = 'forAbstract';
+                } else {
+                    $factoryMethod = 'forConcrete';
+                }
+                $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($rawServiceDefinition['type'])
+                    ->withProfiles(...$rawServiceDefinition['profiles']);
+                $implements = $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['implements']);
+                $extends = $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['extends']);
+
+                foreach (array_merge($implements, $extends) as $implementedService) {
+                    $serviceDefinitionBuilder->withImplementedService($implementedService);
+                }
+
+                $serviceDefinition = $serviceDefinitionBuilder->build();
             }
         }
         return $serviceDefinition;

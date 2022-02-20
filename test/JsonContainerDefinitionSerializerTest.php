@@ -34,20 +34,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'type' => SimpleServices\FooInterface::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => true,
-            'isClass' => false,
-            'isAbstract' => false
+            'isAbstract' => true,
+            'isConcrete' => false
         ];
         $expectedFooImplementation = [
             'type' => SimpleServices\FooImplementation::class,
             'implementedServices' => [md5(SimpleServices\FooInterface::class)],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -134,39 +130,31 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'type' => MultipleSimpleServices\FooInterface::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => true,
-            'isClass' => false,
-            'isAbstract' => false
+            'isAbstract' => true,
+            'isConcrete' => false
         ];
         $expectedFooImplementation = [
             'type' => MultipleSimpleServices\FooImplementation::class,
             'implementedServices' => [md5(MultipleSimpleServices\FooInterface::class)],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
 
         $expectedBarInterface = [
             'type' => MultipleSimpleServices\BarInterface::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => true,
-            'isClass' => false,
-            'isAbstract' => false
+            'isAbstract' => true,
+            'isConcrete' => false
         ];
         $expectedBarImplementation = [
             'type' => MultipleSimpleServices\BarImplementation::class,
             'implementedServices' => [md5(MultipleSimpleServices\BarInterface::class)],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
 
         $this->assertArrayHasKey('compiledServiceDefinitions', $actual);
@@ -263,20 +251,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedAbstractFoo = [
             'type' => AbstractSharedServices\AbstractFoo::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => true
+            'isAbstract' => true,
+            'isConcrete' => false
         ];
         $expectedFooImplementation = [
             'type' => AbstractSharedServices\FooImplementation::class,
-            'implementedServices' => [],
-            'extendedServices' => [md5(AbstractSharedServices\AbstractFoo::class)],
+            'implementedServices' => [md5(AbstractSharedServices\AbstractFoo::class)],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
 
         $actual = json_decode($this->subject->serialize($containerDefinition), 2);
@@ -365,20 +349,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'type' => InterfaceServicePrepare\FooInterface::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => true,
-            'isClass' => false,
-            'isAbstract' => false
+            'isAbstract' => true,
+            'isConcrete' => false
         ];
         $expectedFooImplementation = [
             'type' => InterfaceServicePrepare\FooImplementation::class,
             'implementedServices' => [md5(InterfaceServicePrepare\FooInterface::class)],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -471,11 +451,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooImplementation = [
             'type' => SimpleUseScalar\FooImplementation::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
 
         $this->assertArrayHasKey('compiledServiceDefinitions', $actual);
@@ -597,11 +575,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBarImplementation = [
             'type' => SimpleUseService\BarImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\BarImplementation::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedBarImplementation, $actual['compiledServiceDefinitions'][md5(SimpleUseService\BarImplementation::class)]);
@@ -609,11 +585,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBazImplementation = [
             'type' => SimpleUseService\BazImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\BazImplementation::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedBazImplementation, $actual['compiledServiceDefinitions'][md5(SimpleUseService\BazImplementation::class)]);
@@ -621,11 +595,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedConstructorInjection = [
             'type' => SimpleUseService\ConstructorInjection::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\ConstructorInjection::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedConstructorInjection, $actual['compiledServiceDefinitions'][md5(SimpleUseService\ConstructorInjection::class)]);
@@ -633,11 +605,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'type' => SimpleUseService\FooInterface::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => true,
-            'isClass' => false,
-            'isAbstract' => false
+            'isAbstract' => true,
+            'isConcrete' => false
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\FooInterface::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedFooInterface, $actual['compiledServiceDefinitions'][md5(SimpleUseService\FooInterface::class)]);
@@ -645,11 +615,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedSetterInjection = [
             'type' => SimpleUseService\SetterInjection::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\SetterInjection::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedSetterInjection, $actual['compiledServiceDefinitions'][md5(SimpleUseService\SetterInjection::class)]);
@@ -657,11 +625,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedQuxImplementation = [
             'type' => SimpleUseService\QuxImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\QuxImplementation::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedQuxImplementation, $actual['compiledServiceDefinitions'][md5(SimpleUseService\QuxImplementation::class)]);
@@ -811,11 +777,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedServiceInterface = [
             'type' => ServiceDelegate\ServiceInterface::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => true,
-            'isClass' => false,
-            'isAbstract' => false
+            'isAbstract' => true,
+            'isConcrete' => false
         ];
         $this->assertArrayHasKey(md5(ServiceDelegate\ServiceInterface::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedServiceInterface, $actual['compiledServiceDefinitions'][md5(ServiceDelegate\ServiceInterface::class)]);
@@ -823,11 +787,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooService = [
             'type' => ServiceDelegate\FooService::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => ['default'],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ];
         $this->assertArrayHasKey(md5(ServiceDelegate\FooService::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedFooService, $actual['compiledServiceDefinitions'][md5(ServiceDelegate\FooService::class)]);

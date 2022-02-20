@@ -10,16 +10,11 @@ final class NoAbstractServiceAliasLogicalConstraint implements LogicalConstraint
     public function getConstraintViolations(ContainerDefinition $containerDefinition): LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();
         foreach ($containerDefinition->getServiceDefinitions() as $sharedServiceDefinition) {
-            if ($sharedServiceDefinition->isInterface() || $sharedServiceDefinition->isAbstract()) {
+            if ($sharedServiceDefinition->isAbstract()) {
                 if (!$this->doesServiceDefinitionHaveAlias($containerDefinition, $sharedServiceDefinition)) {
-                    $abstractType = $sharedServiceDefinition->isInterface() ? 'interface' : 'abstract class';
-                    $abstractTypeImplementVerb = $sharedServiceDefinition->isInterface() ? 'implements' : 'extends';
                     $collection->add(new LogicalConstraintViolation(sprintf(
-                        'The %s, %s, does not have an alias. Create a concrete class that %s this %s and annotate it with a #[Service] Attribute.',
-                        $abstractType,
-                        $sharedServiceDefinition->getType(),
-                        $abstractTypeImplementVerb,
-                        $abstractType
+                        'The abstract, %s, does not have an alias. Create a concrete class that implements this type and annotate it with a #[Service] Attribute.',
+                        $sharedServiceDefinition->getType()
                     ), LogicalConstraintViolationType::Warning));
                 }
             }

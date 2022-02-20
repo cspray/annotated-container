@@ -113,26 +113,22 @@ class CompileContainerCommandTest extends TestCase {
         $this->assertEquals([
             'type' => SimpleServices\FooInterface::class,
             'implementedServices' => [],
-            'extendedServices' => [],
             'profiles' => [
                 'default'
             ],
-            'isInterface' => true,
-            'isClass' => false,
-            'isAbstract' => false
+            'isAbstract' => true,
+            'isConcrete' => false
         ], $actual['compiledServiceDefinitions'][md5(SimpleServices\FooInterface::class)]);
 
         $this->assertArrayHasKey(md5(SimpleServices\FooImplementation::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals([
             'type' => SimpleServices\FooImplementation::class,
             'implementedServices' => [md5(SimpleServices\FooInterface::class)],
-            'extendedServices' => [],
             'profiles' => [
                 'default'
             ],
-            'isInterface' => false,
-            'isClass' => true,
-            'isAbstract' => false
+            'isAbstract' => false,
+            'isConcrete' => true
         ], $actual['compiledServiceDefinitions'][md5(SimpleServices\FooImplementation::class)]);
     }
 
@@ -252,13 +248,11 @@ class CompileContainerCommandTest extends TestCase {
         "$serviceKey": {
             "type": "Cspray\\\\AnnotatedContainer\\\\DummyApps\\\\NonPhpFiles\\\\FooInterface",
             "implementedServices": [],
-            "extendedServices": [],
             "profiles": [
                 "default"
             ],
-            "isInterface": true,
-            "isClass": false,
-            "isAbstract": false
+            "isAbstract": true,
+            "isConcrete": false
         }
     },
     "sharedServiceDefinitions": [

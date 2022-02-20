@@ -15,21 +15,12 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                     $implementedServices[] = $implementedKey;
                 }
 
-                $extendedServices = [];
-                foreach ($serviceDefinition->getExtendedServices() as $extendedService) {
-                    $extendedKey = md5($extendedService->getType());
-                    $addCompiledServiceDefinition($extendedKey, $extendedService);
-                    $extendedServices[] = $extendedKey;
-                }
-
                 $compiledServiceDefinitions[$key] = [
                     'type' => $serviceDefinition->getType(),
                     'implementedServices' => $implementedServices,
-                    'extendedServices' => $extendedServices,
                     'profiles' => $serviceDefinition->getProfiles(),
-                    'isInterface' => $serviceDefinition->isInterface(),
-                    'isClass' => $serviceDefinition->isClass(),
-                    'isAbstract' => $serviceDefinition->isAbstract()
+                    'isAbstract' => $serviceDefinition->isAbstract(),
+                    'isConcrete' => $serviceDefinition->isConcrete(),
                 ];
             }
         };
@@ -214,27 +205,21 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $serviceHash = md5($type);
         if (!isset($serviceDefinitionCacheMap[$serviceHash])) {
             $compiledServiceDefinition = $compiledServiceDefinitions[$serviceHash];
+            if ($compiledServiceDefinition['isAbstract']) {
+                $factoryMethod = 'forAbstract';
+            } else {
+                $factoryMethod = 'forConcrete';
+            }
+            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($type)->withProfiles(...$compiledServiceDefinition['profiles']);
 
-            $implementedServices = [];
             foreach ($compiledServiceDefinition['implementedServices'] as $implementedServiceHash) {
                 $implementedType = $compiledServiceDefinitions[$implementedServiceHash]['type'];
-                $implementedServices[] = $this->getDeserializeServiceDefinition($compiledServiceDefinitions, $serviceDefinitionCacheMap, $implementedType);
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService(
+                    $this->getDeserializeServiceDefinition($compiledServiceDefinitions, $serviceDefinitionCacheMap, $implementedType)
+                );
             }
 
-            $extendedServices = [];
-            foreach ($compiledServiceDefinition['extendedServices'] as $extendedServiceHash) {
-                $extendedType = $compiledServiceDefinitions[$extendedServiceHash]['type'];
-                $extendedServices[] = $this->getDeserializeServiceDefinition($compiledServiceDefinitions, $serviceDefinitionCacheMap, $extendedType);
-            }
-
-            $serviceDefinitionCacheMap[$serviceHash] = new ServiceDefinition(
-                $type,
-                $compiledServiceDefinition['profiles'],
-                $implementedServices,
-                $extendedServices,
-                $compiledServiceDefinition['isInterface'],
-                $compiledServiceDefinition['isAbstract']
-            );
+            $serviceDefinitionCacheMap[$serviceHash] = $serviceDefinitionBuilder->build();
         }
 
         return $serviceDefinitionCacheMap[$serviceHash];

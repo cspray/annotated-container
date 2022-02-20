@@ -25,7 +25,7 @@ final class ServicePrepareDefinitionInterrogator {
             if (!isset($serviceDefinition)) {
                 // This technically isn't a "good" definition but the compilation process
                 $goodDefinitions[] = $servicePrepareDefinition;
-            } else if ($serviceDefinition->isInterface()) {
+            } else if ($serviceDefinition->isAbstract()) {
                 $goodDefinitions[] = $servicePrepareDefinition;
             } else if (empty($serviceDefinition->getImplementedServices())) {
                 $goodDefinitions[] = $servicePrepareDefinition;

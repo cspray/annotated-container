@@ -36,7 +36,7 @@ class LogicalConstraintValidatorTest extends TestCase {
         $violations = $this->subject->validate($containerDefinition);
 
         $this->assertCount(1, $violations);
-        $this->assertSame('The interface, ' . NoInterfaceServiceAlias\FooInterface::class . ', does not have an alias. Create a concrete class that implements this interface and annotate it with a #[Service] Attribute.', $violations->get(0)->getMessage());
+        $this->assertSame('The abstract, ' . NoInterfaceServiceAlias\FooInterface::class . ', does not have an alias. Create a concrete class that implements this type and annotate it with a #[Service] Attribute.', $violations->get(0)->getMessage());
         $this->assertSame(LogicalConstraintViolationType::Warning, $violations->get(0)->getViolationType());
     }
 

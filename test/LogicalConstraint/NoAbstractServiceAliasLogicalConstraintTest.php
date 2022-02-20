@@ -25,7 +25,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
         $this->assertCount(1, $violations);
         $this->assertSame(
-            'The interface, Cspray\\AnnotatedContainer\\LogicalErrorApps\\NoInterfaceServiceAlias\\FooInterface, does not have an alias. Create a concrete class that implements this interface and annotate it with a #[Service] Attribute.',
+            'The abstract, Cspray\\AnnotatedContainer\\LogicalErrorApps\\NoInterfaceServiceAlias\\FooInterface, does not have an alias. Create a concrete class that implements this type and annotate it with a #[Service] Attribute.',
             $violations->get(0)->getMessage()
         );
         $this->assertSame(
@@ -42,7 +42,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
         $this->assertCount(1, $violations);
         $this->assertSame(
-            'The abstract class, Cspray\\AnnotatedContainer\\LogicalErrorApps\\NoAbstractServiceAlias\\AbstractFoo, does not have an alias. Create a concrete class that extends this abstract class and annotate it with a #[Service] Attribute.',
+            'The abstract, Cspray\\AnnotatedContainer\\LogicalErrorApps\\NoAbstractServiceAlias\\AbstractFoo, does not have an alias. Create a concrete class that implements this type and annotate it with a #[Service] Attribute.',
             $violations->get(0)->getMessage()
         );
         $this->assertSame(
