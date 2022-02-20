@@ -69,7 +69,7 @@ final class AurynInjectorFactory implements ContainerFactory {
         }
 
         foreach ($useServiceDefinitions as $useServiceDefinition) {
-            $type = $useServiceDefinition->getType();
+            $type = $useServiceDefinition->getService()->getType();
             $defineArgs = self::mapTypesServiceArgs($type, '__construct', $useServiceDefinitions);
             if (isset($typeArgsMap[$type])) {
                 $typeArgsMap[$type] = array_merge($typeArgsMap[$type], $defineArgs);
@@ -115,8 +115,8 @@ final class AurynInjectorFactory implements ContainerFactory {
         $args = [];
         /** @var InjectServiceDefinition $UseServiceDefinition */
         foreach ($UseServiceDefinitions as $UseServiceDefinition) {
-            if ($UseServiceDefinition->getType() === $type && $UseServiceDefinition->getMethod() === $method) {
-                $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getValue();
+            if ($UseServiceDefinition->getService()->getType() === $type && $UseServiceDefinition->getMethod() === $method) {
+                $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getInjectedService()->getType();
             }
         }
         return $args;

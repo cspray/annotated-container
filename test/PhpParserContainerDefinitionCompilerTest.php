@@ -581,11 +581,11 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             $this->assertInstanceOf(InjectServiceDefinition::class, $UseServiceDefinition);
             $key = sprintf(
                 "%s::%s(%s)",
-                $UseServiceDefinition->getType(),
+                $UseServiceDefinition->getService()->getType(),
                 $UseServiceDefinition->getMethod(),
                 $UseServiceDefinition->getParamName()
             );
-            $actualMap[$key] = $UseServiceDefinition->getValue();
+            $actualMap[$key] = $UseServiceDefinition->getInjectedService()->getType();
         }
 
         ksort($actualMap);
