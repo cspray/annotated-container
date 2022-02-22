@@ -13,4 +13,6 @@ interface AliasDefinition {
 
     public function getConcreteService() : ServiceDefinition;
 
+    public function equals(AliasDefinition $aliasDefinition) : bool;
+
 }

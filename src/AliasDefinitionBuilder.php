@@ -50,6 +50,10 @@ final class AliasDefinitionBuilder {
             public function getConcreteService(): ServiceDefinition {
                 return $this->concreteService;
             }
+
+            public function equals(AliasDefinition $aliasDefinition): bool {
+                return $this->abstractService->equals($aliasDefinition->getAbstractService()) && $this->concreteService->equals($aliasDefinition->getConcreteService());
+            }
         };
     }
 

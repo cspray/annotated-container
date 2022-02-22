@@ -50,4 +50,6 @@ interface ServiceDefinition {
      */
     public function isAbstract() : bool;
 
+    public function equals(ServiceDefinition $serviceDefinition) : bool;
+
 }

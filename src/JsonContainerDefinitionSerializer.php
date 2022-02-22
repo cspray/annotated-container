@@ -112,84 +112,55 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             }
         }
 
-        $sharedServiceDefinitions = [];
+        $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
         foreach ($data['sharedServiceDefinitions'] as $serviceHash) {
-            $sharedServiceDefinitions[] = $serviceDefinitions[$serviceHash];
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinitions[$serviceHash]);
         }
 
-        $aliasDefinitions = [];
         foreach ($data['aliasDefinitions'] as $aliasDefinition) {
-            $aliasDefinitions[] = AliasDefinitionBuilder::forAbstract($serviceDefinitions[$aliasDefinition['original']])->withConcrete($serviceDefinitions[$aliasDefinition['alias']])->build();
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition(
+                AliasDefinitionBuilder::forAbstract($serviceDefinitions[$aliasDefinition['original']])->withConcrete($serviceDefinitions[$aliasDefinition['alias']])->build()
+            );
         }
 
-        $servicePrepareDefinitions = [];
         foreach ($data['servicePrepareDefinitions'] as $servicePrepareDefinition) {
             $service = $serviceDefinitions[md5($servicePrepareDefinition['type'])];
-            $servicePrepareDefinitions[] = ServicePrepareDefinitionBuilder::forMethod($service, $servicePrepareDefinition['method'])->build();
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withServicePrepareDefinition(
+                ServicePrepareDefinitionBuilder::forMethod($service, $servicePrepareDefinition['method'])->build()
+            );
         }
 
-        $useScalarDefinitions = [];
         foreach ($data['injectScalarDefinitions'] as $useScalarDefinition) {
             $service = $serviceDefinitions[md5($useScalarDefinition['type'])];
-            $useScalarDefinitions[] = InjectScalarDefinitionBuilder::forMethod($service, $useScalarDefinition['method'])
-                ->withParam(ScalarType::String, $useScalarDefinition['paramName'])
-                ->withValue($useScalarDefinition['value'])
-                ->build();
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
+                InjectScalarDefinitionBuilder::forMethod($service, $useScalarDefinition['method'])
+                    ->withParam(ScalarType::String, $useScalarDefinition['paramName'])
+                    ->withValue($useScalarDefinition['value'])
+                    ->build()
+            );
         }
 
-        $useServiceDefinitions = [];
         foreach ($data['injectServiceDefinitions'] as $useServiceDefinition) {
             $targetService = $serviceDefinitions[md5($useServiceDefinition['type'])];
             $injectService = $serviceDefinitions[md5($useServiceDefinition['value'])];
-            $useServiceDefinitions[] = InjectServiceDefinitionBuilder::forMethod($targetService, $useServiceDefinition['method'])
-                ->withParam($useServiceDefinition['paramType'], $useServiceDefinition['paramName'])
-                ->withInjectedService($injectService)
-                ->build();
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectServiceDefinition(
+                InjectServiceDefinitionBuilder::forMethod($targetService, $useServiceDefinition['method'])
+                    ->withParam($useServiceDefinition['paramType'], $useServiceDefinition['paramName'])
+                    ->withInjectedService($injectService)
+                    ->build()
+            );
         }
 
-        $serviceDelegateDefinitions = [];
         foreach ($data['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
             $service = $serviceDefinitions[md5($serviceDelegateDefinition['serviceType'])];
-            $serviceDelegateDefinitions[] = ServiceDelegateDefinitionBuilder::forService($service)
-                ->withDelegateMethod($serviceDelegateDefinition['delegateType'], $serviceDelegateDefinition['delegateMethod'])
-                ->build();
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition(
+                ServiceDelegateDefinitionBuilder::forService($service)
+                    ->withDelegateMethod($serviceDelegateDefinition['delegateType'], $serviceDelegateDefinition['delegateMethod'])
+                    ->build()
+            );
         }
 
-        return new class($sharedServiceDefinitions, $aliasDefinitions, $servicePrepareDefinitions, $useScalarDefinitions, $useServiceDefinitions, $serviceDelegateDefinitions) implements ContainerDefinition {
-
-            public function __construct(
-                private array $sharedServiceDefinitions,
-                private array $aliasDefinitions,
-                private array $servicePrepareDefinitions,
-                private array $useScalarDefinitions,
-                private array $useServiceDefinitions,
-                private array $serviceDelegateDefinitions
-            ) {}
-
-            public function getServiceDefinitions(): array {
-                return $this->sharedServiceDefinitions;
-            }
-
-            public function getAliasDefinitions(): array {
-                return $this->aliasDefinitions;
-            }
-
-            public function getServicePrepareDefinitions(): array {
-                return $this->servicePrepareDefinitions;
-            }
-
-            public function getInjectScalarDefinitions(): array {
-                return $this->useScalarDefinitions;
-            }
-
-            public function getInjectServiceDefinitions(): array {
-                return $this->useServiceDefinitions;
-            }
-
-            public function getServiceDelegateDefinitions(): array {
-                return $this->serviceDelegateDefinitions;
-            }
-        };
+        return $containerDefinitionBuilder->build();
     }
 
     private function getDeserializeServiceDefinition(array $compiledServiceDefinitions, array &$serviceDefinitionCacheMap, string $type) : ServiceDefinition {

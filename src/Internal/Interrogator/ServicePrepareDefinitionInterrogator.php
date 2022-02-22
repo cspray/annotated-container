@@ -7,33 +7,25 @@ use Generator;
 
 final class ServicePrepareDefinitionInterrogator {
 
-    private ServiceDefinitionInterrogator $serviceDefinitionInterrogator;
     private array $servicePrepareDefinitions;
 
     public function __construct(
-        ServiceDefinitionInterrogator $serviceDefinitionInterrogator,
         ServicePrepareDefinition... $servicePrepareDefinitions
     ) {
-        $this->serviceDefinitionInterrogator = $serviceDefinitionInterrogator;
         $this->servicePrepareDefinitions = $servicePrepareDefinitions;
     }
 
     public function gatherServicePrepare() : Generator {
-        $goodDefinitions = [];
         foreach ($this->servicePrepareDefinitions as $servicePrepareDefinition) {
             $serviceDefinition = $servicePrepareDefinition->getService();
-            if (!isset($serviceDefinition)) {
-                // This technically isn't a "good" definition but the compilation process
-                $goodDefinitions[] = $servicePrepareDefinition;
-            } else if ($serviceDefinition->isAbstract()) {
-                $goodDefinitions[] = $servicePrepareDefinition;
-            } else if (empty($serviceDefinition->getImplementedServices())) {
-                $goodDefinitions[] = $servicePrepareDefinition;
+            // If the service is abstract or if the service definition does not have any implemented services then we
+            // can safely say the current service prepare is valid
+            if ($serviceDefinition->isAbstract() || empty($serviceDefinition->getImplementedServices())) {
+                yield $servicePrepareDefinition;
             } else {
                 // we need to account for the scenario that a class has a ServicePrepare attribute while the Service
                 // interface it implements does not. this is likely a code smell but we have to consider the possibility
-                // we cannot simply look at goodDefinitions because we don't know for certain that the interface we care
-                // about has been parsed and added to the collection yet
+                // because we don't know for certain that the interface we care about has been parsed
                 // TODO: consider whether we should log a warning if this happens
                 foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
                     $hasInterfaceSetup = false;
@@ -51,12 +43,11 @@ final class ServicePrepareDefinitionInterrogator {
                     // if the interface does have this ServicePrepare annotation we need to make sure the class specific
                     // one isn't erroneously invoked a second time in a prepares for that specific type
                     if (!$hasInterfaceSetup) {
-                        $goodDefinitions[] = $servicePrepareDefinition;
+                        yield $servicePrepareDefinition;
                     }
                 }
             }
         }
-        yield from $goodDefinitions;
     }
 
 }
