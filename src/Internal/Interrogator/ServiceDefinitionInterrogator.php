@@ -17,16 +17,6 @@ final class ServiceDefinitionInterrogator {
         $this->serviceDefinitions = $serviceDefinitions;
     }
 
-    public function findServiceDefinitionForType(string $type) : ?ServiceDefinition {
-        foreach ($this->serviceDefinitions as $serviceDefinition) {
-            if ($type === $serviceDefinition->getType()) {
-                return $serviceDefinition;
-            }
-        }
-
-        return null;
-    }
-
     public function gatherSharedServices() : Generator {
         foreach ($this->serviceDefinitions as $serviceDefinition) {
             if ($this->isServiceDefinitionForActiveProfile($serviceDefinition)) {

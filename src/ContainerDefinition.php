@@ -9,6 +9,8 @@ namespace Cspray\AnnotatedContainer;
  */
 interface ContainerDefinition {
 
+    public function merge(ContainerDefinition $containerDefinition) : ContainerDefinition;
+
     /**
      * Returns a set of ServiceDefinition that are shared with the Injector.
      *

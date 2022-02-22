@@ -104,6 +104,10 @@ final class ServiceDefinitionBuilder {
             public function isAbstract(): bool {
                 return $this->isAbstract;
             }
+
+            public function equals(ServiceDefinition $serviceDefinition): bool {
+                return $serviceDefinition->getType() === $this->getType();
+            }
         };
     }
 

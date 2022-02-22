@@ -77,7 +77,6 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             ...$serviceDefinitions
         );
         $servicePrepareInterrogator = new ServicePrepareDefinitionInterrogator(
-            $serviceDefinitionInterrogator,
             ...$this->marshalRawServicePrepareDefinitions($serviceDefinitions, $rawServicePrepareDefinitions)
         );
         $useScalarInterrogator = new InjectScalarDefinitionInterrogator(
@@ -303,48 +302,33 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         InjectServiceDefinitionInterrogator   $useServiceDefinitionInterrogator,
         ServiceDelegateDefinitionInterrogator $serviceDelegateDefinitionInterrogator
     ) : ContainerDefinition {
-        $services = iterator_to_array($serviceDefinitionInterrogator->gatherSharedServices());
-        $aliases = iterator_to_array($serviceDefinitionInterrogator->gatherAliases());
-        $setupMethods = iterator_to_array($servicePrepareDefinitionInterrogator->gatherServicePrepare());
-        $useScalars = iterator_to_array($useScalarDefinitionInterrogator->gatherUseScalarDefinitions());
-        $useServices = iterator_to_array($useServiceDefinitionInterrogator->gatherUseServiceDefinitions());
-        $serviceDelegateDefinitions = iterator_to_array($serviceDelegateDefinitionInterrogator->getServiceDelegateDefinitions());
+        $builder = ContainerDefinitionBuilder::newDefinition();
 
-        return new class($services, $aliases, $setupMethods, $useScalars, $useServices, $serviceDelegateDefinitions) implements ContainerDefinition {
+        foreach ($serviceDefinitionInterrogator->gatherSharedServices() as $serviceDefinition) {
+            $builder = $builder->withServiceDefinition($serviceDefinition);
+        }
 
-            public function __construct(
-                private array $services,
-                private array $aliases,
-                private array $setupMethods,
-                private array $useScalarDefinitions,
-                private array $useServiceDefinitions,
-                private array $serviceDelegateDefinitions
-            ) {}
+        foreach ($serviceDefinitionInterrogator->gatherAliases() as $aliasDefinition) {
+            $builder = $builder->withAliasDefinition($aliasDefinition);
+        }
 
-            public function getServiceDefinitions() : array {
-                return $this->services;
-            }
+        foreach ($servicePrepareDefinitionInterrogator->gatherServicePrepare() as $servicePrepareDefinition) {
+            $builder = $builder->withServicePrepareDefinition($servicePrepareDefinition);
+        }
 
-            public function getAliasDefinitions() : array {
-                return $this->aliases;
-            }
+        foreach ($useScalarDefinitionInterrogator->gatherUseScalarDefinitions() as $injectScalarDefinition) {
+            $builder = $builder->withInjectScalarDefinition($injectScalarDefinition);
+        }
 
-            public function getServicePrepareDefinitions() : array {
-                return $this->setupMethods;
-            }
+        foreach ($useServiceDefinitionInterrogator->gatherUseServiceDefinitions() as $injectServiceDefinition) {
+            $builder = $builder->withInjectServiceDefinition($injectServiceDefinition);
+        }
 
-            public function getInjectScalarDefinitions() : array {
-                return $this->useScalarDefinitions;
-            }
+        foreach ($serviceDelegateDefinitionInterrogator->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
+            $builder = $builder->withServiceDelegateDefinition($serviceDelegateDefinition);
+        }
 
-            public function getInjectServiceDefinitions() : array {
-                return $this->useServiceDefinitions;
-            }
-
-            public function getServiceDelegateDefinitions(): array {
-                return $this->serviceDelegateDefinitions;
-            }
-        };
+        return $builder->build();
     }
 
 }
