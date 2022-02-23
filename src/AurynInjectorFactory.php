@@ -2,7 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Auryn\InjectionException;
 use Auryn\Injector;
+use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -24,7 +26,14 @@ final class AurynInjectorFactory implements ContainerFactory {
             }
 
             public function get(string $id) {
-                return $this->injector->make($id);
+                try {
+                    return $this->injector->make($id);
+                } catch (InjectionException $injectionException) {
+                    throw new ContainerException(
+                        sprintf('An error was encountered creating %s', $id),
+                        previous: $injectionException
+                    );
+                }
             }
 
             public function has(string $id): bool {

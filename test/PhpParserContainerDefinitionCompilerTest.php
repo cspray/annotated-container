@@ -23,6 +23,8 @@ use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
 use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
 use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
 use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
+use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
+use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -480,19 +482,19 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testServicePrepareNotOnServiceThrowsException() {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidAnnotationException::class);
         $this->expectExceptionMessage('The #[ServicePrepare] Attribute on ' . LogicalErrorApps\ServicePrepareNotService\FooImplementation::class . '::postConstruct is not on a type marked as a #[Service].');;
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
     }
 
     public function testEmptyScanDirectoriesThrowsException() {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidCompileOptionsException::class);
         $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . PhpParserContainerDefinitionCompiler::class . ' must include at least 1 directory to scan, but none were provided.');
         $this->runCompileDirectory([]);
     }
 
     public function testEmptyProfilesThrowsException() {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidCompileOptionsException::class);
         $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . PhpParserContainerDefinitionCompiler::class . ' must include at least 1 active profile, but none were provided.');
         $this->runCompileDirectory([__DIR__ . '/DummyApps/SimpleServices'], []);
     }

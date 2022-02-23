@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
 use InvalidArgumentException;
 
 final class CacheAwareContainerDefinitionCompiler implements ContainerDefinitionCompiler {
@@ -28,7 +29,7 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
             $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
             $contentWritten = @file_put_contents($cacheFile, $serialized);
             if (!$contentWritten) {
-                throw new InvalidArgumentException(sprintf('The cache directory, %s, could not be written to. Please ensure it exists and is writeable.', $this->cacheDir));
+                throw new InvalidCacheException(sprintf('The cache directory, %s, could not be written to. Please ensure it exists and is writeable.', $this->cacheDir));
             }
         }
         return $containerDefinition;

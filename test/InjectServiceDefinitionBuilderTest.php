@@ -3,27 +3,28 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use PHPUnit\Framework\TestCase;
 
 class InjectServiceDefinitionBuilderTest extends TestCase {
 
     public function testEmptyMethodNameThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('The method for an InjectServiceDefinition must not be blank.');
         InjectServiceDefinitionBuilder::forMethod($serviceDefinition, '');
     }
 
     public function testEmptyParamTypeThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('The param type for an InjectServiceDefinition must not be blank.');
         InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')->withParam('', '');
     }
 
     public function testEmptyParamNameThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('The param name for an InjectServiceDefinition must not be blank.');
         InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')->withParam(SimpleUseService\FooInterface::class, '');
     }
@@ -46,14 +47,14 @@ class InjectServiceDefinitionBuilderTest extends TestCase {
 
     public function testBuilderWithoutParamThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('An InjectServiceDefinitionBuilder must have a parameter defined before building.');
         InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')->build();
     }
 
     public function testBuilderWithoutInjectedServiceThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('An InjectServiceDefinitionBuilder must have an injected service defined before building.');
         InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')->withParam(SimpleUseService\FooInterface::class, 'foo')->build();
     }

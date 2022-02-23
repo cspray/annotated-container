@@ -4,13 +4,14 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
 use Cspray\AnnotatedContainer\DummyApps\MultipleSimpleServices;
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use PHPUnit\Framework\TestCase;
 
 class AliasDefinitionBuilderTest extends TestCase {
 
     public function testAddingConcreteServiceDefinitionAsAbstractTypeThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('Attempted to assign concrete type ' . SimpleServices\FooImplementation::class . ' as an abstract alias.');
         AliasDefinitionBuilder::forAbstract($serviceDefinition);
     }
@@ -18,7 +19,7 @@ class AliasDefinitionBuilderTest extends TestCase {
     public function testAddingAbstractServiceDefinitionAsConcreteTypeThrowsException() {
         $serviceDefinition1 = ServiceDefinitionBuilder::forAbstract(SimpleServices\FooInterface::class)->build();
         $serviceDefinition2 = ServiceDefinitionBuilder::forAbstract(MultipleSimpleServices\FooInterface::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('Attempted to assign abstract type ' . MultipleSimpleServices\FooInterface::class . ' as a concrete alias.');
         AliasDefinitionBuilder::forAbstract($serviceDefinition1)->withConcrete($serviceDefinition2);
     }

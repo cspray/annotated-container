@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+
 final class AliasDefinitionBuilder {
 
     private ServiceDefinition $abstractType;
@@ -11,7 +13,7 @@ final class AliasDefinitionBuilder {
 
     public static function forAbstract(ServiceDefinition $serviceDefinition) : self {
         if (!$serviceDefinition->isAbstract()) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new DefinitionBuilderException(sprintf(
                 'Attempted to assign concrete type %s as an abstract alias.',
                 $serviceDefinition->getType()
             ));
@@ -23,7 +25,7 @@ final class AliasDefinitionBuilder {
 
     public function withConcrete(ServiceDefinition $serviceDefinition) : self {
         if ($serviceDefinition->isAbstract()) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new DefinitionBuilderException(sprintf(
                 'Attempted to assign abstract type %s as a concrete alias.',
                 $serviceDefinition->getType()
             ));

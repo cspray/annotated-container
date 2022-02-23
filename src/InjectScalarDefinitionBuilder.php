@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use InvalidArgumentException;
 
 class InjectScalarDefinitionBuilder {
@@ -16,7 +17,7 @@ class InjectScalarDefinitionBuilder {
 
     public static function forMethod(ServiceDefinition $service, string $method) : self {
         if (empty($method)) {
-            throw new InvalidArgumentException('The method for an InjectScalarDefinition must not be blank.');
+            throw new DefinitionBuilderException('The method for an InjectScalarDefinition must not be blank.');
         }
         $instance = new self;
         $instance->serviceDefinition = $service;
@@ -26,7 +27,7 @@ class InjectScalarDefinitionBuilder {
 
     public function withParam(ScalarType $paramType, string $name) : self {
         if (empty($name)) {
-            throw new InvalidArgumentException('The param name for an InjectScalarDefinition must not be blank.');
+            throw new DefinitionBuilderException('The param name for an InjectScalarDefinition must not be blank.');
         }
         $instance = clone $this;
         $instance->paramType = $paramType;
@@ -42,10 +43,10 @@ class InjectScalarDefinitionBuilder {
 
     public function build() : InjectScalarDefinition {
         if (!isset($this->paramName)) {
-            throw new InvalidArgumentException('An InjectScalarDefinitionBuilder must have a parameter defined before building.');
+            throw new DefinitionBuilderException('An InjectScalarDefinitionBuilder must have a parameter defined before building.');
         }
         if (!isset($this->paramValue)) {
-            throw new InvalidArgumentException('An InjectScalarDefinitionBuilder must have a parameter value defined before building.');
+            throw new DefinitionBuilderException('An InjectScalarDefinitionBuilder must have a parameter value defined before building.');
         }
         return new class($this->serviceDefinition, $this->method, $this->paramType, $this->paramName, $this->paramValue) implements InjectScalarDefinition {
 

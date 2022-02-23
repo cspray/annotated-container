@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
@@ -22,7 +23,7 @@ class ServiceDefinitionBuilderTest extends TestCase {
      * @dataProvider factoryMethodProvider
      */
     public function testEmptyTypeThrowsException(string $factoryMethod) : void {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('Must not pass an empty type to ' . ServiceDefinitionBuilder::class . '::' . $factoryMethod);
         ServiceDefinitionBuilder::$factoryMethod('');
     }
@@ -131,14 +132,14 @@ class ServiceDefinitionBuilderTest extends TestCase {
      */
     public function testAddImplementedServiceToAbstractThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forAbstract(SimpleServices\FooInterface::class)->build();
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('Attempted to add an implemented service to abstract type ' . MultipleImplementedServices\FooInterface::class . ' which is not allowed.');
         ServiceDefinitionBuilder::forAbstract(MultipleImplementedServices\FooInterface::class)->withImplementedService($serviceDefinition);
     }
 
     public function testAddConcreteServiceToConcreteThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)->build();
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('Attempted to add a concrete implemented service to a concrete type ' . MultipleImplementedServices\FooBarImplementation::class . ' which is not allowed.');
         ServiceDefinitionBuilder::forConcrete(MultipleImplementedServices\FooBarImplementation::class)->withImplementedService($serviceDefinition);
     }

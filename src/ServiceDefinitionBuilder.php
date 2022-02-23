@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use InvalidArgumentException;
 
 final class ServiceDefinitionBuilder {
@@ -16,9 +17,14 @@ final class ServiceDefinitionBuilder {
 
     private function __construct() {}
 
+    /**
+     * @param string $type
+     * @return static
+     * @throws DefinitionBuilderException
+     */
     public static function forAbstract(string $type) : self {
         if (empty($type)) {
-            throw new InvalidArgumentException(sprintf(
+            throw new DefinitionBuilderException(sprintf(
                 'Must not pass an empty type to %s',
                 __METHOD__
             ));
@@ -29,9 +35,14 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * @param string $type
+     * @return static
+     * @throws DefinitionBuilderException
+     */
     public static function forConcrete(string $type) : self {
         if (empty($type)) {
-            throw new InvalidArgumentException(sprintf(
+            throw new DefinitionBuilderException(sprintf(
                 'Must not pass an empty type to %s',
                 __METHOD__
             ));
@@ -42,14 +53,17 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * @throws DefinitionBuilderException
+     */
     public function withImplementedService(ServiceDefinition $serviceDefinition) : self {
         if ($this->isAbstract) {
-            throw new InvalidArgumentException(sprintf(
+            throw new DefinitionBuilderException(sprintf(
                 'Attempted to add an implemented service to abstract type %s which is not allowed.',
                 $this->type
             ));
         } else if (!$serviceDefinition->isAbstract()) {
-            throw new InvalidArgumentException(sprintf(
+            throw new DefinitionBuilderException(sprintf(
                 'Attempted to add a concrete implemented service to a concrete type %s which is not allowed.',
                 $this->type
             ));
