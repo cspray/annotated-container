@@ -3,13 +3,14 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use PHPUnit\Framework\TestCase;
 
 class ServicePrepareDefinitionBuilderTest extends TestCase {
 
     public function testEmptyMethodThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forAbstract(InterfaceServicePrepare\FooInterface::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('A method for a ServicePrepareDefinition must not be blank.');
         ServicePrepareDefinitionBuilder::forMethod($serviceDefinition, '');
     }

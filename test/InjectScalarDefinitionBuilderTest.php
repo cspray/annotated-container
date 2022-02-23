@@ -3,20 +3,21 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use PHPUnit\Framework\TestCase;
 
 class InjectScalarDefinitionBuilderTest extends TestCase {
 
     public function testEmptyMethodNameThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('The method for an InjectScalarDefinition must not be blank.');
         InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '');
     }
 
     public function testEmptyParamNameThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('The param name for an InjectScalarDefinition must not be blank.');
         InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')->withParam(ScalarType::String, '');
     }
@@ -40,7 +41,7 @@ class InjectScalarDefinitionBuilderTest extends TestCase {
     public function testBuildWithoutParamThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
         $builder = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct');
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('An InjectScalarDefinitionBuilder must have a parameter defined before building.');
         $builder->build();
     }
@@ -48,7 +49,7 @@ class InjectScalarDefinitionBuilderTest extends TestCase {
     public function testBuildWithoutValueThrowsException() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
         $builder = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')->withParam(ScalarType::String, 'stringParam');
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('An InjectScalarDefinitionBuilder must have a parameter value defined before building.');
         $builder->build();
     }

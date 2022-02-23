@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
+use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDelegateDefinitionInterrogator;
 use Cspray\AnnotatedContainer\Internal\Interrogator\InjectScalarDefinitionInterrogator;
 use Cspray\AnnotatedContainer\Internal\Interrogator\InjectServiceDefinitionInterrogator;
@@ -41,12 +43,12 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
 
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
         if (empty($containerDefinitionCompileOptions->getScanDirectories())) {
-            throw new InvalidArgumentException(sprintf(
+            throw new InvalidCompileOptionsException(sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s must include at least 1 directory to scan, but none were provided.',
                 self::class
             ));
         } else if (empty($containerDefinitionCompileOptions->getProfiles())) {
-            throw new InvalidArgumentException(sprintf(
+            throw new InvalidCompileOptionsException(sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s must include at least 1 active profile, but none were provided.',
                 self::class
             ));
@@ -173,7 +175,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 }
             }
             if (is_null($service)) {
-                throw new InvalidArgumentException(sprintf(
+                throw new InvalidAnnotationException(sprintf(
                     'The #[ServicePrepare] Attribute on %s::%s is not on a type marked as a #[Service].',
                     $rawServicePrepareDefinition['type'],
                     $rawServicePrepareDefinition['method']

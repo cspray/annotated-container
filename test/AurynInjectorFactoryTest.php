@@ -14,6 +14,7 @@ use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
 use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
 use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerExceptionInterface;
 
 /**
  * @covers \Cspray\AnnotatedContainer\AurynInjectorFactory
@@ -178,7 +179,7 @@ class AurynInjectorFactoryTest extends TestCase {
         );
         $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
 
-        $this->expectException(InjectionException::class);
+        $this->expectException(ContainerExceptionInterface::class);
         $injector->get(MultipleAliasResolution\FooInterface::class);
     }
 

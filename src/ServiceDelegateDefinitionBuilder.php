@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+
 class ServiceDelegateDefinitionBuilder {
 
     private ServiceDefinition $service;
@@ -16,12 +18,15 @@ class ServiceDelegateDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * @throws DefinitionBuilderException
+     */
     public function withDelegateMethod(string $delegateType, string $delegateMethod) : self {
         if (empty($delegateType)) {
-            throw new \InvalidArgumentException('The delegate type for a ServiceDelegateDefinition must not be blank.');
+            throw new DefinitionBuilderException('The delegate type for a ServiceDelegateDefinition must not be blank.');
         }
         if (empty($delegateMethod)) {
-            throw new \InvalidArgumentException('The delegate method for a ServiceDelegateDefinition must not be blank.');
+            throw new DefinitionBuilderException('The delegate method for a ServiceDelegateDefinition must not be blank.');
         }
         $instance = clone $this;
         $instance->delegateType = $delegateType;

@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
@@ -72,7 +73,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         );
 
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidCacheException::class);
         $this->expectExceptionMessage('The cache directory, vfs://cache, could not be written to. Please ensure it exists and is writeable.');
 
         $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->withProfiles('default')->build());

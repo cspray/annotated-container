@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException;
+
 class ContainerDefinitionBuilder {
 
     private array $serviceDefinitions = [];
@@ -76,7 +78,7 @@ class ContainerDefinitionBuilder {
                 $merged = clone $this;
                 foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
                     if ($this->hasServiceDefinition($serviceDefinition)) {
-                        throw new \InvalidArgumentException(sprintf(
+                        throw new ContainerDefinitionMergeException(sprintf(
                             'The ContainerDefinition already has a ServiceDefinition for %s.',
                             $serviceDefinition->getType()
                         ));
@@ -86,7 +88,7 @@ class ContainerDefinitionBuilder {
 
                 foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
                     if ($this->hasAliasDefinition($aliasDefinition)) {
-                        throw new \InvalidArgumentException(sprintf(
+                        throw new ContainerDefinitionMergeException(sprintf(
                             'The ContainerDefinition already has an AliasDefinition for %s aliased to %s.',
                             $aliasDefinition->getAbstractService()->getType(),
                             $aliasDefinition->getConcreteService()->getType()

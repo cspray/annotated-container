@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException;
 use PHPUnit\Framework\TestCase;
 
 class ContainerDefinitionMergeTest extends TestCase {
@@ -41,7 +42,7 @@ class ContainerDefinitionMergeTest extends TestCase {
         $container1 = ContainerDefinitionBuilder::newDefinition()->withServiceDefinition($serviceDefinition1)->build();
         $container2 = ContainerDefinitionBuilder::newDefinition()->withServiceDefinition($serviceDefinition2)->build();
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ContainerDefinitionMergeException::class);
         $this->expectExceptionMessage('The ContainerDefinition already has a ServiceDefinition for ' . DummyApps\SimpleServices\FooInterface::class);
         $container1->merge($container2);
     }
@@ -88,7 +89,7 @@ class ContainerDefinitionMergeTest extends TestCase {
             ->withAliasDefinition($fooBazAliasDefinition)
             ->build();
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ContainerDefinitionMergeException::class);
         $this->expectExceptionMessage('The ContainerDefinition already has an AliasDefinition for ' . DummyApps\MultipleAliasResolution\FooInterface::class . ' aliased to ' . DummyApps\MultipleAliasResolution\BazImplementation::class . '.');
         $container1->merge($container2);
     }
