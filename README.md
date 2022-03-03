@@ -20,9 +20,9 @@ composer require cspray/annotated-container
 
 ## Quick Start
 
-This is a very short example to get started with one of the most important features with configuring your Container; 
-setting up a singleton Service that implements an interface. There's a lot more to review and you should check out the 
-`docs/` directory for more information.
+This is a short example to whet your appetite for learning more about AnnotatedContainer. Dependency resolution is a 
+complicated subject, and you should understand the tools you use. For more information check out the `/docs` directory 
+in this repo.
 
 ```php
 <?php
@@ -32,14 +32,33 @@ require __DIR__ . '/vendor/autoload.php';
 // interfaces and classes in __DIR__ . '/src'
 
 use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\InjectEnv;
 
 #[Service]
-interface Foo {}
+interface Foo {
+
+    public function getValue() : string;
+
+}
 
 #[Service]
-class FooImplementation {}
+class FooImplementation implements Foo {
+
+    public function __construct(
+        #[InjectEnv('FOO_VALUE')] private string $value
+    ) {}
+    
+    public function getValue() : string {
+        return $this->value;
+    }
+
+}
 
 // app bootstrap in __DIR__ . '/app.php'
+
+// This could be set by whatever system you have in place for environment variables. Here to show 
+// that an env var is present
+putenv('FOO_VALUE=foobar');
 
 use Cspray\AnnotatedContainer\AurynContainerFactory;
 use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
@@ -51,8 +70,9 @@ $containerDefinition = $compiler->compile(
 );
 $container = (new AurynInjectorFactory)->createContainer($injectorDefinition);
 
-var_dump($container->get(Foo::class));
-var_dump($container->get(Foo::class) === $container->get(Foo::class));
+var_dump($container->get(Foo::class) instanceof FooImplementation); // true
+var_dump($container->get(Foo::class) === $container->get(Foo::class)); // true
+var_dump($container->get(Foo::class)->getValue()); // 'foobar'
 ```
 
 Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It

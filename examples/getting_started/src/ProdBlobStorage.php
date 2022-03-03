@@ -3,8 +3,10 @@
 namespace Acme\AnnotatedContainerDemo;
 
 use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServiceProfile;
 
-#[Service(environments: ['prod'])]
+#[Service]
+#[ServiceProfile(['prod'])]
 class ProdBlobStorage extends AbstractBlobStorage implements BlobStorage {
 
     protected function getDescriptor() : string {

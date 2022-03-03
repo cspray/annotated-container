@@ -2,10 +2,17 @@
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-$compiler = new \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler();
-$injectorDefinition = $compiler->compile('dev', __DIR__ . '/src');
-$injector = (new Cspray\AnnotatedContainer\AurynContainerFactory)->createInjector($injectorDefinition);
+use Acme\AnnotatedContainerDemo\BlobStorage;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\AurynContainerFactory;
 
-$blobStorage = $injector->make(\Acme\AnnotatedContainerDemo\BlobStorage::class);
+$compiler = ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
+$containerDefinition = $compiler->compile(
+    ContainerDefinitionCompileOptionsBuilder::scanDirectories('src')->withProfiles('default', 'dev')->build()
+);
+$injector = (new AurynContainerFactory)->createContainer($containerDefinition);
+
+$blobStorage = $injector->get(BlobStorage::class);
 
 $blobStorage->store('example blob');

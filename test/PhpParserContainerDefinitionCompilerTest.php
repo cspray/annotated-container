@@ -23,6 +23,7 @@ use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
 use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
 use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
 use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
+use Cspray\AnnotatedContainer\DummyApps\ImplementsServiceExtendsSameService;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use PHPUnit\Framework\TestCase;
@@ -497,6 +498,15 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->expectException(InvalidCompileOptionsException::class);
         $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . PhpParserContainerDefinitionCompiler::class . ' must include at least 1 active profile, but none were provided.');
         $this->runCompileDirectory([__DIR__ . '/DummyApps/SimpleServices'], []);
+    }
+
+    public function testImplementsServiceExtendsSameService() {
+        $containerDefinition = $this->runCompileDirectory([__DIR__ . '/DummyApps/ImplementsServiceExtendsSameService']);
+
+        $this->assertServiceDefinitionsHaveTypes([
+            ImplementsServiceExtendsSameService\FooInterface::class,
+            ImplementsServiceExtendsSameService\FooImplementation::class
+        ], $containerDefinition->getServiceDefinitions());
     }
 
     protected function assertUseScalarMethod(array $expectedMethods, array $UseScalarDefinitions) : void {
