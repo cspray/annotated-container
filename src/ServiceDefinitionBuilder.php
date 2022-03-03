@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
-use InvalidArgumentException;
 
 final class ServiceDefinitionBuilder {
 

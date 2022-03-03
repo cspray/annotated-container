@@ -2,10 +2,18 @@
 
 namespace Cspray\AnnotatedContainer;
 
-class ContainerDefinitionSerializerOptions {
+/**
+ * Options that control how a ContainerDefinition is serialized.
+ */
+final class ContainerDefinitionSerializerOptions {
 
     private bool $prettyFormatting = false;
 
+    /**
+     * Whether to output the serialized ContainerDefinition in a human-readable format.
+     *
+     * @return bool
+     */
     public function isPrettyFormatted() : bool {
         return $this->prettyFormatting;
     }

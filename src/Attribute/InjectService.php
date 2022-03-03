@@ -13,8 +13,6 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final class InjectService {
 
-    public function __construct(
-        private string $name
-    ) {}
+    public function __construct(private string $name) {}
 
 }

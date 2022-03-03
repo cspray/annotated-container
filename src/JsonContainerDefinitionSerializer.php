@@ -2,8 +2,22 @@
 
 namespace Cspray\AnnotatedContainer;
 
+/**
+ * A ContainerDefinitionSerializer that will format a ContainerDefinition into a JSON string.
+ */
 final class JsonContainerDefinitionSerializer implements ContainerDefinitionSerializer {
 
+    /**
+     * Returns a JSON object that specifies the various definitions that make up this ContainerDefinition.
+     *
+     * It is not advised to rely on the precise format of the returned JSON string. Instead, you should use the
+     * serialized string in the JsonContainerDefinitionSerializer::deserialize method to create a corresponding
+     * ContainerDefinition.
+     *
+     * @param ContainerDefinition $containerDefinition
+     * @param ContainerDefinitionSerializerOptions|null $options
+     * @return string
+     */
     public function serialize(ContainerDefinition $containerDefinition, ContainerDefinitionSerializerOptions $options = null) : string {
         $compiledServiceDefinitions = [];
         $addCompiledServiceDefinition = function(string $key, ServiceDefinition $serviceDefinition) use(&$compiledServiceDefinitions, &$addCompiledServiceDefinition) : void {
@@ -98,6 +112,13 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         ], $flags);
     }
 
+    /**
+     * Parses a JSON object returned from JsonContainerDefinitionSerializer::serialize to create a ContainerDefinition.
+     *
+     * @param string $serializedDefinition
+     * @return ContainerDefinition
+     * @throws Exception\DefinitionBuilderException
+     */
     public function deserialize(string $serializedDefinition) : ContainerDefinition {
         $data = json_decode($serializedDefinition, true);
 

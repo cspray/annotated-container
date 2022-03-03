@@ -4,7 +4,10 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 
-class InjectServiceDefinitionBuilder {
+/**
+ * The preferred method for constructing InjectServiceDefinition instances.
+ */
+final class InjectServiceDefinitionBuilder {
 
     private ServiceDefinition $service;
     private string $method;
@@ -14,6 +17,16 @@ class InjectServiceDefinitionBuilder {
 
     private function __construct() {}
 
+    /**
+     * Define the method that requires a Service be injected into it.
+     *
+     * If the Service method is invalid a DefinitionBuilderException will be thrown.
+     *
+     * @param ServiceDefinition $serviceDefinition
+     * @param string $method
+     * @return static
+     * @throws DefinitionBuilderException
+     */
     public static function forMethod(ServiceDefinition $serviceDefinition, string $method) : self {
         if (empty($method)) {
             throw new DefinitionBuilderException('The method for an InjectServiceDefinition must not be blank.');
@@ -24,6 +37,14 @@ class InjectServiceDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * Define the FQCN type and name for the parameter that requires a Service be injected into it.
+     *
+     * @param string $type
+     * @param string $name
+     * @return $this
+     * @throws DefinitionBuilderException
+     */
     public function withParam(string $type, string $name) : self {
         if (empty($type)) {
             throw new DefinitionBuilderException('The param type for an InjectServiceDefinition must not be blank.');
@@ -37,12 +58,22 @@ class InjectServiceDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * Define the actual Service that will be injected into the defined parameter.
+     *
+     * @param ServiceDefinition $serviceDefinition
+     * @return $this
+     */
     public function withInjectedService(ServiceDefinition $serviceDefinition) : self {
         $instance = clone $this;
         $instance->injectedService = $serviceDefinition;
         return $instance;
     }
 
+    /**
+     * @return InjectServiceDefinition
+     * @throws DefinitionBuilderException
+     */
     public function build() : InjectServiceDefinition {
         if (!isset($this->paramType)) {
             throw new DefinitionBuilderException('An InjectServiceDefinitionBuilder must have a parameter defined before building.');

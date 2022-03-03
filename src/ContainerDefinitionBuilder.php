@@ -4,7 +4,10 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException;
 
-class ContainerDefinitionBuilder {
+/**
+ * The preferred method for constructing ContainerDefinition instances.
+ */
+final class ContainerDefinitionBuilder {
 
     private array $serviceDefinitions = [];
     private array $aliasDefinitions = [];
@@ -15,6 +18,9 @@ class ContainerDefinitionBuilder {
 
     private function __construct() {}
 
+    /**
+     * @return static
+     */
     public static function newDefinition() : self {
         return new self;
     }

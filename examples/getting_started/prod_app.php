@@ -4,7 +4,7 @@ require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
 $compiler = new \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler();
 $injectorDefinition = $compiler->compile('prod', __DIR__ . '/src');
-$injector = (new Cspray\AnnotatedContainer\AurynInjectorFactory)->createInjector($injectorDefinition);
+$injector = (new Cspray\AnnotatedContainer\AurynContainerFactory)->createInjector($injectorDefinition);
 
 $blobStorage = $injector->make(\Acme\AnnotatedContainerDemo\BlobStorage::class);
 

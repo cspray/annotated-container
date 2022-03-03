@@ -4,6 +4,9 @@ namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
 use Cspray\AnnotatedContainer\ContainerDefinition;
 
+/**
+ * A class that ensures a ContainerDefinition adheres to the LogicalConstraints we have defined.
+ */
 final class LogicalConstraintValidator {
 
     /** @var LogicalConstraint[] */
@@ -14,6 +17,13 @@ final class LogicalConstraintValidator {
         $this->logicalConstraints[] = new NoAbstractServiceAliasLogicalConstraint();
     }
 
+    /**
+     * Run all the LogicalConstraint implementations that this library defines and return a merged collection of any
+     * violations that might exist in $containerDefinition.
+     *
+     * @param ContainerDefinition $containerDefinition
+     * @return LogicalConstraintViolationCollection
+     */
     public function validate(ContainerDefinition $containerDefinition) : LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();
 

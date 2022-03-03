@@ -14,7 +14,6 @@ use Cspray\AnnotatedContainer\Internal\Visitor\InjectScalarDefinitionVisitor;
 use Cspray\AnnotatedContainer\Internal\Visitor\InjectServiceDefinitionVisitor;
 use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor;
 use Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor;
-use InvalidArgumentException;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;
@@ -29,7 +28,8 @@ use RecursiveIteratorIterator;
 use SplFileInfo;
 
 /**
- * @package Cspray\AnnotatedContainer
+ * A ContainerDefinitionCompiler that uses PhpParser to statically analyze source code for Attributes defined by
+ * AnnotatedContainer.
  */
 final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionCompiler {
 
@@ -41,6 +41,15 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         $this->nodeTraverser = new NodeTraverser();
     }
 
+    /**
+     * Will parse source code, according to the passed $containerDefinitionCompileOptions, and construct a ContainerDefinition
+     * instance based off of the resultant parsing.
+     *
+     * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
+     * @return ContainerDefinition
+     * @throws InvalidAnnotationException
+     * @throws InvalidCompileOptionsException
+     */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
         if (empty($containerDefinitionCompileOptions->getScanDirectories())) {
             throw new InvalidCompileOptionsException(sprintf(

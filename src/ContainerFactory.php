@@ -4,8 +4,15 @@ namespace Cspray\AnnotatedContainer;
 
 use Psr\Container\ContainerInterface;
 
+/**
+ * A factory that is responsible for turning a ContainerDefinition into a PSR ContainerInterface.
+ */
 interface ContainerFactory {
 
+    /**
+     * @param ContainerDefinition $containerDefinition
+     * @return ContainerInterface
+     */
     public function createContainer(ContainerDefinition $containerDefinition) : ContainerInterface;
 
 }
