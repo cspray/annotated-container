@@ -2,6 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
+/**
+ * An enum value that determines what type of scalar value an argument might be.
+ */
 enum ScalarType {
     case String;
     case Int;

@@ -862,7 +862,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
 
         $foo1 = $injector->get(SimpleServices\FooInterface::class);
 
@@ -880,7 +880,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
 
         $foo = $injector->get(InterfaceServicePrepare\FooInterface::class);
 
@@ -896,7 +896,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
 
         $foo = $injector->get(SimpleUseScalar\FooImplementation::class);
 
@@ -920,7 +920,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
 
         $constructorInjection = $injector->get(SimpleUseService\ConstructorInjection::class);
 
@@ -945,7 +945,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ));
         $injectorDefinition = $serializer->deserialize($json);
 
-        $injector = (new AurynInjectorFactory())->createContainer($injectorDefinition);
+        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
 
         $service = $injector->get(ServiceDelegate\ServiceInterface::class);
 

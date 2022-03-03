@@ -5,6 +5,9 @@ namespace Cspray\AnnotatedContainer\LogicalConstraint;
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 
+/**
+ * A LogicalConstraint that will check each abstract Service to ensure that at least 1 concrete Service is aliased for it.
+ */
 final class NoAbstractServiceAliasLogicalConstraint implements LogicalConstraint {
 
     public function getConstraintViolations(ContainerDefinition $containerDefinition): LogicalConstraintViolationCollection {

@@ -2,6 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
+/**
+ * Represents the details of a specific violation of a LogicalConstraint.
+ */
 final class LogicalConstraintViolation {
 
     private string $message;

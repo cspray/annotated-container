@@ -5,17 +5,31 @@ namespace Cspray\AnnotatedContainer;
 use Auryn\InjectionException;
 use Auryn\Injector;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Wires together an Injector from an ContainerDefinition or a JSON serialization of an ContainerDefinition.
- *
- * @package Cspray\AnnotatedContainer
+ * Creates a PSR Container from a ContainerDefinition backed by an Auryn\Injector.
  */
-final class AurynInjectorFactory implements ContainerFactory {
+final class AurynContainerFactory implements ContainerFactory {
 
+    /**
+     * Returns a PSR ContainerInterface that uses an Auryn\Injector to create services.
+     *
+     * Because Auryn does not provide a PSR compatible Container we wrap the injector in an anonymous class that
+     * implements the PSR ContainerInterface. Auryn has the capacity to recursively autowire Services at time of
+     * construction and does not necessarily need to have the Service defined ahead of time if the constructor
+     * dependencies can be reliably determined. This fact makes the has() method for this particular Container a little
+     * tricky in that a service could be successfully constructed but if we don't have something specifically defined
+     * stating how to construct some aspect of it we can't reliably determine whether or not the Container "has" the
+     * Service.
+     *
+     * This limitation should be short-lived as the Auryn Injector is being migrated to a new organization and codebase.
+     * Once that migration has been completed a new ContainerFactory using that implementation will be used and this
+     * implementation will be deprecated.
+     *
+     * @param ContainerDefinition $containerDefinition
+     * @return ContainerInterface
+     */
     public function createContainer(ContainerDefinition $containerDefinition) : ContainerInterface {
         return new class($this->createInjector($containerDefinition)) implements ContainerInterface {
 

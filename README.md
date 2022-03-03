@@ -42,12 +42,12 @@ class FooImplementation {}
 
 // app bootstrap in __DIR__ . '/app.php'
 
-use Cspray\AnnotatedContainer\AurynInjectorFactory;
+use Cspray\AnnotatedContainer\AurynContainerFactory;
 use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
 
 $compiler = new PhpParserInjectorDefinitionCompiler();
 $injectorDefinition = $compiler->compileDirectory('env_identifier', __DIR__ . '/src');
-$injector = (new AurynInjectorFactory)->createContainer($injectorDefinition);
+$injector = (new AurynContainerFactory)->createContainer($injectorDefinition);
 
 var_dump($injector->make(Foo::class));
 ```
