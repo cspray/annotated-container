@@ -33,16 +33,17 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\InjectEnv;
+use Cspray\AnnotatedContainer\AurynContainerFactory;
 
 #[Service]
-interface Foo {
+interface ValueProvider {
 
     public function getValue() : string;
 
 }
 
 #[Service]
-class FooImplementation implements Foo {
+class EnvVarValueProvider implements ValueProvider {
 
     public function __construct(
         #[InjectEnv('FOO_VALUE')] private string $value
@@ -58,21 +59,21 @@ class FooImplementation implements Foo {
 
 // This could be set by whatever system you have in place for environment variables. Here to show 
 // that an env var is present
-putenv('FOO_VALUE=foobar');
+putenv('FOO_VALUE=foo');
 
 use Cspray\AnnotatedContainer\AurynContainerFactory;
 use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 
-$compiler = new PhpParserInjectorDefinitionCompiler();
+$compiler = \Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
 $containerDefinition = $compiler->compile(
     ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->withProfiles('default')->build()
 );
-$container = (new AurynInjectorFactory)->createContainer($injectorDefinition);
+$container = (new AurynContainerFactory)->createContainer($injectorDefinition);
 
-var_dump($container->get(Foo::class) instanceof FooImplementation); // true
-var_dump($container->get(Foo::class) === $container->get(Foo::class)); // true
-var_dump($container->get(Foo::class)->getValue()); // 'foobar'
+var_dump($container->get(ValueProvider::class) instanceof EnvVarValueProvider); // true
+var_dump($container->get(ValueProvider::class) === $container->get(ValueProvider::class)); // true
+var_dump($container->get(ValueProvider::class)->getValue()); // 'foo'
 ```
 
 Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It
@@ -431,20 +432,6 @@ the object. The factory method is executed with `Injector::execute`, meaning you
 as long as they can be properly instantiated by the injector!
 
 ## Attributes Overview
-
-The following Attributes are made available through this library. All Attributes listed are under the namespace 
-`Cspray\AnnotatedContainer\Attribute`. 
-
-|Attribute Name | Target | Description|Implemented|
---- | --- | --- | ---
-|`Service`|`Attribute::TARGET_CLASS`|Describes an interface, abstract class, or concrete class as being a service. Will share and alias the types into the Injector based on what's annotated.|:heavy_check_mark:|
-|`ServicePrepare`|`Attribute::TARGET_METHOD`|Describes a method, on an interface or class, that should be invoked when that type is created.|:heavy_check_mark:|
-|`UseScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be the exact value passed to this Attribute.|:heavy_check_mark:|
-|`UseScalarFromEnv`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an environment variable matching this Attribute's value|:heavy_check_mark:|
-|`UseService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|:heavy_check_mark:|
-|`ServiceDelegate`|`Attribute::TARGET_METHOD`|Defines a method that will be used to generate a defined type.|:heavy_check_mark:|
-|`UseScalarFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated parameters.|:x:|
-|`UseServiceFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated paramters.|:x:|
 
 ## Roadmap
 
