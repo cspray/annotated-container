@@ -31,9 +31,6 @@
   "autoload-dev": {
     "psr-4": {
       "Cspray\\AnnotatedContainer\\": "test"
-    },
-    "files": [
-      "examples/scalar_values/src/constants.php"
-    ]
+    }
   }
 }
