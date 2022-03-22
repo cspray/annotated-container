@@ -144,7 +144,10 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     private function marshalCollectionServiceDefinitionFromTypes(array $rawServiceDefinitions, array $targetTypes) : array {
         $collection = [];
         foreach ($targetTypes as $targetType) {
-            $collection[] = $this->marshalServiceDefinitionFromType($rawServiceDefinitions, $targetType);
+            $extendedServiceDefinition = $this->marshalServiceDefinitionFromType($rawServiceDefinitions, $targetType);
+            if ($extendedServiceDefinition !== null) {
+                $collection[] = $extendedServiceDefinition;
+            }
         }
         return $collection;
     }

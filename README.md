@@ -2,17 +2,16 @@
 
 [![Unit Tests](https://github.com/cspray/annotated-container/actions/workflows/php.yml/badge.svg)](https://github.com/cspray/annotated-container/actions/workflows/php.yml)
 
-A PHP8 library that will wire an [Auryn Injector](https://github.com/rdlowrey/auryn) based off of objects annotated with 
-[Attributes](https://www.php.net/manual/en/language.attributes.php). Aims to provide functionality that enables 
-configuring all Injector options through Attributes.
+A library to configure an autowireable Dependency Injection Container using [PHP 8 Attributes](https://www.php.net/manual/en/language.attributes.php). 
+Key features include:
 
-This is a new library still in active development! You should check out 2 things before you start using this library; 
-the "KNOWN_ISSUES.md" file, and the "ROADMAP" in this README. While developing this library several known logical errors 
-or resolution conflicts became known. Those issues are expected to be fixed in future versions, while the API is 
-stabilizing however it is possible that you could run into these problems that could result in weird or unexpected 
-behavior. When logical problems become known that we are planning on fixing, we'll update the "KNOWN_ISSUES.md" file.
-
-:exclamation: Though this library is not yet production ready we're working hard to make it so! Please check back regularly for updates!
+- Compile and analyze the configuration for a Container without ever running any code
+- Designate an interface as a Service and easily configure which concrete implementations to use
+- Delegate service construction to a factory
+- Inject scalar values, environment variables, and other services into your constructors and setters
+- Automatically invoke methods after the service is constructed
+- Use Profiles to easily use different services in different running environments
+- Container is [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible.
 
 ## Installation
 
@@ -20,10 +19,16 @@ behavior. When logical problems become known that we are planning on fixing, we'
 composer require cspray/annotated-container
 ```
 
-## Getting Started
+## Quick Start
 
-For a more complete, working, example check out the `examples/` directory. To get this example to work in your environment 
-you'd have to move the interface and class definitions into the appropriate directory structure.
+This is a short example to whet your appetite for learning more about AnnotatedContainer. Dependency resolution can be a 
+complicated subject, and you should review the material in `/docs` if you plan on using the library. Our example below 
+is highly contrived but the rest of the documentation builds on top of it to show how AnnotatedContainer can help simplify 
+dependency injection!
+
+In our example we've been given a task to store some blob data. How that data might get stored will change over time, and 
+we should abstract that change from the rest of the system. We decide to introduce a new interface and an initial implementation 
+that will store the data on a filesystem.
 
 ```php
 <?php
@@ -33,395 +38,79 @@ require __DIR__ . '/vendor/autoload.php';
 // interfaces and classes in __DIR__ . '/src'
 
 use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\InjectEnv;
+use Cspray\AnnotatedContainer\AurynContainerFactory;
 
 #[Service]
-interface Foo {}
+interface BlobStorage {
+
+    public function store(string $identifier, string $contents) : void;
+    
+    public function retrieve(string $identifier) : ?string;
+
+}
 
 #[Service]
-class FooImplementation {}
+class FilesystemStorage implements BlobStorage {
+    
+    public function store(string $identifier, string $contents) : void {
+        file_put_contents($identifier, $contents);
+    }
+    
+    public function retrieve(string $identifier) : ?string {
+        return file_get_contents($identifier) ?? null;
+    }
+
+}
 
 // app bootstrap in __DIR__ . '/app.php'
 
 use Cspray\AnnotatedContainer\AurynContainerFactory;
 use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 
-$compiler = new PhpParserInjectorDefinitionCompiler();
-$injectorDefinition = $compiler->compileDirectory('env_identifier', __DIR__ . '/src');
-$injector = (new AurynContainerFactory)->createContainer($injectorDefinition);
+$compiler = \Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
+$containerDefinition = $compiler->compile(
+    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->withProfiles('default')->build()
+);
+$container = (new AurynContainerFactory)->createContainer($injectorDefinition);
 
-var_dump($injector->make(Foo::class));
+var_dump($container->get(BlobStorage::class) instanceof FilesystemStorage); // true
+var_dump($container->get(BlobStorage::class) === $container->get(BlobStorage::class)); // true
 ```
+
+While far from something you'd want to use in production our example shows that we can create a Container that can infer 
+what concrete implementation to use from the name of an interface. Pretty neat! There's a lot more functionality available 
+to you and this is just the tip of the proverbial iceberg.
 
 Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It
-is important before you use this library that you understand what opinions it has made and how to use it properly. This
-README aims to be an exhaustive resource for using the Attributes properly as well as for writing internal code. If you're 
-looking to start using the Attributes to configure your `Injector` check out the "User Guide". Otherwise, check out 
-"How it Works" for a detailed look at the underpinnings of the library.
+is important before you use this library that you understand what opinions it has made and how to use it properly. The 
+articles in `/docs` in the root of this repo will provide more information. Additionally, many use cases have been created 
+and tested in the repo's test suite. Reviewing those tests could also show you a lot of information for how the library 
+works.
 
 :exclamation: **Wiring your dependencies has serious implications. It is your responsibility to understand what you're doing
-when using this library and the Injector!**
+when using this library!**
 
-## User Guide
+## Documentation
 
-This guide aims to get you up to speed with how to properly use the library and considerations you should have while 
-annotating your object graph. At the end of this guide you should have a solid understanding of how to use all of the 
-Attributes that are implemented in this library.
+This library is thoroughly documented in-repo under the `/docs` directory. The documentation is split into three parts;
+Tutorials, How Tos, and References.
 
-> This User Guide details only implemented features. As new features or Attributes are implemented their details will 
-> be added to this User Guide!
+**Tutorials** are where you'll want to start. It'll expand on the examples in the "Quick Start" and teach you how to do 
+most of the things you'll want to do with the library. This documentation tends to split the difference between the amount 
+of code and the amount of explanation.
 
-### Service Attribute
+**How Tos** are where you'll go to get step-by-step guides on how to achieve specific functionality. These documents tend 
+to be more code and less explanation. We assume you've gotten an understanding of the library and have questions on how to 
+do something beyond the "normal" use cases. 
 
-The `Service` Attribute is the primary Attribute in the library and can be applied to interfaces, abstract classes, and 
-concrete classes. What is a `Service`? A `Service` is an object that is shared with the `Injector` such that each time 
-you call `Injector::make` the same object is returned. You can _share_ an interface and then _alias_ a concrete class 
-so that any object created by the Injector will inject the concrete class where you type hint the interface! There's a 
-lot more details than that, but the real power with the Injector comes in encouraging you to use interfaces to separate 
-boundaries of your code. When you attach the `Service` Attribute we make some inferences about what you meant to do and 
-then share or alias the `Service` as appropriate. We'll get into the specific details of what inferences we make later 
-in this guide. For now, let's take a look at some code introducing a common design problem you'll encounter with the 
-`Service` Attribute, and any autowiring system.
+**References** are where you can get into the real internal, technical workings of the library. List of APIs and more 
+technically-explicit documentation can be found here. References may be a lot of code, a lot of explanation, or a split 
+between the two depending on the context.
 
-### Multiple Alias Resolution
-
-Annotating autowiring functionality introduces an issue this library calls the "multiple alias resolution" problem. 
-Based on the annotations the library believes that there are multiple possible concrete implementations that could 
-satisfy a shared interface. Let's take a look at a naive example:
-
-```php
-<?php
-
-use Cspray\AnnotatedContainer\Attribute\Service;
-
-#[Service]
-interface Foo {}
-
-#[Service]
-class Bar implements Foo {}
-
-#[Service]
-class Baz implements Foo {}
-
-#[Service]
-class Qux implements Foo {}
-
-#[Service]
-class FooConsumer {
-
-    private Foo $foo;
-
-    public function __construct(Foo $foo) {
-        $this->foo = $foo;
-    }
-
-}
-```
-
-With the above example, when the `FooConsumer` is instantiated how does the library determine which implementation 
-of `Foo` to pass? There are 3 implementations that could potentially satisfy this requirement, and we don't have 
-enough context to pick one. Hence, the multiple alias resolution problem. If you were to instantiate `FooConsumer` 
-in this example you'd get an `InjectionException` as the container hasn't been properly configured.
-
-Ultimately, fixing this problem lies on your shoulders. You have to tell the library how to resolve these type of 
-resolution problems. There are 2 straight-forward ways to do that.
-
-#### Environment Resolution
-
-The first method for clarifying alias resolution is by using the environment your application is running in. This 
-strategy is especially useful if you have different implementations you want to use on your dev machine, 
-versus CI, versus your production environment. The first thing we'll want to do is specify which concrete implementations 
-we want to use for each environment. Let's take a look at our example again and make some modifications:
-
-> The `examples/getting_started` directory has a working example of this concept!
-
-```php
-<?php
-
-use Cspray\AnnotatedContainer\Attribute\Service;
-
-#[Service]
-interface Foo {}
-
-#[Service(environments: ['test'])]
-class Bar implements Foo {}
-
-#[Service(environments: ['dev'])]
-class Baz implements Foo {}
-
-#[Service(environments: ['prod'])]
-class Qux implements Foo {}
-
-#[Service]
-class FooConsumer {
-
-    private Foo $foo;
-
-    public function __construct(Foo $foo) {
-        $this->foo = $foo;
-    }
-
-}
-```
-
-Now when you call `InjectorDefinitionCompiler::compileDirectory` you can pass in `'test'`, `'dev'`, or `'prod'` and the 
-corresponding concrete implementation will be used! Implementing this strategy will allow the library to smartly realize 
-that one of the implementations can be aliased and now any place you declare `Foo` and use the `Injector` the corresponding 
-concrete implementation will be injected. Nothing else to do here! This problem is solved throughout your codebase!
-
-If you need more control over your injections, or you have multiple implementations that are used in more than 1 environment 
-you can get more specific with the `UseService` Attribute.
-
-#### UseService Resolution
-
-It is possible to annotate parameters in `Service` constructors, as well as methods annotated with `ServicePrepare`, with 
-`UseService` Attribute. This will inject for the specific method's parameter the defined `Service`. Let's take a look 
-at our example but resolve the problem with `FooConsumer` for this specific parameter.
-
-```php
-<?php
-
-use Cspray\AnnotatedContainer\Attribute\InjectService;
-use Cspray\AnnotatedContainer\Attribute\Service;
-
-#[Service]
-interface Foo {}
-
-#[Service]
-class Bar implements Foo {}
-
-#[Service]
-class Baz implements Foo {}
-
-#[Service]
-class Qux implements Foo {}
-
-#[Service]
-class FooConsumer {
-
-    private Foo $foo;
-
-    public function __construct(
-        #[InjectService(Qux::class)]
-        Foo $foo
-    ) {
-        $this->foo = $foo;
-    }
-
-}
-```
-
-Now when we instantiate `FooConsumer` the `Qux` implementation is injected. It is important to note in this use case we 
-_do not_ alias any of the implementations above. It is up to you to ensure that you're using `UseService` in 
-appropriate places or that you're specifying these dependencies when you make the object.
-
-Sometimes your `Service` requires a string or something that can't be provided by the `Injector` nor another `Service`. 
-We've got you covered! Next up we'll talk about how to define scalar values your `Service` may need.
-
-### Injected Scalar Values
-
-It is expected that at some point your `Service` will require some scalar value. A prime example is when your `Service` 
-communicates with an HTTP API and has to provide credentials. Let's take a look at a naive example:
-
-```php
-<?php
-
-use Cspray\AnnotatedContainer\Attribute\Service;
-
-#[Service]
-class FooWebClient {
-
-    private string $clientId;
-    private string $apiSecret;
-
-    public function __construct(string $clientId, string $apiSecret) {
-        $this->clientId = $clientId;
-        $this->apiSecret = $apiSecret;
-    }
-
-}
-```
-
-Without providing explicit parameter values when you call `Injector::make` the above code will throw an `InjectionException` 
-as the container can't resolve scalar values. You can fix this with a series of Attributes that defines the scalar 
-value that should be used.
-
-#### Hardcoded Values
-
-If your desired values can be hardcoded into the `UseScalar` Attribute. There's nothing fancy here... just put the 
-Attribute on the parameter with the desired value. Our previous example, properly annotated:
-
-```php
-<?php
-
-use Cspray\AnnotatedContainer\Attribute\InjectScalar;
-use Cspray\AnnotatedContainer\Attribute\Service;
-
-#[Service]
-class FooWebClient {
-
-    private string $clientId;
-    private string $apiSecret;
-
-    public function __construct(
-        #[InjectScalar("my-client-id")]
-        string $clientId,
-        #[InjectScalar("my-api-secret")]
-        string $apiSecret
-    ) 
-{
-        $this->clientId = $clientId;
-        $this->apiSecret = $apiSecret;
-    }
-
-}
-```
-
-Now when we make `FooWebClient` the strings `"my-client-id"` and `"my-api-secret"` will be passed to the appropriate 
-parameters! Hardcoded values may be the appropriate way to handle some parameters. It probably isn't the correct 
-way for this implementation. Chances are you won't be able to hardcode these type of values. Additionally, if you 
-don't-even-look-that-close you can see a security problem with the above code. We'll talk about the security flaw 
-later but for now let's take a look at how to avoid hard-coding scalar values. The library provides an additional 
-Attribute for reading a value from an environment variable.
-
-#### Reading from env vars
-
-Let's take our previous example and improve it by reading in our client id and secret from environment variables.
-
-```php
-<?php
-
-use Cspray\AnnotatedContainer\Attribute\InjectEnv;
-use Cspray\AnnotatedContainer\Attribute\Service;
-
-#[Service]
-class FooWebClient {
-
-    private string $clientId;
-    private string $apiSecret;
-
-    public function __construct(
-        #[InjectEnv('MY_CLIENT_ID')]
-        string $clientId,
-        #[InjectEnv('MY_API_SECRET')]
-        string $apiSecret
-    ) {
-        $this->clientId = $clientId;
-        $this->apiSecret = $apiSecret;
-    }
-
-}
-```
-
-Now when you construct `FooWebClient` we'll inject our client id and secret from values stored in the environment. This 
-way your secrets can remain out of your codebase, and you aren't burdened by hardcoded values in the codebase! 
-
-Next, it is important to understand how the library resolves "dynamic" scalar values that change at runtime.
-
-#### Resolving Dynamic Scalar Values
-
-When you pass `UseScalar` a constant or everytime you use `UseScalarEnv` you're requesting a value that cannot 
-be reliably determined at compile team when we parse your Attributes. For constants the value could potentially be 
-different based on the environment you're running in and how you load those constants. For environment variables their 
-intrinsic nature means they could be different on the machine that does the compiling versus the machine that does the 
-running. To ensure that you don't get bad values we defer the gathering of constant values and environment variables 
-until runtime.
-
-When we encounter the `UseScalarFromEnv` Attribute or that you're fetching a constant we store a decorated value 
-for this Attribute. In the example above we wouldn't gather the environment variable during compile time, instead we 
-would store the values  as `!env(MY_CLIENT_ID)` and `!env(MY_API_SECRET)`, respectively. At runtime when we parse 
-the compiled definitions we recognize that these values should be derived from an environment variable and make the 
-appropriate PHP calls to read `MY_CLIENT_ID` and `MY_API_SECRET` from the environment. Constants follow a similar 
-pattern with `!env()` replaced with `!const()`.
-
-#### UseScalar Security Considerations
-
-It is important to keep in mind that the compiled `InjectionDefinition` can be serialized and is intended to be 
-cached in production environments. This means, **the values you pass to the Attributes of this library are stored 
-in plaintext in whatever caching mechanism you use**. This means in our `UseScalar` example when we annotate 
-`UseScalar("my-api-secret")` we are committing a mistake and introducing a security flaw into our codebase! Even if 
-the repository you're working in is "private" the serialized representation of your annotations could be stored in an 
-insecure manner! You should be cautious about how to use `UseScalar` and defer to using one of the other attributes 
-available when dealing with scalar values.
-
-### Preparing Services
-
-Sometimes you'll need to do something with a `Service` after it has been instantiated to do something that can't easily 
-be done during object construction. While constructor injection is preferred sometimes it isn't desirable or you're working 
-with an API that makes it hard to accomplish. An example of this could be the use of the `Psr\Log\LoggerAwareInterface`.
-The `ServicePrepare` Attribute helps solve the problem with setter injection by ensuring your setters are called on 
-object instantiation. Let's take a look at an example.
-
-```php
-use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
-
-#[Service]
-class Foo implements Psr\Log\LoggerAwareInterface {
-
-    private Psr\Log\LoggerInterface $logger;
-    
-    // implementation details that are way too complex to have a LoggerInterface in the constructor
-
-    #[ServicePrepare]    
-    public function setLogger(Psr\Log\LoggerInterface $logger) {
-        $this->logger = $logger;
-    }
-
-
-}
-```
-
-In our above example when we construct `Foo` we'll also invoke `setLogger` using the `Injector::execute` method. Meaning,
-if your `LoggerInterface` is defined on the `Injector` your `$logger` property will always be set as long you're creating 
-it with `Injector::make`! A class or interface can define as many `ServicePrepare` methods as is appropriate. However, 
-if you're relying on this functionality too much it could be a code smell and that you should be relying more on 
-constructor injection.
-
-## Using a Factory
-
-Sometimes a Service needs to be constructed by a Factory. Fortunately there's a simple way to declare a class method as 
-a factory method. Annotate any class method with `#[ServiceDelegate()]` and pass the type the factory creates.
-
-```php
-<?php
-
-use \Cspray\AnnotatedContainer\Attribute\Service;
-use \Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
-
-#[Service]
-interface ServiceInterface {}
-
-class ServiceFactory {
-
-    #[ServiceDelegate(ServiceInterface::class)]
-    public function create() : ServiceInterface {
-        return new class implements ServiceInterFace {};
-    }
-
-}
-
-?>
-```
-
-With this configuration anytime you declare `ServiceInterface` the `ServiceFactory::create` method will be used to create 
-the object. The factory method is executed with `Injector::execute`, meaning your factory can depend on other services 
-as long as they can be properly instantiated by the injector!
-
-## Attributes Overview
-
-The following Attributes are made available through this library. All Attributes listed are under the namespace 
-`Cspray\AnnotatedContainer\Attribute`. 
-
-|Attribute Name | Target | Description|Implemented|
---- | --- | --- | ---
-|`Service`|`Attribute::TARGET_CLASS`|Describes an interface, abstract class, or concrete class as being a service. Will share and alias the types into the Injector based on what's annotated.|:heavy_check_mark:|
-|`ServicePrepare`|`Attribute::TARGET_METHOD`|Describes a method, on an interface or class, that should be invoked when that type is created.|:heavy_check_mark:|
-|`UseScalar`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be the exact value passed to this Attribute.|:heavy_check_mark:|
-|`UseScalarFromEnv`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an environment variable matching this Attribute's value|:heavy_check_mark:|
-|`UseService`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method.|:heavy_check_mark:|
-|`ServiceDelegate`|`Attribute::TARGET_METHOD`|Defines a method that will be used to generate a defined type.|:heavy_check_mark:|
-|`UseScalarFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a scalar parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated parameters.|:x:|
-|`UseServiceFromParamStore`|`Attribute::TARGET_PARAMETER`|Defines a Service parameter on a Service constructor or ServicePrepare method. The value will be taken from an interface responsible for providing values to annotated paramters.|:x:|
+> The documentation is still a work in progress and some sections may be missing or incomplete relative to the desired 
+> 1.0 functionality. Eventually this documentation will be provided in a website form.
 
 ## Roadmap
 
@@ -437,24 +126,25 @@ The following Attributes are made available through this library. All Attributes
 
 - Support the concept of a Service factory ... :heavy_check_mark:
 - Support a PSR ContainerInterface Factory ... :heavy_check_mark:
-- Support serializing and caching ContainerDefinition ... :x:
-- Handle when abstract Service does not have corresponding alias ... :x:
-- Handle when an abstract Service might have more than 1 alias ... :x:
-- Handle when Attributes on parameters and methods are not annotated with correct class Attributes ... :x:
+- Support serializing and caching ContainerDefinition ... :heavy_check_mark:
+- Handle when abstract Service does not have corresponding alias ... :heavy_check_mark:
+- Handle when an abstract Service might have more than 1 alias ... :heavy_check_mark:
+- Support Profiles instead of Environments ... :heavy_check_mark:
+- Support creating a ContainerDefinition for libraries that can't be Annotated ... :heavy_check_mark:
 
 ### 0.3.x
 
 - Support for amphp/injector ... :x:
 - Support for PrototypeServices, or an unshared Service ... :x:
-- Support Profiles instead of Environments ... :x:
+- Support a PrimaryService Attribute to help multiple alias resolution ... :x:
 
 ### 0.4.x
 
-- Support creating a ContainerDefinition for libraries that can't be Annotated ... :x:
 - Support a Service having an explicit name that is not the FQCN ... :x:
 - Have convenience functions that abstracts away common boilerplate ... :x:
 
 ### 1.0 and beyond
 
 - Improve handling of logical errors... :x:
+- Host documentation on website ... :x:
 - Support defining scalar values from an arbitrary source ... :question_mark:

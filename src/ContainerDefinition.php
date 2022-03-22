@@ -26,9 +26,14 @@ interface ContainerDefinition {
      * Return a set of ServiceDefinitions that this Container is aware of.
      *
      * Note that this IS NOT necessarily an exhaustive list of every class and interface annotated with Service. It is
+<<<<<<< HEAD
      * possible, and likely, that a concrete implementation is marked as belonging to a profile that isn't currently
      * active. This, and potentially other valid reasons, might exclude a type annotated with Service from appearing
      * this collection.
+=======
+     * possible, and likely, that a concrete implementation is listed as an alias or is not meant to be loaded with this
+     * Injector due to the active profiles it is supposed to be running in.
+>>>>>>> 84ef297 (Start adding better docs)
      *
      * @return ServiceDefinition[]
      */

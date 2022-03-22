@@ -30,11 +30,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Cspray\\AnnotatedContainer\\": "test",
-      "Acme\\AnnotatedContainerDemo\\": ["examples/getting_started/src", "examples/scalar_values/src", "examples/scalar_and_service_defines/src"]
-    },
-    "files": [
-      "examples/scalar_values/src/constants.php"
-    ]
+      "Cspray\\AnnotatedContainer\\": "test"
+    }
   }
 }
