@@ -1,123 +1,180 @@
 # Getting Started
 
-Thanks for choosing to learn more about AnnotatedContainer! In this document we'll take a look at an example similar to 
-the one found in the README. We'll add a little to it and then go over at a high-level what's happening. After that
-we'll give you some places to go next based on what you might be interested in learning. First, let's take a look at our 
-code example.
+Thanks for choosing to learn more about AnnotatedContainer! In this document we'll show you how to get started with the 
+library by expanding on the example from the README and go step-by-step what's going on. After that we'll give you some 
+places to go next based on what you might be interested in learning.
+
+Our requirements have some external code executed when a blob is stored or retrieved. We decide to introduce a new 
+abstract and concrete Service that will emit blob storage events. Our existing Service will become dependent on this new 
+Service. Let's start digging into some code!
+
+## Abstract Services
+
+```php
+<?php
+
+use Cspray\AnnotatedContainer\Attribute\Service;
+
+// This is the Service that was defined in the README
+#[Service]
+interface BlobStorage {
+
+    public function store(string $identifier, string $contents) : void;
+    
+    public function retrieve(string $identifier) : ?string;
+
+}
+
+// This is the new Service we're adding
+#[Service]
+interface BlobStorageEventEmitter {
+
+    public function onStore(callable $listener) : void;
+    
+    public function onRetrieve(callable $listener) : void;
+    
+    public function emitStoreEvent(string $identifier) : void;
+    
+    public function emitRetrieveEvent(string $identifier) : void;
+
+}
+```
+
+Here we have annotated 2 interfaces, `BlobStorage` and `BlobStorageEventEmitter`. When an interface or abstract class is 
+annotated with the `#[Service]` attribute they are called _abstract services_. Abstract services cannot be instantiated,
+but you want to type-hint in constructors and "share" with the container. Sharing a service with the container ensures
+that 1 instance is created and shared wherever you might type-hint it or whenever you call `ContainerInterface::get()`.
+In other words, for our example, you can call `ContainerInterface::get(BlobStorage::class)` and get the same instance
+every time.
+
+## Concrete Services
+
+```php
+<?php
+
+use Cspray\AnnotatedContainer\Attribute\Service;
+
+#[Service]
+class StandardBlobStorageEventEmitter implements BlobStorageEventEmitter {
+
+    private array $storeListeners = [];
+    private array $retrieveListeners = [];
+
+    public function onStore(callable $listener) : void {
+        $this->storeListeners[] = $listener;
+    }
+    
+    public function onRetrieve(callable $listener) : void {
+        $this->retrieveListeners[] = $listener;
+    }
+    
+    public function emitStoreEvent(string $identifier) : void {
+        foreach ($this->storeListeners as $storeListener) {
+            $storeListener($identifier);
+        } 
+    }
+    
+    public function emitRetrieveEvent(string $identifier) : void {
+        foreach ($this->retrieveListeners as $retrieveListener) {
+            $retrieveListener($identifier);
+        }
+    }
+
+}
+
+#[Service]
+class FilesystemStorage implements BlobStorage {
+
+    public function __construct(private BlobStorageEventEmitter $emitter) {}
+    
+    public function store(string $identifier, string $contents) : void {
+        file_put_contents($identifier, $contents);
+        $this->emitter->emitStoreEvent($identifier);
+    }
+    
+    public function retrieve(string $identifier) : ?string {
+        $contents = file_get_contents($identifier) ?? null;
+        $this->emitter->emitRetrieveEvent($identifier);
+        return $contents;
+    }
+
+}
+```
+
+We also annotated 2 concrete classes, `BlobStorageEventEmitter` and `FilesystemStorage`, which are called _concrete services_.
+While it is not necessary for a concrete service to satisfy a contract from an abstract service it is expected that the
+AnnotatedContainer will often be used in this manner. Because there's only 1 concrete service for each abstract service
+we know, for example, when `ContainerInterface::get(BlobStorage::class)`is called you really want to get an instance of 
+`FilesystemStorage`.
+
+When a concrete service is used to instantiate an abstract service it is referred to as an _alias_; an alias that is inferred
+from the static analysis of your codebase is considered _implicit_. It is possible for an abstract service to have multiple
+concrete services, and an alias can't be inferred. We'll talk about how to resolve those types of conflicts in a separate
+document.
+
+The `FilesystemStorage` service has been refactored from our example in README.md by adding an event emitter. We added the
+`BlobStorageEventEmitter` type-hint to our constructor. Our Container is autowired and knows that you're looking for a
+Service to be injected. Since the `BlobStorageEventEmitter` has an implicit alias we don't need to specify which concrete
+implementation to use.
+
+## Using our Services
 
 ```php
 <?php
 
 require __DIR__ . '/vendor/autoload.php';
 
-// interfaces and classes in __DIR__ . '/src'
-
-use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Attribute\InjectEnv;
-
-#[Service]
-interface ValueProvider {
-
-    public function getValue() : string;
-
-}
-
-#[Service]
-interface ValueDecorator {
-
-    public function getDecoratedValue(string $value) : string;
-
-}
-
-#[Service]
-class BarredValueDecorator implements ValueDecorator {
-
-    public function getDecoratedValue(string $value) : string {
-        return $value . ' got barred';
-    }
-
-}
-
-#[Service]
-class EnvVarValueProvider implements  {
-
-    public function __construct(
-        private ValueDecorator $decorator,
-        #[InjectEnv('FOO_VALUE')] private string $value
-    ) {}
-    
-    public function getValue() : string {
-        return $this->decorator->getDecoratedValue($this->value);
-    }
-
-}
-
-// app bootstrap in __DIR__ . '/app.php'
-
-// This could be set by whatever system you have in place for environment variables. Here to show 
-// that an env var is present
-putenv('FOO_VALUE=foo');
-
 use Cspray\AnnotatedContainer\AurynContainerFactory;
-use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 
-$compiler = new PhpParserInjectorDefinitionCompiler();
+$compiler = ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
 $containerDefinition = $compiler->compile(
     ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->withProfiles('default')->build()
 );
-$container = (new AurynInjectorFactory)->createContainer($injectorDefinition);
+$container = (new AurynContainerFactory)->createContainer($injectorDefinition);
 
-var_dump($container->get(Foo::class)->getValue()); // 'foo got barred'
+$emitter = $container->get(BlobStorageEventEmitter::class);
+$emitter->onStore(fn(string $identifier) -> echo "Stored $identifier");
+
+$storage = $container->get(BlobStorage::class);
+$storage->store('foo.txt', 'bar');
 ```
 
-Though simple I hope it exposes some powers and capabilities possible with the AnnotatedContainer! Now, let's dig 
-deeper!
-
-## Abstract Services Annotated
-
-In our example above we annotated two interfaces, `ValueProvider` and `ValueDecorator`, which we call _abstract services_. These are interfaces, 
-or abstract classes, that cannot be instantiated, but you want to type-hint in constructors and "share" with the container. 
-Sharing a service with the container ensures that 1 instance is created and shared wherever you might type-hint it or 
-whenever you call `ContainerInterface::get()`. In other words, for our example, you can call `ContainerInterface::get(ValueProvider::class)` 
-and get the same instance every time.
-
-## Concrete Services Annotated
-
-In our example above we also annotated two concrete classes, `EnvVarValueProvider` and `BarredValueDecorator`, 
-which we call _concrete services_. These are classes that can be instantiated. While it is not necessary for a concrete 
-service to satisfy a contract from an abstract service it is expected that the AnnotatedContainer will often be used 
-in this manner. Because there's only 1 concrete service for each abstract service we know when `ContainerInterface::get(ValueProvider::class)` 
-is called you _really_ want to get an instance of `EnvVarValueProvider`.
-
-It is possible for an abstract service to have multiple concrete services defined for it. We'll talk about how to resolve 
-those type of conflicts in a separate document.
-
-## Another Service was Injected through auto-wiring
-
-The `EnvVarValueProvider` has been refactored from our example in README.md by adding a decorator. The decorator 
-will modify our string according to some new business requirements. To accomplish this we only need to add the `ValueDecorator` 
-type-hint to our constructor. Our Container is auto-wired and knows that you're looking for a Service to be injected. Since 
-there's only 1 concrete `ValueDecorator` we don't need to specify which concrete implementation to use.
-
-## We injected an environment variable in our constructor
-
-One of our concrete services required a scalar value, a string. No container can "construct" a string... no such concept 
-exists in PHP! Instead, we tell AnnotatedContainer to use the value of the environment variable `FOO_VALUE`, as it is defined 
-at runtime, to populate the value. While we inject an example value it could be imagined that this is injecting a database 
-connection string or some other important value that might vary from environment to environment.
+A key aspect of AnnotatedContainer is how each Service has 1 instance associated with it. See in the calling code that uses 
+the services we were able to call `ContainerInterface::get(BlobStorageEventEmitter::class)`. Changes to that object were
+present in the service injected into `FilesystemStorage`. All Services are shared and will have the same instance injected 
+through autowiring and returned from `ContainerInterface::get()`.
 
 ## Wrapping Up
 
-In this document we learned how to autowire service to inject into a constructor, the bread & butter of AnnotatedContainer. 
-This example is meant to show you how to inject a service and a common use-case for injecting some scalar values.  This is 
-just the surface of the functionality available in AnnotatedContainer but shows some important concepts.
+In this document we learned some important concepts in AnnotatedContainer; abstract and concrete services, aliasing abstract 
+services, how to auto-wire service injection, and how all services are effectively singletons. This example is meant to 
+show you some bread & butter aspects of AnnotatedContainer that we expect is the "regular" use-case. There's a lot more 
+functionality available! We highly recommend you checking out the rest of the documents for more details.
 
 ## Next Steps
 
-There's still a lot of functionality to go over and learn about! First, we highly recommend you check out 
-`/docs/tutorials/02-learning-about-profiles.md`. Profiles are a critically important aspect of AnnotatedContainer and to 
-realize the full power of the container you must understand profiles. If you already know all there is to know about AnnotatedContainer profiles check out 
-`/docs/tutorials/03-using-service-factory.md`, or `/docs/tutorials/04-calling-post-construct-methods.md`.
-I also recommended checking out the `/docs/references` directory for more technical-heavy documentation including a 
-list and description of all possible Attributes.
+If you want to learn more about the library itself and important concepts with a mix of code and explanation check out 
+the rest of the `/docs/tutorials` directory!
+
+Are you curious about how to resolve multiple aliases and make sure the right concrete implementation is used? Check out 
+`/docs/tutorials/02-alias-resolution-with-profiles.md` and `/docs/tutorials/03-alias-resolution-with-attributes.md`.
+
+Do you want to have more control of your object creation and have the Container call your Factory method? You can do just 
+that, and all the details are in `/docs/tutorials/04-using-service-factories.md`.
+
+Is there some method you want to call after an object is constructed? You can do that and auto-wire Services for that method 
+as well! Read how to do that at `/docs/tutorials/05-calling-post-construct-methods.md`.
+
+Do you need to have a Service that takes a scalar value into its constructor? We have you covered! Read over 
+`/docs/tutorials/06-injecting-scalar-values.md` for more information.
+
+---
+
+If you want to learn how to do something specific in a step-by-step guide with more code and less explanation check out 
+the `/docs/how-tos` directory!
+
+Are you using a third-party library that you'd like to include as an abstract or concrete service but the code can't 
+be annotated? No fear, we have you covered! Walk through the steps in `/docs/how-tos/01-how-to-use-third-party-services.md` 
+for a practical example.
