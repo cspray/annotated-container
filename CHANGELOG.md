@@ -7,9 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
 ### Changed
 
-- Renamed `UseScalar` -> `UseScalar`
+## [0.2.0] - 2022-03-22
+
+### Added
+
+- Support for creating a PSR-11 Container
+- Allow to define multiple active profiles at compile time
+- Allow defining multiple profiles that a service belongs to
+- Improved the way many Definition objects are built
+- Allow merging multiple ContainerDefinitions
+- Allow a ContainerDefinition to be serialized and deserialized
+- Introduced a first-pass CLI tool for compiling a ContainerDefinition and caching it to file
+- Allow for using a factory to create a service
+
+### Changed
+
+- Renamed many classes, properties, and methods to reflect `Container` instead of `Injector`
+- Renamed `UseScalar` -> `InjectScalar`
+- Renamed `UseScalarFromEnv` -> `InjectEnv`
+- Rename `UseService`-> `InjectService`
 
 ## [0.1.0] - 2021-04-06
 
