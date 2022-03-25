@@ -2,16 +2,14 @@
 
 [![Unit Tests](https://github.com/cspray/annotated-container/actions/workflows/php.yml/badge.svg)](https://github.com/cspray/annotated-container/actions/workflows/php.yml)
 
-A library to configure an autowireable Dependency Injection Container using [PHP 8 Attributes](https://www.php.net/manual/en/language.attributes.php). 
-Key features include:
+A Dependency Injection framework for creating an autowired, feature-rich, [PSR-11](https://github.com/cspray/annotated-container-dummy-apps) compatible Container using PHP 8 Attributes!
 
 - Compile and analyze the configuration for a Container without ever running any code
 - Designate an interface as a Service and easily configure which concrete implementations to use
 - Delegate service construction to a factory
 - Inject scalar values, environment variables, and other services into your constructors and setters
 - Automatically invoke methods after the service is constructed
-- Use Profiles to easily use different services in different running environments
-- Container is [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible.
+- Use Profiles to easily use different services in different runtimes
 
 ## Installation
 
@@ -21,14 +19,9 @@ composer require cspray/annotated-container
 
 ## Quick Start
 
-This is a short example to whet your appetite for learning more about AnnotatedContainer. Dependency resolution can be a 
-complicated subject, and you should review the material in `/docs` if you plan on using the library. Our example below 
-is highly contrived but the rest of the documentation builds on top of it to show how AnnotatedContainer can help simplify 
-dependency injection!
+This is a short example to whet your appetite for learning more about AnnotatedContainer. Dependency resolution can be a complicated subject, and you should review the material in `/docs` if you plan on using the framework. Our example below is highly contrived but the rest of the documentation builds on top of it to show how AnnotatedContainer can help simplify dependency injection!
 
-In our example we've been given a task to store some blob data. How that data might get stored will change over time, and 
-we should abstract that change from the rest of the system. We decide to introduce a new interface and an initial implementation 
-that will store the data on a filesystem.
+In our example we've been given a task to store some blob data. How that data might get stored will change over time, and we should abstract that change from the rest of the system. We decide to introduce a new interface and an initial implementation that will store the data on a filesystem.
 
 ```php
 <?php
@@ -79,35 +72,19 @@ var_dump($container->get(BlobStorage::class) instanceof FilesystemStorage); // t
 var_dump($container->get(BlobStorage::class) === $container->get(BlobStorage::class)); // true
 ```
 
-While far from something you'd want to use in production our example shows that we can create a Container that can infer 
-what concrete implementation to use from the name of an interface. Pretty neat! There's a lot more functionality available 
-to you and this is just the tip of the proverbial iceberg.
+While far from something you'd want to use in production our example shows that we can create a Container that can infer what concrete implementation to use from the name of an interface. Pretty neat! There's a lot more functionality available to you and this is just the tip of the proverbial iceberg.
 
-Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It
-is important before you use this library that you understand what opinions it has made and how to use it properly. The 
-articles in `/docs` in the root of this repo will provide more information. Additionally, many use cases have been created 
-and tested in the repo's test suite. Reviewing those tests could also show you a lot of information for how the library 
-works.
-
-:exclamation: **Wiring your dependencies has serious implications. It is your responsibility to understand what you're doing
-when using this library!**
+Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It is important before you use this library, or any other, that you understand what opinions it has made and how to use it properly. The articles in `/docs` in the root of this repo will provide more information. Additionally, many use cases have been created and tested in the repo's test suite. Reviewing those tests could also show you a lot of information for how the library works.
 
 ## Documentation
 
-This library is thoroughly documented in-repo under the `/docs` directory. The documentation is split into three parts;
-Tutorials, How Tos, and References.
+This library is thoroughly documented in-repo under the `/docs` directory. The documentation is split into three parts; Tutorials, How Tos, and References.
 
-**Tutorials** are where you'll want to start. It'll expand on the examples in the "Quick Start" and teach you how to do 
-most of the things you'll want to do with the library. This documentation tends to split the difference between the amount 
-of code and the amount of explanation.
+**Tutorials** are where you'll want to start. It'll expand on the examples in the "Quick Start" and teach you how to do most of the things you'll want to do with the library. This documentation tends to split the difference between the amount of code and the amount of explanation.
 
-**How Tos** are where you'll go to get step-by-step guides on how to achieve specific functionality. These documents tend 
-to be more code and less explanation. We assume you've gotten an understanding of the library and have questions on how to 
-do something beyond the "normal" use cases. 
+**How Tos** are where you'll go to get step-by-step guides on how to achieve specific functionality. These documents tend to be more code and less explanation. We assume you've gotten an understanding of the library and have questions on how to do something beyond the "normal" use cases. 
 
-**References** are where you can get into the real internal, technical workings of the library. List of APIs and more 
-technically-explicit documentation can be found here. References may be a lot of code, a lot of explanation, or a split 
-between the two depending on the context.
+**References** are where you can get into the real internal, technical workings of the library. List of APIs and more technically-explicit documentation can be found here. References may be a lot of code, a lot of explanation, or a split between the two depending on the context.
 
 > The documentation is still a work in progress and some sections may be missing or incomplete relative to the desired 
 > 1.0 functionality. Eventually this documentation will be provided in a website form.
@@ -134,17 +111,20 @@ between the two depending on the context.
 
 ### 0.3.x
 
-- Support for amphp/injector ... :x:
-- Support for PrototypeServices, or an unshared Service ... :x:
-- Support a PrimaryService Attribute to help multiple alias resolution ... :x:
+- Support the concept of a Service that is not shared, instead is recreated on every retrieval ... :x:
+- Support a Service being marked as primary to be used for multiple alias resolution ... :x:
+- Support a Service having an explicit name that is not the FQCN ... :x:
+- Support a ServiceCollection Attribute which allows collecting many Services ... :x:
+- Support easily configuring third-party code that can't be annotated ... :x:
 
 ### 0.4.x
 
-- Support a Service having an explicit name that is not the FQCN ... :x:
-- Have convenience functions that abstracts away common boilerplate ... :x:
+- Support creating a Container with different backing libraries ... :x:
+- Have convenience functions for common ways of interacting with the library ... :x:
+- Solidify and document the process one would take for deploying this code in production ... :x:
 
 ### 1.0 and beyond
 
 - Improve handling of logical errors... :x:
 - Host documentation on website ... :x:
-- Support defining scalar values from an arbitrary source ... :question_mark:
+- Support defining scalar values from an arbitrary source ... :question:
