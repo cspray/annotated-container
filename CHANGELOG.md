@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Fixed
 
-### Changed
+- An error in the README documentation referencing an incorrect variable.
+- Directory paths in all tests to point to new directory structure.
+- A dev-only dependency, `mikey179/vfsStream` was inadvertently included in the `require` section. This dependency is now properly a `require-dev` dependency.
+
+### Removed
+
+- Extracted the Symfony Console tool into its own repo, `cspray/annotated-container-cli`. Removed the dependency on `symfony/console`.
+- Extracted the code examples used in unit tests to its own repo, `cspray/annotated-container-dummy-apps`.
 
 ## [0.2.0] - 2022-03-22
 
