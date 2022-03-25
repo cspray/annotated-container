@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler;
 use PHPUnit\Framework\TestCase;
 
@@ -53,7 +54,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
     public function testNoViolationsForInterfaceWithServiceAlias() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/DummyApps/SimpleServices')->withProfiles('default')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->withProfiles('default')->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 

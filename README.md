@@ -73,7 +73,7 @@ $compiler = \Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory::witho
 $containerDefinition = $compiler->compile(
     ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->withProfiles('default')->build()
 );
-$container = (new AurynContainerFactory)->createContainer($injectorDefinition);
+$container = (new AurynContainerFactory)->createContainer($containerDefinition);
 
 var_dump($container->get(BlobStorage::class) instanceof FilesystemStorage); // true
 var_dump($container->get(BlobStorage::class) === $container->get(BlobStorage::class)); // true

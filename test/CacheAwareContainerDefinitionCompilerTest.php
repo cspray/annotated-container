@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
@@ -24,7 +25,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testFileDoesNotExistWritesFile() {
-        $dir = __DIR__ . '/DummyApps/SimpleServices';
+        $dir = DummyAppUtils::getRootDir() . '/SimpleServices';
         $containerDefinition = $this->cacheAwareContainerDefinitionCompiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)
                 ->withProfiles('test')
@@ -40,7 +41,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testFileDoesExistDoesNotCallCompiler() {
-        $dir = __DIR__ . '/DummyApps/ProfileResolvedServices';
+        $dir = DummyAppUtils::getRootDir() . '/ProfileResolvedServices';
         $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->withProfiles('default')->build()
         );
@@ -65,7 +66,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testFailingToWriteCacheFileThrowsException() {
-        $dir = __DIR__ . '/DummyApps/ProfileResolvedServices';
+        $dir = DummyAppUtils::getRootDir() . '/ProfileResolvedServices';
         $subject = new CacheAwareContainerDefinitionCompiler(
             $this->phpParserContainerDefinitionCompiler = new PhpParserContainerDefinitionCompiler(),
             $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
