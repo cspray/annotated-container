@@ -18,6 +18,39 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
         $this->assertEqualsCanonicalizing($expectedTypes, $actualTypes);
     }
 
+    protected function assertServiceDefinitionIsPrimary(array $serviceDefinitions, string $serviceDefinitionType) : void {
+        $serviceDefinition = $this->getServiceDefinition($serviceDefinitions, $serviceDefinitionType);
+        if ($serviceDefinition === null) {
+            $this->fail("Expected $serviceDefinitionType to be present in the provided collection but it is not.");
+        }
+
+        $this->assertTrue($serviceDefinition->isPrimary());
+    }
+
+    protected function assertServiceDefinitionIsNotPrimary(array $serviceDefinitions, string $serviceDefinitionType) : void {
+        $serviceDefinition = $this->getServiceDefinition($serviceDefinitions, $serviceDefinitionType);
+        if ($serviceDefinition === null) {
+            $this->fail("Expected $serviceDefinitionType to be present in the provided collection but it is not.");
+        }
+
+        $this->assertFalse($serviceDefinition->isPrimary());
+    }
+
+    /**
+     * @param ServiceDefinition[] $serviceDefinitions
+     * @param string $serviceDefinitionType
+     * @return ServiceDefinition|null
+     */
+    private function getServiceDefinition(array $serviceDefinitions, string $serviceDefinitionType) : ?ServiceDefinition {
+        foreach ($serviceDefinitions as $serviceDefinition) {
+            if ($serviceDefinitionType === $serviceDefinition->getType()) {
+                return $serviceDefinition;
+            }
+        }
+
+        return null;
+    }
+
     protected function assertAliasDefinitionsMap(array $expectedAliasMap, array $aliasDefinitions) : void {
         if (($countExpected = count($expectedAliasMap)) !== ($countActual = count($aliasDefinitions))) {
             $this->fail("Expected ${countExpected} AliasDefinitions but received ${countActual}");

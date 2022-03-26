@@ -37,6 +37,14 @@ interface ServiceDefinition {
     public function getProfiles() : array;
 
     /**
+     * Return whether the Service is the Primary for this type and will be used by default if there are multiple aliases
+     * resolved.
+     *
+     * @return bool
+     */
+    public function isPrimary() : bool;
+
+    /**
      * Returns whether the defined Service is a concrete class that can be instantiated.
      *
      * @return bool

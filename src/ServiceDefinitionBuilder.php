@@ -110,6 +110,10 @@ final class ServiceDefinitionBuilder {
                 return $this->profiles;
             }
 
+            public function isPrimary(): bool {
+                return false;
+            }
+
             public function isConcrete(): bool {
                 return !$this->isAbstract;
             }
