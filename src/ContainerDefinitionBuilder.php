@@ -9,6 +9,9 @@ use Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException;
  */
 final class ContainerDefinitionBuilder {
 
+    /**
+     * @var ServiceDefinition[]
+     */
     private array $serviceDefinitions = [];
     private array $aliasDefinitions = [];
     private array $servicePrepareDefinitions = [];

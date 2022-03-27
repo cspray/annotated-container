@@ -2,19 +2,16 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\InjectEnv;
+use Cspray\AnnotatedContainer\Attribute\InjectScalar;
+use Cspray\AnnotatedContainer\Attribute\InjectService;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
-use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDelegateDefinitionInterrogator;
-use Cspray\AnnotatedContainer\Internal\Interrogator\InjectScalarDefinitionInterrogator;
-use Cspray\AnnotatedContainer\Internal\Interrogator\InjectServiceDefinitionInterrogator;
-use Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator;
-use Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator;
-use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDelegateVisitor;
-use Cspray\AnnotatedContainer\Internal\Visitor\InjectScalarDefinitionVisitor;
-use Cspray\AnnotatedContainer\Internal\Visitor\InjectServiceDefinitionVisitor;
-use Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor;
-use Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor;
-use PhpParser\Node;
+use Cspray\AnnotatedContainer\Internal\AnnotationDetailsList;
+use Cspray\AnnotatedContainer\Internal\AttributeType;
+use Cspray\AnnotatedContainer\Internal\AnnotationVisitor;
+use Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;
 use PhpParser\NodeVisitor\NodeConnectingVisitor;
@@ -22,10 +19,11 @@ use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use FilesystemIterator;
-use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionParameter;
 use SplFileInfo;
+use function PHPUnit\Framework\once;
 
 /**
  * A ContainerDefinitionCompiler that uses PhpParser to statically analyze source code for Attributes defined by
@@ -63,197 +61,22 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             ));
         }
 
-        $rawServiceDefinitions = [];
-        $rawServicePrepareDefinitions = [];
-        $rawUseScalarDefinitions = [];
-        $rawUseServiceDefinitions = [];
-        $rawServiceDelegateDefinitions = [];
-        /** @var Node $node */
-        foreach ($this->gatherDefinitions($containerDefinitionCompileOptions->getScanDirectories()) as $rawDefinition) {
-            if ($rawDefinition['definitionType'] === ServiceDefinition::class) {
-                $rawServiceDefinitions[] = $rawDefinition;
-            } else if ($rawDefinition['definitionType'] === ServicePrepareDefinition::class) {
-                $rawServicePrepareDefinitions[] = $rawDefinition;
-            } else if ($rawDefinition['definitionType'] === InjectScalarDefinition::class) {
-                $rawUseScalarDefinitions[] = $rawDefinition;
-            } else if ($rawDefinition['definitionType'] === InjectServiceDefinition::class) {
-                $rawUseServiceDefinitions[] = $rawDefinition;
-            } else if ($rawDefinition['definitionType'] === ServiceDelegateDefinition::class) {
-                $rawServiceDelegateDefinitions[] = $rawDefinition;
-            }
-        }
-        $serviceDefinitions = $this->marshalRawServiceDefinitions($rawServiceDefinitions);
-        $serviceDefinitionInterrogator = new ServiceDefinitionInterrogator(
-            $containerDefinitionCompileOptions->getProfiles(),
-            ...$serviceDefinitions
-        );
-        $servicePrepareInterrogator = new ServicePrepareDefinitionInterrogator(
-            ...$this->marshalRawServicePrepareDefinitions($serviceDefinitions, $rawServicePrepareDefinitions)
-        );
-        $useScalarInterrogator = new InjectScalarDefinitionInterrogator(
-            ...$this->marshalRawUseScalarDefinitions($serviceDefinitions, $rawUseScalarDefinitions)
-        );
-        $useServiceInterrogator = new InjectServiceDefinitionInterrogator(
-            ...$this->marshalRawUseServiceDefinitions($serviceDefinitions, $rawUseServiceDefinitions)
-        );
-        $serviceDelegateInterrogator = new ServiceDelegateDefinitionInterrogator(
-            ...$this->marshalRawServiceDelegateDefinitions($serviceDefinitions, $rawServiceDelegateDefinitions)
-        );
+        $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
 
-        return $this->interrogateDefinitions(
-            $serviceDefinitionInterrogator,
-            $servicePrepareInterrogator,
-            $useScalarInterrogator,
-            $useServiceInterrogator,
-            $serviceDelegateInterrogator
-        );
+        $aggregatedMap = $this->parseDirectories($containerDefinitionCompileOptions->getScanDirectories());
+
+        $containerDefinitionBuilder = $this->addAllServiceDefinitions($containerDefinitionBuilder, $aggregatedMap, $containerDefinitionCompileOptions->getProfiles());
+        $containerDefinitionBuilder = $this->addAllAliasDefinitions($containerDefinitionBuilder, $aggregatedMap, $containerDefinitionCompileOptions->getProfiles());
+        $containerDefinitionBuilder = $this->addAllServicePrepareDefinitions($containerDefinitionBuilder, $aggregatedMap);
+        $containerDefinitionBuilder = $this->addAllServiceDelegateDefinitions($containerDefinitionBuilder, $aggregatedMap);
+        $containerDefinitionBuilder = $this->addAllInjectScalarDefinitions($containerDefinitionBuilder, $aggregatedMap);
+        $containerDefinitionBuilder = $this->addAllInjectServiceDefinitions($containerDefinitionBuilder, $aggregatedMap);
+
+        return $containerDefinitionBuilder->build();
     }
 
-    private function marshalRawServiceDefinitions(array $rawServiceDefinitions) : array {
-        $marshaledDefinitions = [];
-        foreach ($rawServiceDefinitions as $rawServiceDefinition) {
-            $implementServiceDefinitions = $this->marshalCollectionServiceDefinitionFromTypes(
-                $rawServiceDefinitions,
-                $rawServiceDefinition['implements']
-            );
-
-            $extendedServiceDefinitions = $this->marshalCollectionServiceDefinitionFromTypes(
-                $rawServiceDefinitions,
-                $rawServiceDefinition['extends']
-            );
-
-            if ($rawServiceDefinition['isAbstract'] || $rawServiceDefinition['isInterface']) {
-                $factoryMethod = 'forAbstract';
-            } else {
-                $factoryMethod = 'forConcrete';
-            }
-
-            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($rawServiceDefinition['type'])
-                ->withProfiles(...$rawServiceDefinition['profiles']);
-
-            foreach (array_merge($implementServiceDefinitions, $extendedServiceDefinitions) as $serviceDefinition) {
-                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($serviceDefinition);
-            }
-
-            $marshaledDefinitions[] = $serviceDefinitionBuilder->build();
-        }
-
-        return $marshaledDefinitions;
-    }
-
-    private function marshalCollectionServiceDefinitionFromTypes(array $rawServiceDefinitions, array $targetTypes) : array {
-        $collection = [];
-        foreach ($targetTypes as $targetType) {
-            $extendedServiceDefinition = $this->marshalServiceDefinitionFromType($rawServiceDefinitions, $targetType);
-            if ($extendedServiceDefinition !== null) {
-                $collection[] = $extendedServiceDefinition;
-            }
-        }
-        return $collection;
-    }
-
-    private function marshalServiceDefinitionFromType(array $rawServiceDefinitions, string $targetType) {
-        $serviceDefinition = null;
-        foreach ($rawServiceDefinitions as $rawServiceDefinition) {
-            if ($targetType === $rawServiceDefinition['type']) {
-                if ($rawServiceDefinition['isAbstract'] || $rawServiceDefinition['isInterface']) {
-                    $factoryMethod = 'forAbstract';
-                } else {
-                    $factoryMethod = 'forConcrete';
-                }
-                $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($rawServiceDefinition['type'])
-                    ->withProfiles(...$rawServiceDefinition['profiles']);
-                $implements = $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['implements']);
-                $extends = $this->marshalCollectionServiceDefinitionFromTypes($rawServiceDefinitions, $rawServiceDefinition['extends']);
-
-                foreach (array_merge($implements, $extends) as $implementedService) {
-                    $serviceDefinitionBuilder->withImplementedService($implementedService);
-                }
-
-                $serviceDefinition = $serviceDefinitionBuilder->build();
-            }
-        }
-        return $serviceDefinition;
-    }
-
-    private function marshalRawServicePrepareDefinitions(array $serviceDefinitions, array $rawServicePrepareDefinitions) : array {
-        $marshaledDefinitions = [];
-        foreach ($rawServicePrepareDefinitions as $rawServicePrepareDefinition) {
-            $service = null;
-            foreach ($serviceDefinitions as $serviceDefinition) {
-                if ($serviceDefinition->getType() === $rawServicePrepareDefinition['type']) {
-                    $service = $serviceDefinition;
-                    break;
-                }
-            }
-            if (is_null($service)) {
-                throw new InvalidAnnotationException(sprintf(
-                    'The #[ServicePrepare] Attribute on %s::%s is not on a type marked as a #[Service].',
-                    $rawServicePrepareDefinition['type'],
-                    $rawServicePrepareDefinition['method']
-                ));
-            }
-            $marshaledDefinitions[] = ServicePrepareDefinitionBuilder::forMethod($service, $rawServicePrepareDefinition['method'])->build();
-        }
-        return $marshaledDefinitions;
-    }
-
-    private function marshalRawUseScalarDefinitions(array $serviceDefinitions, array $rawUseScalarDefinitions) : array {
-        $marshaledDefinitions = [];
-        foreach ($rawUseScalarDefinitions as $rawUseScalarDefinition) {
-            $injectScalarDefinition = null;
-            foreach ($serviceDefinitions as $serviceDefinition) {
-                if ($rawUseScalarDefinition['type'] === $serviceDefinition->getType()) {
-                    $injectScalarDefinition = $serviceDefinition;
-                    break;
-                }
-            }
-            $marshaledDefinitions[] = InjectScalarDefinitionBuilder::forMethod($injectScalarDefinition, $rawUseScalarDefinition['method'])
-                ->withParam(ScalarType::fromName($rawUseScalarDefinition['paramType']), $rawUseScalarDefinition['param'])
-                ->withValue($rawUseScalarDefinition['value'])
-                ->build();
-        }
-        return $marshaledDefinitions;
-    }
-
-    private function marshalRawUseServiceDefinitions(array $serviceDefinitions, array $rawUseServiceDefinitions) : array {
-        $marshaledDefinitions = [];
-        foreach ($rawUseServiceDefinitions as $rawUseServiceDefinition) {
-            $targetDefinition = null;
-            $injectDefinition = null;
-            foreach ($serviceDefinitions as $serviceDefinition) {
-                if ($rawUseServiceDefinition['type'] === $serviceDefinition->getType()) {
-                    $targetDefinition = $serviceDefinition;
-                } else if ($rawUseServiceDefinition['value'] === $serviceDefinition->getType()) {
-                    $injectDefinition = $serviceDefinition;
-                }
-            }
-            $marshaledDefinitions[] = InjectServiceDefinitionBuilder::forMethod($targetDefinition, $rawUseServiceDefinition['method'])
-                ->withParam($rawUseServiceDefinition['paramType'], $rawUseServiceDefinition['param'])
-                ->withInjectedService($injectDefinition)
-                ->build();
-        }
-        return $marshaledDefinitions;
-    }
-
-    private function marshalRawServiceDelegateDefinitions(array $serviceDefinitions, array $rawServiceDelegateDefinitions) : array {
-        $marshaledDefinitions = [];
-        foreach ($rawServiceDelegateDefinitions as $rawServiceDelegateDefinition) {
-            $service = null;
-            foreach ($serviceDefinitions as $serviceDefinition) {
-                if ($serviceDefinition->getType() === $rawServiceDelegateDefinition['serviceType']) {
-                    $service = $serviceDefinition;
-                    break;
-                }
-            }
-            $marshaledDefinitions[] = ServiceDelegateDefinitionBuilder::forService($service)
-                ->withDelegateMethod($rawServiceDelegateDefinition['delegateType'], $rawServiceDelegateDefinition['delegateMethod'])
-                ->build();
-        }
-        return $marshaledDefinitions;
-    }
-
-    private function gatherDefinitions(array $dirs) : Generator {
+    private function parseDirectories(array $dirs) : AnnotationDetailsList {
+        $list = new AnnotationDetailsList();
         foreach ($dirs as $dir) {
             $dirIterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator(
@@ -270,79 +93,199 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                     continue;
                 }
 
-                $statements = $this->parser->parse(file_get_contents($file->getRealPath()));
-
-                $nameResolver = new NameResolver();
-                $nodeConnectingVisitor = new NodeConnectingVisitor();
-                $this->nodeTraverser->addVisitor($nameResolver);
-                $this->nodeTraverser->addVisitor($nodeConnectingVisitor);
-                $this->nodeTraverser->traverse($statements);
-
-                $this->nodeTraverser->removeVisitor($nameResolver);
-                $this->nodeTraverser->removeVisitor($nodeConnectingVisitor);
-
-                $serviceDefinitionVisitor = new ServiceDefinitionVisitor();
-                $servicePrepareDefinitionVisitor = new ServicePrepareDefinitionVisitor();
-                $useScalarDefinitionVisitor = new InjectScalarDefinitionVisitor();
-                $useServiceDefinitionVisitor = new InjectServiceDefinitionVisitor();
-                $serviceDelegateDefinitionVisitor = new ServiceDelegateVisitor();
-
-                $this->nodeTraverser->addVisitor($serviceDefinitionVisitor);
-                $this->nodeTraverser->addVisitor($servicePrepareDefinitionVisitor);
-                $this->nodeTraverser->addVisitor($useScalarDefinitionVisitor);
-                $this->nodeTraverser->addVisitor($useServiceDefinitionVisitor);
-                $this->nodeTraverser->addVisitor($serviceDelegateDefinitionVisitor);
-                $this->nodeTraverser->traverse($statements);
-
-                $this->nodeTraverser->removeVisitor($serviceDefinitionVisitor);
-                $this->nodeTraverser->removeVisitor($servicePrepareDefinitionVisitor);
-                $this->nodeTraverser->removeVisitor($useScalarDefinitionVisitor);
-                $this->nodeTraverser->removeVisitor($useServiceDefinitionVisitor);
-                $this->nodeTraverser->removeVisitor($serviceDelegateDefinitionVisitor);
-
-                yield from $serviceDefinitionVisitor->getServiceDefinitions();
-                yield from $servicePrepareDefinitionVisitor->getServicePrepareDefinitions();
-                yield from $useScalarDefinitionVisitor->getUseScalarDefinitions();
-                yield from $useServiceDefinitionVisitor->getUseServiceDefinitions();
-                yield from $serviceDelegateDefinitionVisitor->getServiceDelegateDefinitions();
+                $visitor = new AnnotationVisitor($file);
+                $this->traverseCode(file_get_contents($file->getRealPath()), $visitor);
+                $list->merge($visitor->getAnnotationDetailsList());
             }
         }
+
+        return $list;
     }
 
-    private function interrogateDefinitions(
-        ServiceDefinitionInterrogator         $serviceDefinitionInterrogator,
-        ServicePrepareDefinitionInterrogator  $servicePrepareDefinitionInterrogator,
-        InjectScalarDefinitionInterrogator    $useScalarDefinitionInterrogator,
-        InjectServiceDefinitionInterrogator   $useServiceDefinitionInterrogator,
-        ServiceDelegateDefinitionInterrogator $serviceDelegateDefinitionInterrogator
-    ) : ContainerDefinition {
-        $builder = ContainerDefinitionBuilder::newDefinition();
-
-        foreach ($serviceDefinitionInterrogator->gatherSharedServices() as $serviceDefinition) {
-            $builder = $builder->withServiceDefinition($serviceDefinition);
+    private function addAllServiceDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList, array $activeProfiles) : ContainerDefinitionBuilder {
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $serviceAnnotationDetails) {
+            $serviceProfiles = $serviceAnnotationDetails->getAnnotationArguments()->get('profiles', ['default']);
+            foreach ($serviceProfiles as $serviceProfile) {
+                if (in_array($serviceProfile, $activeProfiles)) {
+                    $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($this->getServiceDefinition($annotationDetailsList, $serviceAnnotationDetails->getReflection()->getName()));
+                    break;
+                }
+            }
         }
-
-        foreach ($serviceDefinitionInterrogator->gatherAliases() as $aliasDefinition) {
-            $builder = $builder->withAliasDefinition($aliasDefinition);
-        }
-
-        foreach ($servicePrepareDefinitionInterrogator->gatherServicePrepare() as $servicePrepareDefinition) {
-            $builder = $builder->withServicePrepareDefinition($servicePrepareDefinition);
-        }
-
-        foreach ($useScalarDefinitionInterrogator->gatherUseScalarDefinitions() as $injectScalarDefinition) {
-            $builder = $builder->withInjectScalarDefinition($injectScalarDefinition);
-        }
-
-        foreach ($useServiceDefinitionInterrogator->gatherUseServiceDefinitions() as $injectServiceDefinition) {
-            $builder = $builder->withInjectServiceDefinition($injectServiceDefinition);
-        }
-
-        foreach ($serviceDelegateDefinitionInterrogator->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
-            $builder = $builder->withServiceDelegateDefinition($serviceDelegateDefinition);
-        }
-
-        return $builder->build();
+        return $containerDefinitionBuilder;
     }
+
+    private function getServiceDefinition(AnnotationDetailsList $annotationDetailsList, string $serviceType) : ?ServiceDefinition {
+        static $serviceDefinitions = [];
+        if (!isset($serviceDefinitions[$serviceType])) {
+            foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $annotationDetails) {
+                if ($annotationDetails->getReflection()->getName() === $serviceType) {
+                    $method = $annotationDetails->getReflection()->isAbstract() || $annotationDetails->getReflection()->isInterface() ? 'forAbstract' : 'forConcrete';
+                    /** @var ServiceDefinitionBuilder $serviceDefinitionBuilder */
+                    $serviceDefinitionBuilder = ServiceDefinitionBuilder::$method($annotationDetails->getReflection()->getName());
+                    if ($method === 'forConcrete') {
+                        $parent = $annotationDetails->getReflection()->getParentClass();
+                        if ($parent) {
+                            $extendedServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $parent->getName());
+                            if (!is_null($extendedServiceDefinition)) {
+                                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($extendedServiceDefinition);
+                            }
+                        }
+                        foreach ($annotationDetails->getReflection()->getInterfaceNames() as $interfaceName) {
+                            $implementServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $interfaceName);
+                            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($implementServiceDefinition);
+                        }
+                    }
+                    $serviceDefinitions[$serviceType] = $serviceDefinitionBuilder->build();
+                    break;
+                }
+            }
+        }
+
+        return $serviceDefinitions[$serviceType] ?? null;
+    }
+
+    private function addAllAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList, array $activeProfiles) : ContainerDefinitionBuilder {
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $serviceAnnotationDetails) {
+            if (!$serviceAnnotationDetails->getReflection()->isInterface() && !$serviceAnnotationDetails->getReflection()->isAbstract()) {
+                continue;
+            }
+
+            foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $sd) {
+                $serviceProfiles = $sd->getAnnotationArguments()->get('profiles', ['wtf']);
+                foreach ($serviceProfiles as $serviceProfile) {
+                    if (in_array($serviceProfile, $activeProfiles) && $sd->getReflection()->isSubclassOf($serviceAnnotationDetails->getReflection())) {
+                        $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition(
+                            AliasDefinitionBuilder::forAbstract(
+                                $this->getServiceDefinition($annotationDetailsList, $serviceAnnotationDetails->getReflection()->getName())
+                            )->withConcrete(
+                                $this->getServiceDefinition($annotationDetailsList, $sd->getReflection()->getName())
+                            )->build()
+                        );
+                    }
+                }
+            }
+
+        }
+
+        return $containerDefinitionBuilder;
+    }
+
+    private function addAllServicePrepareDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServicePrepare) as $annotationDetails) {
+            $reflection = $annotationDetails->getReflection();
+            $serviceDefinition = $this->getServiceDefinition($annotationDetailsList, $reflection->getDeclaringClass()->getName());
+            if (is_null($serviceDefinition)) {
+                throw new InvalidAnnotationException(sprintf(
+                    'The #[ServicePrepare] Attribute on %s::%s is not on a type marked as a #[Service].',
+                    $reflection->getDeclaringClass()->getName(),
+                    $reflection->getName()
+                ));
+            }
+            foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
+                if ($this->doesServiceDefinitionHavePrepare($annotationDetailsList, $implementedService, $reflection->getName())) {
+                    continue 2;
+                }
+            }
+
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withServicePrepareDefinition(
+                ServicePrepareDefinitionBuilder::forMethod($serviceDefinition, $reflection->getName())->build()
+            );
+        }
+
+        return $containerDefinitionBuilder;
+    }
+
+    private function doesServiceDefinitionHavePrepare(AnnotationDetailsList $annotationDetailsList, ServiceDefinition $serviceDefinition, string $method) : bool {
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServicePrepare) as $annotationDetails) {
+            if ($serviceDefinition->getType() === $annotationDetails->getReflection()->getDeclaringClass()->getName() && $annotationDetails->getReflection()->getName() === $method) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function addAllInjectScalarDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::InjectScalar) as $annotationDetails) {
+            /** @var ReflectionParameter $reflection */
+            $reflection = $annotationDetails->getReflection();
+            $reflectionClass = $reflection->getDeclaringClass();
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
+                InjectScalarDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
+                    ->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
+                    ->withValue($annotationDetails->getAnnotationArguments()->get('value'))
+                    ->build()
+            );
+        }
+
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::InjectEnv) as $annotationDetails) {
+            /** @var ReflectionParameter $reflection */
+            $reflection = $annotationDetails->getReflection();
+            $reflectionClass = $reflection->getDeclaringClass();
+            /** @var InjectEnv $injectEnv */
+            $injectEnv = $reflection->getAttributes(InjectEnv::class)[0]->newInstance();
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
+                InjectScalarDefinitionBuilder::forMethod(
+                    $this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName()
+                )->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
+                ->withValue("!env(" . $injectEnv->getVariableName() . ")")
+                ->build()
+            );
+        }
+
+        return $containerDefinitionBuilder;
+    }
+
+    private function addAllInjectServiceDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::InjectService) as $annotationDetails) {
+            /** @var ReflectionParameter $reflection */
+            $reflection = $annotationDetails->getReflection();
+            $reflectionClass = $reflection->getDeclaringClass();
+            /** @var InjectService $injectService */
+            $injectService = $reflection->getAttributes(InjectService::class)[0]->newInstance();
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectServiceDefinition(
+                InjectServiceDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
+                    ->withParam($reflection->getType()->getName(), $reflection->getName())
+                    ->withInjectedService($this->getServiceDefinition($annotationDetailsList, $injectService->getName()))
+                    ->build()
+            );
+        }
+
+        return $containerDefinitionBuilder;
+    }
+
+    private function addAllServiceDelegateDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServiceDelegate) as $annotationDetails) {
+            $reflection = $annotationDetails->getReflection();
+            $serviceDefinition = $this->getServiceDefinition($annotationDetailsList, $annotationDetails->getAnnotationArguments()->get('service'));
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition(
+                ServiceDelegateDefinitionBuilder::forService($serviceDefinition)
+                    ->withDelegateMethod($reflection->getDeclaringClass()->getName(), $reflection->getName())
+                    ->build()
+            );
+        }
+        return $containerDefinitionBuilder;
+    }
+
+    private function traverseCode(string $fileContents, AnnotationVisitor $annotationVisitor) : void {
+        $statements = $this->parser->parse($fileContents);
+
+        $nameResolver = new NameResolver();
+        $nodeConnectingVisitor = new NodeConnectingVisitor();
+        $this->nodeTraverser->addVisitor($nameResolver);
+        $this->nodeTraverser->addVisitor($nodeConnectingVisitor);
+        $this->nodeTraverser->traverse($statements);
+
+        $this->nodeTraverser->removeVisitor($nameResolver);
+        $this->nodeTraverser->removeVisitor($nodeConnectingVisitor);
+
+        $this->nodeTraverser->addVisitor($annotationVisitor);
+        $this->nodeTraverser->traverse($statements);
+
+        $this->nodeTraverser->removeVisitor($annotationVisitor);
+
+        unset($statements);
+    }
+
 
 }
