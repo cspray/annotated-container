@@ -2,7 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
-class AnnotationDetailsList {
+/**
+ * @Internal
+ */
+final class AnnotationDetailsList {
 
     /**
      * @var AnnotationDetails[]

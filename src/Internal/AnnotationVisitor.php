@@ -16,6 +16,9 @@ use ReflectionMethod;
 use ReflectionParameter;
 use SplFileInfo;
 
+/**
+ * @Internal
+ */
 final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor {
 
     private AnnotationDetailsList $annotationDetails;

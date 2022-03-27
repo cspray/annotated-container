@@ -10,6 +10,9 @@ use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\Attribute\ServiceProfile;
 
+/**
+ * @Internal
+ */
 enum AttributeType : string {
     case InjectEnv = InjectEnv::class;
     case InjectScalar = InjectScalar::class;
