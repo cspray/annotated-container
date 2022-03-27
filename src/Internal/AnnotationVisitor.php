@@ -2,12 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
-use Cspray\AnnotatedContainer\Attribute\InjectEnv;
-use Cspray\AnnotatedContainer\Attribute\InjectScalar;
-use Cspray\AnnotatedContainer\Attribute\InjectService;
 use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
-use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\Attribute\ServiceProfile;
 use PhpParser\ConstExprEvaluationException;
 use PhpParser\ConstExprEvaluator;
@@ -24,7 +19,6 @@ use SplFileInfo;
 final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor {
 
     private AnnotationDetailsList $annotationDetails;
-    private ConstExprEvaluator $constEvaluator;
 
     public function __construct(private SplFileInfo $fileInfo) {
         $this->annotationDetails = new AnnotationDetailsList();
@@ -34,44 +28,42 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
         if ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) {
             $serviceAttribute = $this->findAttribute(Service::class, ...$node->attrGroups);
             if (isset($serviceAttribute)) {
-                $reflectionClass = $this->getReflectionClass($node->namespacedName->toString());
-                $reflectionAttribute = $reflectionClass->getAttributes(Service::class)[0];
-
-                $annotationDetailsMetadata = new AnnotationDetailsMetadata();
+                $annotationArguments = $this->getAnnotationArguments($serviceAttribute);
                 $serviceProfile = $this->findAttribute(ServiceProfile::class, ...$node->attrGroups);
                 if (!isset($serviceProfile)) {
-                    $annotationDetailsMetadata->put('profiles', ['default']);
+                    $annotationArguments->put('profiles', ['default']);
                 } else {
-                    $annotationDetailsMetadata->put('profiles', $this->getAttributeArgumentValue($serviceProfile->args[0]));
+                    $annotationArguments->put('profiles', $this->getAttributeArgumentValue($serviceProfile->args[0]));
                 }
 
-                $this->annotationDetails->add(new AnnotationDetails($this->fileInfo, $reflectionAttribute, $reflectionClass, $annotationDetailsMetadata));
+                $this->annotationDetails->add(new AnnotationDetails(
+                    $this->fileInfo,
+                    AttributeType::Service,
+                    $annotationArguments,
+                    $this->getReflectionClass($node->namespacedName->toString())
+                ));
             }
         } else if ($node instanceof Node\Stmt\ClassMethod) {
-            foreach ([ServicePrepare::class, ServiceDelegate::class] as $attributeType) {
-                $servicePrepareAttribute = $this->findAttribute($attributeType, ...$node->attrGroups);
-                if (isset($servicePrepareAttribute))  {
+            foreach ([AttributeType::ServicePrepare, AttributeType::ServiceDelegate] as $attributeType) {
+                $serviceMethodAttribute = $this->findAttribute($attributeType->value, ...$node->attrGroups);
+                if (isset($serviceMethodAttribute))  {
                     $reflectionMethod = new ReflectionMethod(
                         $node->getAttribute('parent')->namespacedName->toString(),
                         $node->name->toString()
                     );
-                    $reflectionAttribute = $reflectionMethod->getAttributes($attributeType)[0];
-                    $this->annotationDetails->add(new AnnotationDetails($this->fileInfo, $reflectionAttribute, $reflectionMethod));
+                    $this->annotationDetails->add(new AnnotationDetails($this->fileInfo, $attributeType, $this->getAnnotationArguments($serviceMethodAttribute), $reflectionMethod));
                 }
             }
         } else if ($node instanceof Node\Param) {
-            foreach ([InjectScalar::class, InjectService::class, InjectEnv::class] as $attributeType) {
-                $injectScalarAttribute = $this->findAttribute($attributeType, ...$node->attrGroups);
-                if (isset($injectScalarAttribute)) {
+            foreach ([AttributeType::InjectScalar, AttributeType::InjectEnv, AttributeType::InjectService] as $attributeType) {
+                $injectAttribute = $this->findAttribute($attributeType->value, ...$node->attrGroups);
+                if (isset($injectAttribute)) {
                     $methodNode = $node->getAttribute('parent');
                     $classNode = $methodNode->getAttribute('parent');
                     $reflectionParameter = new ReflectionParameter([$classNode->namespacedName->toString(), $methodNode->name->toString()], $node->var->name);
-                    $reflectionAttribute = $reflectionParameter->getAttributes($attributeType)[0];
+                    $annotationArguments = $this->getAnnotationArguments($injectAttribute);
 
-                    $annotationDetailsMetadata = new AnnotationDetailsMetadata();
-                    $annotationDetailsMetadata->put('attribute_arg_value', $this->getAttributeArgumentValue($injectScalarAttribute->args[0]));
-
-                    $this->annotationDetails->add(new AnnotationDetails($this->fileInfo, $reflectionAttribute, $reflectionParameter, $annotationDetailsMetadata));
+                    $this->annotationDetails->add(new AnnotationDetails($this->fileInfo, $attributeType, $annotationArguments, $reflectionParameter));
                 }
             }
         }
@@ -87,6 +79,25 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
         }
 
         return null;
+    }
+
+    private function getAnnotationArguments(Attribute $attribute) : AnnotationArguments {
+        $arguments = new AnnotationArguments();
+        $ordinalArgumentNames = $this->getOrdinalArgumentNames($attribute);
+        foreach ($attribute->args as $index => $arg) {
+            $name = $arg->name ?? $ordinalArgumentNames[$index];
+            $arguments->put($name, $this->getAttributeArgumentValue($arg));
+        }
+        return $arguments;
+    }
+
+    private function getOrdinalArgumentNames(Attribute $attribute) : array {
+        $attributeConstructor = $this->getReflectionClass($attribute->name->toString())->getConstructor();
+        if (is_null($attributeConstructor)) {
+            return [];
+        }
+        $parameters = $attributeConstructor->getParameters();
+        return array_map(fn(ReflectionParameter $param) => $param->name, $parameters);
     }
 
     private function getReflectionClass(string $class) : ReflectionClass {

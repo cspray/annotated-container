@@ -2,39 +2,55 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
-use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use SplFileInfo;
 
-class AnnotationDetails {
+/**
+ * @Internal
+ */
+final class AnnotationDetails {
 
     public function __construct(
         private SplFileInfo $fileInfo,
-        private ReflectionAttribute $reflectionAttribute,
+        private AttributeType $attributeType,
+        private AnnotationArguments $annotationArguments,
         private ReflectionClass|ReflectionMethod|ReflectionParameter $reflectionClass,
-        private ?AnnotationDetailsMetadata $annotationDetailsMetadata = null
-    ) {
-        if (!isset($this->annotationDetailsMetadata)) {
-            $this->annotationDetailsMetadata = new AnnotationDetailsMetadata();
-        }
-    }
+    ) {}
 
     public function getFile() : SplFileInfo {
         return $this->fileInfo;
     }
 
-    public function getReflectionAttribute() : ReflectionAttribute {
-        return $this->reflectionAttribute;
+    public function getAttributeType() : AttributeType {
+        return $this->attributeType;
     }
 
+    /**
+     * The exact type returned is dependent on the Attribute that these details represent.
+     *
+     * ReflectionClass Attributes
+     * - Service
+     * ReflectionMethodAttributes
+     * - ServicePrepare
+     * - ServiceDelegate
+     * ReflectionParameter
+     * - InjectService
+     * - InjectScalar
+     * - InjectEnv
+     *
+     * The ServiceProfile Attribute would not have an AnnotationDetails created for it. Whatever profile is present
+     * will be
+     *
+     * @return ReflectionClass|ReflectionMethod|ReflectionParameter
+     */
     public function getReflection() : ReflectionClass|ReflectionMethod|ReflectionParameter {
         return $this->reflectionClass;
     }
 
-    public function getAnnotationDetailsMetaData() : AnnotationDetailsMetadata {
-        return $this->annotationDetailsMetadata;
+    public function getAnnotationArguments() : AnnotationArguments {
+        return $this->annotationArguments;
     }
 
 }

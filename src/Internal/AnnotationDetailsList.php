@@ -20,7 +20,7 @@ class AnnotationDetailsList {
     public function getSubsetForAttributeType(AttributeType $attributeType) : array {
         $validDetails = [];
         foreach ($this->details as $detail) {
-            if ($detail->getReflectionAttribute()->getName() === $attributeType->value) {
+            if ($detail->getAttributeType() === $attributeType) {
                 $validDetails[] = $detail;
             }
         }

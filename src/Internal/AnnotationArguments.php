@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
-class AnnotationDetailsMetadata {
+class AnnotationArguments {
 
     private array $map = [];
 

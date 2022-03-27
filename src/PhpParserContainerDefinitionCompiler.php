@@ -104,7 +104,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
 
     private function addAllServiceDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList, array $activeProfiles) : ContainerDefinitionBuilder {
         foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $serviceAnnotationDetails) {
-            $serviceProfiles = $serviceAnnotationDetails->getAnnotationDetailsMetaData()->get('profiles', ['default']);
+            $serviceProfiles = $serviceAnnotationDetails->getAnnotationArguments()->get('profiles', ['default']);
             foreach ($serviceProfiles as $serviceProfile) {
                 if (in_array($serviceProfile, $activeProfiles)) {
                     $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($this->getServiceDefinition($annotationDetailsList, $serviceAnnotationDetails->getReflection()->getName()));
@@ -152,7 +152,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             }
 
             foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $sd) {
-                $serviceProfiles = $sd->getAnnotationDetailsMetaData()->get('profiles', ['wtf']);
+                $serviceProfiles = $sd->getAnnotationArguments()->get('profiles', ['wtf']);
                 foreach ($serviceProfiles as $serviceProfile) {
                     if (in_array($serviceProfile, $activeProfiles) && $sd->getReflection()->isSubclassOf($serviceAnnotationDetails->getReflection())) {
                         $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition(
@@ -200,7 +200,6 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServicePrepare) as $annotationDetails) {
             if ($serviceDefinition->getType() === $annotationDetails->getReflection()->getDeclaringClass()->getName() && $annotationDetails->getReflection()->getName() === $method) {
                 return true;
-                break;
             }
         }
         return false;
@@ -214,7 +213,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
                 InjectScalarDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
                     ->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
-                    ->withValue($annotationDetails->getAnnotationDetailsMetaData()->get('attribute_arg_value'))
+                    ->withValue($annotationDetails->getAnnotationArguments()->get('value'))
                     ->build()
             );
         }
@@ -258,9 +257,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     private function addAllServiceDelegateDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
         foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServiceDelegate) as $annotationDetails) {
             $reflection = $annotationDetails->getReflection();
-            /** @var ServiceDelegate $serviceDelegate */
-            $serviceDelegate = $annotationDetails->getReflectionAttribute()->newInstance();
-            $serviceDefinition = $this->getServiceDefinition($annotationDetailsList, $serviceDelegate->getServiceType());
+            $serviceDefinition = $this->getServiceDefinition($annotationDetailsList, $annotationDetails->getAnnotationArguments()->get('service'));
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition(
                 ServiceDelegateDefinitionBuilder::forService($serviceDefinition)
                     ->withDelegateMethod($reflection->getDeclaringClass()->getName(), $reflection->getName())

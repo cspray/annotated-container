@@ -7,10 +7,10 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 final class ServiceDelegate {
 
-    public function __construct(private string $serviceType) {}
+    public function __construct(private string $service) {}
 
     public function getServiceType() : string {
-        return $this->serviceType;
+        return $this->service;
     }
 
 }
