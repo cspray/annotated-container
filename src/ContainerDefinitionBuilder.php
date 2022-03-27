@@ -28,16 +28,6 @@ final class ContainerDefinitionBuilder {
         return new self;
     }
 
-    public function getServiceDefinition(string $type) : ?ServiceDefinition {
-        foreach ($this->serviceDefinitions as $serviceDefinition) {
-            if ($serviceDefinition->getType() === $type) {
-                return $serviceDefinition;
-            }
-        }
-
-        return null;
-    }
-
     public function withServiceDefinition(ServiceDefinition $serviceDefinition) : self {
         $instance = clone $this;
         $instance->serviceDefinitions[] = $serviceDefinition;

@@ -157,9 +157,9 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                     if (in_array($serviceProfile, $activeProfiles) && $sd->getReflection()->isSubclassOf($serviceAnnotationDetails->getReflection())) {
                         $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition(
                             AliasDefinitionBuilder::forAbstract(
-                                $containerDefinitionBuilder->getServiceDefinition($serviceAnnotationDetails->getReflection()->getName())
+                                $this->getServiceDefinition($annotationDetailsList, $serviceAnnotationDetails->getReflection()->getName())
                             )->withConcrete(
-                                $containerDefinitionBuilder->getServiceDefinition($sd->getReflection()->getName())
+                                $this->getServiceDefinition($annotationDetailsList, $sd->getReflection()->getName())
                             )->build()
                         );
                     }
@@ -212,7 +212,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             $reflection = $annotationDetails->getReflection();
             $reflectionClass = $reflection->getDeclaringClass();
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
-                InjectScalarDefinitionBuilder::forMethod($containerDefinitionBuilder->getServiceDefinition($reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
+                InjectScalarDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
                     ->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
                     ->withValue($annotationDetails->getAnnotationDetailsMetaData()->get('attribute_arg_value'))
                     ->build()
@@ -227,7 +227,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             $injectEnv = $reflection->getAttributes(InjectEnv::class)[0]->newInstance();
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
                 InjectScalarDefinitionBuilder::forMethod(
-                    $containerDefinitionBuilder->getServiceDefinition($reflectionClass->getName()), $reflection->getDeclaringFunction()->getName()
+                    $this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName()
                 )->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
                 ->withValue("!env(" . $injectEnv->getVariableName() . ")")
                 ->build()
@@ -245,9 +245,9 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             /** @var InjectService $injectService */
             $injectService = $reflection->getAttributes(InjectService::class)[0]->newInstance();
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectServiceDefinition(
-                InjectServiceDefinitionBuilder::forMethod($containerDefinitionBuilder->getServiceDefinition($reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
+                InjectServiceDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
                     ->withParam($reflection->getType()->getName(), $reflection->getName())
-                    ->withInjectedService($containerDefinitionBuilder->getServiceDefinition($injectService->getName()))
+                    ->withInjectedService($this->getServiceDefinition($annotationDetailsList, $injectService->getName()))
                     ->build()
             );
         }
@@ -260,7 +260,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             $reflection = $annotationDetails->getReflection();
             /** @var ServiceDelegate $serviceDelegate */
             $serviceDelegate = $annotationDetails->getReflectionAttribute()->newInstance();
-            $serviceDefinition = $containerDefinitionBuilder->getServiceDefinition($serviceDelegate->getServiceType());
+            $serviceDefinition = $this->getServiceDefinition($annotationDetailsList, $serviceDelegate->getServiceType());
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition(
                 ServiceDelegateDefinitionBuilder::forService($serviceDefinition)
                     ->withDelegateMethod($reflection->getDeclaringClass()->getName(), $reflection->getName())
