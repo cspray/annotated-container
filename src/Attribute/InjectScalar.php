@@ -20,4 +20,8 @@ final class InjectScalar {
         private string|int|float|bool|array $value
     ) {}
 
+    public function getValue() : string|int|float|bool|array {
+        return $this->value;
+    }
+
 }

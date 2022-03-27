@@ -9,6 +9,9 @@ use Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException;
  */
 final class ContainerDefinitionBuilder {
 
+    /**
+     * @var ServiceDefinition[]
+     */
     private array $serviceDefinitions = [];
     private array $aliasDefinitions = [];
     private array $servicePrepareDefinitions = [];
@@ -23,6 +26,16 @@ final class ContainerDefinitionBuilder {
      */
     public static function newDefinition() : self {
         return new self;
+    }
+
+    public function getServiceDefinition(string $type) : ?ServiceDefinition {
+        foreach ($this->serviceDefinitions as $serviceDefinition) {
+            if ($serviceDefinition->getType() === $type) {
+                return $serviceDefinition;
+            }
+        }
+
+        return null;
     }
 
     public function withServiceDefinition(ServiceDefinition $serviceDefinition) : self {

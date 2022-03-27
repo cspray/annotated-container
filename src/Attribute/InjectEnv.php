@@ -16,6 +16,10 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final class InjectEnv {
 
-    public function __construct(private string $envVar) {}
+    public function __construct(private string $var) {}
+
+    public function getVariableName() : string {
+        return $this->var;
+    }
 
 }

@@ -262,7 +262,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
-    public function testSimpleUseScalar() {
+    public function testSimpleInjectScalar() {
         $injectorDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleUseScalar');
 
         $this->assertServiceDefinitionsHaveTypes([SimpleUseScalar\FooImplementation::class], $injectorDefinition->getServiceDefinitions());
@@ -369,7 +369,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
-    public function testUseScalarFromEnv() {
+    public function testInjectScalarFromEnv() {
         $injectorDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleUseScalarFromEnv');
 
         $this->assertServiceDefinitionsHaveTypes([SimpleUseScalarFromEnv\FooImplementation::class], $injectorDefinition->getServiceDefinitions());
@@ -386,7 +386,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
-    public function testSimpleUseService() {
+    public function testSimpleInjectService() {
         $injectorDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleUseService');
 
         $this->assertServiceDefinitionsHaveTypes([
