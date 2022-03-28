@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Adds ability to mark a Service as primary. If multiple aliases are found the one marked as primary will be used by default.
+
+### Changed
+
+- Made several changes to the internal parsing of the codebase. This shouldn't have any changes in the public-facing API.
+
 ### Fixed
 
 - An error in the README documentation referencing an incorrect variable.

@@ -76,20 +76,17 @@ the following Attributes to our source code:
 <?php
 
 use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Attribute\ServiceProfile;
 
 // ... rest of file remains untouched
 
-#[Service]
-#[ServiceProfile(['cloud'])]
+#[Service(profiles: ['cloud'])]
 class CloudStorage implements BlobStorage {
 
     // ... rest of class remains untouched
     
 }
 
-#[Service]
-#[ServiceProfile(['local'])]
+#[Service(profiles: ['local'])]
 class FilesystemStorage implements BlobStorage {
 
     // ... rest of class remains untouched

@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer\Internal;
 
 use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Attribute\ServiceProfile;
 use PhpParser\ConstExprEvaluationException;
 use PhpParser\ConstExprEvaluator;
 use PhpParser\Node;
@@ -32,13 +31,9 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
             $serviceAttribute = $this->findAttribute(Service::class, ...$node->attrGroups);
             if (isset($serviceAttribute)) {
                 $annotationArguments = $this->getAnnotationArguments($serviceAttribute);
-                $serviceProfile = $this->findAttribute(ServiceProfile::class, ...$node->attrGroups);
-                if (!isset($serviceProfile)) {
+                if (!$annotationArguments->has('profiles')) {
                     $annotationArguments->put('profiles', ['default']);
-                } else {
-                    $annotationArguments->put('profiles', $this->getAttributeArgumentValue($serviceProfile->args[0]));
                 }
-
                 $this->annotationDetails->add(new AnnotationDetails(
                     $this->fileInfo,
                     AttributeType::Service,
@@ -91,6 +86,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
             $name = $arg->name ?? $ordinalArgumentNames[$index];
             $arguments->put($name, $this->getAttributeArgumentValue($arg));
         }
+
         return $arguments;
     }
 
