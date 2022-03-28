@@ -7,12 +7,10 @@ use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 final class ServiceDefinitionBuilder {
 
     private string $type;
-
     private bool $isAbstract;
-
     private array $implementedServices = [];
-
     private array $profiles = [];
+    private bool $isPrimary = false;
 
     private function __construct() {}
 
@@ -39,7 +37,7 @@ final class ServiceDefinitionBuilder {
      * @return static
      * @throws DefinitionBuilderException
      */
-    public static function forConcrete(string $type) : self {
+    public static function forConcrete(string $type, bool $isPrimary = false) : self {
         if (empty($type)) {
             throw new DefinitionBuilderException(sprintf(
                 'Must not pass an empty type to %s',
@@ -49,6 +47,7 @@ final class ServiceDefinitionBuilder {
         $instance = new self;
         $instance->type = $type;
         $instance->isAbstract = false;
+        $instance->isPrimary = $isPrimary;
         return $instance;
     }
 
@@ -84,18 +83,20 @@ final class ServiceDefinitionBuilder {
         if (empty($profiles)) {
             $profiles[] = 'default';
         }
-        return new class($this->type, $this->isAbstract, $this->implementedServices, $profiles) implements ServiceDefinition {
+        return new class($this->type, $this->isAbstract, $this->implementedServices, $profiles, $this->isPrimary) implements ServiceDefinition {
 
             private string $type;
             private bool $isAbstract;
             private array $implementedServices;
             private array $profiles;
+            private bool $isPrimary;
 
-            public function __construct(string $type, bool $isAbstract, array $implementedServices, array $profiles) {
+            public function __construct(string $type, bool $isAbstract, array $implementedServices, array $profiles, bool $isPrimary) {
                 $this->type = $type;
                 $this->isAbstract = $isAbstract;
                 $this->implementedServices = $implementedServices;
                 $this->profiles = $profiles;
+                $this->isPrimary = $isPrimary;
             }
 
             public function getType(): string {
@@ -111,7 +112,7 @@ final class ServiceDefinitionBuilder {
             }
 
             public function isPrimary(): bool {
-                return false;
+                return $this->isPrimary;
             }
 
             public function isConcrete(): bool {

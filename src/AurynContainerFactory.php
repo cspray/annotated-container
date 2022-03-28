@@ -75,15 +75,24 @@ final class AurynContainerFactory implements ContainerFactory {
         $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
             if (!in_array($aliasDefinition->getAbstractService(), $aliasedTypes)) {
-                // We are intentionally taking the stance that if there are more than 1 alias possible that it is up
-                // to the developer to properly instantiate the Service. The caller could presume to provide a specific
-                // parameter to the make() call or could potentially have another piece of code that interacts with the
-                // Injector to define these kind of parameters
                 $typeAliasDefinitions = self::mapTypesAliasDefinitions($aliasDefinition->getAbstractService()->getType(), $aliasDefinitions);
+                $aliasDefinition = null;
                 if (count($typeAliasDefinitions) === 1) {
+                    $aliasDefinition = $typeAliasDefinitions[0];
+                } else {
+                    /** @var AliasDefinition $typeAliasDefinition */
+                    foreach ($typeAliasDefinitions as $typeAliasDefinition) {
+                        if ($typeAliasDefinition->getConcreteService()->isPrimary()) {
+                            $aliasDefinition = $typeAliasDefinition;
+                            break;
+                        }
+                    }
+                }
+
+                if (isset($aliasDefinition)) {
                     $injector->alias(
-                        $typeAliasDefinitions[0]->getAbstractService()->getType(),
-                        $typeAliasDefinitions[0]->getConcreteService()->getType()
+                        $aliasDefinition->getAbstractService()->getType(),
+                        $aliasDefinition->getConcreteService()->getType()
                     );
                 }
             }

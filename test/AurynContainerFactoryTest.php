@@ -2,12 +2,10 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Auryn\InjectionException;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceInterface;
 use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
 use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
-use Cspray\AnnotatedContainer\DummyApps\InjectorExecuteServicePrepare;
 use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
 use Cspray\AnnotatedContainer\DummyApps\MultipleUseScalars;
 use Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar;
@@ -20,73 +18,66 @@ use Psr\Container\ContainerExceptionInterface;
 /**
  * @covers \Cspray\AnnotatedContainer\AurynContainerFactory
  * @covers \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler
- * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServiceDefinitionVisitor
- * @covers \Cspray\AnnotatedContainer\Internal\Visitor\ServicePrepareDefinitionVisitor
- * @covers \Cspray\AnnotatedContainer\Internal\Visitor\InjectScalarDefinitionVisitor
- * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServiceDefinitionInterrogator
- * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\ServicePrepareDefinitionInterrogator
- * @covers \Cspray\AnnotatedContainer\Internal\Interrogator\InjectScalarDefinitionInterrogator
  * @covers \Cspray\AnnotatedContainer\ServiceDefinition
  * @covers \Cspray\AnnotatedContainer\AliasDefinition
  * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinition
  * @covers \Cspray\AnnotatedContainer\InjectScalarDefinition
- * @covers \Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor
  */
-class AurynInjectorFactoryTest extends TestCase {
+class AurynContainerFactoryTest extends TestCase {
 
     public function testCreateSimpleServices() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
-        $subject = $injector->get(SimpleServices\FooInterface::class);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
+        $subject = $container->get(SimpleServices\FooInterface::class);
 
         $this->assertInstanceOf(SimpleServices\FooImplementation::class, $subject);
     }
 
     public function testInterfaceServicePrepare() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InterfaceServicePrepare')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $subject = $injector->get(InterfaceServicePrepare\FooInterface::class);
+        $subject = $container->get(InterfaceServicePrepare\FooInterface::class);
 
         $this->assertInstanceOf(InterfaceServicePrepare\FooImplementation::class, $subject);
         $this->assertEquals(1, $subject->getBarCounter());
     }
 
-    public function testServicePrepareInvokedOnInjector() {
+    public function testServicePrepareInvokedOnContainer() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InjectorExecuteServicePrepare')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $subject = $injector->get(InjectorExecuteServicePrepare\FooInterface::class);
+        $subject = $container->get(DummyApps\InjectorExecuteServicePrepare\FooInterface::class);
 
-        $this->assertInstanceOf(InjectorExecuteServicePrepare\FooImplementation::class, $subject);
-        $this->assertInstanceOf(InjectorExecuteServicePrepare\BarImplementation::class, $subject->getBar());
+        $this->assertInstanceOf(DummyApps\InjectorExecuteServicePrepare\FooImplementation::class, $subject);
+        $this->assertInstanceOf(DummyApps\InjectorExecuteServicePrepare\BarImplementation::class, $subject->getBar());
     }
 
     public function testSimpleUseScalar() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseScalar')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $subject = $injector->get(SimpleUseScalar\FooImplementation::class);
+        $subject = $container->get(SimpleUseScalar\FooImplementation::class);
 
         $this->assertSame('string param test value', $subject->stringParam);
         $this->assertSame(42, $subject->intParam);
@@ -96,14 +87,14 @@ class AurynInjectorFactoryTest extends TestCase {
 
     public function testMultipleUseScalars() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/MultipleUseScalars')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $subject = $injector->get(MultipleUseScalars\FooImplementation::class);
+        $subject = $container->get(MultipleUseScalars\FooImplementation::class);
 
         $this->assertSame('constructor param', $subject->stringParam);
         $this->assertSame('prepare param', $subject->prepareParam);
@@ -113,42 +104,42 @@ class AurynInjectorFactoryTest extends TestCase {
         // we need to make sure this file is loaded so that our constant is defined
         require_once DummyAppUtils::getRootDir() . '/ConstantUseScalar/FooImplementation.php';
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ConstantUseScalar')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $subject = $injector->get(ConstantUseScalar\FooImplementation::class);
+        $subject = $container->get(ConstantUseScalar\FooImplementation::class);
 
         $this->assertSame('foo_bar_val', $subject->val);
     }
 
     public function testSimpleUseScalarFromEnv() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseScalarFromEnv')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $subject = $injector->get(SimpleUseScalarFromEnv\FooImplementation::class);
+        $subject = $container->get(SimpleUseScalarFromEnv\FooImplementation::class);
 
         $this->assertSame(getenv('USER'), $subject->user);
     }
 
     public function testSimpleUseServiceSetterInjection() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseService')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $subject = $injector->get(SimpleUseService\SetterInjection::class);
+        $subject = $container->get(SimpleUseService\SetterInjection::class);
 
         $this->assertInstanceOf(SimpleUseService\BazImplementation::class, $subject->baz);
         $this->assertInstanceOf(SimpleUseService\BarImplementation::class, $subject->bar);
@@ -157,14 +148,14 @@ class AurynInjectorFactoryTest extends TestCase {
 
     public function testSimpleUseServiceConstructorInjection() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseService')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $subject = $injector->get(SimpleUseService\ConstructorInjection::class);
+        $subject = $container->get(SimpleUseService\ConstructorInjection::class);
 
         $this->assertInstanceOf(SimpleUseService\BazImplementation::class, $subject->baz);
         $this->assertInstanceOf(SimpleUseService\BarImplementation::class, $subject->bar);
@@ -173,42 +164,54 @@ class AurynInjectorFactoryTest extends TestCase {
 
     public function testMultipleAliasResolutionNoMakeDefine() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/MultipleAliasResolution')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
         $this->expectException(ContainerExceptionInterface::class);
-        $injector->get(MultipleAliasResolution\FooInterface::class);
+        $container->get(MultipleAliasResolution\FooInterface::class);
     }
 
     public function testServiceDelegate() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ServiceDelegate')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $service = $injector->get(ServiceInterface::class);
+        $service = $container->get(ServiceInterface::class);
 
         $this->assertSame('From ServiceFactory From FooService', $service->getValue());
     }
 
     public function testHasServiceIfCompiled() {
         $compiler = new PhpParserContainerDefinitionCompiler();
-        $injectorDefinition = $compiler->compile(
+        $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')
                 ->withProfiles('default')
                 ->build()
         );
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
 
-        $this->assertTrue($injector->has(DummyApps\SimpleServices\FooInterface::class));
-        $this->assertFalse($injector->has(DummyApps\MultipleSimpleServices\FooInterface::class));
+        $this->assertTrue($container->has(DummyApps\SimpleServices\FooInterface::class));
+        $this->assertFalse($container->has(DummyApps\MultipleSimpleServices\FooInterface::class));
+    }
+
+    public function testMultipleServicesWithPrimary() {
+        $compiler = new PhpParserContainerDefinitionCompiler();
+        $containerDefinition = $compiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/MultipleServicesWithPrimary')
+                ->withProfiles('default')
+                ->build()
+        );
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
+
+        $this->assertInstanceOf(DummyApps\MultipleServicesWithPrimary\FooImplementation::class, $container->get(DummyApps\MultipleServicesWithPrimary\FooInterface::class));
     }
 
 }

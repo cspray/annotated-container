@@ -3,15 +3,12 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Attribute\InjectEnv;
-use Cspray\AnnotatedContainer\Attribute\InjectScalar;
 use Cspray\AnnotatedContainer\Attribute\InjectService;
-use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\AnnotatedContainer\Internal\AnnotationDetailsList;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\Internal\AnnotationVisitor;
-use Cspray\AnnotatedContainer\Internal\Visitor\AbstractNodeVisitor;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeTraverserInterface;
 use PhpParser\NodeVisitor\NodeConnectingVisitor;
@@ -23,7 +20,6 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionParameter;
 use SplFileInfo;
-use function PHPUnit\Framework\once;
 
 /**
  * A ContainerDefinitionCompiler that uses PhpParser to statically analyze source code for Attributes defined by
@@ -120,22 +116,25 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         if (!isset($serviceDefinitions[$serviceType])) {
             foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $annotationDetails) {
                 if ($annotationDetails->getReflection()->getName() === $serviceType) {
-                    $method = $annotationDetails->getReflection()->isAbstract() || $annotationDetails->getReflection()->isInterface() ? 'forAbstract' : 'forConcrete';
-                    /** @var ServiceDefinitionBuilder $serviceDefinitionBuilder */
-                    $serviceDefinitionBuilder = ServiceDefinitionBuilder::$method($annotationDetails->getReflection()->getName());
-                    if ($method === 'forConcrete') {
-                        $parent = $annotationDetails->getReflection()->getParentClass();
-                        if ($parent) {
-                            $extendedServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $parent->getName());
-                            if (!is_null($extendedServiceDefinition)) {
-                                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($extendedServiceDefinition);
-                            }
-                        }
-                        foreach ($annotationDetails->getReflection()->getInterfaceNames() as $interfaceName) {
-                            $implementServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $interfaceName);
-                            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($implementServiceDefinition);
-                        }
-                    }
+                     if ($annotationDetails->getReflection()->isAbstract() || $annotationDetails->getReflection()->isInterface()) {
+                         $serviceDefinitionBuilder = ServiceDefinitionBuilder::forAbstract($annotationDetails->getReflection()->getName());
+                     } else {
+                         $isPrimary = $annotationDetails->getAnnotationArguments()->get('primary', false);
+                         $serviceDefinitionBuilder = ServiceDefinitionBuilder::forConcrete($annotationDetails->getReflection()->getName(), $isPrimary);
+
+                         $parent = $annotationDetails->getReflection()->getParentClass();
+                         if ($parent) {
+                             $extendedServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $parent->getName());
+                             if (!is_null($extendedServiceDefinition)) {
+                                 $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($extendedServiceDefinition);
+                             }
+                         }
+
+                         foreach ($annotationDetails->getReflection()->getInterfaceNames() as $interfaceName) {
+                             $implementServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $interfaceName);
+                             $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($implementServiceDefinition);
+                         }
+                     }
                     $serviceDefinitions[$serviceType] = $serviceDefinitionBuilder->build();
                     break;
                 }
