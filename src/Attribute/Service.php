@@ -14,4 +14,6 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 final class Service {
 
+    public function __construct(private bool $primary) {}
+
 }

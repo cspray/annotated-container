@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5a68bfd710dbd066e5fe29e25e2f2243",
+    "content-hash": "32ed2767be10d463330fdf9f6f6f068c",
     "packages": [
         {
             "name": "nikic/php-parser",
@@ -184,16 +184,16 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.1.0",
+            "version": "0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
-                "reference": "34bed9e3d1edc5646f231da110cf8f2ede9b56f6"
+                "reference": "135854fb189ad2c4dbbcb682f55233a30583817c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/34bed9e3d1edc5646f231da110cf8f2ede9b56f6",
-                "reference": "34bed9e3d1edc5646f231da110cf8f2ede9b56f6",
+                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/135854fb189ad2c4dbbcb682f55233a30583817c",
+                "reference": "135854fb189ad2c4dbbcb682f55233a30583817c",
                 "shasum": ""
             },
             "type": "library",
@@ -217,9 +217,9 @@
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
-                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.1.0"
+                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.2.0"
             },
-            "time": "2022-03-25T21:17:00+00:00"
+            "time": "2022-03-28T02:05:53+00:00"
         },
         {
             "name": "doctrine/instantiator",

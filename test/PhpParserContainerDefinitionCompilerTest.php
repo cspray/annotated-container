@@ -75,6 +75,13 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
+    public function testSimpleServicesDefaultsPrimaryToFalse() {
+        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleServices');
+
+        $this->assertServiceDefinitionIsNotPrimary($containerDefinition->getServiceDefinitions(), SimpleServices\FooInterface::class);
+        $this->assertServiceDefinitionIsNotPrimary($containerDefinition->getServiceDefinitions(), SimpleServices\FooImplementation::class);
+    }
+
     public function testSimpleServicesHasDefaultProfile() {
         $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleServices');
 
@@ -508,6 +515,15 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             ImplementsServiceExtendsSameService\FooInterface::class,
             ImplementsServiceExtendsSameService\FooImplementation::class
         ], $containerDefinition->getServiceDefinitions());
+    }
+
+    public function testMultipleServicesWithPrimaryMarkedAppropriately() {
+        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/MultipleServicesWithPrimary');
+
+        $this->assertServiceDefinitionIsNotPrimary($containerDefinition->getServiceDefinitions(), DummyApps\MultipleServicesWithPrimary\FooInterface::class);
+        $this->assertServiceDefinitionIsPrimary($containerDefinition->getServiceDefinitions(), DummyApps\MultipleServicesWithPrimary\FooImplementation::class);
+        $this->assertServiceDefinitionIsNotPrimary($containerDefinition->getServiceDefinitions(), DummyApps\MultipleServicesWithPrimary\BarImplementation::class);
+        $this->assertServiceDefinitionIsNotPrimary($containerDefinition->getServiceDefinitions(), DummyApps\MultipleServicesWithPrimary\BazImplementation::class);
     }
 
     protected function assertUseScalarMethod(array $expectedMethods, array $UseScalarDefinitions) : void {
