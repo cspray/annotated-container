@@ -8,7 +8,6 @@ namespace Cspray\AnnotatedContainer;
 final class ContainerDefinitionCompileOptionsBuilder {
 
     private array $directories = [];
-    private array $profiles = [];
 
     private function __construct() {}
 
@@ -24,35 +23,17 @@ final class ContainerDefinitionCompileOptionsBuilder {
         return $instance;
     }
 
-    /**
-     * Specify the Profiles that are active when generating the ContainerDefinition.
-     *
-     * @param string ...$profiles
-     * @return $this
-     */
-    public function withProfiles(string... $profiles) : self {
-        $instance = clone $this;
-        $instance->profiles = array_merge($this->profiles, $profiles);
-        return $instance;
-    }
-
     public function build() : ContainerDefinitionCompileOptions {
-        return new class($this->directories, $this->profiles) implements ContainerDefinitionCompileOptions {
+        return new class($this->directories) implements ContainerDefinitionCompileOptions {
 
             private array $directories;
-            private array $profiles;
 
-            public function __construct(array $directories, array $profiles) {
+            public function __construct(array $directories) {
                 $this->directories = $directories;
-                $this->profiles = $profiles;
             }
 
             public function getScanDirectories(): array {
                 return $this->directories;
-            }
-
-            public function getProfiles(): array {
-                return $this->profiles;
             }
         };
     }

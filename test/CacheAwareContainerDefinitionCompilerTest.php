@@ -27,15 +27,13 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     public function testFileDoesNotExistWritesFile() {
         $dir = DummyAppUtils::getRootDir() . '/SimpleServices';
         $containerDefinition = $this->cacheAwareContainerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)
-                ->withProfiles('test')
-                ->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
         );
 
-        $this->assertNotNull($this->root->getChild('root/' . md5('test' . $dir)));
+        $this->assertNotNull($this->root->getChild('root/' . md5($dir)));
 
         $expected = $this->containerDefinitionSerializer->serialize($containerDefinition);
-        $actual = $this->root->getChild('root/' . md5('test' . $dir))->getContent();
+        $actual = $this->root->getChild('root/' . md5($dir))->getContent();
 
         $this->assertJsonStringEqualsJsonString($expected, $actual);
     }
@@ -43,11 +41,11 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     public function testFileDoesExistDoesNotCallCompiler() {
         $dir = DummyAppUtils::getRootDir() . '/ProfileResolvedServices';
         $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->withProfiles('default')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
         );
         $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
-        vfsStream::newFile(md5('test' . $dir))->at($this->root)->setContent($serialized);
+        vfsStream::newFile(md5($dir))->at($this->root)->setContent($serialized);
 
         $mock = $this->getMockBuilder(ContainerDefinitionCompiler::class)->getMock();
         $mock->expects($this->never())->method('compile');
@@ -58,7 +56,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         );
 
         $containerDefinition = $subject->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->withProfiles('test')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
         );
         $actual = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
@@ -77,7 +75,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $this->expectException(InvalidCacheException::class);
         $this->expectExceptionMessage('The cache directory, vfs://cache, could not be written to. Please ensure it exists and is writeable.');
 
-        $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->withProfiles('default')->build());
+        $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build());
     }
 
 

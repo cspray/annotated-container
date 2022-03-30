@@ -117,23 +117,25 @@ class ContainerDefinitionMergeTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\SimpleUseScalar\FooImplementation::class)->build();
         $injectScalarDefinition1 = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::String, 'stringParam')
-            ->withValue('string value')
+            ->withValue(new CompileEqualsRuntimeAnnotationValue('string value'))
+            ->withProfiles(new ArrayAnnotationValue(new CompileEqualsRuntimeAnnotationValue('default')))
             ->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()->withInjectScalarDefinition($injectScalarDefinition1)->build();
 
         $injectScalarDefinition2 = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::Int, 'intParam')
-            ->withValue(42)
+            ->withValue(new CompileEqualsRuntimeAnnotationValue(42))
+            ->withProfiles(new ArrayAnnotationValue(new CompileEqualsRuntimeAnnotationValue('default')))
             ->build();
 
         $container2 = ContainerDefinitionBuilder::newDefinition()->withInjectScalarDefinition($injectScalarDefinition2)->build();
 
         $subject = $container1->merge($container2);
 
-        $this->assertUseScalarParamValues([
-            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(stringParam)' => 'string value',
-            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(intParam)' => 42
+        $this->assertInjectScalarParamValues([
+            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(stringParam)|default' => 'string value',
+            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(intParam)|default' => 42
         ], $subject->getInjectScalarDefinitions());
     }
 

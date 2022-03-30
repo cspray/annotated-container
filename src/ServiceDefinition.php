@@ -32,9 +32,9 @@ interface ServiceDefinition {
      * A ServiceDefinition MUST have at least 1 profile; if a profile is not explicitly set for a given Service it should
      * be given the 'default' profile.
      *
-     * @return string[]
+     * @return AnnotationValue
      */
-    public function getProfiles() : array;
+    public function getProfiles() : AnnotationValue;
 
     /**
      * Return whether the Service is the Primary for this type and will be used by default if there are multiple aliases

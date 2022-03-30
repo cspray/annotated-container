@@ -13,7 +13,7 @@ use Attribute;
  *
  * @package Cspray\AnnotatedContainer\Attribute
  */
-#[Attribute(Attribute::TARGET_PARAMETER)]
+#[Attribute(Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
 final class InjectScalar {
 
     public function __construct(

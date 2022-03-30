@@ -9,7 +9,7 @@ final class ServiceDefinitionBuilder {
     private string $type;
     private bool $isAbstract;
     private array $implementedServices = [];
-    private array $profiles = [];
+    private ?AnnotationValue $profiles = null;
     private bool $isPrimary = false;
 
     private function __construct() {}
@@ -71,27 +71,26 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
-    public function withProfiles(string $profile, string... $additionalProfiles) : self {
+    public function withProfiles(AnnotationValue $profiles) : self {
         $instance = clone $this;
-        $instance->profiles[] = $profile;
-        $instance->profiles = array_merge($instance->profiles, $additionalProfiles);
+        $instance->profiles = $profiles;
         return $instance;
     }
 
     public function build() : ServiceDefinition {
         $profiles = $this->profiles;
-        if (empty($profiles)) {
-            $profiles[] = 'default';
+        if (is_null($profiles)) {
+            $profiles = new ArrayAnnotationValue();
         }
         return new class($this->type, $this->isAbstract, $this->implementedServices, $profiles, $this->isPrimary) implements ServiceDefinition {
 
             private string $type;
             private bool $isAbstract;
             private array $implementedServices;
-            private array $profiles;
+            private AnnotationValue $profiles;
             private bool $isPrimary;
 
-            public function __construct(string $type, bool $isAbstract, array $implementedServices, array $profiles, bool $isPrimary) {
+            public function __construct(string $type, bool $isAbstract, array $implementedServices, AnnotationValue $profiles, bool $isPrimary) {
                 $this->type = $type;
                 $this->isAbstract = $isAbstract;
                 $this->implementedServices = $implementedServices;
@@ -107,7 +106,7 @@ final class ServiceDefinitionBuilder {
                 return $this->implementedServices;
             }
 
-            public function getProfiles(): array {
+            public function getProfiles(): AnnotationValue {
                 return $this->profiles;
             }
 

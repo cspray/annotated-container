@@ -20,7 +20,7 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
 
     public function testMultipleAliasResolvedHasWarning() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyApps\DummyAppUtils::getRootDir() . '/MultipleAliasResolution')->withProfiles('default')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyApps\DummyAppUtils::getRootDir() . '/MultipleAliasResolution')->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
@@ -32,7 +32,7 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
 
     public function testNoAliasResolvedHasNoViolations() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->withProfiles('default')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
@@ -42,7 +42,7 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
 
     public function testSingleAliasResolvedHasNoViolations() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyApps\DummyAppUtils::getRootDir() . '/SimpleServices')->withProfiles('default')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyApps\DummyAppUtils::getRootDir() . '/SimpleServices')->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);

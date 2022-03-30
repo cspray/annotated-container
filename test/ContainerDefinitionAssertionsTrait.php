@@ -87,26 +87,40 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
         $this->assertEquals($expectedServicePrepare, $actualMap);
     }
 
-    protected function assertUseScalarParamValues(array $expectedValueMap, array $UseScalarDefinitions) : void {
-        if (($countExpected = count($expectedValueMap)) !== ($countActual = count($UseScalarDefinitions))) {
+    protected function assertInjectScalarParamValues(array $expectedValueMap, array $injectScalarDefinitions) : void {
+        if (($countExpected = count($expectedValueMap)) !== ($countActual = count($injectScalarDefinitions))) {
             $this->fail("Expected ${countExpected} InjectScalarDefinition but received ${countActual}");
         }
 
         $actualMap = [];
-        foreach ($UseScalarDefinitions as $UseScalarDefinition) {
-            $this->assertInstanceOf(InjectScalarDefinition::class, $UseScalarDefinition);
+        foreach ($injectScalarDefinitions as $injectScalarDefinition) {
+            $this->assertInstanceOf(InjectScalarDefinition::class, $injectScalarDefinition);
             $key = sprintf(
-                "%s::%s(%s)",
-                $UseScalarDefinition->getService()->getType(),
-                $UseScalarDefinition->getMethod(),
-                $UseScalarDefinition->getParamName()
+                "%s::%s(%s)|%s",
+                $injectScalarDefinition->getService()->getType(),
+                $injectScalarDefinition->getMethod(),
+                $injectScalarDefinition->getParamName(),
+                join(',', $this->getCompiledValues($injectScalarDefinition->getProfiles()))
             );
-            $actualMap[$key] = $UseScalarDefinition->getValue();
+            $actualMap[$key] = $this->getCompiledValues($injectScalarDefinition->getValue());
         }
 
         ksort($actualMap);
         ksort($expectedValueMap);
         $this->assertEquals($expectedValueMap, $actualMap);
+    }
+
+    private function getCompiledValues(AnnotationValue $annotationValue) : string|int|bool|array|float {
+        $value = $annotationValue->getCompileValue();
+        if (is_array($value)) {
+            $values = [];
+            foreach ($value as $v) {
+                $values[] = $this->getCompiledValues($v);
+            }
+            return $values;
+        } else {
+            return $value;
+        }
     }
 
     protected function assertUseServiceParamValues(array $expectedValueMap, array $UseServiceDefinitions) : void {

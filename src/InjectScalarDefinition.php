@@ -15,6 +15,11 @@ interface InjectScalarDefinition {
     public function getService() : ServiceDefinition;
 
     /**
+     * @return AnnotationValue
+     */
+    public function getProfiles() : AnnotationValue;
+
+    /**
      * The name of the method on getService() that needs to have a scalar value injected into it.
      *
      * @return string
@@ -38,8 +43,8 @@ interface InjectScalarDefinition {
     /**
      * The value that should be injected into the scalar.
      *
-     * @return string|int|float|bool|array
+     * @return AnnotationValue
      */
-    public function getValue() : string|int|float|bool|array;
+    public function getValue() : AnnotationValue;
 
 }

@@ -23,7 +23,7 @@ class LogicalConstraintValidatorTest extends TestCase {
         $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(
             DummyAppUtils::getRootDir() . '/MultipleAliasResolution',
             dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias'
-        )->withProfiles('default')->build());
+        )->build());
         $violations = $this->subject->validate($containerDefinition);
 
         $this->assertCount(2, $violations);
@@ -32,7 +32,7 @@ class LogicalConstraintValidatorTest extends TestCase {
     public function testValidatorHasCorrectViolationMessages() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(
             dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias'
-        )->withProfiles('default')->build());
+        )->build());
         $violations = $this->subject->validate($containerDefinition);
 
         $this->assertCount(1, $violations);
