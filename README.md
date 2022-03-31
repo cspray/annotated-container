@@ -44,7 +44,11 @@ interface BlobStorage {
 }
 
 #[Service]
-class FilesystemStorage implements BlobStorage {
+class FilesystemStorage implements BlobStorage 
+
+
+
+{
     
     public function store(string $identifier, string $contents) : void {
         file_put_contents($identifier, $contents);
@@ -112,10 +116,11 @@ This library is thoroughly documented in-repo under the `/docs` directory. The d
 ### 0.3.x
 
 - Support the concept of a Service that is not shared, instead is recreated on every retrieval ... :x:
-- Support a Service being marked as primary to be used for multiple alias resolution ... :x:
+- Support a Service being marked as primary to be used for multiple alias resolution ... :heavy_check_mark:
 - Support a Service having an explicit name that is not the FQCN ... :x:
 - Support a ServiceCollection Attribute which allows collecting many Services ... :x:
 - Support easily configuring third-party code that can't be annotated ... :x:
+- Support profiles when injecting scalar values ... :heavy_check_mark:
 
 ### 0.4.x
 

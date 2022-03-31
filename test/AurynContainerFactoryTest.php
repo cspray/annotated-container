@@ -195,11 +195,7 @@ class AurynContainerFactoryTest extends TestCase {
         );
         $container = (new AurynContainerFactory())->createContainer(
             $containerDefinition,
-            new class implements ContainerFactoryOptions {
-                public function getActiveProfiles(): array {
-                    return ['default', 'dev'];
-                }
-            }
+            ContainerFactoryOptionsBuilder::forActiveProfiles('default', 'dev')->build()
         );
 
         $instance = $container->get(DummyApps\ProfileResolvedServices\FooInterface::class);
@@ -213,12 +209,7 @@ class AurynContainerFactoryTest extends TestCase {
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InjectScalarProfiles')->build()
         );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition, new class implements ContainerFactoryOptions {
-
-            public function getActiveProfiles(): array {
-                return ['default', 'dev'];
-            }
-        });
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition, ContainerFactoryOptionsBuilder::forActiveProfiles('default', 'dev')->build());
 
         $instance = $container->get(DummyApps\InjectScalarProfiles\FooImplementation::class);
 
@@ -233,12 +224,7 @@ class AurynContainerFactoryTest extends TestCase {
         );
         $container = (new AurynContainerFactory())->createContainer(
             $containerDefinition,
-            new class implements ContainerFactoryOptions {
-
-                public function getActiveProfiles(): array {
-                    return ['default', 'prod'];
-                }
-            }
+            ContainerFactoryOptionsBuilder::forActiveProfiles('default', 'prod')->build()
         );
 
         $instance = $container->get(DummyApps\InjectScalarProfiles\FooImplementation::class);
@@ -252,12 +238,7 @@ class AurynContainerFactoryTest extends TestCase {
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InjectScalarProfiles')->build()
         );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition, new class implements ContainerFactoryOptions {
-
-            public function getActiveProfiles(): array {
-                return ['default', 'test'];
-            }
-        });
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition, ContainerFactoryOptionsBuilder::forActiveProfiles('default', 'test')->build());
 
         $instance = $container->get(DummyApps\InjectScalarProfiles\FooImplementation::class);
 

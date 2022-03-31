@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - An error in the README documentation referencing an incorrect variable.
 - Directory paths in all tests to point to new directory structure.
 - A dev-only dependency, `mikey179/vfsStream` was inadvertently included in the `require` section. This dependency is now properly a `require-dev` dependency.
+- Arguments passed to Attributes better differentiates between compile and runtime values.
 
 ### Removed
 

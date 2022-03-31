@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-class ArrayAnnotationValue implements AnnotationValue {
+final class ArrayAnnotationValue implements AnnotationValue {
 
     private array $annotationValues;
 
@@ -10,11 +10,11 @@ class ArrayAnnotationValue implements AnnotationValue {
         $this->annotationValues = $annotationValues;
     }
 
-    public function getCompileValue(): string|int|float|bool|array {
+    public function getCompileValue(): array {
         return $this->annotationValues;
     }
 
-    public function getRuntimeValue(): string|int|float|bool|array {
+    public function getRuntimeValue(): array {
         $values = [];
         foreach ($this->annotationValues as $annotationValue) {
             $values[] = $annotationValue->getRuntimeValue();

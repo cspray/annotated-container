@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-class ConstantAnnotationValue implements AnnotationValue {
+final class ConstantAnnotationValue implements AnnotationValue {
 
     public function __construct(private string $constantName) {}
 

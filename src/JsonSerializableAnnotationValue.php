@@ -4,11 +4,11 @@ namespace Cspray\AnnotatedContainer;
 
 use JsonSerializable;
 
-class JsonSerializableAnnotationValue implements JsonSerializable {
+final class JsonSerializableAnnotationValue implements JsonSerializable {
 
     public function __construct(private AnnotationValue $annotationValue) {}
 
-    public function jsonSerialize(): mixed {
+    public function jsonSerialize(): array {
         return $this->getJsonForAnnotationValue($this->annotationValue);
     }
 

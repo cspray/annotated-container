@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-class EnvironmentVariableAnnotationValue implements AnnotationValue {
+final class EnvironmentVariableAnnotationValue implements AnnotationValue {
 
     public function __construct(private string $envVar) {}
 
