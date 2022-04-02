@@ -15,11 +15,4 @@ interface ContainerDefinitionCompileOptions {
      */
     public function getScanDirectories() : array;
 
-    /**
-     * Return a list of profiles that are active for the given resultant ContainerDefinition.
-     *
-     * @return array
-     */
-    public function getProfiles() : array;
-
 }

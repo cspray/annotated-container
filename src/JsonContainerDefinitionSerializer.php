@@ -2,6 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use JetBrains\PhpStorm\Internal\TentativeType;
+use JsonSerializable;
+
 /**
  * A ContainerDefinitionSerializer that will format a ContainerDefinition into a JSON string.
  */
@@ -32,7 +35,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 $compiledServiceDefinitions[$key] = [
                     'type' => $serviceDefinition->getType(),
                     'implementedServices' => $implementedServices,
-                    'profiles' => $serviceDefinition->getProfiles(),
+                    'profiles' => $this->convertAnnotationValueToJson($serviceDefinition->getProfiles()),
                     'isAbstract' => $serviceDefinition->isAbstract(),
                     'isConcrete' => $serviceDefinition->isConcrete(),
                 ];
@@ -72,7 +75,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 'method' => $injectScalarDefinition->getMethod(),
                 'paramName' => $injectScalarDefinition->getParamName(),
                 'paramType' => strtolower($injectScalarDefinition->getParamType()->name),
-                'value' => $injectScalarDefinition->getValue()
+                'value' => $this->convertAnnotationValueToJson($injectScalarDefinition->getValue())
             ];
         }
 
@@ -83,7 +86,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 'method' => $injectServiceDefinition->getMethod(),
                 'paramName' => $injectServiceDefinition->getParamName(),
                 'paramType' => $injectServiceDefinition->getParamType(),
-                'value' => $injectServiceDefinition->getInjectedService()->getType()
+                'value' => [
+                    'type' => CompileEqualsRuntimeAnnotationValue::class,
+                    'value' => $injectServiceDefinition->getInjectedService()->getCompileValue()
+                ]
             ];
         }
 
@@ -156,18 +162,17 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
                 InjectScalarDefinitionBuilder::forMethod($service, $useScalarDefinition['method'])
                     ->withParam(ScalarType::String, $useScalarDefinition['paramName'])
-                    ->withValue($useScalarDefinition['value'])
+                    ->withValue($this->convertJsonToAnnotationValue($useScalarDefinition['value']))
                     ->build()
             );
         }
 
-        foreach ($data['injectServiceDefinitions'] as $useServiceDefinition) {
-            $targetService = $serviceDefinitions[md5($useServiceDefinition['type'])];
-            $injectService = $serviceDefinitions[md5($useServiceDefinition['value'])];
+        foreach ($data['injectServiceDefinitions'] as $injectServiceDefinition) {
+            $targetService = $serviceDefinitions[md5($injectServiceDefinition['type'])];
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectServiceDefinition(
-                InjectServiceDefinitionBuilder::forMethod($targetService, $useServiceDefinition['method'])
-                    ->withParam($useServiceDefinition['paramType'], $useServiceDefinition['paramName'])
-                    ->withInjectedService($injectService)
+                InjectServiceDefinitionBuilder::forMethod($targetService, $injectServiceDefinition['method'])
+                    ->withParam($injectServiceDefinition['paramType'], $injectServiceDefinition['paramName'])
+                    ->withInjectedService(new $injectServiceDefinition['value']['type']($injectServiceDefinition['value']['value']))
                     ->build()
             );
         }
@@ -193,7 +198,9 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             } else {
                 $factoryMethod = 'forConcrete';
             }
-            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($type)->withProfiles(...$compiledServiceDefinition['profiles']);
+            /** @var ServiceDefinitionBuilder $serviceDefinitionBuilder */
+            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($type);
+            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($this->convertJsonToAnnotationValue($compiledServiceDefinition['profiles']));
 
             foreach ($compiledServiceDefinition['implementedServices'] as $implementedServiceHash) {
                 $implementedType = $compiledServiceDefinitions[$implementedServiceHash]['type'];
@@ -206,6 +213,49 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         }
 
         return $serviceDefinitionCacheMap[$serviceHash];
+    }
+
+    private function convertAnnotationValueToJson(AnnotationValue $annotationValue) : JsonSerializable {
+        return new class($annotationValue) implements JsonSerializable {
+
+            public function __construct(private AnnotationValue $annotationValue) {}
+
+            public function jsonSerialize(): array {
+                return $this->getJsonForAnnotationValue($this->annotationValue);
+            }
+
+            private function getJsonForAnnotationValue(AnnotationValue $annotationValue) : array {
+                if (is_array($annotationValue->getCompileValue())) {
+                    $compiledJson = [
+                        'type' => get_class($annotationValue),
+                        'items' => []
+                    ];
+                    foreach ($annotationValue->getCompileValue() as $value) {
+                        $compiledJson['items'][] = $this->getJsonForAnnotationValue($value);
+                    }
+                    return $compiledJson;
+                } else {
+                    return [
+                        'type' => get_class($annotationValue),
+                        'value' => $annotationValue->getCompileValue()
+                    ];
+                }
+            }
+        };
+    }
+
+    private function convertJsonToAnnotationValue(array $json) : AnnotationValue {
+        if (isset($json['type']) && isset($json['value'])) {
+            return new $json['type']($json['value']);
+        } else if (isset($json['type']) && isset($json['items'])){
+            $values = [];
+            foreach ($json['items'] as $item) {
+                $values[] = $this->convertJsonToAnnotationValue($item);
+            }
+            return new $json['type'](...$values);
+        } else {
+            throw new \RuntimeException("Invalid JSON was provided. This should not happen and is likely a result of an error within AnnotatedContainer itself.");
+        }
     }
 
 }

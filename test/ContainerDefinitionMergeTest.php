@@ -117,36 +117,38 @@ class ContainerDefinitionMergeTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\SimpleUseScalar\FooImplementation::class)->build();
         $injectScalarDefinition1 = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::String, 'stringParam')
-            ->withValue('string value')
+            ->withValue(new CompileEqualsRuntimeAnnotationValue('string value'))
+            ->withProfiles(new ArrayAnnotationValue(new CompileEqualsRuntimeAnnotationValue('default')))
             ->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()->withInjectScalarDefinition($injectScalarDefinition1)->build();
 
         $injectScalarDefinition2 = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::Int, 'intParam')
-            ->withValue(42)
+            ->withValue(new CompileEqualsRuntimeAnnotationValue(42))
+            ->withProfiles(new ArrayAnnotationValue(new CompileEqualsRuntimeAnnotationValue('default')))
             ->build();
 
         $container2 = ContainerDefinitionBuilder::newDefinition()->withInjectScalarDefinition($injectScalarDefinition2)->build();
 
         $subject = $container1->merge($container2);
 
-        $this->assertUseScalarParamValues([
-            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(stringParam)' => 'string value',
-            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(intParam)' => 42
+        $this->assertInjectScalarParamValues([
+            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(stringParam)|default' => 'string value',
+            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(intParam)|default' => 42
         ], $subject->getInjectScalarDefinitions());
     }
 
     public function testMergeHasCorrectInjectServiceDefinitions() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\SimpleUseService\ConstructorInjection::class)->build();
-        $barInjectedDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\SimpleUseService\BarImplementation::class)->build();
+        $barInjectedDefinition = new CompileEqualsRuntimeAnnotationValue(DummyApps\SimpleUseService\BarImplementation::class);
         $barInjectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(DummyApps\SimpleUseService\FooInterface::class, 'bar')
             ->withInjectedService($barInjectedDefinition)
             ->build();
         $container1 = ContainerDefinitionBuilder::newDefinition()->withInjectServiceDefinition($barInjectServiceDefinition)->build();
 
-        $bazInjectedDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\SimpleUseService\BazImplementation::class)->build();
+        $bazInjectedDefinition = new CompileEqualsRuntimeAnnotationValue(DummyApps\SimpleUseService\BazImplementation::class);
         $bazInjectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(DummyApps\SimpleUseService\BazImplementation::class, 'baz')
             ->withInjectedService($bazInjectedDefinition)

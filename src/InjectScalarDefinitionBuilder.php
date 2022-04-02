@@ -10,10 +10,11 @@ use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 final class InjectScalarDefinitionBuilder {
 
     private ServiceDefinition $serviceDefinition;
+    private ?AnnotationValue $profiles = null;
     private string $method;
     private ScalarType $paramType;
     private string $paramName;
-    private string|int|float|bool|array $paramValue;
+    private AnnotationValue $paramValue;
 
     private function __construct() {}
 
@@ -58,12 +59,18 @@ final class InjectScalarDefinitionBuilder {
     /**
      * Define the value that should be injected into the parameter value on method invocation.
      *
-     * @param string|int|float|bool|array $value
+     * @param AnnotationValue $value
      * @return $this
      */
-    public function withValue(string|int|float|bool|array $value) : self {
+    public function withValue(AnnotationValue $value) : self {
         $instance = clone $this;
         $instance->paramValue = $value;
+        return $instance;
+    }
+
+    public function withProfiles(AnnotationValue $profile) : self {
+        $instance = clone $this;
+        $instance->profiles = $profile;
         return $instance;
     }
 
@@ -82,27 +89,21 @@ final class InjectScalarDefinitionBuilder {
         if (!isset($this->paramValue)) {
             throw new DefinitionBuilderException('An InjectScalarDefinitionBuilder must have a parameter value defined before building.');
         }
-        return new class($this->serviceDefinition, $this->method, $this->paramType, $this->paramName, $this->paramValue) implements InjectScalarDefinition {
 
-            private ServiceDefinition $serviceDefinition;
-            private string $method;
-            private ScalarType $paramType;
-            private string $paramName;
-            private string|int|float|bool|array $value;
+        $profiles = $this->profiles;
+        if (is_null($profiles)) {
+            $profiles = new ArrayAnnotationValue(new CompileEqualsRuntimeAnnotationValue('default'));
+        }
+        return new class($this->serviceDefinition, $profiles, $this->method, $this->paramType, $this->paramName, $this->paramValue) implements InjectScalarDefinition {
 
             public function __construct(
-                ServiceDefinition $serviceDefinition,
-                string $method,
-                ScalarType $paramType,
-                string $paramName,
-                string|int|float|bool|array $value
-            ) {
-                $this->serviceDefinition = $serviceDefinition;
-                $this->method = $method;
-                $this->paramType = $paramType;
-                $this->paramName = $paramName;
-                $this->value = $value;
-            }
+                private ServiceDefinition $serviceDefinition,
+                private AnnotationValue $profiles,
+                private string $method,
+                private ScalarType $paramType,
+                private string $paramName,
+                private AnnotationValue $value
+            ) {}
 
             public function getService(): ServiceDefinition {
                 return $this->serviceDefinition;
@@ -120,8 +121,12 @@ final class InjectScalarDefinitionBuilder {
                 return $this->paramType;
             }
 
-            public function getValue(): string|int|float|bool|array {
+            public function getValue(): AnnotationValue {
                 return $this->value;
+            }
+
+            public function getProfiles(): AnnotationValue {
+                return $this->profiles;
             }
         };
     }

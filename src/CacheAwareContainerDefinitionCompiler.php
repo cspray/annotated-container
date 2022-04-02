@@ -40,10 +40,7 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
      * @throws InvalidCacheException
      */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions): ContainerDefinition {
-        $cacheFile = $this->getCacheFile(
-            $containerDefinitionCompileOptions->getProfiles(),
-            $containerDefinitionCompileOptions->getScanDirectories()
-        );
+        $cacheFile = $this->getCacheFile($containerDefinitionCompileOptions->getScanDirectories());
         if (is_file($cacheFile)) {
             $containerDefinition = $this->containerDefinitionSerializer->deserialize(file_get_contents($cacheFile));
         } else {
@@ -57,11 +54,11 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
         return $containerDefinition;
     }
 
-    private function getCacheFile(array $profiles, array $dirs) : string {
+    private function getCacheFile(array $dirs) : string {
         return sprintf(
             '%s/%s',
             $this->cacheDir,
-            md5(join($profiles) . join($dirs))
+            md5(join($dirs))
         );
     }
 }

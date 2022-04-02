@@ -11,8 +11,9 @@ interface ContainerFactory {
 
     /**
      * @param ContainerDefinition $containerDefinition
+     * @param ContainerFactoryOptions|null $containerFactoryOptions
      * @return ContainerInterface
      */
-    public function createContainer(ContainerDefinition $containerDefinition) : ContainerInterface;
+    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface;
 
 }

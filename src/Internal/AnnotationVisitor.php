@@ -2,8 +2,12 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
+use Cspray\AnnotatedContainer\AnnotationValue;
+use Cspray\AnnotatedContainer\ArrayAnnotationValue;
 use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Attribute\ServiceProfile;
+use Cspray\AnnotatedContainer\CompileEqualsRuntimeAnnotationValue;
+use Cspray\AnnotatedContainer\ConstantAnnotationValue;
+use Cspray\AnnotatedContainer\EnvironmentVariableAnnotationValue;
 use PhpParser\ConstExprEvaluationException;
 use PhpParser\ConstExprEvaluator;
 use PhpParser\Node;
@@ -29,16 +33,10 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
 
     public function enterNode(Node $node) {
         if ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) {
-            $serviceAttribute = $this->findAttribute(Service::class, ...$node->attrGroups);
-            if (isset($serviceAttribute)) {
-                $annotationArguments = $this->getAnnotationArguments($serviceAttribute);
-                $serviceProfile = $this->findAttribute(ServiceProfile::class, ...$node->attrGroups);
-                if (!isset($serviceProfile)) {
-                    $annotationArguments->put('profiles', ['default']);
-                } else {
-                    $annotationArguments->put('profiles', $this->getAttributeArgumentValue($serviceProfile->args[0]));
-                }
-
+            $serviceAttributes = $this->findAttributes(Service::class, ...$node->attrGroups);
+            if (!empty($serviceAttributes)) {
+                $serviceAttribute = $serviceAttributes[0];
+                $annotationArguments = $this->getAnnotationArguments(AttributeType::Service, $serviceAttribute);
                 $this->annotationDetails->add(new AnnotationDetails(
                     $this->fileInfo,
                     AttributeType::Service,
@@ -48,49 +46,62 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
             }
         } else if ($node instanceof Node\Stmt\ClassMethod) {
             foreach ([AttributeType::ServicePrepare, AttributeType::ServiceDelegate] as $attributeType) {
-                $serviceMethodAttribute = $this->findAttribute($attributeType->value, ...$node->attrGroups);
-                if (isset($serviceMethodAttribute))  {
+                $serviceMethodAttributes = $this->findAttributes($attributeType->value, ...$node->attrGroups);
+                if (!empty($serviceMethodAttributes))  {
+                    $serviceMethodAttribute = $serviceMethodAttributes[0];
                     $reflectionMethod = new ReflectionMethod(
                         $node->getAttribute('parent')->namespacedName->toString(),
                         $node->name->toString()
                     );
-                    $this->annotationDetails->add(new AnnotationDetails($this->fileInfo, $attributeType, $this->getAnnotationArguments($serviceMethodAttribute), $reflectionMethod));
+                    $this->annotationDetails->add(new AnnotationDetails(
+                        $this->fileInfo,
+                        $attributeType,
+                        $this->getAnnotationArguments($attributeType, $serviceMethodAttribute),
+                        $reflectionMethod
+                    ));
                 }
             }
         } else if ($node instanceof Node\Param) {
             foreach ([AttributeType::InjectScalar, AttributeType::InjectEnv, AttributeType::InjectService] as $attributeType) {
-                $injectAttribute = $this->findAttribute($attributeType->value, ...$node->attrGroups);
-                if (isset($injectAttribute)) {
+                $injectAttributes = $this->findAttributes($attributeType->value, ...$node->attrGroups);
+                foreach ($injectAttributes as $injectAttribute) {
                     $methodNode = $node->getAttribute('parent');
                     $classNode = $methodNode->getAttribute('parent');
                     $reflectionParameter = new ReflectionParameter([$classNode->namespacedName->toString(), $methodNode->name->toString()], $node->var->name);
-                    $annotationArguments = $this->getAnnotationArguments($injectAttribute);
+                    $annotationArguments = $this->getAnnotationArguments($attributeType, $injectAttribute);
 
-                    $this->annotationDetails->add(new AnnotationDetails($this->fileInfo, $attributeType, $annotationArguments, $reflectionParameter));
+                    $this->annotationDetails->add(new AnnotationDetails(
+                        $this->fileInfo,
+                        $attributeType,
+                        $annotationArguments,
+                        $reflectionParameter
+                    ));
                 }
             }
         }
     }
 
-    private function findAttribute(string $attributeType, AttributeGroup... $attributeGroups) : ?Attribute {
+    private function findAttributes(string $attributeType, AttributeGroup... $attributeGroups) : array {
+        $attributes = [];
         foreach ($attributeGroups as $attributeGroup) {
             foreach ($attributeGroup->attrs as $attribute) {
                 if ($attribute->name->toString() === $attributeType) {
-                    return $attribute;
+                    $attributes[] = $attribute;
                 }
             }
         }
 
-        return null;
+        return $attributes;
     }
 
-    private function getAnnotationArguments(Attribute $attribute) : AnnotationArguments {
+    private function getAnnotationArguments(AttributeType $attributeType, Attribute $attribute) : AnnotationArguments {
         $arguments = new AnnotationArguments();
         $ordinalArgumentNames = $this->getOrdinalArgumentNames($attribute);
         foreach ($attribute->args as $index => $arg) {
             $name = $arg->name ?? $ordinalArgumentNames[$index];
-            $arguments->put($name, $this->getAttributeArgumentValue($arg));
+            $arguments->put($name, $this->getAttributeArgumentValue($attributeType, $attribute, $arg));
         }
+
         return $arguments;
     }
 
@@ -116,7 +127,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
         return $this->annotationDetails;
     }
 
-    private function getAttributeArgumentValue(Node\Arg|Node\Expr\ArrayItem $arg) : string|bool|float|int|array {
+    private function getAttributeArgumentValue(AttributeType $attributeType, Attribute $attribute, Node\Arg|Node\Expr\ArrayItem $arg) : ?AnnotationValue {
         static $constEvaluator;
         if (!isset($constEvaluator)) {
             $constEvaluator = new ConstExprEvaluator(function(Node\Expr $expr) {
@@ -126,7 +137,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
                     if ($const === 'class') {
                         // When you call Object::class the node becomes a ClassConstFetch with the class constant understood to be
                         // a "magic" constant that corresponds to the type that is being called on.
-                        return $type;
+                        return new CompileEqualsRuntimeAnnotationValue($type);
                     } else {
                         // We are intentionally deferring the evaluation of the constant expression here until runtime when the
                         // Injector is instantiated because the constant being evaluated may not actually be loaded within the
@@ -135,15 +146,20 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
                         // in different environments. If environment values are encapsulated in constants not deferring could also
                         // pose a potential security risk as those potentially sensitive values would be stored in plaintext in the
                         // serialization of the ContainerDefinition
-                        return "!const(${type}::${const})";
+                        return new ConstantAnnotationValue("$type::$const");
                     }
                 } else if ($expr instanceof Node\Expr\ConstFetch) {
                     $constName = $expr->name->getAttribute('namespacedName')->toString();
-                    return "!const({$constName})";
+                    return new ConstantAnnotationValue($constName);
                 }
 
                 throw new ConstExprEvaluationException("Expression of type {$expr->getType()} cannot be evaluated.");
             });
+        }
+
+        // If the value doesn't have a name then the $arg node must equal the first argument
+        if ($attributeType === AttributeType::InjectEnv && ((!isset($arg->name) && $arg === $attribute->args[0]) || (isset($arg->name) && $arg->name === 'value'))) {
+            return new EnvironmentVariableAnnotationValue($arg->value->value);
         }
 
         if (
@@ -151,17 +167,21 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
             $arg->value instanceof Node\Scalar\LNumber ||
             $arg->value instanceof Node\Scalar\DNumber
         ) {
-            $value = $arg->value->value;
+            $value = new CompileEqualsRuntimeAnnotationValue($arg->value->value);
         } else if ($arg->value instanceof Node\Expr\ConstFetch || $arg->value instanceof Node\Expr\ClassConstFetch) {
             $value = $constEvaluator->evaluateDirectly($arg->value);
+            if (!$value instanceof AnnotationValue) {
+                $value = new CompileEqualsRuntimeAnnotationValue($value);
+            }
         } else if ($arg->value instanceof Node\Expr\UnaryMinus) {
-            $value = $arg->value->expr->value * -1;
+            $value = new CompileEqualsRuntimeAnnotationValue($arg->value->expr->value * -1);
         } else if ($arg->value instanceof Node\Expr\Array_) {
             $value = [];
             /** @var Node\Expr\ArrayItem $arrayItem */
             foreach ($arg->value->items as $arrayItem) {
-                $value[] = $this->getAttributeArgumentValue($arrayItem);
+                $value[] = $this->getAttributeArgumentValue($attributeType, $attribute, $arrayItem);
             }
+            $value = new ArrayAnnotationValue(...$value);
         } else {
             $value = null;
         }

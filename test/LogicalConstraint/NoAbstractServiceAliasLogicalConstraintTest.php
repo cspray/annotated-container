@@ -20,7 +20,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
     public function testViolationsForNoInterfaceServiceAlias() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->withProfiles('default')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
@@ -37,7 +37,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
     public function testViolationsForNoAbstractServiceAlias() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoAbstractServiceAlias')->withProfiles('default')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoAbstractServiceAlias')->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
@@ -54,7 +54,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
     public function testNoViolationsForInterfaceWithServiceAlias() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->withProfiles('default')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
