@@ -130,7 +130,7 @@ use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 
 $compiler = ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
 $containerDefinition = $compiler->compile(
-    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->withProfiles('default')->build()
+    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
 );
 $container = (new AurynContainerFactory)->createContainer($injectorDefinition);
 

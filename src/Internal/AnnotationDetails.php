@@ -40,9 +40,6 @@ final class AnnotationDetails {
      * - InjectScalar
      * - InjectEnv
      *
-     * The ServiceProfile Attribute would not have an AnnotationDetails created for it. Whatever profile is present
-     * will be
-     *
      * @return ReflectionClass|ReflectionMethod|ReflectionParameter
      */
     public function getReflection() : ReflectionClass|ReflectionMethod|ReflectionParameter {

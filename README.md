@@ -44,11 +44,7 @@ interface BlobStorage {
 }
 
 #[Service]
-class FilesystemStorage implements BlobStorage 
-
-
-
-{
+class FilesystemStorage implements BlobStorage {
     
     public function store(string $identifier, string $contents) : void {
         file_put_contents($identifier, $contents);
@@ -65,11 +61,13 @@ class FilesystemStorage implements BlobStorage
 use Cspray\AnnotatedContainer\AurynContainerFactory;
 use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory;
 
-$compiler = \Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
+$compiler = ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
 $containerDefinition = $compiler->compile(
-    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->withProfiles('default')->build()
+    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
 );
+
 $container = (new AurynContainerFactory)->createContainer($containerDefinition);
 
 var_dump($container->get(BlobStorage::class) instanceof FilesystemStorage); // true
