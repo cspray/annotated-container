@@ -13,7 +13,7 @@ final class InjectServiceDefinitionBuilder {
     private string $method;
     private string $paramType;
     private string $paramName;
-    private ServiceDefinition $injectedService;
+    private AnnotationValue $injectedService;
 
     private function __construct() {}
 
@@ -61,12 +61,12 @@ final class InjectServiceDefinitionBuilder {
     /**
      * Define the actual Service that will be injected into the defined parameter.
      *
-     * @param ServiceDefinition $serviceDefinition
+     * @param AnnotationValue $annotationValue
      * @return $this
      */
-    public function withInjectedService(ServiceDefinition $serviceDefinition) : self {
+    public function withInjectedService(AnnotationValue $annotationValue) : self {
         $instance = clone $this;
-        $instance->injectedService = $serviceDefinition;
+        $instance->injectedService = $annotationValue;
         return $instance;
     }
 
@@ -87,14 +87,14 @@ final class InjectServiceDefinitionBuilder {
             private string $method;
             private string $paramType;
             private string $paramName;
-            private ServiceDefinition $injectedService;
+            private AnnotationValue $injectedService;
 
             public function __construct(
                 ServiceDefinition $serviceDefinition,
                 string $method,
                 string $paramType,
                 string $paramName,
-                ServiceDefinition $injectedService
+                AnnotationValue $injectedService
             ) {
                 $this->service = $serviceDefinition;
                 $this->method = $method;
@@ -115,11 +115,11 @@ final class InjectServiceDefinitionBuilder {
                 return $this->paramName;
             }
 
-            public function getParamType(): string {
+            public function getParamType() : string {
                 return $this->paramType;
             }
 
-            public function getInjectedService(): ServiceDefinition {
+            public function getInjectedService(): AnnotationValue {
                 return $this->injectedService;
             }
         };

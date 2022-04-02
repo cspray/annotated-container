@@ -236,7 +236,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                     // where we currently need to have a valid ServiceDefinition.It might be useful to refactor the InjectServiceDefinition
                     // to return an AnnotationValue for the service type, as it is more semantic and wouldn't require having the
                     // runtime value for an annotation argument be required
-                    ->withInjectedService($this->getServiceDefinition($annotationDetailsList, $annotationDetails->getAnnotationArguments()->get('name')->getRuntimeValue()))
+                    ->withInjectedService($annotationDetails->getAnnotationArguments()->get('name'))
                     ->build()
             );
         }

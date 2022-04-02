@@ -83,7 +83,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 'method' => $injectServiceDefinition->getMethod(),
                 'paramName' => $injectServiceDefinition->getParamName(),
                 'paramType' => $injectServiceDefinition->getParamType(),
-                'value' => $injectServiceDefinition->getInjectedService()->getType()
+                'value' => [
+                    'type' => CompileEqualsRuntimeAnnotationValue::class,
+                    'value' => $injectServiceDefinition->getInjectedService()->getCompileValue()
+                ]
             ];
         }
 
@@ -161,13 +164,12 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             );
         }
 
-        foreach ($data['injectServiceDefinitions'] as $useServiceDefinition) {
-            $targetService = $serviceDefinitions[md5($useServiceDefinition['type'])];
-            $injectService = $serviceDefinitions[md5($useServiceDefinition['value'])];
+        foreach ($data['injectServiceDefinitions'] as $injectServiceDefinition) {
+            $targetService = $serviceDefinitions[md5($injectServiceDefinition['type'])];
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectServiceDefinition(
-                InjectServiceDefinitionBuilder::forMethod($targetService, $useServiceDefinition['method'])
-                    ->withParam($useServiceDefinition['paramType'], $useServiceDefinition['paramName'])
-                    ->withInjectedService($injectService)
+                InjectServiceDefinitionBuilder::forMethod($targetService, $injectServiceDefinition['method'])
+                    ->withParam($injectServiceDefinition['paramType'], $injectServiceDefinition['paramName'])
+                    ->withInjectedService(new $injectServiceDefinition['value']['type']($injectServiceDefinition['value']['value']))
                     ->build()
             );
         }

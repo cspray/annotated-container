@@ -40,7 +40,7 @@ class InjectServiceDefinitionBuilderTest extends TestCase {
     public function testWithInjectedServiceImmutableBuilder() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
         $builder1 = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz');
-        $builder2 = $builder1->withInjectedService(ServiceDefinitionBuilder::forConcrete(SimpleUseService\FooInterface::class)->build());
+        $builder2 = $builder1->withInjectedService(new CompileEqualsRuntimeAnnotationValue(SimpleUseService\FooInterface::class));
 
         $this->assertNotSame($builder1, $builder2);
     }
@@ -63,7 +63,7 @@ class InjectServiceDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
         $injectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')
             ->withParam(SimpleUseService\FooInterface::class, 'foo')
-            ->withInjectedService(ServiceDefinitionBuilder::forConcrete(SimpleUseService\BazImplementation::class)->build())
+            ->withInjectedService(new CompileEqualsRuntimeAnnotationValue(SimpleUseService\BazImplementation::class))
             ->build();
 
         $this->assertSame($serviceDefinition, $injectServiceDefinition->getService());
@@ -73,7 +73,7 @@ class InjectServiceDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
         $injectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')
             ->withParam(SimpleUseService\FooInterface::class, 'foo')
-            ->withInjectedService(ServiceDefinitionBuilder::forConcrete(SimpleUseService\BazImplementation::class)->build())
+            ->withInjectedService(new CompileEqualsRuntimeAnnotationValue(SimpleUseService\BazImplementation::class))
             ->build();
 
         $this->assertSame('setBaz', $injectServiceDefinition->getMethod());
@@ -83,7 +83,7 @@ class InjectServiceDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
         $injectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')
             ->withParam(SimpleUseService\FooInterface::class, 'foo')
-            ->withInjectedService(ServiceDefinitionBuilder::forConcrete(SimpleUseService\BazImplementation::class)->build())
+            ->withInjectedService(new CompileEqualsRuntimeAnnotationValue(SimpleUseService\BazImplementation::class))
             ->build();
 
         $this->assertSame(SimpleUseService\FooInterface::class, $injectServiceDefinition->getParamType());
@@ -93,7 +93,7 @@ class InjectServiceDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
         $injectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')
             ->withParam(SimpleUseService\FooInterface::class, 'foo')
-            ->withInjectedService(ServiceDefinitionBuilder::forConcrete(SimpleUseService\BazImplementation::class)->build())
+            ->withInjectedService(new CompileEqualsRuntimeAnnotationValue(SimpleUseService\BazImplementation::class))
             ->build();
 
         $this->assertSame('foo', $injectServiceDefinition->getParamName());
@@ -103,7 +103,7 @@ class InjectServiceDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseService\SetterInjection::class)->build();
         $injectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, 'setBaz')
             ->withParam(SimpleUseService\FooInterface::class, 'foo')
-            ->withInjectedService($injectedService = ServiceDefinitionBuilder::forConcrete(SimpleUseService\BazImplementation::class)->build())
+            ->withInjectedService($injectedService = new CompileEqualsRuntimeAnnotationValue(SimpleUseService\BazImplementation::class))
             ->build();
 
         $this->assertSame($injectedService, $injectServiceDefinition->getInjectedService());

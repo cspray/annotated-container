@@ -137,7 +137,7 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
                 $UseServiceDefinition->getMethod(),
                 $UseServiceDefinition->getParamName()
             );
-            $actualMap[$key] = $UseServiceDefinition->getInjectedService()->getType();
+            $actualMap[$key] = $UseServiceDefinition->getInjectedService()->getCompileValue();
         }
 
         ksort($actualMap);

@@ -928,43 +928,62 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'method' => '__construct',
             'paramName' => 'bar',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => SimpleUseService\BarImplementation::class
+            'value' => [
+                'type' => CompileEqualsRuntimeAnnotationValue::class,
+                'value' => SimpleUseService\BarImplementation::class
+            ]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => SimpleUseService\ConstructorInjection::class,
             'method' => '__construct',
             'paramName' => 'baz',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => SimpleUseService\BazImplementation::class
+            'value' => [
+                'type' => CompileEqualsRuntimeAnnotationValue::class,
+                'value' => SimpleUseService\BazImplementation::class
+            ]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => SimpleUseService\ConstructorInjection::class,
             'method' => '__construct',
             'paramName' => 'qux',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => SimpleUseService\QuxImplementation::class
+            'value' => [
+                'type' => CompileEqualsRuntimeAnnotationValue::class,
+                'value' => SimpleUseService\QuxImplementation::class
+            ]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => DummyApps\SimpleUseService\SetterInjection::class,
             'method' => 'setBaz',
             'paramName' => 'foo',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => SimpleUseService\BazImplementation::class
+            'value' => [
+                'type' => CompileEqualsRuntimeAnnotationValue::class,
+                'value' => SimpleUseService\BazImplementation::class
+            ]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => DummyApps\SimpleUseService\SetterInjection::class,
             'method' => 'setBar',
             'paramName' => 'foo',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => SimpleUseService\BarImplementation::class
+            'value' => [
+                'type' => CompileEqualsRuntimeAnnotationValue::class,
+                'value' => SimpleUseService\BarImplementation::class
+            ]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => DummyApps\SimpleUseService\SetterInjection::class,
             'method' => 'setQux',
             'paramName' => 'foo',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => SimpleUseService\QuxImplementation::class
+            'value' => [
+                'type' => CompileEqualsRuntimeAnnotationValue::class,
+                'value' => SimpleUseService\QuxImplementation::class
+            ]
         ], $actual['injectServiceDefinitions']);
+
     }
 
     public function testSerializeSimpleUseServiceHasNoServiceDelegateDefinitions() {
@@ -1251,4 +1270,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ], $json['compiledServiceDefinitions']);
     }
 
+
 }
+
+

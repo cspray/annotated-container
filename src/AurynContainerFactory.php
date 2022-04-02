@@ -164,12 +164,12 @@ final class AurynContainerFactory implements ContainerFactory {
         return $args;
     }
 
-    private static function mapTypesServiceArgs(string $type, string $method, array $UseServiceDefinitions) : array {
+    private static function mapTypesServiceArgs(string $type, string $method, array $injectServiceDefinitions) : array {
         $args = [];
         /** @var InjectServiceDefinition $UseServiceDefinition */
-        foreach ($UseServiceDefinitions as $UseServiceDefinition) {
+        foreach ($injectServiceDefinitions as $UseServiceDefinition) {
             if ($UseServiceDefinition->getService()->getType() === $type && $UseServiceDefinition->getMethod() === $method) {
-                $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getInjectedService()->getType();
+                $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getInjectedService()->getRuntimeValue();
             }
         }
         return $args;

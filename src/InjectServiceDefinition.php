@@ -31,6 +31,10 @@ interface InjectServiceDefinition {
     /**
      * The fully-qualified-class-name for the Service type that should be injected.
      *
+     * Please note that this value is likely different from the type that would come from getInjectedService(). This
+     * value is here primarily to allow future static analysis to make validation checks that the service being
+     * injected satisfies the required type.
+     *
      * @return string
      */
     public function getParamType() : string;
@@ -38,8 +42,8 @@ interface InjectServiceDefinition {
     /**
      * The Service that should be injected into the given parameter.
      *
-     * @return ServiceDefinition
+     * @return AnnotationValue
      */
-    public function getInjectedService() : ServiceDefinition;
+    public function getInjectedService() : AnnotationValue;
 
 }
