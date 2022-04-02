@@ -201,7 +201,7 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 InjectScalarDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
                     ->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
                     ->withValue($annotationDetails->getAnnotationArguments()->get('value'))
-                    ->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', ['default']))
+                    ->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', []))
                     ->build()
             );
         }
@@ -214,7 +214,8 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 InjectScalarDefinitionBuilder::forMethod(
                     $this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName()
                 )->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
-                    ->withValue($annotationDetails->getAnnotationArguments()->get('var'))
+                    ->withValue($annotationDetails->getAnnotationArguments()->get('value'))
+                    ->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', []))
                     ->build()
             );
         }
@@ -228,11 +229,14 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
             $reflection = $annotationDetails->getReflection();
             $reflectionClass = $reflection->getDeclaringClass();
             /** @var InjectService $injectService */
-            $injectService = $reflection->getAttributes(InjectService::class)[0]->newInstance();
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectServiceDefinition(
                 InjectServiceDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
                     ->withParam($reflection->getType()->getName(), $reflection->getName())
-                    ->withInjectedService($this->getServiceDefinition($annotationDetailsList, $injectService->getName()))
+                    // Normally we wouldn't use getRuntimeValue here, but we're in a unique situation with the InjectService
+                    // where we currently need to have a valid ServiceDefinition.It might be useful to refactor the InjectServiceDefinition
+                    // to return an AnnotationValue for the service type, as it is more semantic and wouldn't require having the
+                    // runtime value for an annotation argument be required
+                    ->withInjectedService($this->getServiceDefinition($annotationDetailsList, $annotationDetails->getAnnotationArguments()->get('name')->getRuntimeValue()))
                     ->build()
             );
         }

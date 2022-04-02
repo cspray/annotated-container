@@ -9,8 +9,4 @@ final class ServiceDelegate {
 
     public function __construct(private string $service) {}
 
-    public function getServiceType() : string {
-        return $this->service;
-    }
-
 }

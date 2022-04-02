@@ -99,7 +99,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
         $ordinalArgumentNames = $this->getOrdinalArgumentNames($attribute);
         foreach ($attribute->args as $index => $arg) {
             $name = $arg->name ?? $ordinalArgumentNames[$index];
-            $arguments->put($name, $this->getAttributeArgumentValue($attributeType, $arg));
+            $arguments->put($name, $this->getAttributeArgumentValue($attributeType, $attribute, $arg));
         }
 
         return $arguments;
@@ -127,7 +127,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
         return $this->annotationDetails;
     }
 
-    private function getAttributeArgumentValue(AttributeType $attributeType, Node\Arg|Node\Expr\ArrayItem $arg) : ?AnnotationValue {
+    private function getAttributeArgumentValue(AttributeType $attributeType, Attribute $attribute, Node\Arg|Node\Expr\ArrayItem $arg) : ?AnnotationValue {
         static $constEvaluator;
         if (!isset($constEvaluator)) {
             $constEvaluator = new ConstExprEvaluator(function(Node\Expr $expr) {
@@ -157,7 +157,8 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
             });
         }
 
-        if ($attributeType === AttributeType::InjectEnv) {
+        // If the value doesn't have a name then the $arg node must equal the first argument
+        if ($attributeType === AttributeType::InjectEnv && ((!isset($arg->name) && $arg === $attribute->args[0]) || (isset($arg->name) && $arg->name === 'value'))) {
             return new EnvironmentVariableAnnotationValue($arg->value->value);
         }
 
@@ -178,7 +179,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
             $value = [];
             /** @var Node\Expr\ArrayItem $arrayItem */
             foreach ($arg->value->items as $arrayItem) {
-                $value[] = $this->getAttributeArgumentValue($attributeType, $arrayItem);
+                $value[] = $this->getAttributeArgumentValue($attributeType, $attribute, $arrayItem);
             }
             $value = new ArrayAnnotationValue(...$value);
         } else {

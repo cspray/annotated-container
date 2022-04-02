@@ -152,6 +152,9 @@ final class AurynContainerFactory implements ContainerFactory {
         /** @var InjectScalarDefinition $injectScalarDefinition */
         foreach ($injectScalarDefinitions as $injectScalarDefinition) {
             $scalarProfiles = $injectScalarDefinition->getProfiles()->getRuntimeValue();
+            if (empty($scalarProfiles)) {
+                $scalarProfiles = ['default'];
+            }
             foreach ($activeProfiles as $activeProfile) {
                 if (in_array($activeProfile, $scalarProfiles) && $injectScalarDefinition->getService()->getType() === $type && $injectScalarDefinition->getMethod() === $method) {
                     $args[':' . $injectScalarDefinition->getParamName()] = $injectScalarDefinition->getValue()->getRuntimeValue();

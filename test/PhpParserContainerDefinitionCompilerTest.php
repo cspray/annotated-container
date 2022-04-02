@@ -239,11 +239,11 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertInjectScalarParamValues([
-            SimpleUseScalar\FooImplementation::class . '::__construct(stringParam)|default' => 'string param test value',
-            SimpleUseScalar\FooImplementation::class . '::__construct(intParam)|default' => 42,
-            SimpleUseScalar\FooImplementation::class . '::__construct(floatParam)|default' => 42.0,
-            SimpleUseScalar\FooImplementation::class . '::__construct(boolParam)|default' => true,
-            SimpleUseScalar\FooImplementation::class . '::__construct(arrayParam)|default' => [
+            SimpleUseScalar\FooImplementation::class . '::__construct(stringParam)|' => 'string param test value',
+            SimpleUseScalar\FooImplementation::class . '::__construct(intParam)|' => 42,
+            SimpleUseScalar\FooImplementation::class . '::__construct(floatParam)|' => 42.0,
+            SimpleUseScalar\FooImplementation::class . '::__construct(boolParam)|' => true,
+            SimpleUseScalar\FooImplementation::class . '::__construct(arrayParam)|' => [
                 ['a', 'b', 'c'],
                 [1, 2, 3],
                 [1.1, 2.1, 3.1],
@@ -271,8 +271,8 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertInjectScalarParamValues([
-            NegativeNumberUseScalar\FooImplementation::class . '::__construct(intParam)|default' => -1,
-            NegativeNumberUseScalar\FooImplementation::class . '::__construct(floatParam)|default' => -42.0,
+            NegativeNumberUseScalar\FooImplementation::class . '::__construct(intParam)|' => -1,
+            NegativeNumberUseScalar\FooImplementation::class . '::__construct(floatParam)|' => -42.0,
         ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertInjectScalarDefinitions([
@@ -292,8 +292,8 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             [MultipleUseScalars\FooImplementation::class, 'setUp']
         ], $injectorDefinition->getServicePrepareDefinitions());
         $this->assertInjectScalarParamValues([
-            MultipleUseScalars\FooImplementation::class . '::__construct(stringParam)|default' => 'constructor param',
-            MultipleUseScalars\FooImplementation::class . '::setUp(stringParam)|default' => 'prepare param',
+            MultipleUseScalars\FooImplementation::class . '::__construct(stringParam)|' => 'constructor param',
+            MultipleUseScalars\FooImplementation::class . '::setUp(stringParam)|' => 'prepare param',
         ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertInjectScalarDefinitions([
@@ -311,7 +311,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertInjectScalarParamValues([
-            ClassConstantUseScalar\FooImplementation::class . '::__construct(val)|default' => 'Cspray\AnnotatedContainer\DummyApps\ClassConstantUseScalar\FooImplementation::VALUE',
+            ClassConstantUseScalar\FooImplementation::class . '::__construct(val)|' => 'Cspray\AnnotatedContainer\DummyApps\ClassConstantUseScalar\FooImplementation::VALUE',
         ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertInjectScalarDefinitions([
@@ -329,7 +329,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertInjectScalarParamValues([
-            ConstantUseScalar\FooImplementation::class . '::__construct(val)|default' => 'Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar\FOO_BAR',
+            ConstantUseScalar\FooImplementation::class . '::__construct(val)|' => 'Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar\FOO_BAR',
         ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertInjectScalarDefinitions([
@@ -345,7 +345,7 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getAliasDefinitions());
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertInjectScalarParamValues([
-            SimpleUseScalarFromEnv\FooImplementation::class . '::__construct(user)|default' => 'USER',
+            SimpleUseScalarFromEnv\FooImplementation::class . '::__construct(user)|' => 'USER',
         ], $injectorDefinition->getInjectScalarDefinitions());
 
         $this->assertInjectScalarDefinitions([
@@ -489,6 +489,16 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             DummyApps\InjectScalarProfiles\FooImplementation::class . '::__construct(value)|dev' => 'foo',
             DummyApps\InjectScalarProfiles\FooImplementation::class . '::__construct(value)|prod' => 'bar',
             DummyApps\InjectScalarProfiles\FooImplementation::class . '::__construct(value)|Cspray\AnnotatedContainer\DummyApps\InjectScalarProfiles\Constants::INJECT_SCALAR_BAZ_TEST_PROFILE' => 'baz'
+        ], $containerDefinition->getInjectScalarDefinitions());
+    }
+
+    public function testInjectEnvProfilesHasAllInjectScalarDefinitions() {
+        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/InjectEnvProfiles');
+
+        $this->assertInjectScalarParamValues([
+            DummyApps\InjectEnvProfiles\FooImplementation::class . '::setValue(value)|dev' => 'foo',
+            DummyApps\InjectEnvProfiles\FooImplementation::class . '::setValue(value)|prod' => 'USER',
+            DummyApps\InjectEnvProfiles\FooImplementation::class . '::__construct(testUser)|test' => 'USER'
         ], $containerDefinition->getInjectScalarDefinitions());
     }
 

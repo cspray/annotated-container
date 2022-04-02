@@ -17,11 +17,8 @@ use Attribute;
 final class InjectScalar {
 
     public function __construct(
-        private string|int|float|bool|array $value
+        private string|int|float|bool|array $value,
+        private array $profiles
     ) {}
-
-    public function getValue() : string|int|float|bool|array {
-        return $this->value;
-    }
 
 }
