@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Adds ability to mark a Service as primary. If multiple aliases are found the one marked as primary will be used by default.
-
+- Adds ability to define multiple InjectScalar and InjectEnv attributes and to specify a profile, or profiles, that each annotation belongs to.
 ### Changed
 
 - Made several changes to the internal parsing of the codebase. This shouldn't have any changes in the public-facing API.
+- The ContainerDefinitionCompiler is no longer aware of active profiles and will provide a ContainerDefinition with all parsed annotations. It is the responsibility of the ContainerFactory to parse out information relating to active profiles. This change was necessary to accommodate profiles as arguments, including profiles defined as constants.
 
 ### Fixed
 
