@@ -32,7 +32,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 $compiledServiceDefinitions[$key] = [
                     'type' => $serviceDefinition->getType(),
                     'implementedServices' => $implementedServices,
-                    'profiles' => $serviceDefinition->getProfiles(),
+                    'profiles' => new JsonSerializableAnnotationValue($serviceDefinition->getProfiles()),
                     'isAbstract' => $serviceDefinition->isAbstract(),
                     'isConcrete' => $serviceDefinition->isConcrete(),
                 ];
@@ -193,7 +193,9 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             } else {
                 $factoryMethod = 'forConcrete';
             }
+            /** @var ServiceDefinitionBuilder $serviceDefinitionBuilder */
             $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($type);
+            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($this->convertJsonToAnnotationValue($compiledServiceDefinition['profiles']));
 
             foreach ($compiledServiceDefinition['implementedServices'] as $implementedServiceHash) {
                 $implementedType = $compiledServiceDefinitions[$implementedServiceHash]['type'];
