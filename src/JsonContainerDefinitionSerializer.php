@@ -2,6 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use JetBrains\PhpStorm\Internal\TentativeType;
+use JsonSerializable;
+
 /**
  * A ContainerDefinitionSerializer that will format a ContainerDefinition into a JSON string.
  */
@@ -32,7 +35,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 $compiledServiceDefinitions[$key] = [
                     'type' => $serviceDefinition->getType(),
                     'implementedServices' => $implementedServices,
-                    'profiles' => new JsonSerializableAnnotationValue($serviceDefinition->getProfiles()),
+                    'profiles' => $this->convertAnnotationValueToJson($serviceDefinition->getProfiles()),
                     'isAbstract' => $serviceDefinition->isAbstract(),
                     'isConcrete' => $serviceDefinition->isConcrete(),
                 ];
@@ -72,7 +75,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 'method' => $injectScalarDefinition->getMethod(),
                 'paramName' => $injectScalarDefinition->getParamName(),
                 'paramType' => strtolower($injectScalarDefinition->getParamType()->name),
-                'value' => new JsonSerializableAnnotationValue($injectScalarDefinition->getValue())
+                'value' => $this->convertAnnotationValueToJson($injectScalarDefinition->getValue())
             ];
         }
 
@@ -210,6 +213,35 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         }
 
         return $serviceDefinitionCacheMap[$serviceHash];
+    }
+
+    private function convertAnnotationValueToJson(AnnotationValue $annotationValue) : JsonSerializable {
+        return new class($annotationValue) implements JsonSerializable {
+
+            public function __construct(private AnnotationValue $annotationValue) {}
+
+            public function jsonSerialize(): array {
+                return $this->getJsonForAnnotationValue($this->annotationValue);
+            }
+
+            private function getJsonForAnnotationValue(AnnotationValue $annotationValue) : array {
+                if (is_array($annotationValue->getCompileValue())) {
+                    $compiledJson = [
+                        'type' => get_class($annotationValue),
+                        'items' => []
+                    ];
+                    foreach ($annotationValue->getCompileValue() as $value) {
+                        $compiledJson['items'][] = $this->getJsonForAnnotationValue($value);
+                    }
+                    return $compiledJson;
+                } else {
+                    return [
+                        'type' => get_class($annotationValue),
+                        'value' => $annotationValue->getCompileValue()
+                    ];
+                }
+            }
+        };
     }
 
     private function convertJsonToAnnotationValue(array $json) : AnnotationValue {
