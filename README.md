@@ -93,41 +93,4 @@ This library is thoroughly documented in-repo under the `/docs` directory. The d
 
 ## Roadmap
 
-### 0.1.x
-
-- Compiler to parse Attributes from source directories ... :heavy_check_mark:
-- Factory to create Container based on parsed Attributes ... :heavy_check_mark:
-- Support methods invoked in Injector::prepares ... :heavy_check_mark:
-- Support defining scalar values on parameters ... :heavy_check_mark:
-- Support defining specific Service on parameters ... :heavy_check_mark:
-
-### 0.2.x
-
-- Support the concept of a Service factory ... :heavy_check_mark:
-- Support a PSR ContainerInterface Factory ... :heavy_check_mark:
-- Support serializing and caching ContainerDefinition ... :heavy_check_mark:
-- Handle when abstract Service does not have corresponding alias ... :heavy_check_mark:
-- Handle when an abstract Service might have more than 1 alias ... :heavy_check_mark:
-- Support Profiles instead of Environments ... :heavy_check_mark:
-- Support creating a ContainerDefinition for libraries that can't be Annotated ... :heavy_check_mark:
-
-### 0.3.x
-
-- Support the concept of a Service that is not shared, instead is recreated on every retrieval ... :x:
-- Support a Service being marked as primary to be used for multiple alias resolution ... :heavy_check_mark:
-- Support a Service having an explicit name that is not the FQCN ... :x:
-- Support a ServiceCollection Attribute which allows collecting many Services ... :x:
-- Support easily configuring third-party code that can't be annotated ... :x:
-- Support profiles when injecting scalar values ... :heavy_check_mark:
-
-### 0.4.x
-
-- Support creating a Container with different backing libraries ... :x:
-- Have convenience functions for common ways of interacting with the library ... :x:
-- Solidify and document the process one would take for deploying this code in production ... :x:
-
-### 1.0 and beyond
-
-- Improve handling of logical errors... :x:
-- Host documentation on website ... :x:
-- Support defining scalar values from an arbitrary source ... :question:
+The Roadmap can be found in the [annotated-container Project page](https://github.com/users/cspray/projects/1/views/1).
