@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 
 final class ServiceDefinitionBuilder {
 
+    private ?AnnotationValue $name = null;
     private string $type;
     private bool $isAbstract;
     private array $implementedServices = [];
@@ -71,6 +72,12 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
+    public function withName(AnnotationValue $name) : self {
+        $instance = clone $this;
+        $instance->name = $name;
+        return $instance;
+    }
+
     public function withProfiles(AnnotationValue $profiles) : self {
         $instance = clone $this;
         $instance->profiles = $profiles;
@@ -82,20 +89,19 @@ final class ServiceDefinitionBuilder {
         if (is_null($profiles)) {
             $profiles = new ArrayAnnotationValue();
         }
-        return new class($this->type, $this->isAbstract, $this->implementedServices, $profiles, $this->isPrimary) implements ServiceDefinition {
+        return new class($this->name, $this->type, $this->isAbstract, $this->implementedServices, $profiles, $this->isPrimary) implements ServiceDefinition {
 
-            private string $type;
-            private bool $isAbstract;
-            private array $implementedServices;
-            private AnnotationValue $profiles;
-            private bool $isPrimary;
+            public function __construct(
+                private ?AnnotationValue $name,
+                private string $type,
+                private bool $isAbstract,
+                private array $implementedServices,
+                private AnnotationValue $profiles,
+                private bool $isPrimary
+            ) {}
 
-            public function __construct(string $type, bool $isAbstract, array $implementedServices, AnnotationValue $profiles, bool $isPrimary) {
-                $this->type = $type;
-                $this->isAbstract = $isAbstract;
-                $this->implementedServices = $implementedServices;
-                $this->profiles = $profiles;
-                $this->isPrimary = $isPrimary;
+            public function getName() : ?AnnotationValue {
+                return $this->name;
             }
 
             public function getType(): string {

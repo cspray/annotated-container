@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "89690fb2011dcbab10f5dbcc6ff029d3",
+    "content-hash": "996b1b90818f548d481aa00a32516da3",
     "packages": [
         {
             "name": "nikic/php-parser",
@@ -184,17 +184,11 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
-                "reference": "e4703d389b52095d4ba997c26723a7bea4d43033"
-            },
+            "version": "dev-main",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/e4703d389b52095d4ba997c26723a7bea4d43033",
-                "reference": "e4703d389b52095d4ba997c26723a7bea4d43033",
-                "shasum": ""
+                "type": "path",
+                "url": "../annotated-container-dummy-apps",
+                "reference": "e4703d389b52095d4ba997c26723a7bea4d43033"
             },
             "type": "library",
             "autoload": {
@@ -202,7 +196,6 @@
                     "Cspray\\AnnotatedContainer\\DummyApps\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -215,11 +208,9 @@
                 }
             ],
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
-            "support": {
-                "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
-                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.3.0"
-            },
-            "time": "2022-04-02T18:34:25+00:00"
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "doctrine/instantiator",
@@ -2317,12 +2308,14 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "cspray/annotated-container-dummy-apps": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.3.0"
 }

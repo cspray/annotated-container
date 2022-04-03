@@ -32,16 +32,21 @@ final class AurynContainerFactory implements ContainerFactory {
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface {
         $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
-        return new class($this->createInjector($containerDefinition, $activeProfiles)) implements ContainerInterface {
-
-            private Injector $injector;
-
-            public function __construct(Injector $injector) {
-                $this->injector = $injector;
+        $nameTypeMap = [];
+        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
+            if (!is_null($serviceDefinition->getName())) {
+                $nameTypeMap[$serviceDefinition->getName()->getCompileValue()] = $serviceDefinition->getType();
             }
+        }
+        return new class($this->createInjector($containerDefinition, $activeProfiles), $nameTypeMap) implements ContainerInterface {
+
+            public function __construct(private Injector $injector, private array $nameTypeMap) {}
 
             public function get(string $id) {
                 try {
+                    if (isset($this->nameTypeMap[$id])) {
+                        $id = $this->nameTypeMap[$id];
+                    }
                     return $this->injector->make($id);
                 } catch (InjectionException $injectionException) {
                     throw new ContainerException(
@@ -52,6 +57,10 @@ final class AurynContainerFactory implements ContainerFactory {
             }
 
             public function has(string $id): bool {
+                if (isset($this->nameTypeMap[$id])) {
+                    return true;
+                }
+
                 $anyDefined = 0;
                 foreach ($this->injector->inspect($id) as $definitions) {
                     $anyDefined += count($definitions);

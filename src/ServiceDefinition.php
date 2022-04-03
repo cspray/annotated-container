@@ -10,6 +10,11 @@ namespace Cspray\AnnotatedContainer;
 interface ServiceDefinition {
 
     /**
+     * @return string|null
+     */
+    public function getName() : ?AnnotationValue;
+
+    /**
      * Returns the fully-qualified class/interface name for the given Service.
      *
      * @return string

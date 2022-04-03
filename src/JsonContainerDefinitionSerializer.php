@@ -33,6 +33,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 }
 
                 $compiledServiceDefinitions[$key] = [
+                    'name' => is_null($serviceDefinition->getName()) ? null : $this->convertAnnotationValueToJson($serviceDefinition->getName()),
                     'type' => $serviceDefinition->getType(),
                     'implementedServices' => $implementedServices,
                     'profiles' => $this->convertAnnotationValueToJson($serviceDefinition->getProfiles()),
@@ -207,6 +208,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService(
                     $this->getDeserializeServiceDefinition($compiledServiceDefinitions, $serviceDefinitionCacheMap, $implementedType)
                 );
+            }
+
+            if (!is_null($compiledServiceDefinition['name'])) {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($this->convertJsonToAnnotationValue($compiledServiceDefinition['name']));
             }
 
             $serviceDefinitionCacheMap[$serviceHash] = $serviceDefinitionBuilder->build();

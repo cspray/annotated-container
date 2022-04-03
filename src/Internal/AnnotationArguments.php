@@ -25,8 +25,10 @@ final class AnnotationArguments {
                     $values[] = new CompileEqualsRuntimeAnnotationValue($value);
                 }
                 return new ArrayAnnotationValue(...$values);
-            } else {
+            } else if (!is_null($default)) {
                 return new CompileEqualsRuntimeAnnotationValue($default);
+            } else {
+                throw new \RuntimeException('Provided a default null value for a key that is not present');
             }
         }
         return $this->map[$key];
