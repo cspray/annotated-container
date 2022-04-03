@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "996b1b90818f548d481aa00a32516da3",
+    "content-hash": "5f9c864a10b8f5787b1671bdaea58696",
     "packages": [
         {
             "name": "nikic/php-parser",
@@ -184,11 +184,17 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "dev-main",
+            "version": "0.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
+                "reference": "2769e2892c18bbcfc931ed3ead0280630d55df70"
+            },
             "dist": {
-                "type": "path",
-                "url": "../annotated-container-dummy-apps",
-                "reference": "e4703d389b52095d4ba997c26723a7bea4d43033"
+                "type": "zip",
+                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/2769e2892c18bbcfc931ed3ead0280630d55df70",
+                "reference": "2769e2892c18bbcfc931ed3ead0280630d55df70",
+                "shasum": ""
             },
             "type": "library",
             "autoload": {
@@ -196,6 +202,7 @@
                     "Cspray\\AnnotatedContainer\\DummyApps\\": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -208,9 +215,11 @@
                 }
             ],
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
+                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.4.0"
+            },
+            "time": "2022-04-03T03:47:59+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -2308,9 +2317,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "cspray/annotated-container-dummy-apps": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

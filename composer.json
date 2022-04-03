@@ -11,12 +11,6 @@
       "role": "Project Maintainer"
     }
   ],
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../annotated-container-dummy-apps"
-    }
-  ],
   "require": {
     "php": "^8.1",
     "psr/container": "^2.0",
@@ -24,7 +18,7 @@
     "nikic/php-parser": "^4.10"
   },
   "require-dev": {
-    "cspray/annotated-container-dummy-apps": "dev-main",
+    "cspray/annotated-container-dummy-apps": "0.4",
     "phpunit/phpunit": "^9.5",
     "mikey179/vfsstream": "^1.6"
   },
