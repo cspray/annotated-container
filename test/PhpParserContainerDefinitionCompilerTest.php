@@ -502,6 +502,16 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         ], $containerDefinition->getInjectScalarDefinitions());
     }
 
+    public function testNamedServiceHasCorrectName() {
+        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/NamedService');
+
+        $fooInterfaceService = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\NamedService\FooInterface::class);
+        $fooImplementationService = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\NamedService\FooImplementation::class);
+
+        $this->assertSame('foo', $fooInterfaceService->getName()->getCompileValue());
+        $this->assertNull($fooImplementationService->getName());
+    }
+
     protected function assertInjectScalarDefinitions(array $expectedMethods, array $injectScalarDefinitions) : void {
         if (($countExpected = count($expectedMethods)) !== ($countActual = count($injectScalarDefinitions))) {
             $this->fail("Expected ${countExpected} InjectScalarDefinition but received ${countActual}");

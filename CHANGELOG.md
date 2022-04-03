@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Adds ability to mark a Service as primary. If multiple aliases are found the one marked as primary will be used by default.
-- Adds ability to define multiple InjectScalar and InjectEnv attributes and to specify a profile, or profiles, that each annotation belongs to.
+- Add ability to define multiple InjectScalar and InjectEnv attributes and to specify a profile, or profiles, that each annotation belongs to.
+- Add ability to name a Service by passing an argument and allow retrieval with an arbitrary value without having to use the type as an identifier.
+
 ### Changed
 
 - Made several changes to the internal parsing of the codebase. This shouldn't have any changes in the public-facing API.

@@ -126,6 +126,11 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                     }
 
                     $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', []));
+
+                    if ($annotationDetails->getAnnotationArguments()->has('name')) {
+                        $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($annotationDetails->getAnnotationArguments()->get('name'));
+                    }
+
                     $serviceDefinitions[$serviceType] = $serviceDefinitionBuilder->build();
                     break;
                 }

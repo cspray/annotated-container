@@ -32,6 +32,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         );
 
         $expectedFooInterface = [
+            'name' => null,
             'type' => SimpleServices\FooInterface::class,
             'implementedServices' => [],
             'profiles' => [
@@ -42,6 +43,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isConcrete' => false
         ];
         $expectedFooImplementation = [
+            'name' => null,
             'type' => SimpleServices\FooImplementation::class,
             'implementedServices' => [md5(SimpleServices\FooInterface::class)],
             'profiles' => [
@@ -132,6 +134,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
         $expectedFooInterface = [
+            'name' => null,
             'type' => MultipleSimpleServices\FooInterface::class,
             'implementedServices' => [],
             'profiles' => [
@@ -142,6 +145,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isConcrete' => false
         ];
         $expectedFooImplementation = [
+            'name' => null,
             'type' => MultipleSimpleServices\FooImplementation::class,
             'implementedServices' => [md5(MultipleSimpleServices\FooInterface::class)],
             'profiles' => [
@@ -153,6 +157,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ];
 
         $expectedBarInterface = [
+            'name' => null,
             'type' => MultipleSimpleServices\BarInterface::class,
             'implementedServices' => [],
             'profiles' => [
@@ -163,6 +168,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isConcrete' => false
         ];
         $expectedBarImplementation = [
+            'name' => null,
             'type' => MultipleSimpleServices\BarImplementation::class,
             'implementedServices' => [md5(MultipleSimpleServices\BarInterface::class)],
             'profiles' => [
@@ -265,6 +271,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         );
 
         $expectedAbstractFoo = [
+            'name' => null,
             'type' => AbstractSharedServices\AbstractFoo::class,
             'implementedServices' => [],
             'profiles' => [
@@ -275,6 +282,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isConcrete' => false
         ];
         $expectedFooImplementation = [
+            'name' => null,
             'type' => AbstractSharedServices\FooImplementation::class,
             'implementedServices' => [md5(AbstractSharedServices\AbstractFoo::class)],
             'profiles' => [
@@ -369,6 +377,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         );
 
         $expectedFooInterface = [
+            'name' => null,
             'type' => InterfaceServicePrepare\FooInterface::class,
             'implementedServices' => [],
             'profiles' => [
@@ -379,6 +388,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isConcrete' => false
         ];
         $expectedFooImplementation = [
+            'name' => null,
             'type' => InterfaceServicePrepare\FooImplementation::class,
             'implementedServices' => [md5(InterfaceServicePrepare\FooInterface::class)],
             'profiles' => [
@@ -478,6 +488,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertIsArray($actual);
 
         $expectedFooImplementation = [
+            'name' => null,
             'type' => SimpleUseScalar\FooImplementation::class,
             'implementedServices' => [],
             'profiles' => [
@@ -767,6 +778,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertCount(6, $actual['compiledServiceDefinitions']);
 
         $expectedBarImplementation = [
+            'name' => null,
             'type' => SimpleUseService\BarImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'profiles' => [
@@ -780,6 +792,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expectedBarImplementation, $actual['compiledServiceDefinitions'][md5(SimpleUseService\BarImplementation::class)]);
 
         $expectedBazImplementation = [
+            'name' => null,
             'type' => SimpleUseService\BazImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'profiles' => [
@@ -793,6 +806,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expectedBazImplementation, $actual['compiledServiceDefinitions'][md5(SimpleUseService\BazImplementation::class)]);
 
         $expectedConstructorInjection = [
+            'name' => null,
             'type' => SimpleUseService\ConstructorInjection::class,
             'implementedServices' => [],
             'profiles' => [
@@ -806,6 +820,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expectedConstructorInjection, $actual['compiledServiceDefinitions'][md5(SimpleUseService\ConstructorInjection::class)]);
 
         $expectedFooInterface = [
+            'name' => null,
             'type' => SimpleUseService\FooInterface::class,
             'implementedServices' => [],
             'profiles' => [
@@ -819,6 +834,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expectedFooInterface, $actual['compiledServiceDefinitions'][md5(SimpleUseService\FooInterface::class)]);
 
         $expectedSetterInjection = [
+            'name' => null,
             'type' => SimpleUseService\SetterInjection::class,
             'implementedServices' => [],
             'profiles' => [
@@ -832,6 +848,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expectedSetterInjection, $actual['compiledServiceDefinitions'][md5(SimpleUseService\SetterInjection::class)]);
 
         $expectedQuxImplementation = [
+            'name' => null,
             'type' => SimpleUseService\QuxImplementation::class,
             'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'profiles' => [
@@ -1006,6 +1023,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertCount(2, $actual['compiledServiceDefinitions']);
 
         $expectedServiceInterface = [
+            'name' => null,
             'type' => ServiceDelegate\ServiceInterface::class,
             'implementedServices' => [],
             'profiles' => [
@@ -1019,6 +1037,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertEquals($expectedServiceInterface, $actual['compiledServiceDefinitions'][md5(ServiceDelegate\ServiceInterface::class)]);
 
         $expectedFooService = [
+            'name' => null,
             'type' => ServiceDelegate\FooService::class,
             'implementedServices' => [],
             'profiles' => [
@@ -1191,7 +1210,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     public function serializeDeserializeSerializeDirs() : array {
         return [
             [DummyAppUtils::getRootDir() . '/ProfileResolvedServices'],
-            [DummyAppUtils::getRootDir() . '/AbstractSharedServices']
+            [DummyAppUtils::getRootDir() . '/AbstractSharedServices'],
+            [DummyAppUtils::getRootDir() . '/NamedService']
         ];
     }
 
@@ -1224,6 +1244,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
         $json = json_decode($serializer->serialize($containerDefinition), true);
         $this->assertContains([
+            'name' => null,
             'type' => DummyApps\ProfileResolvedServices\DevFooImplementation::class,
             'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
             'profiles' => [
@@ -1239,6 +1260,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
         $this->assertContains([
+            'name' => null,
             'type' => DummyApps\ProfileResolvedServices\TestFooImplementation::class,
             'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
             'profiles' => [
@@ -1254,6 +1276,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
         $this->assertContains([
+            'name' => null,
             'type' => DummyApps\ProfileResolvedServices\ProdFooImplementation::class,
             'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
             'profiles' => [
@@ -1268,6 +1291,30 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isAbstract' => false,
             'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
+    }
+
+    public function testSerializeNamedServicesHasName() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/NamedService')->build()
+        );
+
+        $json = json_decode($serializer->serialize($containerDefinition), true);
+        $this->assertContains([
+            'name' => [
+                'type' => CompileEqualsRuntimeAnnotationValue::class,
+                'value' => 'foo'
+            ],
+            'type' => DummyApps\NamedService\FooInterface::class,
+            'implementedServices' => [],
+            'profiles' => [
+                'type' => ArrayAnnotationValue::class,
+                'items' => []
+            ],
+            'isAbstract' => true,
+            'isConcrete' => false
+        ], $json['compiledServiceDefinitions']);
+
     }
 
 

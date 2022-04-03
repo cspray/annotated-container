@@ -246,4 +246,19 @@ class AurynContainerFactoryTest extends TestCase {
         $this->assertSame('baz', $instance->getValue());
     }
 
+    public function testCreateNamedService() {
+        $compiler = new PhpParserContainerDefinitionCompiler();
+        $containerDefinition = $compiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/NamedService')->build()
+        );
+        $container = (new AurynContainerFactory())->createContainer($containerDefinition, ContainerFactoryOptionsBuilder::forActiveProfiles('default')->build());
+
+        $this->assertTrue($container->has('foo'));
+
+        $instance = $container->get('foo');
+
+        $this->assertNotNull($instance);
+        $this->assertInstanceOf(DummyApps\NamedService\FooImplementation::class, $instance);
+    }
+
 }
