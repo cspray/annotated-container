@@ -86,7 +86,7 @@ class ServiceDefinitionBuilderTest extends TestCase {
 
     public function testWithProfilesImmutableBuilder() {
         $serviceDefinition1 = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class);
-        $serviceDefinition2 = $serviceDefinition1->withProfiles(new CompileEqualsRuntimeAnnotationValue('dev'));
+        $serviceDefinition2 = $serviceDefinition1->withProfiles(arrayValue(['dev']));
 
         $this->assertNotSame($serviceDefinition1, $serviceDefinition2);
     }
@@ -111,21 +111,15 @@ class ServiceDefinitionBuilderTest extends TestCase {
     }
 
     public function testWithProfileReplacesDefault() {
-        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooInterface::class)->withProfiles(new ArrayAnnotationValue(
-            new CompileEqualsRuntimeAnnotationValue('dev')
-        ))->build();
+        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooInterface::class)->withProfiles(arrayValue(['dev']))->build();
 
         $this->assertSame(['dev'], $serviceDefinition->getProfiles()->getRuntimeValue());
     }
 
     public function testWithMultipleProfilesAllIncluded() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooInterface::class)
-            ->withProfiles(
-                new ArrayAnnotationValue(
-                    new CompileEqualsRuntimeAnnotationValue('default'),
-                    new CompileEqualsRuntimeAnnotationValue('dev'),
-                    new CompileEqualsRuntimeAnnotationValue('local'))
-            )->build();
+            ->withProfiles(arrayValue(['default', 'dev', 'local']))
+            ->build();
 
         $this->assertSame(['default', 'dev', 'local'], $serviceDefinition->getProfiles()->getRuntimeValue());
     }

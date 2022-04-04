@@ -92,7 +92,7 @@ final class InjectScalarDefinitionBuilder {
 
         $profiles = $this->profiles;
         if (is_null($profiles)) {
-            $profiles = new ArrayAnnotationValue(new CompileEqualsRuntimeAnnotationValue('default'));
+            $profiles = arrayValue(['default']);
         }
         return new class($this->serviceDefinition, $profiles, $this->method, $this->paramType, $this->paramName, $this->paramValue) implements InjectScalarDefinition {
 

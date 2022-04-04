@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Serializable;
+
 /**
  * A value, typically associated with an argument to an Attribute, that cannot have its value determined at compile time.
  *
@@ -20,5 +22,8 @@ interface AnnotationValue {
      */
     public function getRuntimeValue() : string|int|float|bool|array;
 
+    public function __serialize() : array;
+
+    public function __unserialize(array $data) : void;
 
 }

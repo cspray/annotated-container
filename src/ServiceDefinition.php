@@ -10,7 +10,7 @@ namespace Cspray\AnnotatedContainer;
 interface ServiceDefinition {
 
     /**
-     * @return string|null
+     * @return AnnotationValue|null
      */
     public function getName() : ?AnnotationValue;
 
@@ -37,9 +37,9 @@ interface ServiceDefinition {
      * A ServiceDefinition MUST have at least 1 profile; if a profile is not explicitly set for a given Service it should
      * be given the 'default' profile.
      *
-     * @return AnnotationValue
+     * @return CollectionAnnotationValue
      */
-    public function getProfiles() : AnnotationValue;
+    public function getProfiles() : CollectionAnnotationValue;
 
     /**
      * Return whether the Service is the Primary for this type and will be used by default if there are multiple aliases

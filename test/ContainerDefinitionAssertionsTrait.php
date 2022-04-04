@@ -111,16 +111,7 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
     }
 
     private function getCompiledValues(AnnotationValue $annotationValue) : string|int|bool|array|float {
-        $value = $annotationValue->getCompileValue();
-        if (is_array($value)) {
-            $values = [];
-            foreach ($value as $v) {
-                $values[] = $this->getCompiledValues($v);
-            }
-            return $values;
-        } else {
-            return $value;
-        }
+        return $annotationValue->getCompileValue();
     }
 
     protected function assertUseServiceParamValues(array $expectedValueMap, array $UseServiceDefinitions) : void {
