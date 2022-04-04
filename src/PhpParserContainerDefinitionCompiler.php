@@ -111,19 +111,6 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                     } else {
                         $isPrimary = $annotationDetails->getAnnotationArguments()->get('primary', false)->getCompileValue();
                         $serviceDefinitionBuilder = ServiceDefinitionBuilder::forConcrete($annotationDetails->getReflection()->getName(), $isPrimary);
-
-                        $parent = $annotationDetails->getReflection()->getParentClass();
-                        if ($parent) {
-                            $extendedServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $parent->getName());
-                            if (!is_null($extendedServiceDefinition)) {
-                                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($extendedServiceDefinition);
-                            }
-                        }
-
-                        foreach ($annotationDetails->getReflection()->getInterfaceNames() as $interfaceName) {
-                            $implementServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $interfaceName);
-                            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($implementServiceDefinition);
-                        }
                     }
 
                     $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', []));
@@ -158,7 +145,6 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                     );
                 }
             }
-
         }
 
         return $containerDefinitionBuilder;
@@ -175,10 +161,9 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                     $reflection->getName()
                 ));
             }
-            foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
-                if ($this->doesServiceDefinitionHavePrepare($annotationDetailsList, $implementedService, $reflection->getName())) {
-                    continue 2;
-                }
+
+            if ($serviceDefinition->isConcrete() && $this->doesServiceDefinitionHaveAbstractPrepare($annotationDetailsList, $serviceDefinition, $reflection->getName())) {
+                continue;
             }
 
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServicePrepareDefinition(
@@ -189,9 +174,19 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         return $containerDefinitionBuilder;
     }
 
-    private function doesServiceDefinitionHavePrepare(AnnotationDetailsList $annotationDetailsList, ServiceDefinition $serviceDefinition, string $method) : bool {
+    private function doesServiceDefinitionHaveAbstractPrepare(AnnotationDetailsList $annotationDetailsList, ServiceDefinition $serviceDefinition, string $method) : bool {
+        $concreteType = $serviceDefinition->getType();
+        $classInterfaces = class_implements($concreteType);
+        if (empty($classInterfaces)) {
+            return false;
+        }
+
         foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServicePrepare) as $annotationDetails) {
-            if ($serviceDefinition->getType() === $annotationDetails->getReflection()->getDeclaringClass()->getName() && $annotationDetails->getReflection()->getName() === $method) {
+            if (!$annotationDetails->getReflection()->getDeclaringClass()->isAbstract() && !$annotationDetails->getReflection()->getDeclaringClass()->isInterface()) {
+                continue;
+            }
+            $abstractType = $annotationDetails->getReflection()->getDeclaringClass()->getName();
+            if (in_array($abstractType, $classInterfaces)) {
                 return true;
             }
         }

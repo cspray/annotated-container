@@ -26,7 +26,7 @@ class AliasDefinitionBuilderTest extends TestCase {
 
     public function testWithConcreteImmutableBuilder() {
         $abstract = ServiceDefinitionBuilder::forAbstract(SimpleServices\FooInterface::class)->build();
-        $concrete = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)->withImplementedService($abstract)->build();
+        $concrete = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)->build();
 
         $builder1 = AliasDefinitionBuilder::forAbstract($abstract);
         $builder2 = $builder1->withConcrete($concrete);
@@ -36,7 +36,7 @@ class AliasDefinitionBuilderTest extends TestCase {
 
     public function testWithConcreteReturnsCorrectServiceDefinitions() {
         $abstract = ServiceDefinitionBuilder::forAbstract(SimpleServices\FooInterface::class)->build();
-        $concrete = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)->withImplementedService($abstract)->build();
+        $concrete = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)->build();
 
         $aliasDefinition = AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete)->build();
 

@@ -34,7 +34,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'name' => null,
             'type' => SimpleServices\FooInterface::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
@@ -42,7 +41,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooImplementation = [
             'name' => null,
             'type' => SimpleServices\FooImplementation::class,
-            'implementedServices' => [md5(SimpleServices\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -130,7 +128,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'name' => null,
             'type' => MultipleSimpleServices\FooInterface::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
@@ -138,7 +135,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooImplementation = [
             'name' => null,
             'type' => MultipleSimpleServices\FooImplementation::class,
-            'implementedServices' => [md5(MultipleSimpleServices\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -147,7 +143,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBarInterface = [
             'name' => null,
             'type' => MultipleSimpleServices\BarInterface::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
@@ -155,7 +150,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBarImplementation = [
             'name' => null,
             'type' => MultipleSimpleServices\BarImplementation::class,
-            'implementedServices' => [md5(MultipleSimpleServices\BarInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -255,7 +249,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedAbstractFoo = [
             'name' => null,
             'type' => AbstractSharedServices\AbstractFoo::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
@@ -263,7 +256,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooImplementation = [
             'name' => null,
             'type' => AbstractSharedServices\FooImplementation::class,
-            'implementedServices' => [md5(AbstractSharedServices\AbstractFoo::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -355,7 +347,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'name' => null,
             'type' => InterfaceServicePrepare\FooInterface::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
@@ -363,7 +354,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooImplementation = [
             'name' => null,
             'type' => InterfaceServicePrepare\FooImplementation::class,
-            'implementedServices' => [md5(InterfaceServicePrepare\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -460,7 +450,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooImplementation = [
             'name' => null,
             'type' => SimpleUseScalar\FooImplementation::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -587,7 +576,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBarImplementation = [
             'name' => null,
             'type' => SimpleUseService\BarImplementation::class,
-            'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -598,7 +586,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBazImplementation = [
             'name' => null,
             'type' => SimpleUseService\BazImplementation::class,
-            'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -609,7 +596,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedConstructorInjection = [
             'name' => null,
             'type' => SimpleUseService\ConstructorInjection::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -620,7 +606,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'name' => null,
             'type' => SimpleUseService\FooInterface::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
@@ -631,7 +616,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedSetterInjection = [
             'name' => null,
             'type' => SimpleUseService\SetterInjection::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -642,7 +626,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedQuxImplementation = [
             'name' => null,
             'type' => SimpleUseService\QuxImplementation::class,
-            'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -796,7 +779,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedServiceInterface = [
             'name' => null,
             'type' => ServiceDelegate\ServiceInterface::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
@@ -807,7 +789,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooService = [
             'name' => null,
             'type' => ServiceDelegate\FooService::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -1011,7 +992,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertContains([
             'name' => null,
             'type' => DummyApps\ProfileResolvedServices\DevFooImplementation::class,
-            'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue(['dev']))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -1019,7 +999,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertContains([
             'name' => null,
             'type' => DummyApps\ProfileResolvedServices\TestFooImplementation::class,
-            'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue(['test']))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -1027,7 +1006,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertContains([
             'name' => null,
             'type' => DummyApps\ProfileResolvedServices\ProdFooImplementation::class,
-            'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
             'profiles' => ['annotationValue' => serialize(arrayValue(['prod']))],
             'isAbstract' => false,
             'isConcrete' => true
@@ -1044,7 +1022,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertContains([
             'name' => ['annotationValue' => serialize(scalarValue('foo'))],
             'type' => DummyApps\NamedService\FooInterface::class,
-            'implementedServices' => [],
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false

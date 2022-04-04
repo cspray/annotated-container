@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use JetBrains\PhpStorm\Internal\TentativeType;
 use JsonSerializable;
 
 /**
@@ -25,17 +24,9 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $compiledServiceDefinitions = [];
         $addCompiledServiceDefinition = function(string $key, ServiceDefinition $serviceDefinition) use(&$compiledServiceDefinitions, &$addCompiledServiceDefinition) : void {
             if (!isset($compiledServiceDefinitions[$key])) {
-                $implementedServices = [];
-                foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
-                    $implementedKey = md5($implementedService->getType());
-                    $addCompiledServiceDefinition($implementedKey, $implementedService);
-                    $implementedServices[] = $implementedKey;
-                }
-
                 $compiledServiceDefinitions[$key] = [
                     'name' => is_null($serviceDefinition->getName()) ? null : $this->convertAnnotationValueToJson($serviceDefinition->getName()),
                     'type' => $serviceDefinition->getType(),
-                    'implementedServices' => $implementedServices,
                     'profiles' => $this->convertAnnotationValueToJson($serviceDefinition->getProfiles()),
                     'isAbstract' => $serviceDefinition->isAbstract(),
                     'isConcrete' => $serviceDefinition->isConcrete(),
@@ -200,13 +191,6 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($type);
             $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($this->convertJsonToAnnotationValue($compiledServiceDefinition['profiles']));
 
-            foreach ($compiledServiceDefinition['implementedServices'] as $implementedServiceHash) {
-                $implementedType = $compiledServiceDefinitions[$implementedServiceHash]['type'];
-                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService(
-                    $this->getDeserializeServiceDefinition($compiledServiceDefinitions, $serviceDefinitionCacheMap, $implementedType)
-                );
-            }
-
             if (!is_null($compiledServiceDefinition['name'])) {
                 $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($this->convertJsonToAnnotationValue($compiledServiceDefinition['name']));
             }
@@ -232,7 +216,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         };
     }
 
-    private function convertJsonToAnnotationValue(array $json) : AnnotationValue {
+    private function convertJsonToAnnotationValue(array $json) : AnnotationValue|CollectionAnnotationValue {
         return unserialize($json['annotationValue']);
     }
 

@@ -52,26 +52,6 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
-    /**
-     * @throws DefinitionBuilderException
-     */
-    public function withImplementedService(ServiceDefinition $serviceDefinition) : self {
-        if ($this->isAbstract) {
-            throw new DefinitionBuilderException(sprintf(
-                'Attempted to add an implemented service to abstract type %s which is not allowed.',
-                $this->type
-            ));
-        } else if (!$serviceDefinition->isAbstract()) {
-            throw new DefinitionBuilderException(sprintf(
-                'Attempted to add a concrete implemented service to a concrete type %s which is not allowed.',
-                $this->type
-            ));
-        }
-        $instance = clone $this;
-        $instance->implementedServices[] = $serviceDefinition;
-        return $instance;
-    }
-
     public function withName(AnnotationValue $name) : self {
         $instance = clone $this;
         $instance->name = $name;
@@ -89,13 +69,12 @@ final class ServiceDefinitionBuilder {
         if (is_null($profiles)) {
             $profiles = arrayValue([]);
         }
-        return new class($this->name, $this->type, $this->isAbstract, $this->implementedServices, $profiles, $this->isPrimary) implements ServiceDefinition {
+        return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary) implements ServiceDefinition {
 
             public function __construct(
                 private ?AnnotationValue $name,
                 private string $type,
                 private bool $isAbstract,
-                private array $implementedServices,
                 private CollectionAnnotationValue $profiles,
                 private bool $isPrimary
             ) {}
@@ -106,10 +85,6 @@ final class ServiceDefinitionBuilder {
 
             public function getType(): string {
                 return $this->type;
-            }
-
-            public function getImplementedServices(): array {
-                return $this->implementedServices;
             }
 
             public function getProfiles(): CollectionAnnotationValue {
