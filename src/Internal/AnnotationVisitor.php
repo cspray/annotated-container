@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer\Internal;
 use Cspray\AnnotatedContainer\AnnotationValue;
 use Cspray\AnnotatedContainer\ArrayAnnotationValue;
 use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ThirdPartyService;
 use Cspray\AnnotatedContainer\CompileEqualsRuntimeAnnotationValue;
 use Cspray\AnnotatedContainer\EnvironmentVariableAnnotationValue;
 use PhpParser\ConstExprEvaluationException;
@@ -46,6 +47,8 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
                     $annotationArguments,
                     $this->getReflectionClass($node->namespacedName->toString())
                 ));
+            } else {
+                $this->checkForThirdPartyAnnotations($node);
             }
         } else if ($node instanceof Node\Stmt\ClassMethod) {
             foreach ([AttributeType::ServicePrepare, AttributeType::ServiceDelegate] as $attributeType) {
@@ -84,6 +87,25 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
         }
     }
 
+    private function checkForThirdPartyAnnotations(Node\Stmt\Interface_|Node\Stmt\Class_ $node) : void {
+        $thirdPartyServiceAttributes = $this->findAttributes(ThirdPartyService::class, ...$node->attrGroups);
+        if (!empty($thirdPartyServiceAttributes)) {
+            $thirdPartyServiceAttribute = $thirdPartyServiceAttributes[0];
+            $annotationArguments = $this->getAnnotationArguments(AttributeType::ThirdPartyService, $thirdPartyServiceAttribute);
+            $this->annotationDetails->add(new AnnotationDetails(
+                $this->fileInfo,
+                AttributeType::ThirdPartyService,
+                $annotationArguments,
+                $this->getReflectionClass($annotationArguments->get('type')->getCompileValue())
+            ));
+        }
+    }
+
+    /**
+     * @param string $attributeType
+     * @param AttributeGroup ...$attributeGroups
+     * @return Attribute[]
+     */
     private function findAttributes(string $attributeType, AttributeGroup... $attributeGroups) : array {
         $attributes = [];
         foreach ($attributeGroups as $attributeGroup) {

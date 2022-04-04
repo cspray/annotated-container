@@ -3,8 +3,7 @@
 namespace Cspray\AnnotatedContainer\Internal;
 
 use Cspray\AnnotatedContainer\AnnotationValue;
-use Cspray\AnnotatedContainer\ArrayAnnotationValue;
-use Cspray\AnnotatedContainer\CompileEqualsRuntimeAnnotationValue;
+use Cspray\AnnotatedContainer\CollectionAnnotationValue;
 use function Cspray\AnnotatedContainer\arrayValue;
 use function Cspray\AnnotatedContainer\scalarValue;
 
@@ -19,7 +18,7 @@ final class AnnotationArguments {
         $this->map[$key] = $value;
     }
 
-    public function get(string $key, string|int|float|bool|array $default = null) : AnnotationValue {
+    public function get(string $key, string|int|float|bool|array $default = null) : AnnotationValue|CollectionAnnotationValue {
         if (!$this->has($key)) {
             if (is_array($default)) {
                 return arrayValue($default);
