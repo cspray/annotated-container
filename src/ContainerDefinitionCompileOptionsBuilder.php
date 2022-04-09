@@ -9,6 +9,8 @@ final class ContainerDefinitionCompileOptionsBuilder {
 
     private array $directories = [];
 
+    private ?ContainerDefinitionBuilderContextConsumer $consumer = null;
+
     private function __construct() {}
 
     /**
@@ -23,17 +25,23 @@ final class ContainerDefinitionCompileOptionsBuilder {
         return $instance;
     }
 
+    public function withContainerDefinitionBuilderContextConsumer(ContainerDefinitionBuilderContextConsumer $consumer) : self {
+        $instance = clone $this;
+        $instance->consumer = $consumer;
+        return $instance;
+    }
+
     public function build() : ContainerDefinitionCompileOptions {
-        return new class($this->directories) implements ContainerDefinitionCompileOptions {
-
-            private array $directories;
-
-            public function __construct(array $directories) {
-                $this->directories = $directories;
+        return new class($this->directories, $this->consumer) implements ContainerDefinitionCompileOptions {
+            public function __construct(private array $directories, private ?ContainerDefinitionBuilderContextConsumer $consumer) {
             }
 
             public function getScanDirectories(): array {
                 return $this->directories;
+            }
+
+            public function getContainerDefinitionBuilderContextConsumer(): ?ContainerDefinitionBuilderContextConsumer {
+                return $this->consumer;
             }
         };
     }

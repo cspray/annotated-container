@@ -64,6 +64,17 @@ final class ContainerDefinitionBuilder {
         return $instance;
     }
 
+    public function getServiceDefinitions() : array {
+        return $this->serviceDefinitions;
+    }
+
+    public function getServiceDefinition(string $type) : ?ServiceDefinition {
+        return array_reduce(
+            $this->serviceDefinitions,
+            fn($carry, $item) => $item->getType() === $type ? $item : $carry
+        );
+    }
+
     public function build() : ContainerDefinition {
         return new class(
             $this->serviceDefinitions,

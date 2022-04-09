@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Serializable;
+use UnitEnum;
 
 /**
  * A value, typically associated with an argument to an Attribute, that cannot have its value determined at compile time.
@@ -18,9 +18,9 @@ interface AnnotationValue {
     /**
      *
      *
-     * @return string|int|float|bool|array
+     * @return string|int|float|bool|array|UnitEnum
      */
-    public function getRuntimeValue() : string|int|float|bool|array;
+    public function getRuntimeValue() : string|int|float|bool|array|UnitEnum;
 
     public function __serialize() : array;
 

@@ -24,23 +24,6 @@ function envValue(string $envVar) : AnnotationValue {
     return new EnvironmentAnnotationValue($envVar);
 }
 
-function containerDefinition(callable $buildContainerCallable) : ContainerDefinition {
-    $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
-    $context = new class($containerDefinitionBuilder) implements ContainerDefinitionBuilderContext {
-        public function __construct(private ContainerDefinitionBuilder $containerDefinitionBuilder) {}
-
-        public function getBuilder(): ContainerDefinitionBuilder {
-            return $this->containerDefinitionBuilder;
-        }
-
-        public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) {
-            $this->containerDefinitionBuilder = $containerDefinitionBuilder;
-        }
-    };
-    $buildContainerCallable($context);
-    return $context->getBuilder()->build();
-}
-
 function service(ContainerDefinitionBuilderContext $context, string $type, ?AnnotationValue $name = null, CollectionAnnotationValue $profiles = null, bool $isPrimary = false) : ServiceDefinition {
     $reflection = new ReflectionClass($type);
     $methodArgs = [$type];

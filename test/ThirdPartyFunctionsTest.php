@@ -231,10 +231,27 @@ class ThirdPartyFunctionsTest extends TestCase {
         $this->assertSame($annotationValue->getCompileValue(), $unserialize->getCompileValue());
     }
 
+    private function getContext() : ContainerDefinitionBuilderContext {
+        $builder = ContainerDefinitionBuilder::newDefinition();
+        return new class($builder) implements ContainerDefinitionBuilderContext {
+
+            public function __construct(private ContainerDefinitionBuilder $builder) {}
+
+            public function getBuilder(): ContainerDefinitionBuilder {
+                return $this->builder;
+            }
+
+            public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) {
+                $this->builder = $containerDefinitionBuilder;
+            }
+        };
+    }
+
     public function testHasServiceDefinitionForType() : void {
-        $containerDefinition = containerDefinition(function($context) {
-            service($context, DummyApps\SimpleServices\FooInterface::class);
-        });
+        $context = $this->getContext();
+        service($context, DummyApps\SimpleServices\FooInterface::class);
+
+        $containerDefinition = $context->getBuilder()->build();
 
         $this->assertServiceDefinitionsHaveTypes([
             DummyApps\SimpleServices\FooInterface::class
@@ -242,81 +259,83 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testServiceDefinitionReturnsIsInContainerDefinition() {
-        $def = null;
-        $containerDefinition = containerDefinition(function($context) use(&$def) {
-            $def = service($context, DummyApps\SimpleServices\FooInterface::class);
-        });
+        $context = $this->getContext();
+        $def = service($context, DummyApps\SimpleServices\FooInterface::class);
 
+        $containerDefinition = $context->getBuilder()->build();
         $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooInterface::class);
 
         $this->assertSame($serviceDefinition, $def);
     }
 
     public function testAbstractDefinedServiceIsAbstract() {
-        $containerDefinition = containerDefinition(function($context) {
-            service($context, DummyApps\SimpleServices\FooInterface::class);
-        });
+        $context = $this->getContext();
+        service($context, DummyApps\SimpleServices\FooInterface::class);
 
+        $containerDefinition = $context->getBuilder()->build();
         $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooInterface::class);
 
         $this->assertTrue($serviceDefinition?->isAbstract());
     }
 
     public function testAbstractDefinedServiceGetName() {
-        $containerDefinition = containerDefinition(function($context) {
-            service($context, DummyApps\SimpleServices\FooInterface::class, scalarValue('fooService'));
-        });
+        $context = $this->getContext();
+        service($context, DummyApps\SimpleServices\FooInterface::class, scalarValue('fooService'));
 
+        $containerDefinition = $context->getBuilder()->build();
         $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooInterface::class);
 
         $this->assertSame('fooService', $serviceDefinition?->getName()?->getCompileValue());
     }
 
     public function testAbstractDefinedServiceGetProfiles() {
-        $containerDefinition = containerDefinition(function($context) {
-            service($context, DummyApps\SimpleServices\FooImplementation::class, profiles: arrayValue(['default', 'dev']));
-        });
+        $context = $this->getContext();
+        service($context, DummyApps\SimpleServices\FooImplementation::class, profiles: arrayValue(['default', 'dev']));
 
+        $containerDefinition = $context->getBuilder();
         $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooImplementation::class);
 
         $this->assertSame(['default', 'dev'], $serviceDefinition->getProfiles()->getCompileValue());
     }
 
     public function testConcreteServiceIsNotDefined() {
-        $containerDefinition = containerDefinition(function($context) {
-            service($context, DummyApps\SimpleServices\FooImplementation::class);
-        });
+        $context = $this->getContext();
+        service($context, DummyApps\SimpleServices\FooImplementation::class);
 
+        $containerDefinition = $context->getBuilder()->build();
         $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooImplementation::class);
+
         $this->assertTrue($serviceDefinition?->isConcrete());
     }
 
     public function testServiceIsPrimary() {
-        $containerDefinition = containerDefinition(function($context) {
-            service($context, DummyApps\SimpleServices\FooImplementation::class, isPrimary: true);
-        });
+        $context = $this->getContext();
+        service($context, DummyApps\SimpleServices\FooImplementation::class, isPrimary: true);
 
+        $containerDefinition = $context->getBuilder()->build();
         $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooImplementation::class);
+
         $this->assertTrue($serviceDefinition->isPrimary());
     }
 
     public function testAddAliasDefinition() {
-        $containerDefinition = containerDefinition(function($context) {
-            $abstract = service($context, DummyApps\SimpleServices\FooInterface::class);
-            $concrete = service($context, DummyApps\SimpleServices\FooImplementation::class);
-            alias($context, $abstract, $concrete);
-        });
+        $context = $this->getContext();
+        $abstract = service($context, DummyApps\SimpleServices\FooInterface::class);
+        $concrete = service($context, DummyApps\SimpleServices\FooImplementation::class);
+        alias($context, $abstract, $concrete);
 
+        $containerDefinition = $context->getBuilder()->build();
         $this->assertAliasDefinitionsMap([
             [DummyApps\SimpleServices\FooInterface::class, DummyApps\SimpleServices\FooImplementation::class]
         ], $containerDefinition->getAliasDefinitions());
     }
 
     public function testServiceDelegateDefinition() {
-        $containerDefinition = containerDefinition(function($context) {
-            $service = service($context, DummyApps\ServiceDelegate\ServiceInterface::class);
-            serviceDelegate($context, $service, DummyApps\ServiceDelegate\ServiceFactory::class, 'createService');
-        });
+        $context = $this->getContext();
+        $service = service($context, DummyApps\ServiceDelegate\ServiceInterface::class);
+        serviceDelegate($context, $service, DummyApps\ServiceDelegate\ServiceFactory::class, 'createService');
+
+        $containerDefinition = $context->getBuilder()->build();
 
         $this->assertCount(1, $containerDefinition->getServiceDelegateDefinitions());
         $this->assertSame(DummyApps\ServiceDelegate\ServiceInterface::class, $containerDefinition->getServiceDelegateDefinitions()[0]->getServiceType()->getType());
@@ -325,10 +344,11 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testServicePrepareDefinition() {
-        $containerDefinition = containerDefinition(function($context) {
-            $service = service($context, DummyApps\InterfaceServicePrepare\FooInterface::class);
-            servicePrepare($context, $service, 'setBar');
-        });
+        $context = $this->getContext();
+        $service = service($context, DummyApps\InterfaceServicePrepare\FooInterface::class);
+        servicePrepare($context, $service, 'setBar');
+
+        $containerDefinition = $context->getBuilder()->build();
 
         $this->assertServicePrepareTypes([
             [DummyApps\InterfaceServicePrepare\FooInterface::class, 'setBar']
@@ -336,10 +356,11 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testInjectScalarDefinition() {
-        $containerDefinition = containerDefinition(function($context) {
-            $service = service($context, DummyApps\SimpleUseScalar\FooImplementation::class);
-            injectScalar($context, $service, '__construct', 'stringParam', ScalarType::String, scalarValue('foobar'), arrayValue(['default', 'dev']));
-        });
+        $context = $this->getContext();
+        $service = service($context, DummyApps\SimpleUseScalar\FooImplementation::class);
+        injectScalar($context, $service, '__construct', 'stringParam', ScalarType::String, scalarValue('foobar'), arrayValue(['default', 'dev']));
+
+        $containerDefinition = $context->getBuilder()->build();
 
         $this->assertInjectScalarParamValues([
             DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(stringParam)|default,dev' => 'foobar'
@@ -347,10 +368,11 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testInjectEnvHasInjectScalarDefinition() {
-        $containerDefinition = containerDefinition(function($context) {
-            $service = service($context, DummyApps\SimpleUseScalarFromEnv\FooImplementation::class);
-            injectEnv($context, $service, '__construct', 'user', ScalarType::String, 'USER', arrayValue(['default']));
-        });
+        $context = $this->getContext();
+        $service = service($context, DummyApps\SimpleUseScalarFromEnv\FooImplementation::class);
+        injectEnv($context, $service, '__construct', 'user', ScalarType::String, 'USER', arrayValue(['default']));
+
+        $containerDefinition = $context->getBuilder()->build();
 
         $this->assertInjectScalarParamValues([
             DummyApps\SimpleUseScalarFromEnv\FooImplementation::class . '::__construct(user)|default' => 'USER'
@@ -358,10 +380,11 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testInjectService() {
-        $containerDefinition = containerDefinition(function($context) {
-            $injectInto = service($context, DummyApps\SimpleUseService\ConstructorInjection::class);
-            injectService($context, $injectInto, '__construct', 'bar', DummyApps\SimpleUseService\FooInterface::class, scalarValue(DummyApps\SimpleUseService\BarImplementation::class));
-        });
+        $context = $this->getContext();
+        $injectInto = service($context, DummyApps\SimpleUseService\ConstructorInjection::class);
+        injectService($context, $injectInto, '__construct', 'bar', DummyApps\SimpleUseService\FooInterface::class, scalarValue(DummyApps\SimpleUseService\BarImplementation::class));
+
+        $containerDefinition = $context->getBuilder()->build();
 
         $this->assertCount(1, $containerDefinition->getInjectServiceDefinitions());
         $this->assertSame(DummyApps\SimpleUseService\ConstructorInjection::class, $containerDefinition->getInjectServiceDefinitions()[0]->getService()->getType());

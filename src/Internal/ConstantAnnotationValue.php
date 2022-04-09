@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Internal;
 
 use Cspray\AnnotatedContainer\AnnotationValue;
+use UnitEnum;
 
 final class ConstantAnnotationValue implements AnnotationValue {
 
@@ -12,7 +13,7 @@ final class ConstantAnnotationValue implements AnnotationValue {
         return $this->name;
     }
 
-    public function getRuntimeValue(): string|int|float|bool|array {
+    public function getRuntimeValue(): string|int|float|bool|array|UnitEnum {
         return constant($this->name);
     }
 
