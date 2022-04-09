@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "184cd2cb5f8d8fa18d6cf36794e550a5",
+    "content-hash": "be9512259e9e0349ccee0c4d8d27d509",
     "packages": [
         {
             "name": "nikic/php-parser",
@@ -184,20 +184,17 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.5.0",
+            "version": "0.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
-                "reference": "99098ec707300516a107395892af5188d0f4f449"
+                "reference": "f0ba7548b9029d5a7cf4d20442cb499a1dfc3112"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/99098ec707300516a107395892af5188d0f4f449",
-                "reference": "99098ec707300516a107395892af5188d0f4f449",
+                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/f0ba7548b9029d5a7cf4d20442cb499a1dfc3112",
+                "reference": "f0ba7548b9029d5a7cf4d20442cb499a1dfc3112",
                 "shasum": ""
-            },
-            "require": {
-                "cspray/annotated-container": "dev-main"
             },
             "type": "library",
             "autoload": {
@@ -220,9 +217,9 @@
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
-                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.5.0"
+                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.5.1"
             },
-            "time": "2022-04-09T11:36:36+00:00"
+            "time": "2022-04-09T11:42:11+00:00"
         },
         {
             "name": "doctrine/instantiator",
