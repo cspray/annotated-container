@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "996b1b90818f548d481aa00a32516da3",
+    "content-hash": "184cd2cb5f8d8fa18d6cf36794e550a5",
     "packages": [
         {
             "name": "nikic/php-parser",
@@ -184,11 +184,20 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "dev-main",
+            "version": "0.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
+                "reference": "99098ec707300516a107395892af5188d0f4f449"
+            },
             "dist": {
-                "type": "path",
-                "url": "../annotated-container-dummy-apps",
-                "reference": "2769e2892c18bbcfc931ed3ead0280630d55df70"
+                "type": "zip",
+                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/99098ec707300516a107395892af5188d0f4f449",
+                "reference": "99098ec707300516a107395892af5188d0f4f449",
+                "shasum": ""
+            },
+            "require": {
+                "cspray/annotated-container": "dev-main"
             },
             "type": "library",
             "autoload": {
@@ -196,6 +205,7 @@
                     "Cspray\\AnnotatedContainer\\DummyApps\\": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -208,9 +218,11 @@
                 }
             ],
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
+                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.5.0"
+            },
+            "time": "2022-04-09T11:36:36+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -1517,16 +1529,16 @@
         },
         {
             "name": "sebastian/environment",
-            "version": "5.1.3",
+            "version": "5.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/environment.git",
-                "reference": "388b6ced16caa751030f6a69e588299fa09200ac"
+                "reference": "1b5dff7bb151a4db11d49d90e5408e4e938270f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/388b6ced16caa751030f6a69e588299fa09200ac",
-                "reference": "388b6ced16caa751030f6a69e588299fa09200ac",
+                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/1b5dff7bb151a4db11d49d90e5408e4e938270f7",
+                "reference": "1b5dff7bb151a4db11d49d90e5408e4e938270f7",
                 "shasum": ""
             },
             "require": {
@@ -1568,7 +1580,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/environment/issues",
-                "source": "https://github.com/sebastianbergmann/environment/tree/5.1.3"
+                "source": "https://github.com/sebastianbergmann/environment/tree/5.1.4"
             },
             "funding": [
                 {
@@ -1576,7 +1588,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-28T05:52:38+00:00"
+            "time": "2022-04-03T09:37:03+00:00"
         },
         {
             "name": "sebastian/exporter",
@@ -2308,9 +2320,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "cspray/annotated-container-dummy-apps": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
