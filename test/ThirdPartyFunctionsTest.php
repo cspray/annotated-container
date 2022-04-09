@@ -6,8 +6,6 @@ use Cspray\AnnotatedContainer\Internal\ArrayAnnotationValue;
 use Cspray\AnnotatedContainer\Internal\SingleAnnotationValue;
 use PHPUnit\Framework\TestCase;
 
-const ANNOTATED_CONTAINER_THIRD_PARTY_TEST = 'foobar';
-
 class ThirdPartyFunctionsTest extends TestCase {
 
     use ContainerDefinitionAssertionsTrait;
@@ -58,7 +56,7 @@ class ThirdPartyFunctionsTest extends TestCase {
     public function constantValueProvider() : array {
         return [
             [DummyApps\ClassConstantUseScalar\FooImplementation::class. '::VALUE'],
-            ['\\Cspray\\AnnotatedContainer\\ANNOTATED_CONTAINER_THIRD_PARTY_TEST']
+            ['\\Cspray\\AnnotatedContainer\\DummyApps\\ThirdPartyServices\\ANNOTATED_CONTAINER_THIRD_PARTY_TEST']
         ];
     }
 
@@ -79,7 +77,7 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testNotClassConstantValueRunTimeValue() {
-        $annotationValue = constantValue('\\Cspray\\AnnotatedContainer\\ANNOTATED_CONTAINER_THIRD_PARTY_TEST');
+        $annotationValue = constantValue('\\Cspray\\AnnotatedContainer\\DummyApps\\ThirdPartyServices\\ANNOTATED_CONTAINER_THIRD_PARTY_TEST');
 
         $this->assertSame('foobar', $annotationValue->getRuntimeValue());
     }

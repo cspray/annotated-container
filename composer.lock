@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be9512259e9e0349ccee0c4d8d27d509",
+    "content-hash": "ed1da31f1d0920fc577e6a4d7e16233f",
     "packages": [
         {
             "name": "nikic/php-parser",
@@ -184,20 +184,23 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.5.1",
+            "version": "0.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
-                "reference": "f0ba7548b9029d5a7cf4d20442cb499a1dfc3112"
+                "reference": "98d1fa517980f6ea4377f65d8a504d7dfb9365de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/f0ba7548b9029d5a7cf4d20442cb499a1dfc3112",
-                "reference": "f0ba7548b9029d5a7cf4d20442cb499a1dfc3112",
+                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/98d1fa517980f6ea4377f65d8a504d7dfb9365de",
+                "reference": "98d1fa517980f6ea4377f65d8a504d7dfb9365de",
                 "shasum": ""
             },
             "type": "library",
             "autoload": {
+                "files": [
+                    "src/ThirdPartyServices/constants.php"
+                ],
                 "psr-4": {
                     "Cspray\\AnnotatedContainer\\DummyApps\\": "src"
                 }
@@ -217,9 +220,9 @@
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
-                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.5.1"
+                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.5.2"
             },
-            "time": "2022-04-09T11:42:11+00:00"
+            "time": "2022-04-09T11:54:27+00:00"
         },
         {
             "name": "doctrine/instantiator",
