@@ -34,22 +34,14 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'name' => null,
             'type' => SimpleServices\FooInterface::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
         ];
         $expectedFooImplementation = [
             'name' => null,
             'type' => SimpleServices\FooImplementation::class,
-            'implementedServices' => [md5(SimpleServices\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -136,22 +128,14 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'name' => null,
             'type' => MultipleSimpleServices\FooInterface::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
         ];
         $expectedFooImplementation = [
             'name' => null,
             'type' => MultipleSimpleServices\FooImplementation::class,
-            'implementedServices' => [md5(MultipleSimpleServices\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -159,22 +143,14 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBarInterface = [
             'name' => null,
             'type' => MultipleSimpleServices\BarInterface::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
         ];
         $expectedBarImplementation = [
             'name' => null,
             'type' => MultipleSimpleServices\BarImplementation::class,
-            'implementedServices' => [md5(MultipleSimpleServices\BarInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -273,22 +249,14 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedAbstractFoo = [
             'name' => null,
             'type' => AbstractSharedServices\AbstractFoo::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
         ];
         $expectedFooImplementation = [
             'name' => null,
             'type' => AbstractSharedServices\FooImplementation::class,
-            'implementedServices' => [md5(AbstractSharedServices\AbstractFoo::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -379,22 +347,14 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'name' => null,
             'type' => InterfaceServicePrepare\FooInterface::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
         ];
         $expectedFooImplementation = [
             'name' => null,
             'type' => InterfaceServicePrepare\FooImplementation::class,
-            'implementedServices' => [md5(InterfaceServicePrepare\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -490,11 +450,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooImplementation = [
             'name' => null,
             'type' => SimpleUseScalar\FooImplementation::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -548,40 +504,28 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'method' => '__construct',
             'paramName' => 'stringParam',
             'paramType' => 'string',
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => 'string param test value'
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue('string param test value'))]
         ], $actual['injectScalarDefinitions']);
         $this->assertContains([
             'type' => SimpleUseScalar\FooImplementation::class,
             'method' => '__construct',
             'paramName' => 'intParam',
             'paramType' => 'int',
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => 42
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(42))]
         ], $actual['injectScalarDefinitions']);
         $this->assertContains([
             'type' => SimpleUseScalar\FooImplementation::class,
             'method' => '__construct',
             'paramName' => 'floatParam',
             'paramType' => 'float',
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => 42
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(42.0))]
         ], $actual['injectScalarDefinitions']);
         $this->assertContains([
             'type' => SimpleUseScalar\FooImplementation::class,
             'method' => '__construct',
             'paramName' => 'boolParam',
             'paramType' => 'bool',
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => true
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(true))]
         ], $actual['injectScalarDefinitions']);
 
         $expectedArrayParam = [
@@ -589,161 +533,13 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'method' => '__construct',
             'paramName' => 'arrayParam',
             'paramType' => 'array',
-            'value' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => [
-                    // String values
-                    [
-                        'type' => ArrayAnnotationValue::class,
-                        'items' => [
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 'a'
-                            ],
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 'b'
-                            ],
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 'c'
-                            ]
-                        ]
-                    ],
-                    // Int values
-                    [
-                        'type' => ArrayAnnotationValue::class,
-                        'items' => [
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 1
-                            ],
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 2
-                            ],
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 3
-                            ]
-                        ]
-                    ],
-                    // Float values
-                    [
-                        'type' => ArrayAnnotationValue::class,
-                        'items' => [
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 1.1
-                            ],
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 2.1
-                            ],
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => 3.1
-                            ]
-                        ]
-                    ],
-                    // Bool values
-                    [
-                        'type' => ArrayAnnotationValue::class,
-                        'items' => [
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => true
-                            ],
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => false
-                            ],
-                            [
-                                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                'value' => true
-                            ]
-                        ]
-                    ],
-                    // Nested Array values
-                    [
-                        'type' => ArrayAnnotationValue::class,
-                        'items' => [
-                            // String Nested Array values
-                            [
-                                'type' => ArrayAnnotationValue::class,
-                                'items' => [
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 'a'
-                                    ],
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 'b'
-                                    ],
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 'c'
-                                    ]
-                                ]
-                            ],
-                            // Int Nested Array values
-                            [
-                                'type' => ArrayAnnotationValue::class,
-                                'items' => [
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 1
-                                    ],
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 2,
-                                    ],
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 3
-                                    ]
-                                ]
-                            ],
-                            // Float Nested Array values
-                            [
-                                'type' => ArrayAnnotationValue::class,
-                                'items' => [
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 1.1
-                                    ],
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 2.1
-                                    ],
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => 3.1
-                                    ]
-                                ]
-                            ],
-                            // Bool Nested Array values
-                            [
-                                'type' => ArrayAnnotationValue::class,
-                                'items' => [
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => true
-                                    ],
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => false
-                                    ],
-                                    [
-                                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                                        'value' => true
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            'value' => ['annotationValue' => serialize(arrayValue([
+                ['a', 'b', 'c'],
+                [1, 2, 3],
+                [1.1, 2.1, 3.1],
+                [true, false, true],
+                [['a', 'b', 'c'], [1, 2, 3], [1.1, 2.1, 3.1], [true, false, true]]
+            ]))]
         ];
         $this->assertContains($expectedArrayParam, $actual['injectScalarDefinitions']);
     }
@@ -780,11 +576,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBarImplementation = [
             'name' => null,
             'type' => SimpleUseService\BarImplementation::class,
-            'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -794,11 +586,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedBazImplementation = [
             'name' => null,
             'type' => SimpleUseService\BazImplementation::class,
-            'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -808,11 +596,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedConstructorInjection = [
             'name' => null,
             'type' => SimpleUseService\ConstructorInjection::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -822,11 +606,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooInterface = [
             'name' => null,
             'type' => SimpleUseService\FooInterface::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
         ];
@@ -836,11 +616,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedSetterInjection = [
             'name' => null,
             'type' => SimpleUseService\SetterInjection::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -850,11 +626,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedQuxImplementation = [
             'name' => null,
             'type' => SimpleUseService\QuxImplementation::class,
-            'implementedServices' => [md5(SimpleUseService\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -945,60 +717,42 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'method' => '__construct',
             'paramName' => 'bar',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => SimpleUseService\BarImplementation::class
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(SimpleUseService\BarImplementation::class))]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => SimpleUseService\ConstructorInjection::class,
             'method' => '__construct',
             'paramName' => 'baz',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => SimpleUseService\BazImplementation::class
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(SimpleUseService\BazImplementation::class))]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => SimpleUseService\ConstructorInjection::class,
             'method' => '__construct',
             'paramName' => 'qux',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => SimpleUseService\QuxImplementation::class
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(SimpleUseService\QuxImplementation::class))]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => DummyApps\SimpleUseService\SetterInjection::class,
             'method' => 'setBaz',
             'paramName' => 'foo',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => SimpleUseService\BazImplementation::class
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(SimpleUseService\BazImplementation::class))]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => DummyApps\SimpleUseService\SetterInjection::class,
             'method' => 'setBar',
             'paramName' => 'foo',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => SimpleUseService\BarImplementation::class
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(SimpleUseService\BarImplementation::class))]
         ], $actual['injectServiceDefinitions']);
         $this->assertContains([
             'type' => DummyApps\SimpleUseService\SetterInjection::class,
             'method' => 'setQux',
             'paramName' => 'foo',
             'paramType' => SimpleUseService\FooInterface::class,
-            'value' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => SimpleUseService\QuxImplementation::class
-            ]
+            'value' => ['annotationValue' => serialize(scalarValue(SimpleUseService\QuxImplementation::class))]
         ], $actual['injectServiceDefinitions']);
 
     }
@@ -1025,11 +779,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedServiceInterface = [
             'name' => null,
             'type' => ServiceDelegate\ServiceInterface::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
         ];
@@ -1039,11 +789,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooService = [
             'name' => null,
             'type' => ServiceDelegate\FooService::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
             'isConcrete' => true
         ];
@@ -1246,48 +992,21 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertContains([
             'name' => null,
             'type' => DummyApps\ProfileResolvedServices\DevFooImplementation::class,
-            'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => [
-                    [
-                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                        'value' => 'dev'
-                    ]
-                ]
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue(['dev']))],
             'isAbstract' => false,
             'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
         $this->assertContains([
             'name' => null,
             'type' => DummyApps\ProfileResolvedServices\TestFooImplementation::class,
-            'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => [
-                    [
-                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                        'value' => 'test'
-                    ]
-                ]
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue(['test']))],
             'isAbstract' => false,
             'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
         $this->assertContains([
             'name' => null,
             'type' => DummyApps\ProfileResolvedServices\ProdFooImplementation::class,
-            'implementedServices' => [md5(DummyApps\ProfileResolvedServices\FooInterface::class)],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => [
-                    [
-                        'type' => CompileEqualsRuntimeAnnotationValue::class,
-                        'value' => 'prod'
-                    ]
-                ]
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue(['prod']))],
             'isAbstract' => false,
             'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
@@ -1301,16 +1020,9 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
         $json = json_decode($serializer->serialize($containerDefinition), true);
         $this->assertContains([
-            'name' => [
-                'type' => CompileEqualsRuntimeAnnotationValue::class,
-                'value' => 'foo'
-            ],
+            'name' => ['annotationValue' => serialize(scalarValue('foo'))],
             'type' => DummyApps\NamedService\FooInterface::class,
-            'implementedServices' => [],
-            'profiles' => [
-                'type' => ArrayAnnotationValue::class,
-                'items' => []
-            ],
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
             'isConcrete' => false
         ], $json['compiledServiceDefinitions']);

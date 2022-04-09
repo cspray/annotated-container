@@ -3,8 +3,9 @@
 namespace Cspray\AnnotatedContainer\Internal;
 
 use Cspray\AnnotatedContainer\AnnotationValue;
-use Cspray\AnnotatedContainer\ArrayAnnotationValue;
-use Cspray\AnnotatedContainer\CompileEqualsRuntimeAnnotationValue;
+use Cspray\AnnotatedContainer\CollectionAnnotationValue;
+use function Cspray\AnnotatedContainer\arrayValue;
+use function Cspray\AnnotatedContainer\scalarValue;
 
 /**
  * @Internal
@@ -17,16 +18,12 @@ final class AnnotationArguments {
         $this->map[$key] = $value;
     }
 
-    public function get(string $key, string|int|float|bool|array $default = null) : AnnotationValue {
-        if (!isset($this->map[$key])) {
+    public function get(string $key, string|int|float|bool|array $default = null) : AnnotationValue|CollectionAnnotationValue {
+        if (!$this->has($key)) {
             if (is_array($default)) {
-                $values = [];
-                foreach ($default as $value) {
-                    $values[] = new CompileEqualsRuntimeAnnotationValue($value);
-                }
-                return new ArrayAnnotationValue(...$values);
+                return arrayValue($default);
             } else if (!is_null($default)) {
-                return new CompileEqualsRuntimeAnnotationValue($default);
+                return scalarValue($default);
             } else {
                 throw new \RuntimeException('Provided a default null value for a key that is not present');
             }

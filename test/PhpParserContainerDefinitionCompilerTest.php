@@ -512,6 +512,33 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertNull($fooImplementationService->getName());
     }
 
+    public function testServicesAddedFromAnnotationAndContextConsumerHaveServiceDefinitions() {
+        $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ThirdPartyServices')
+            ->withContainerDefinitionBuilderContextConsumer(new CallableContainerDefinitionBuilderContextConsumer(function($context) {
+                service($context, DummyApps\ThirdPartyServices\FooImplementation::class);
+            }))
+            ->build();
+        $containerDefinition = $this->subject->compile($compilerOptions);
+
+        $this->assertServiceDefinitionsHaveTypes([
+            DummyApps\ThirdPartyServices\FooInterface::class,
+            DummyApps\ThirdPartyServices\FooImplementation::class
+        ], $containerDefinition->getServiceDefinitions());
+    }
+
+    public function testServicesAddedFromAnnotationAndContextConsumerHaveAliasDefinitions() {
+        $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ThirdPartyServices')
+            ->withContainerDefinitionBuilderContextConsumer(new CallableContainerDefinitionBuilderContextConsumer(function($context) {
+                service($context, DummyApps\ThirdPartyServices\FooImplementation::class);
+            }))
+            ->build();
+        $containerDefinition = $this->subject->compile($compilerOptions);
+
+        $this->assertAliasDefinitionsMap([
+            [DummyApps\ThirdPartyServices\FooInterface::class, DummyApps\ThirdPartyServices\FooImplementation::class]
+        ], $containerDefinition->getAliasDefinitions());
+    }
+
     protected function assertInjectScalarDefinitions(array $expectedMethods, array $injectScalarDefinitions) : void {
         if (($countExpected = count($expectedMethods)) !== ($countActual = count($injectScalarDefinitions))) {
             $this->fail("Expected ${countExpected} InjectScalarDefinition but received ${countActual}");

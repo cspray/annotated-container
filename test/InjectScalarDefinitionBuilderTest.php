@@ -33,7 +33,7 @@ class InjectScalarDefinitionBuilderTest extends TestCase {
     public function testWithValueImmutableBuilder() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
         $builder1 = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct');
-        $builder2 = $builder1->withValue(new CompileEqualsRuntimeAnnotationValue('something'));
+        $builder2 = $builder1->withValue(scalarValue('something'));
 
         $this->assertNotSame($builder1, $builder2);
     }
@@ -58,7 +58,7 @@ class InjectScalarDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
         $injectScalarDefinition = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::String, 'stringParam')
-            ->withValue(new CompileEqualsRuntimeAnnotationValue('string param value'))
+            ->withValue(scalarValue('string param value'))
             ->build();
 
         $this->assertSame($serviceDefinition, $injectScalarDefinition->getService());
@@ -68,7 +68,7 @@ class InjectScalarDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
         $injectScalarDefinition = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::String, 'stringParam')
-            ->withValue(new CompileEqualsRuntimeAnnotationValue('string param value'))
+            ->withValue(scalarValue('string param value'))
             ->build();
 
         $this->assertSame('__construct', $injectScalarDefinition->getMethod());
@@ -78,7 +78,7 @@ class InjectScalarDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
         $injectScalarDefinition = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::String, 'stringParam')
-            ->withValue(new CompileEqualsRuntimeAnnotationValue('string param value'))
+            ->withValue(scalarValue('string param value'))
             ->build();
 
         $this->assertSame(ScalarType::String, $injectScalarDefinition->getParamType());
@@ -88,7 +88,7 @@ class InjectScalarDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
         $injectScalarDefinition = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::String, 'stringParam')
-            ->withValue(new CompileEqualsRuntimeAnnotationValue('string param value'))
+            ->withValue(scalarValue('string param value'))
             ->build();
 
         $this->assertSame('stringParam', $injectScalarDefinition->getParamName());
@@ -98,7 +98,7 @@ class InjectScalarDefinitionBuilderTest extends TestCase {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleUseScalar\FooImplementation::class)->build();
         $injectScalarDefinition = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
             ->withParam(ScalarType::String, 'stringParam')
-            ->withValue(new CompileEqualsRuntimeAnnotationValue('string param value'))
+            ->withValue(scalarValue('string param value'))
             ->build();
 
         $this->assertSame('string param value', $injectScalarDefinition->getValue()->getCompileValue());

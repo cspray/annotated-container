@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Attribute\InjectEnv;
 use Cspray\AnnotatedContainer\Attribute\InjectService;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
@@ -54,14 +53,32 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
 
-        $aggregatedMap = $this->parseDirectories($containerDefinitionCompileOptions->getScanDirectories());
+        $annotationDetailsList = $this->parseDirectories($containerDefinitionCompileOptions->getScanDirectories());
 
-        $containerDefinitionBuilder = $this->addAllServiceDefinitions($containerDefinitionBuilder, $aggregatedMap);
-        $containerDefinitionBuilder = $this->addAllAliasDefinitions($containerDefinitionBuilder, $aggregatedMap);
-        $containerDefinitionBuilder = $this->addAllServicePrepareDefinitions($containerDefinitionBuilder, $aggregatedMap);
-        $containerDefinitionBuilder = $this->addAllServiceDelegateDefinitions($containerDefinitionBuilder, $aggregatedMap);
-        $containerDefinitionBuilder = $this->addAllInjectScalarDefinitions($containerDefinitionBuilder, $aggregatedMap);
-        $containerDefinitionBuilder = $this->addAllInjectServiceDefinitions($containerDefinitionBuilder, $aggregatedMap);
+        $containerDefinitionBuilder = $this->addAllServiceDefinitions($containerDefinitionBuilder, $annotationDetailsList);
+        $containerDefinitionBuilder = $this->addAllServicePrepareDefinitions($containerDefinitionBuilder, $annotationDetailsList);
+        $containerDefinitionBuilder = $this->addAllServiceDelegateDefinitions($containerDefinitionBuilder, $annotationDetailsList);
+        $containerDefinitionBuilder = $this->addAllInjectScalarDefinitions($containerDefinitionBuilder, $annotationDetailsList);
+        $containerDefinitionBuilder = $this->addAllInjectServiceDefinitions($containerDefinitionBuilder, $annotationDetailsList);
+
+        $contextConsumer = $containerDefinitionCompileOptions->getContainerDefinitionBuilderContextConsumer();
+        if (isset($contextConsumer)) {
+            $context = new class($containerDefinitionBuilder) implements ContainerDefinitionBuilderContext {
+
+                public function __construct(private ContainerDefinitionBuilder $containerDefinitionBuilder) {}
+
+                public function getBuilder() : ContainerDefinitionBuilder {
+                    return $this->containerDefinitionBuilder;
+                }
+
+                public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) {
+                    $this->containerDefinitionBuilder = $containerDefinitionBuilder;
+                }
+            };
+            $contextConsumer->consume($context);
+            $containerDefinitionBuilder = $context->getBuilder();
+        }
+        $containerDefinitionBuilder = $this->addAllAliasDefinitions($containerDefinitionBuilder);
 
         return $containerDefinitionBuilder->build();
     }
@@ -94,79 +111,50 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     }
 
     private function addAllServiceDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList): ContainerDefinitionBuilder {
-        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $serviceAnnotationDetails) {
-            $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($this->getServiceDefinition($annotationDetailsList, $serviceAnnotationDetails->getReflection()->getName()));
+        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $annotationDetails) {
+            if ($annotationDetails->getReflection()->isAbstract() || $annotationDetails->getReflection()->isInterface()) {
+                $serviceDefinitionBuilder = ServiceDefinitionBuilder::forAbstract($annotationDetails->getReflection()->getName());
+            } else {
+                $isPrimary = $annotationDetails->getAnnotationArguments()->get('primary', false)->getCompileValue();
+                $serviceDefinitionBuilder = ServiceDefinitionBuilder::forConcrete($annotationDetails->getReflection()->getName(), $isPrimary);
+            }
+
+            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', []));
+
+            if ($annotationDetails->getAnnotationArguments()->has('name')) {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($annotationDetails->getAnnotationArguments()->get('name'));
+            }
+
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinitionBuilder->build());
         }
+
         return $containerDefinitionBuilder;
     }
 
-    private function getServiceDefinition(AnnotationDetailsList $annotationDetailsList, string $serviceType): ?ServiceDefinition {
-        static $serviceDefinitions = [];
-        if (!isset($serviceDefinitions[$serviceType])) {
-            foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $annotationDetails) {
-                if ($annotationDetails->getReflection()->getName() === $serviceType) {
-                    if ($annotationDetails->getReflection()->isAbstract() || $annotationDetails->getReflection()->isInterface()) {
-                        $serviceDefinitionBuilder = ServiceDefinitionBuilder::forAbstract($annotationDetails->getReflection()->getName());
-                    } else {
-                        $isPrimary = $annotationDetails->getAnnotationArguments()->get('primary', false)->getCompileValue();
-                        $serviceDefinitionBuilder = ServiceDefinitionBuilder::forConcrete($annotationDetails->getReflection()->getName(), $isPrimary);
+    private function addAllAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder) : ContainerDefinitionBuilder {
+        $serviceDefinitions = $containerDefinitionBuilder->getServiceDefinitions();
+        $concreteServices = array_filter($serviceDefinitions, fn(ServiceDefinition $serviceDefinition) => $serviceDefinition->isConcrete());
+        $abstractServices = array_filter($serviceDefinitions, fn(ServiceDefinition $serviceDefinition) => $serviceDefinition->isAbstract());
 
-                        $parent = $annotationDetails->getReflection()->getParentClass();
-                        if ($parent) {
-                            $extendedServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $parent->getName());
-                            if (!is_null($extendedServiceDefinition)) {
-                                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($extendedServiceDefinition);
-                            }
-                        }
-
-                        foreach ($annotationDetails->getReflection()->getInterfaceNames() as $interfaceName) {
-                            $implementServiceDefinition = $this->getServiceDefinition($annotationDetailsList, $interfaceName);
-                            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withImplementedService($implementServiceDefinition);
-                        }
-                    }
-
-                    $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', []));
-
-                    if ($annotationDetails->getAnnotationArguments()->has('name')) {
-                        $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($annotationDetails->getAnnotationArguments()->get('name'));
-                    }
-
-                    $serviceDefinitions[$serviceType] = $serviceDefinitionBuilder->build();
-                    break;
-                }
-            }
-        }
-
-        return $serviceDefinitions[$serviceType] ?? null;
-    }
-
-    private function addAllAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList): ContainerDefinitionBuilder {
-        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $serviceAnnotationDetails) {
-            if (!$serviceAnnotationDetails->getReflection()->isInterface() && !$serviceAnnotationDetails->getReflection()->isAbstract()) {
-                continue;
-            }
-
-            foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::Service) as $sd) {
-                if ($sd->getReflection()->isSubclassOf($serviceAnnotationDetails->getReflection())) {
+        foreach ($abstractServices as $abstractService) {
+            $abstractType = $abstractService->getType();
+            foreach ($concreteServices as $concreteService) {
+                $classImplementsOrExtends = array_merge([], class_implements($concreteService->getType()), class_parents($concreteService->getType()));
+                if (in_array($abstractType, $classImplementsOrExtends)) {
                     $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition(
-                        AliasDefinitionBuilder::forAbstract(
-                            $this->getServiceDefinition($annotationDetailsList, $serviceAnnotationDetails->getReflection()->getName())
-                        )->withConcrete(
-                            $this->getServiceDefinition($annotationDetailsList, $sd->getReflection()->getName())
-                        )->build()
+                        AliasDefinitionBuilder::forAbstract($abstractService)->withConcrete($concreteService)->build()
                     );
                 }
             }
-
         }
 
         return $containerDefinitionBuilder;
     }
 
-    private function addAllServicePrepareDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList): ContainerDefinitionBuilder {
+    private function addAllServicePrepareDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
         foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServicePrepare) as $annotationDetails) {
             $reflection = $annotationDetails->getReflection();
-            $serviceDefinition = $this->getServiceDefinition($annotationDetailsList, $reflection->getDeclaringClass()->getName());
+            $serviceDefinition = $containerDefinitionBuilder->getServiceDefinition($reflection->getDeclaringClass()->getName());
             if (is_null($serviceDefinition)) {
                 throw new InvalidAnnotationException(sprintf(
                     'The #[ServicePrepare] Attribute on %s::%s is not on a type marked as a #[Service].',
@@ -174,10 +162,9 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                     $reflection->getName()
                 ));
             }
-            foreach ($serviceDefinition->getImplementedServices() as $implementedService) {
-                if ($this->doesServiceDefinitionHavePrepare($annotationDetailsList, $implementedService, $reflection->getName())) {
-                    continue 2;
-                }
+
+            if ($serviceDefinition->isConcrete() && $this->doesServiceDefinitionHaveAbstractPrepare($annotationDetailsList, $serviceDefinition, $reflection->getName())) {
+                continue;
             }
 
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServicePrepareDefinition(
@@ -188,37 +175,38 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         return $containerDefinitionBuilder;
     }
 
-    private function doesServiceDefinitionHavePrepare(AnnotationDetailsList $annotationDetailsList, ServiceDefinition $serviceDefinition, string $method): bool {
+    private function doesServiceDefinitionHaveAbstractPrepare(AnnotationDetailsList $annotationDetailsList, ServiceDefinition $serviceDefinition, string $method) : bool {
+        $concreteType = $serviceDefinition->getType();
+        $classInterfaces = class_implements($concreteType);
+        if (empty($classInterfaces)) {
+            return false;
+        }
+
         foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServicePrepare) as $annotationDetails) {
-            if ($serviceDefinition->getType() === $annotationDetails->getReflection()->getDeclaringClass()->getName() && $annotationDetails->getReflection()->getName() === $method) {
+            if (!$annotationDetails->getReflection()->getDeclaringClass()->isAbstract() && !$annotationDetails->getReflection()->getDeclaringClass()->isInterface()) {
+                continue;
+            }
+            $abstractType = $annotationDetails->getReflection()->getDeclaringClass()->getName();
+            if (in_array($abstractType, $classInterfaces)) {
                 return true;
             }
         }
         return false;
     }
 
-    private function addAllInjectScalarDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList): ContainerDefinitionBuilder {
-        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::InjectScalar) as $annotationDetails) {
+    private function addAllInjectScalarDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
+        $injects = array_merge(
+            [],
+            $annotationDetailsList->getSubsetForAttributeType(AttributeType::InjectScalar),
+            $annotationDetailsList->getSubsetForAttributeType(AttributeType::InjectEnv)
+        );
+        foreach ($injects as $annotationDetails) {
             /** @var ReflectionParameter $reflection */
             $reflection = $annotationDetails->getReflection();
-            $reflectionClass = $reflection->getDeclaringClass();
+            $serviceDefinition = $containerDefinitionBuilder->getServiceDefinition($reflection->getDeclaringClass()->getName());
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
-                InjectScalarDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
+                InjectScalarDefinitionBuilder::forMethod($serviceDefinition, $reflection->getDeclaringFunction()->getName())
                     ->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
-                    ->withValue($annotationDetails->getAnnotationArguments()->get('value'))
-                    ->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', []))
-                    ->build()
-            );
-        }
-
-        foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::InjectEnv) as $annotationDetails) {
-            /** @var ReflectionParameter $reflection */
-            $reflection = $annotationDetails->getReflection();
-            $reflectionClass = $reflection->getDeclaringClass();
-            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
-                InjectScalarDefinitionBuilder::forMethod(
-                    $this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName()
-                )->withParam(ScalarType::fromName($reflection->getType()->getName()), $reflection->getName())
                     ->withValue($annotationDetails->getAnnotationArguments()->get('value'))
                     ->withProfiles($annotationDetails->getAnnotationArguments()->get('profiles', []))
                     ->build()
@@ -228,19 +216,15 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         return $containerDefinitionBuilder;
     }
 
-    private function addAllInjectServiceDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList): ContainerDefinitionBuilder {
+    private function addAllInjectServiceDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
         foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::InjectService) as $annotationDetails) {
             /** @var ReflectionParameter $reflection */
             $reflection = $annotationDetails->getReflection();
-            $reflectionClass = $reflection->getDeclaringClass();
+            $serviceDefinition = $containerDefinitionBuilder->getServiceDefinition($reflection->getDeclaringClass()->getName());
             /** @var InjectService $injectService */
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectServiceDefinition(
-                InjectServiceDefinitionBuilder::forMethod($this->getServiceDefinition($annotationDetailsList, $reflectionClass->getName()), $reflection->getDeclaringFunction()->getName())
+                InjectServiceDefinitionBuilder::forMethod($serviceDefinition, $reflection->getDeclaringFunction()->getName())
                     ->withParam($reflection->getType()->getName(), $reflection->getName())
-                    // Normally we wouldn't use getRuntimeValue here, but we're in a unique situation with the InjectService
-                    // where we currently need to have a valid ServiceDefinition.It might be useful to refactor the InjectServiceDefinition
-                    // to return an AnnotationValue for the service type, as it is more semantic and wouldn't require having the
-                    // runtime value for an annotation argument be required
                     ->withInjectedService($annotationDetails->getAnnotationArguments()->get('name'))
                     ->build()
             );
@@ -249,16 +233,18 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
         return $containerDefinitionBuilder;
     }
 
-    private function addAllServiceDelegateDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList): ContainerDefinitionBuilder {
+    private function addAllServiceDelegateDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, AnnotationDetailsList $annotationDetailsList) : ContainerDefinitionBuilder {
         foreach ($annotationDetailsList->getSubsetForAttributeType(AttributeType::ServiceDelegate) as $annotationDetails) {
             $reflection = $annotationDetails->getReflection();
-            $serviceDefinition = $this->getServiceDefinition($annotationDetailsList, $annotationDetails->getAnnotationArguments()->get('service')->getCompileValue());
+            $serviceName = $annotationDetails->getAnnotationArguments()->get('service')->getCompileValue();
+            $serviceDefinition = $containerDefinitionBuilder->getServiceDefinition($serviceName);
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition(
                 ServiceDelegateDefinitionBuilder::forService($serviceDefinition)
                     ->withDelegateMethod($reflection->getDeclaringClass()->getName(), $reflection->getName())
                     ->build()
             );
         }
+
         return $containerDefinitionBuilder;
     }
 

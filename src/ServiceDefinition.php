@@ -10,7 +10,7 @@ namespace Cspray\AnnotatedContainer;
 interface ServiceDefinition {
 
     /**
-     * @return string|null
+     * @return AnnotationValue|null
      */
     public function getName() : ?AnnotationValue;
 
@@ -22,24 +22,14 @@ interface ServiceDefinition {
     public function getType() : string;
 
     /**
-     * Returns an array of ServiceDefinition for each Service interface or abstract class implemented.
-     *
-     * Please note that this IS NOT an exhaustive list of every possible interface for the given $type. Instead, it only
-     * lists those interfaces or abstract classes that the $type implements that are also annotated with the Service attribute.
-     *
-     * @return ServiceDefinition[]
-     */
-    public function getImplementedServices() : array;
-
-    /**
      * Returns an array of profiles that this service is attached to.
      *
      * A ServiceDefinition MUST have at least 1 profile; if a profile is not explicitly set for a given Service it should
      * be given the 'default' profile.
      *
-     * @return AnnotationValue
+     * @return CollectionAnnotationValue
      */
-    public function getProfiles() : AnnotationValue;
+    public function getProfiles() : CollectionAnnotationValue;
 
     /**
      * Return whether the Service is the Primary for this type and will be used by default if there are multiple aliases

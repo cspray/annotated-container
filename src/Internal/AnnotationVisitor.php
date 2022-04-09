@@ -3,11 +3,7 @@
 namespace Cspray\AnnotatedContainer\Internal;
 
 use Cspray\AnnotatedContainer\AnnotationValue;
-use Cspray\AnnotatedContainer\ArrayAnnotationValue;
 use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\CompileEqualsRuntimeAnnotationValue;
-use Cspray\AnnotatedContainer\ConstantAnnotationValue;
-use Cspray\AnnotatedContainer\EnvironmentVariableAnnotationValue;
 use PhpParser\ConstExprEvaluationException;
 use PhpParser\ConstExprEvaluator;
 use PhpParser\Node;
@@ -19,6 +15,10 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 use SplFileInfo;
+use function Cspray\AnnotatedContainer\arrayValue;
+use function Cspray\AnnotatedContainer\constantValue;
+use function Cspray\AnnotatedContainer\envValue;
+use function Cspray\AnnotatedContainer\scalarValue;
 
 /**
  * @Internal
@@ -81,6 +81,11 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
         }
     }
 
+    /**
+     * @param string $attributeType
+     * @param AttributeGroup ...$attributeGroups
+     * @return Attribute[]
+     */
     private function findAttributes(string $attributeType, AttributeGroup... $attributeGroups) : array {
         $attributes = [];
         foreach ($attributeGroups as $attributeGroup) {
@@ -137,7 +142,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
                     if ($const === 'class') {
                         // When you call Object::class the node becomes a ClassConstFetch with the class constant understood to be
                         // a "magic" constant that corresponds to the type that is being called on.
-                        return new CompileEqualsRuntimeAnnotationValue($type);
+                        return scalarValue($type);
                     } else {
                         // We are intentionally deferring the evaluation of the constant expression here until runtime when the
                         // Injector is instantiated because the constant being evaluated may not actually be loaded within the
@@ -146,11 +151,11 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
                         // in different environments. If environment values are encapsulated in constants not deferring could also
                         // pose a potential security risk as those potentially sensitive values would be stored in plaintext in the
                         // serialization of the ContainerDefinition
-                        return new ConstantAnnotationValue("$type::$const");
+                        return constantValue("$type::$const");
                     }
                 } else if ($expr instanceof Node\Expr\ConstFetch) {
                     $constName = $expr->name->getAttribute('namespacedName')->toString();
-                    return new ConstantAnnotationValue($constName);
+                    return constantValue($constName);
                 }
 
                 throw new ConstExprEvaluationException("Expression of type {$expr->getType()} cannot be evaluated.");
@@ -159,7 +164,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
 
         // If the value doesn't have a name then the $arg node must equal the first argument
         if ($attributeType === AttributeType::InjectEnv && ((!isset($arg->name) && $arg === $attribute->args[0]) || (isset($arg->name) && $arg->name === 'value'))) {
-            return new EnvironmentVariableAnnotationValue($arg->value->value);
+            return envValue($arg->value->value);
         }
 
         if (
@@ -167,21 +172,21 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
             $arg->value instanceof Node\Scalar\LNumber ||
             $arg->value instanceof Node\Scalar\DNumber
         ) {
-            $value = new CompileEqualsRuntimeAnnotationValue($arg->value->value);
+            $value = scalarValue($arg->value->value);
         } else if ($arg->value instanceof Node\Expr\ConstFetch || $arg->value instanceof Node\Expr\ClassConstFetch) {
             $value = $constEvaluator->evaluateDirectly($arg->value);
             if (!$value instanceof AnnotationValue) {
-                $value = new CompileEqualsRuntimeAnnotationValue($value);
+                $value = scalarValue($value);
             }
         } else if ($arg->value instanceof Node\Expr\UnaryMinus) {
-            $value = new CompileEqualsRuntimeAnnotationValue($arg->value->expr->value * -1);
+            $value = scalarValue(-($arg->value->expr->value));
         } else if ($arg->value instanceof Node\Expr\Array_) {
             $value = [];
             /** @var Node\Expr\ArrayItem $arrayItem */
             foreach ($arg->value->items as $arrayItem) {
                 $value[] = $this->getAttributeArgumentValue($attributeType, $attribute, $arrayItem);
             }
-            $value = new ArrayAnnotationValue(...$value);
+            $value = arrayValue($value);
         } else {
             $value = null;
         }
