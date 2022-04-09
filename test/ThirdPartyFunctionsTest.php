@@ -10,6 +10,15 @@ class ThirdPartyFunctionsTest extends TestCase {
 
     use ContainerDefinitionAssertionsTrait;
 
+    protected function setUp(): void {
+        putenv('ANNOTATED_CONTAINER_TEST_ENV=test-value');
+    }
+
+    protected function tearDown(): void {
+        putenv('ANNOTATED_CONTAINER_TEST_ENV');
+    }
+
+
     public function scalarValueProvider() : array {
         return [
             ['foo'],
@@ -97,24 +106,24 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testEnvValueCompileValue() {
-        $annotationValue = envValue('USER');
+        $annotationValue = envValue('ANNOTATED_CONTAINER_TEST_ENV');
 
-        $this->assertSame('USER', $annotationValue->getCompileValue());
+        $this->assertSame('ANNOTATED_CONTAINER_TEST_ENV', $annotationValue->getCompileValue());
     }
 
     public function testEnvValueRuntimeValue() {
-        $annotationValue = envValue('USER');
+        $annotationValue = envValue('ANNOTATED_CONTAINER_TEST_ENV');
 
-        $this->assertSame(get_current_user(), $annotationValue->getRuntimeValue());
+        $this->assertSame('test-value', $annotationValue->getRuntimeValue());
     }
 
     public function testEnvValueSerializeAndUnserialize() {
-        $annotationValue = envValue('USER');
+        $annotationValue = envValue('ANNOTATED_CONTAINER_TEST_ENV');
 
         $serialized = serialize($annotationValue);
         $unserialize = unserialize($serialized);
 
-        $this->assertSame('USER', $unserialize->getCompileValue());
+        $this->assertSame('ANNOTATED_CONTAINER_TEST_ENV', $unserialize->getCompileValue());
     }
 
     public function testScalarCollectionConvertedToAnnotationValues() {
@@ -163,7 +172,7 @@ class ThirdPartyFunctionsTest extends TestCase {
 
     public function testRespectsValuesAlreadyAnnotationValues() {
         $fooValue = constantValue(DummyApps\ClassConstantUseScalar\FooImplementation::class . '::VALUE');
-        $barValue = envValue('USER');
+        $barValue = envValue('ANNOTATED_CONTAINER_TEST_ENV');
         $bazValue = scalarValue('foobar');
         $annotationValue = arrayValue([
             'foo' => $fooValue,
@@ -195,7 +204,7 @@ class ThirdPartyFunctionsTest extends TestCase {
 
     public function testArrayRuntimeValues() {
         $fooValue = constantValue(DummyApps\ClassConstantUseScalar\FooImplementation::class . '::VALUE');
-        $barValue = envValue('USER');
+        $barValue = envValue('ANNOTATED_CONTAINER_TEST_ENV');
         $bazValue = scalarValue('foobar');
         $annotationValue = arrayValue([
             'foo' => $fooValue,
@@ -205,7 +214,7 @@ class ThirdPartyFunctionsTest extends TestCase {
 
         $expected = [
             'foo' => DummyApps\ClassConstantUseScalar\FooImplementation::VALUE,
-            'bar' => get_current_user(),
+            'bar' => 'test-value',
             'baz' => 'foobar'
         ];
         $this->assertSame($expected, $annotationValue->getRuntimeValue());
