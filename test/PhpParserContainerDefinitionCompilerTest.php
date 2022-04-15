@@ -504,4 +504,18 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             [DummyApps\ThirdPartyServices\FooInterface::class, DummyApps\ThirdPartyServices\FooImplementation::class]
         ], $containerDefinition->getAliasDefinitions());
     }
+
+    public function testServiceDefinitionsAreSharedByDefault() {
+        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleServices');
+
+        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooInterface::class);
+        $this->assertTrue($serviceDefinition?->isShared());
+    }
+
+    public function testNonSharedServiceDefinitionNotShared() {
+        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/NonSharedService') ;
+
+        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\NonSharedService\FooImplementation::class);
+        $this->assertFalse($serviceDefinition?->isShared());
+    }
 }

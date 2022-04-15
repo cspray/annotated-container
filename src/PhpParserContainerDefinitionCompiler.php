@@ -125,6 +125,12 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
                 $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($annotationDetails->getAnnotationArguments()->get('name'));
             }
 
+            if ($annotationDetails->getAnnotationArguments()->get('shared', true)->getCompileValue()) {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withShared();
+            } else {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withNotShared();
+            }
+
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinitionBuilder->build());
         }
 
