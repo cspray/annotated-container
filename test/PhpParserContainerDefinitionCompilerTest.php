@@ -252,15 +252,6 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             ]
         ], $injectorDefinition->getInjectScalarDefinitions());
 
-        $this->assertInjectScalarDefinitions([
-            // all of our parameters are in the same method so we'd expect to see this 5 times
-            SimpleUseScalar\FooImplementation::class . '::__construct',
-            SimpleUseScalar\FooImplementation::class . '::__construct',
-            SimpleUseScalar\FooImplementation::class . '::__construct',
-            SimpleUseScalar\FooImplementation::class . '::__construct',
-            SimpleUseScalar\FooImplementation::class . '::__construct'
-        ], $injectorDefinition->getInjectScalarDefinitions());
-
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
@@ -275,11 +266,6 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             NegativeNumberUseScalar\FooImplementation::class . '::__construct(floatParam)|' => -42.0,
         ], $injectorDefinition->getInjectScalarDefinitions());
 
-        $this->assertInjectScalarDefinitions([
-            // all of our parameters are in the same method so we'd expect to see this 2 times
-            NegativeNumberUseScalar\FooImplementation::class . '::__construct',
-            NegativeNumberUseScalar\FooImplementation::class . '::__construct'
-        ], $injectorDefinition->getInjectScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
@@ -295,12 +281,6 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
             MultipleUseScalars\FooImplementation::class . '::__construct(stringParam)|' => 'constructor param',
             MultipleUseScalars\FooImplementation::class . '::setUp(stringParam)|' => 'prepare param',
         ], $injectorDefinition->getInjectScalarDefinitions());
-
-        $this->assertInjectScalarDefinitions([
-            // all of our parameters are in the same method so we'd expect to see this 2 times
-            MultipleUseScalars\FooImplementation::class . '::__construct',
-            MultipleUseScalars\FooImplementation::class . '::setUp'
-        ], $injectorDefinition->getInjectScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
@@ -312,11 +292,6 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertInjectScalarParamValues([
             ClassConstantUseScalar\FooImplementation::class . '::__construct(val)|' => 'Cspray\AnnotatedContainer\DummyApps\ClassConstantUseScalar\FooImplementation::VALUE',
-        ], $injectorDefinition->getInjectScalarDefinitions());
-
-        $this->assertInjectScalarDefinitions([
-            // all of our parameters are in the same method so we'd expect to see this 2 times
-            ClassConstantUseScalar\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getInjectScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
@@ -331,10 +306,6 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertInjectScalarParamValues([
             ConstantUseScalar\FooImplementation::class . '::__construct(val)|' => 'Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar\FOO_BAR',
         ], $injectorDefinition->getInjectScalarDefinitions());
-
-        $this->assertInjectScalarDefinitions([
-            ConstantUseScalar\FooImplementation::class . '::__construct',
-        ], $injectorDefinition->getInjectScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
 
@@ -346,11 +317,6 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
         $this->assertInjectScalarParamValues([
             SimpleUseScalarFromEnv\FooImplementation::class . '::__construct(user)|' => 'USER',
-        ], $injectorDefinition->getInjectScalarDefinitions());
-
-        $this->assertInjectScalarDefinitions([
-            // all of our parameters are in the same method so we'd expect to see this 2 times
-            SimpleUseScalarFromEnv\FooImplementation::class . '::__construct',
         ], $injectorDefinition->getInjectScalarDefinitions());
         $this->assertEmpty($injectorDefinition->getInjectServiceDefinitions());
     }
@@ -537,18 +503,5 @@ class PhpParserContainerDefinitionCompilerTest extends TestCase {
         $this->assertAliasDefinitionsMap([
             [DummyApps\ThirdPartyServices\FooInterface::class, DummyApps\ThirdPartyServices\FooImplementation::class]
         ], $containerDefinition->getAliasDefinitions());
-    }
-
-    protected function assertInjectScalarDefinitions(array $expectedMethods, array $injectScalarDefinitions) : void {
-        if (($countExpected = count($expectedMethods)) !== ($countActual = count($injectScalarDefinitions))) {
-            $this->fail("Expected ${countExpected} InjectScalarDefinition but received ${countActual}");
-        }
-
-        $actualMethods = [];
-        foreach ($injectScalarDefinitions as $injectScalarDefinition) {
-            $actualMethods[] = $injectScalarDefinition->getService()->getType() . "::" . $injectScalarDefinition->getMethod();
-        }
-
-        $this->assertEqualsCanonicalizing($expectedMethods, $actualMethods);
     }
 }
