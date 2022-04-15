@@ -31,7 +31,7 @@ final class AnnotationVisitor extends NodeVisitorAbstract implements NodeVisitor
         $this->annotationDetails = new AnnotationDetailsList();
     }
 
-    public function enterNode(Node $node) {
+    public function leaveNode(Node $node) {
         if ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) {
             $serviceAttributes = $this->findAttributes(Service::class, ...$node->attrGroups);
             if (!empty($serviceAttributes)) {
