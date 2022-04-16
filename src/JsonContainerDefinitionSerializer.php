@@ -30,6 +30,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                     'profiles' => $this->convertAnnotationValueToJson($serviceDefinition->getProfiles()),
                     'isAbstract' => $serviceDefinition->isAbstract(),
                     'isConcrete' => $serviceDefinition->isConcrete(),
+                    'isShared' => $serviceDefinition->isShared()
                 ];
             }
         };
@@ -193,6 +194,12 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
             if (!is_null($compiledServiceDefinition['name'])) {
                 $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($this->convertJsonToAnnotationValue($compiledServiceDefinition['name']));
+            }
+
+            if ($compiledServiceDefinition['isShared']) {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withShared();
+            } else {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withNotShared();
             }
 
             $serviceDefinitionCacheMap[$serviceHash] = $serviceDefinitionBuilder->build();

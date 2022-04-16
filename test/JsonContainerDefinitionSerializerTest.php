@@ -36,14 +36,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleServices\FooInterface::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
-            'isConcrete' => false
+            'isConcrete' => false,
+            'isShared' => true
         ];
         $expectedFooImplementation = [
             'name' => null,
             'type' => SimpleServices\FooImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -130,14 +132,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => MultipleSimpleServices\FooInterface::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
-            'isConcrete' => false
+            'isConcrete' => false,
+            'isShared' => true
         ];
         $expectedFooImplementation = [
             'name' => null,
             'type' => MultipleSimpleServices\FooImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
 
         $expectedBarInterface = [
@@ -145,14 +149,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => MultipleSimpleServices\BarInterface::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
-            'isConcrete' => false
+            'isConcrete' => false,
+            'isShared' => true
         ];
         $expectedBarImplementation = [
             'name' => null,
             'type' => MultipleSimpleServices\BarImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
 
         $this->assertArrayHasKey('compiledServiceDefinitions', $actual);
@@ -251,14 +257,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => AbstractSharedServices\AbstractFoo::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
-            'isConcrete' => false
+            'isConcrete' => false,
+            'isShared' => true
         ];
         $expectedFooImplementation = [
             'name' => null,
             'type' => AbstractSharedServices\FooImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
 
         $actual = json_decode($this->subject->serialize($containerDefinition), 2);
@@ -349,14 +357,16 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => InterfaceServicePrepare\FooInterface::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
-            'isConcrete' => false
+            'isConcrete' => false,
+            'isShared' => true
         ];
         $expectedFooImplementation = [
             'name' => null,
             'type' => InterfaceServicePrepare\FooImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -452,7 +462,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseScalar\FooImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
 
         $this->assertArrayHasKey('compiledServiceDefinitions', $actual);
@@ -578,7 +589,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\BarImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\BarImplementation::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedBarImplementation, $actual['compiledServiceDefinitions'][md5(SimpleUseService\BarImplementation::class)]);
@@ -588,7 +600,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\BazImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\BazImplementation::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedBazImplementation, $actual['compiledServiceDefinitions'][md5(SimpleUseService\BazImplementation::class)]);
@@ -598,7 +611,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\ConstructorInjection::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\ConstructorInjection::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedConstructorInjection, $actual['compiledServiceDefinitions'][md5(SimpleUseService\ConstructorInjection::class)]);
@@ -608,7 +622,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\FooInterface::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
-            'isConcrete' => false
+            'isConcrete' => false,
+            'isShared' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\FooInterface::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedFooInterface, $actual['compiledServiceDefinitions'][md5(SimpleUseService\FooInterface::class)]);
@@ -618,7 +633,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\SetterInjection::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\SetterInjection::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedSetterInjection, $actual['compiledServiceDefinitions'][md5(SimpleUseService\SetterInjection::class)]);
@@ -628,7 +644,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => SimpleUseService\QuxImplementation::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
         $this->assertArrayHasKey(md5(SimpleUseService\QuxImplementation::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedQuxImplementation, $actual['compiledServiceDefinitions'][md5(SimpleUseService\QuxImplementation::class)]);
@@ -781,7 +798,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => ServiceDelegate\ServiceInterface::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => true,
-            'isConcrete' => false
+            'isConcrete' => false,
+            'isShared' => true
         ];
         $this->assertArrayHasKey(md5(ServiceDelegate\ServiceInterface::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedServiceInterface, $actual['compiledServiceDefinitions'][md5(ServiceDelegate\ServiceInterface::class)]);
@@ -791,7 +809,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => ServiceDelegate\FooService::class,
             'profiles' => ['annotationValue' => serialize(arrayValue([]))],
             'isAbstract' => false,
-            'isConcrete' => true
+            'isConcrete' => true,
+            'isShared' => true
         ];
         $this->assertArrayHasKey(md5(ServiceDelegate\FooService::class), $actual['compiledServiceDefinitions']);
         $this->assertEquals($expectedFooService, $actual['compiledServiceDefinitions'][md5(ServiceDelegate\FooService::class)]);
@@ -852,6 +871,73 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'delegateMethod' => 'createService',
             'serviceType' => ServiceDelegate\ServiceInterface::class
         ], $actual['serviceDelegateDefinitions']);
+    }
+
+    public function testSerializingContainerDefinitionIncludesProfiles() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ProfileResolvedServices')->build()
+        );
+
+        $json = json_decode($serializer->serialize($containerDefinition), true);
+        $this->assertContains([
+            'name' => null,
+            'type' => DummyApps\ProfileResolvedServices\DevFooImplementation::class,
+            'profiles' => ['annotationValue' => serialize(arrayValue(['dev']))],
+            'isAbstract' => false,
+            'isConcrete' => true,
+            'isShared' => true
+        ], $json['compiledServiceDefinitions']);
+        $this->assertContains([
+            'name' => null,
+            'type' => DummyApps\ProfileResolvedServices\TestFooImplementation::class,
+            'profiles' => ['annotationValue' => serialize(arrayValue(['test']))],
+            'isAbstract' => false,
+            'isConcrete' => true,
+            'isShared' => true
+        ], $json['compiledServiceDefinitions']);
+        $this->assertContains([
+            'name' => null,
+            'type' => DummyApps\ProfileResolvedServices\ProdFooImplementation::class,
+            'profiles' => ['annotationValue' => serialize(arrayValue(['prod']))],
+            'isAbstract' => false,
+            'isConcrete' => true,
+            'isShared' => true
+        ], $json['compiledServiceDefinitions']);
+    }
+
+    public function testSerializeNamedServicesHasName() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/NamedService')->build()
+        );
+
+        $json = json_decode($serializer->serialize($containerDefinition), true);
+        $this->assertContains([
+            'name' => ['annotationValue' => serialize(scalarValue('foo'))],
+            'type' => DummyApps\NamedService\FooInterface::class,
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
+            'isAbstract' => true,
+            'isConcrete' => false,
+            'isShared' => true
+        ], $json['compiledServiceDefinitions']);
+    }
+
+    public function testSerializeNonSharedService() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/NonSharedService')->build()
+        );
+
+        $json = json_decode($serializer->serialize($containerDefinition), true);
+        $this->assertContains([
+            'name' => null,
+            'type' => DummyApps\NonSharedService\FooImplementation::class,
+            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
+            'isAbstract' => false,
+            'isConcrete' => true,
+            'isShared' => false
+        ], $json['compiledServiceDefinitions']);
     }
 
     /** ======================================== Deserialization Testing ==============================================*/
@@ -957,7 +1043,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         return [
             [DummyAppUtils::getRootDir() . '/ProfileResolvedServices'],
             [DummyAppUtils::getRootDir() . '/AbstractSharedServices'],
-            [DummyAppUtils::getRootDir() . '/NamedService']
+            [DummyAppUtils::getRootDir() . '/NamedService'],
+            [DummyAppUtils::getRootDir() . '/NonSharedService']
         ];
     }
 
@@ -982,51 +1069,18 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         );
     }
 
-    public function testSerializingContainerDefinitionIncludesProfiles() {
+    public function testDeserializeNonSharedService() {
         $serializer = new JsonContainerDefinitionSerializer();
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ProfileResolvedServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/NonSharedService')->build()
         );
 
-        $json = json_decode($serializer->serialize($containerDefinition), true);
-        $this->assertContains([
-            'name' => null,
-            'type' => DummyApps\ProfileResolvedServices\DevFooImplementation::class,
-            'profiles' => ['annotationValue' => serialize(arrayValue(['dev']))],
-            'isAbstract' => false,
-            'isConcrete' => true
-        ], $json['compiledServiceDefinitions']);
-        $this->assertContains([
-            'name' => null,
-            'type' => DummyApps\ProfileResolvedServices\TestFooImplementation::class,
-            'profiles' => ['annotationValue' => serialize(arrayValue(['test']))],
-            'isAbstract' => false,
-            'isConcrete' => true
-        ], $json['compiledServiceDefinitions']);
-        $this->assertContains([
-            'name' => null,
-            'type' => DummyApps\ProfileResolvedServices\ProdFooImplementation::class,
-            'profiles' => ['annotationValue' => serialize(arrayValue(['prod']))],
-            'isAbstract' => false,
-            'isConcrete' => true
-        ], $json['compiledServiceDefinitions']);
-    }
+        $json = $serializer->serialize($containerDefinition);
+        $subject = $serializer->deserialize($json);
 
-    public function testSerializeNamedServicesHasName() {
-        $serializer = new JsonContainerDefinitionSerializer();
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/NamedService')->build()
-        );
-
-        $json = json_decode($serializer->serialize($containerDefinition), true);
-        $this->assertContains([
-            'name' => ['annotationValue' => serialize(scalarValue('foo'))],
-            'type' => DummyApps\NamedService\FooInterface::class,
-            'profiles' => ['annotationValue' => serialize(arrayValue([]))],
-            'isAbstract' => true,
-            'isConcrete' => false
-        ], $json['compiledServiceDefinitions']);
-
+        $this->assertCount(1, $subject->getServiceDefinitions());
+        $serviceDefinition = $subject->getServiceDefinitions()[0];
+        $this->assertFalse($serviceDefinition->isShared());
     }
 
 

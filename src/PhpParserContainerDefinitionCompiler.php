@@ -32,6 +32,8 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     public function __construct() {
         $this->parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
         $this->nodeTraverser = new NodeTraverser();
+        $this->nodeTraverser->addVisitor(new NameResolver());
+        $this->nodeTraverser->addVisitor(new NodeConnectingVisitor());
     }
 
     /**
@@ -123,6 +125,12 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
 
             if ($annotationDetails->getAnnotationArguments()->has('name')) {
                 $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($annotationDetails->getAnnotationArguments()->get('name'));
+            }
+
+            if ($annotationDetails->getAnnotationArguments()->get('shared', true)->getCompileValue()) {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withShared();
+            } else {
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withNotShared();
             }
 
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinitionBuilder->build());
@@ -251,21 +259,11 @@ final class PhpParserContainerDefinitionCompiler implements ContainerDefinitionC
     private function traverseCode(string $fileContents, AnnotationVisitor $annotationVisitor): void {
         $statements = $this->parser->parse($fileContents);
 
-        $nameResolver = new NameResolver();
-        $nodeConnectingVisitor = new NodeConnectingVisitor();
-        $this->nodeTraverser->addVisitor($nameResolver);
-        $this->nodeTraverser->addVisitor($nodeConnectingVisitor);
-        $this->nodeTraverser->traverse($statements);
-
-        $this->nodeTraverser->removeVisitor($nameResolver);
-        $this->nodeTraverser->removeVisitor($nodeConnectingVisitor);
-
         $this->nodeTraverser->addVisitor($annotationVisitor);
+
         $this->nodeTraverser->traverse($statements);
 
         $this->nodeTraverser->removeVisitor($annotationVisitor);
-
-        unset($statements);
     }
 
 

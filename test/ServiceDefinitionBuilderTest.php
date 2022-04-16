@@ -91,4 +91,41 @@ class ServiceDefinitionBuilderTest extends TestCase {
         $this->assertSame(['default', 'dev', 'local'], $serviceDefinition->getProfiles()->getRuntimeValue());
     }
 
+    public function testWithSharedReturnsDifferentObject() {
+        $a = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class);
+        $b = $a->withShared();
+
+        $this->assertNotSame($a, $b);
+    }
+
+    public function testWithNoSharedReturnsDifferentObject() {
+        $a = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class);
+        $b = $a->withNotShared();
+
+        $this->assertNotSame($a, $b);
+    }
+
+    public function testIsSharedByDefault() {
+        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)->build();
+
+        $this->assertTrue($serviceDefinition->isShared());
+    }
+
+    public function testWithNotShared() {
+        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)
+            ->withNotShared()
+            ->build();
+
+        $this->assertFalse($serviceDefinition->isShared());
+    }
+
+    public function testWithShared() {
+        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(SimpleServices\FooImplementation::class)
+            ->withNotShared()
+            ->withShared()
+            ->build();
+
+        $this->assertTrue($serviceDefinition->isShared());
+    }
+
 }

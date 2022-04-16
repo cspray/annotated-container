@@ -9,9 +9,9 @@ final class ServiceDefinitionBuilder {
     private ?AnnotationValue $name = null;
     private string $type;
     private bool $isAbstract;
-    private array $implementedServices = [];
     private ?AnnotationValue $profiles = null;
     private bool $isPrimary = false;
+    private bool $isShared = true;
 
     private function __construct() {}
 
@@ -64,43 +64,60 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
+    public function withShared() : self {
+        $instance = clone $this;
+        $instance->isShared = true;
+        return $instance;
+    }
+
+    public function withNotShared() : self {
+        $instance = clone $this;
+        $instance->isShared = false;
+        return $instance;
+    }
+
     public function build() : ServiceDefinition {
         $profiles = $this->profiles;
         if (is_null($profiles)) {
             $profiles = arrayValue([]);
         }
-        return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary) implements ServiceDefinition {
+        return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary, $this->isShared) implements ServiceDefinition {
 
             public function __construct(
                 private ?AnnotationValue $name,
                 private string $type,
                 private bool $isAbstract,
                 private CollectionAnnotationValue $profiles,
-                private bool $isPrimary
+                private bool $isPrimary,
+                private bool $isShared
             ) {}
 
             public function getName() : ?AnnotationValue {
                 return $this->name;
             }
 
-            public function getType(): string {
+            public function getType() : string {
                 return $this->type;
             }
 
-            public function getProfiles(): CollectionAnnotationValue {
+            public function getProfiles() : CollectionAnnotationValue {
                 return $this->profiles;
             }
 
-            public function isPrimary(): bool {
+            public function isPrimary() : bool {
                 return $this->isPrimary;
             }
 
-            public function isConcrete(): bool {
+            public function isConcrete() : bool {
                 return !$this->isAbstract;
             }
 
-            public function isAbstract(): bool {
+            public function isAbstract() : bool {
                 return $this->isAbstract;
+            }
+
+            public function isShared() : bool {
+                return $this->isShared;
             }
 
             public function equals(ServiceDefinition $serviceDefinition): bool {

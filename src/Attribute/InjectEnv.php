@@ -13,9 +13,9 @@ use Attribute;
  *
  * @package Cspray\AnnotatedContainer\Attribute
  */
-#[Attribute(Attribute::TARGET_PARAMETER)]
+#[Attribute(Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
 final class InjectEnv {
 
-    public function __construct(private string $value, private array $profiles) {}
+    public function __construct(private string $value, private array $profiles = []) {}
 
 }

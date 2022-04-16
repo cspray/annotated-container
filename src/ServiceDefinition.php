@@ -53,6 +53,11 @@ interface ServiceDefinition {
      */
     public function isAbstract() : bool;
 
+    /**
+     * @return bool
+     */
+    public function isShared() : bool;
+
     public function equals(ServiceDefinition $serviceDefinition) : bool;
 
 }

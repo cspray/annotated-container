@@ -18,7 +18,7 @@ final class InjectScalar {
 
     public function __construct(
         private string|int|float|bool|array $value,
-        private array $profiles
+        private array $profiles = []
     ) {}
 
 }
