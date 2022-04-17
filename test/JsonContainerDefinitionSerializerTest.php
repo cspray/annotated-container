@@ -7,8 +7,6 @@ use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate;
 use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
-use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
-use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
 use Cspray\AnnotatedContainer\DummyApps\MultipleSimpleServices;
 use PHPUnit\Framework\TestCase;
 
@@ -367,117 +365,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
     public function testSerializeInterfaceServicePrepareHasEmptyServiceDelegateDefinitions() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InterfaceServicePrepare')->build()
-        );
-        $actual = json_decode($this->subject->serialize($containerDefinition), true);
-
-        $this->assertArrayHasKey('serviceDelegateDefinitions', $actual);
-        $this->assertEmpty($actual['serviceDelegateDefinitions']);
-    }
-
-    public function testSerializeSimpleInjectScalarHasSharedServiceDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseScalar')->build()
-        );
-        $actual = json_decode($this->subject->serialize($containerDefinition), true);
-
-        $this->assertArrayHasKey('sharedServiceDefinitions', $actual);
-        $this->assertCount(1, $actual['sharedServiceDefinitions']);
-        $this->assertContains(md5(SimpleUseScalar\FooImplementation::class), $actual['sharedServiceDefinitions']);
-    }
-
-    public function testSerializeSimpleInjectScalarHasNoAliasDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseScalar')->build()
-        );
-        $actual = json_decode($this->subject->serialize($containerDefinition), true);
-
-        $this->assertArrayHasKey('aliasDefinitions', $actual);
-        $this->assertEmpty($actual['aliasDefinitions']);
-    }
-
-    public function testSerializeSimpleInjectScalarHasNoServicePrepareDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseScalar')->build()
-        );
-        $actual = json_decode($this->subject->serialize($containerDefinition), true);
-
-        $this->assertArrayHasKey('servicePrepareDefinitions', $actual);
-        $this->assertEmpty($actual['servicePrepareDefinitions']);
-    }
-
-    public function testSerializeSimpleUseScalarHasNoServiceDelegateDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseScalar')->build()
-        );
-        $actual = json_decode($this->subject->serialize($containerDefinition), true);
-
-        $this->assertArrayHasKey('serviceDelegateDefinitions', $actual);
-        $this->assertEmpty($actual['serviceDelegateDefinitions']);
-    }
-
-    public function testSerializeSimpleUseServiceHasSharedServiceDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseService')->build()
-        );
-        $actual = json_decode($this->subject->serialize($containerDefinition), true);
-
-        $this->assertArrayHasKey('sharedServiceDefinitions', $actual);
-        $this->assertCount(6, $actual['sharedServiceDefinitions']);
-        $this->assertContains(md5(SimpleUseService\BarImplementation::class), $actual['sharedServiceDefinitions']);
-        $this->assertContains(md5(SimpleUseService\BazImplementation::class), $actual['sharedServiceDefinitions']);
-        $this->assertContains(md5(SimpleUseService\ConstructorInjection::class), $actual['sharedServiceDefinitions']);
-        $this->assertContains(md5(SimpleUseService\FooInterface::class), $actual['sharedServiceDefinitions']);
-        $this->assertContains(md5(SimpleUseService\QuxImplementation::class), $actual['sharedServiceDefinitions']);
-        $this->assertContains(md5(SimpleUseService\SetterInjection::class), $actual['sharedServiceDefinitions']);
-    }
-
-    public function testSerializeSimpleUseServiceHasAliasDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseService')->build()
-        );
-        $actual = json_decode($this->subject->serialize($containerDefinition), true);
-
-        $this->assertArrayHasKey('aliasDefinitions', $actual);
-        $this->assertCount(3, $actual['aliasDefinitions']);
-        $this->assertContains([
-            'original' => md5(SimpleUseService\FooInterface::class),
-            'alias' => md5(SimpleUseService\BarImplementation::class)
-        ], $actual['aliasDefinitions']);
-        $this->assertContains([
-            'original' => md5(SimpleUseService\FooInterface::class),
-            'alias' => md5(SimpleUseService\BazImplementation::class)
-        ], $actual['aliasDefinitions']);
-        $this->assertContains([
-            'original' => md5(SimpleUseService\FooInterface::class),
-            'alias' => md5(SimpleUseService\QuxImplementation::class)
-        ], $actual['aliasDefinitions']);
-    }
-
-    public function testSerializeSimpleUseServiceHasServicePrepareDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseService')->build()
-        );
-        $actual = json_decode($this->subject->serialize($containerDefinition), true);
-
-        $this->assertArrayHasKey('servicePrepareDefinitions', $actual);
-        $this->assertCount(3, $actual['servicePrepareDefinitions']);
-        $this->assertContains([
-            'type' => SimpleUseService\SetterInjection::class,
-            'method' => 'setBaz'
-        ], $actual['servicePrepareDefinitions']);
-        $this->assertContains([
-            'type' => SimpleUseService\SetterInjection::class,
-            'method' => 'setBar'
-        ], $actual['servicePrepareDefinitions']);
-        $this->assertContains([
-            'type' => SimpleUseService\SetterInjection::class,
-            'method' => 'setQux'
-        ], $actual['servicePrepareDefinitions']);
-    }
-
-    public function testSerializeSimpleUseServiceHasNoServiceDelegateDefinitions() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseService')->build()
         );
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 

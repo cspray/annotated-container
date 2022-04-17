@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer\AnnotatedTargetCompilerTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
-use Cspray\AnnotatedContainer\AnnotatedTargetType;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
@@ -28,13 +27,6 @@ class InterfaceServicePrepareCompilerTest extends AnnotatedTargetCompilerTestCas
 
     public function testHasCorrectServicePrepareMethod() {
         $this->assertNotNull($this->getExpectedTarget());
-    }
-
-    public function testGetTargetType() {
-        $this->assertSame(
-            AnnotatedTargetType::MethodTarget,
-            $this->getExpectedTarget()->getTargetType()
-        );
     }
 
     public function testGetAttributeReflectionType() {
@@ -71,8 +63,5 @@ class InterfaceServicePrepareCompilerTest extends AnnotatedTargetCompilerTestCas
             $this->getExpectedTarget()->getAttributeInstance()
         );
     }
-
-
-    
 
 }

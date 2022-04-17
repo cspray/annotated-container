@@ -28,6 +28,7 @@ use Cspray\AnnotatedContainer\DummyApps\ImplementsServiceExtendsSameService;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use PHPUnit\Framework\TestCase;
+use function Cspray\Typiphy\intType;
 use function Cspray\Typiphy\objectType;
 
 class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
@@ -349,4 +350,25 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\NonSharedService\FooImplementation::class);
         $this->assertFalse($serviceDefinition?->isShared());
     }
+
+    public function testInjectIntMethodParamHasInjectDefinition() {
+        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/InjectIntMethodParam');
+
+        $this->assertCount(1, $containerDefinition->getInjectDefinitions());
+        $injectDefinition = $containerDefinition->getInjectDefinitions()[0];
+
+        $this->assertSame(DummyApps\InjectIntMethodParam\FooImplementation::class, $injectDefinition->getTargetIdentifier()->getClass()->getName());
+        $this->assertSame('setSomething', $injectDefinition->getTargetIdentifier()->getMethodName());
+        $this->assertSame('value', $injectDefinition->getTargetIdentifier()->getName());
+        $this->assertSame(intType(), $injectDefinition->getType());
+        $this->assertSame(42, $injectDefinition->getValue());
+        $this->assertNull($injectDefinition->getStoreName());
+    }
+
+    public function testServicePrepareNotOnServiceThrowsException() {
+        $this->expectException(InvalidAnnotationException::class);
+        $this->expectExceptionMessage('The #[ServicePrepare] Attribute on ' . LogicalErrorApps\ServicePrepareNotService\FooImplementation::class . '::postConstruct is not on a type marked as a #[Service].');;
+        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
+    }
+
 }

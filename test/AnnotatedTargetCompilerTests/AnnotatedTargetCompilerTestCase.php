@@ -42,8 +42,8 @@ abstract class AnnotatedTargetCompilerTestCase extends TestCase {
             if (
                 $target->getTargetReflection() instanceof ReflectionParameter &&
                 $target->getTargetReflection()->getDeclaringClass()->getName() === $classType &&
-                $target->getTargetReflection()->getDeclaringFunction()->getName() &&
-                $target->getTargetReflection()->getName()
+                $target->getTargetReflection()->getDeclaringFunction()->getName() === $method &&
+                $target->getTargetReflection()->getName() === $paramName
             ) {
                 $targets[] = $target;
             }

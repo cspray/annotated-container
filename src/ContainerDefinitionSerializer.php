@@ -14,10 +14,9 @@ interface ContainerDefinitionSerializer {
      * The precise format of the returned string will be dependent on the specific serializer used.
      *
      * @param ContainerDefinition $containerDefinition
-     * @param ContainerDefinitionSerializerOptions|null $options
      * @return string
      */
-    public function serialize(ContainerDefinition $containerDefinition, ContainerDefinitionSerializerOptions $options = null) : string;
+    public function serialize(ContainerDefinition $containerDefinition) : string;
 
     /**
      * Convert a string into a ContainerDefinition.

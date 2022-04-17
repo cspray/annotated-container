@@ -32,10 +32,6 @@ class ServiceDelegateTest extends AnnotatedTargetCompilerTestCase {
         $this->assertNotNull($this->getExpectedTarget());
     }
 
-    public function testCorrectAnnotationTargetType() {
-        $this->assertSame(AnnotatedTargetType::MethodTarget, $this->getExpectedTarget()->getTargetType());
-    }
-
     public function testCorrectAttributeReflectionType() {
         $this->assertSame(ServiceDelegate::class, $this->getExpectedTarget()->getAttributeReflection()->getName());
     }

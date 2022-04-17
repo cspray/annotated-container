@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\Typiphy\ObjectType;
 
@@ -48,6 +49,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             public array $serviceDefinitions = [];
             public array $servicePrepareDefinitions = [];
             public array $serviceDelegateDefinitions = [];
+            public array $injectDefinitions = [];
 
             public function __construct(
                 private readonly AnnotatedTargetDefinitionConverter $converter
@@ -58,7 +60,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                 match (true) {
                     $definition instanceof ServiceDefinition => $this->serviceDefinitions[] = $definition,
                     $definition instanceof ServicePrepareDefinition => $this->servicePrepareDefinitions[] = $definition,
-                    $definition instanceof ServiceDelegateDefinition => $this->serviceDelegateDefinitions[] = $definition
+                    $definition instanceof ServiceDelegateDefinition => $this->serviceDelegateDefinitions[] = $definition,
+                    $definition instanceof InjectDefinition => $this->injectDefinitions[] = $definition
                 };
             }
         };
@@ -75,6 +78,13 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
 
         $concretePrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function(ServicePrepareDefinition $prepareDef) use($containerDefinitionBuilder) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
+            if (is_null($serviceDef)) {
+                throw new InvalidAnnotationException(sprintf(
+                    'The #[ServicePrepare] Attribute on %s::%s is not on a type marked as a #[Service].',
+                    $prepareDef->getService()->getName(),
+                    $prepareDef->getMethod()
+                ));
+            }
             return $serviceDef->isConcrete();
         });
         $abstractPrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function(ServicePrepareDefinition $prepareDef) use($containerDefinitionBuilder) {
@@ -97,6 +107,10 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             if (!$hasAbstractPrepare) {
                 $containerDefinitionBuilder = $containerDefinitionBuilder->withServicePrepareDefinition($concretePrepareDefinition);
             }
+        }
+
+        foreach ($consumer->injectDefinitions as $injectDefinition) {
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectDefinitions($injectDefinition);
         }
 
         return $containerDefinitionBuilder;

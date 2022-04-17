@@ -16,4 +16,6 @@ interface ContainerFactory {
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface;
 
+    public function addParameterStore(ParameterStore $parameterStore) : void;
+
 }
