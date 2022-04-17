@@ -24,7 +24,7 @@ function envValue(string $envVar) : AnnotationValue {
     return new EnvironmentAnnotationValue($envVar);
 }
 
-function service(ContainerDefinitionBuilderContext $context, string $type, ?AnnotationValue $name = null, CollectionAnnotationValue $profiles = null, bool $isPrimary = false) : ServiceDefinition {
+function service(ContainerDefinitionBuilderContext $context, string $type, ?AnnotationValue $name = null, CollectionAnnotationValue $profiles = null, bool $isPrimary = false, bool $isShared = true) : ServiceDefinition {
     $reflection = new ReflectionClass($type);
     $methodArgs = [$type];
     $method = $reflection->isAbstract() || $reflection->isInterface() ? 'forAbstract' : 'forConcrete';
@@ -40,6 +40,13 @@ function service(ContainerDefinitionBuilderContext $context, string $type, ?Anno
     if (isset($profiles)) {
         $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($profiles);
     }
+
+    if ($isShared) {
+        $serviceDefinitionBuilder = $serviceDefinitionBuilder->withShared();
+    } else {
+        $serviceDefinitionBuilder = $serviceDefinitionBuilder->withNotShared();
+    }
+
     $serviceDefinition = $serviceDefinitionBuilder->build();
     $context->setBuilder($context->getBuilder()->withServiceDefinition($serviceDefinition));
     return $serviceDefinition;
