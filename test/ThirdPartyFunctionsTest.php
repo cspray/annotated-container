@@ -401,4 +401,14 @@ class ThirdPartyFunctionsTest extends TestCase {
         $this->assertSame(DummyApps\SimpleUseService\BarImplementation::class, $containerDefinition->getInjectServiceDefinitions()[0]->getInjectedService()->getCompileValue());
     }
 
+    public function testNonSharedService() {
+        $context = $this->getContext();
+        service($context, DummyApps\NonSharedService\FooImplementation::class, isShared: false);
+
+        $containerDefinition = $context->getBuilder()->build();
+
+        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\NonSharedService\FooImplementation::class);
+        $this->assertFalse($serviceDefinition->isShared());
+    }
+
 }
