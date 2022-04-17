@@ -108,4 +108,24 @@ They've also added an Attribute to that parameter called `#[InjectService]`. The
 be the one injected when the consuming service is constructed. As long as each place you type-hint `BlobStorage` has an 
 Attribute defining which concrete implementation to use all your services will be able to be created properly. 
 
+## Specifying a Primary Service
 
+One of the drawbacks with using the `#[InjectService]` Attribute is that you have to specify it everywhere you might use the type-hint. Another is that you can't get the abstract service, in our example `ContainerInterface::get(BlobStorage::class)`, through the Container. With the v0.3 release it is now possible to mark a `#[Service]` as _primary_. If there are multiple possible aliases and one of them is marked as primary it'll be used as the alias for that service. For example, if we wanted to make `FilesystemStorage` the default alias we'd update the code to look like the following:
+
+```php
+
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+// interfaces and classes in __DIR__ . '/src'
+
+use Cspray\AnnotatedContainer\Attribute\Service;
+
+#[Service(primary: true)]
+class FilesystemStorage implements BlobStorage {
+
+    // ... The rest of the code from example
+    
+}
+```
