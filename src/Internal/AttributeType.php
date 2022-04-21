@@ -17,9 +17,6 @@ use Cspray\AnnotatedContainer\Attribute\ThirdPartyServicePrepare;
  * @Internal
  */
 enum AttributeType : string {
-    case InjectEnv = InjectEnv::class;
-    case InjectScalar = InjectScalar::class;
-    case InjectService = InjectService::class;
     case Service = Service::class;
     case ServiceDelegate = ServiceDelegate::class;
     case ServicePrepare = ServicePrepare::class;

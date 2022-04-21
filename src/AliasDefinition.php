@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\Typiphy\ObjectType;
+
 /**
  * Define the concrete Service that should be used when constructing an abstract Service.
  *
@@ -14,14 +16,14 @@ interface AliasDefinition {
      *
      * @return ServiceDefinition
      */
-    public function getAbstractService() : ServiceDefinition;
+    public function getAbstractService() : ObjectType;
 
     /**
      * The concrete Service that should be used where your applications requires the corresponding abstract Service.
      *
      * @return ServiceDefinition
      */
-    public function getConcreteService() : ServiceDefinition;
+    public function getConcreteService() : ObjectType;
 
     /**
      * Returns whether the given $aliasDefinition has matching abstract and concrete services.

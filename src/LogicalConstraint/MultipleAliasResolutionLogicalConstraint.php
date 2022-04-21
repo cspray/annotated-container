@@ -32,7 +32,7 @@ final class MultipleAliasResolutionLogicalConstraint implements LogicalConstrain
     private function getAliasCount(ContainerDefinition $containerDefinition, ServiceDefinition $serviceDefinition) : int {
         $count = 0;
         foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
-            if ($serviceDefinition->getType() === $aliasDefinition->getAbstractService()->getType()) {
+            if ($serviceDefinition->getType() === $aliasDefinition->getAbstractService()) {
                 $count++;
             }
         }

@@ -3,10 +3,11 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\Typiphy\ObjectType;
 
 class ServicePrepareDefinitionBuilder {
 
-    private ServiceDefinition $service;
+    private ObjectType $service;
     private string $method;
 
     private function __construct() {}
@@ -16,7 +17,7 @@ class ServicePrepareDefinitionBuilder {
      *
      * @throws DefinitionBuilderException
      */
-    public static function forMethod(ServiceDefinition $serviceDefinition, string $method) : self {
+    public static function forMethod(ObjectType $serviceDefinition, string $method) : self {
         if (empty($method)) {
             throw new DefinitionBuilderException('A method for a ServicePrepareDefinition must not be blank.');
         }
@@ -29,15 +30,12 @@ class ServicePrepareDefinitionBuilder {
     public function build() : ServicePrepareDefinition {
         return new class($this->service, $this->method) implements ServicePrepareDefinition {
 
-            private ServiceDefinition $service;
-            private string $method;
-
-            public function __construct(ServiceDefinition $service, string $method) {
-                $this->service = $service;
-                $this->method = $method;
+            public function __construct(
+                private readonly ObjectType $service,
+                private readonly string $method) {
             }
 
-            public function getService(): ServiceDefinition {
+            public function getService(): ObjectType {
                 return $this->service;
             }
 

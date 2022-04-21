@@ -28,7 +28,7 @@ final class NoAbstractServiceAliasLogicalConstraint implements LogicalConstraint
     private function doesServiceDefinitionHaveAlias(ContainerDefinition $containerDefinition, ServiceDefinition $serviceDefinition) : bool {
         $hasAlias = false;
         foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
-            if ($aliasDefinition->getAbstractService()->getType() === $serviceDefinition->getType()) {
+            if ($aliasDefinition->getAbstractService() === $serviceDefinition->getType()) {
                 $hasAlias = true;
                 break;
             }

@@ -14,6 +14,11 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 final class Service {
 
-    public function __construct(private array $profiles = [], private bool $primary = false, private bool $shared = true) {}
+    public function __construct(
+        public array $profiles = [],
+        public bool $primary = false,
+        public bool $shared = true,
+        public ?string $name = null
+    ) {}
 
 }

@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\Typiphy\ObjectType;
+
 /**
  * Defines a Service, a class or interface that should be shared or aliased on the wired Injector.
  *
@@ -10,16 +12,16 @@ namespace Cspray\AnnotatedContainer;
 interface ServiceDefinition {
 
     /**
-     * @return AnnotationValue|null
+     * @return string|null
      */
-    public function getName() : ?AnnotationValue;
+    public function getName() : ?string;
 
     /**
      * Returns the fully-qualified class/interface name for the given Service.
      *
-     * @return string
+     * @return ObjectType
      */
-    public function getType() : string;
+    public function getType() : ObjectType;
 
     /**
      * Returns an array of profiles that this service is attached to.
@@ -27,9 +29,9 @@ interface ServiceDefinition {
      * A ServiceDefinition MUST have at least 1 profile; if a profile is not explicitly set for a given Service it should
      * be given the 'default' profile.
      *
-     * @return CollectionAnnotationValue
+     * @return array
      */
-    public function getProfiles() : CollectionAnnotationValue;
+    public function getProfiles() : array;
 
     /**
      * Return whether the Service is the Primary for this type and will be used by default if there are multiple aliases

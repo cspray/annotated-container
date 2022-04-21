@@ -4,8 +4,10 @@ namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\DummyApps;
-use Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\PhpParserAnnotatedTargetCompiler;
 use PHPUnit\Framework\TestCase;
 
 class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
@@ -14,7 +16,10 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
     private MultipleAliasResolutionLogicalConstraint $subject;
 
     protected function setUp(): void {
-        $this->containerDefinitionCompiler = new PhpParserContainerDefinitionCompiler();
+        $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
+            new PhpParserAnnotatedTargetCompiler(),
+            new DefaultAnnotatedTargetDefinitionConverter()
+        );
         $this->subject = new MultipleAliasResolutionLogicalConstraint();
     }
 

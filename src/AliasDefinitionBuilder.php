@@ -3,14 +3,15 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\Typiphy\ObjectType;
 
 /**
  * The preferred method for constructing AliasDefinition instances.
  */
 final class AliasDefinitionBuilder {
 
-    private ServiceDefinition $abstractType;
-    private ServiceDefinition $concreteType;
+    private ObjectType $abstractType;
+    private ObjectType $concreteType;
 
     private function __construct() {}
 
@@ -21,13 +22,7 @@ final class AliasDefinitionBuilder {
      * @return static
      * @throws DefinitionBuilderException
      */
-    public static function forAbstract(ServiceDefinition $serviceDefinition) : self {
-        if (!$serviceDefinition->isAbstract()) {
-            throw new DefinitionBuilderException(sprintf(
-                'Attempted to assign concrete type %s as an abstract alias.',
-                $serviceDefinition->getType()
-            ));
-        }
+    public static function forAbstract(ObjectType $serviceDefinition) : self {
         $instance = new self;
         $instance->abstractType = $serviceDefinition;
         return $instance;
@@ -42,13 +37,7 @@ final class AliasDefinitionBuilder {
      * @return $this
      * @throws DefinitionBuilderException
      */
-    public function withConcrete(ServiceDefinition $serviceDefinition) : self {
-        if ($serviceDefinition->isAbstract()) {
-            throw new DefinitionBuilderException(sprintf(
-                'Attempted to assign abstract type %s as a concrete alias.',
-                $serviceDefinition->getType()
-            ));
-        }
+    public function withConcrete(ObjectType $serviceDefinition) : self {
         $instance = clone $this;
         $instance->concreteType = $serviceDefinition;
         return $instance;
@@ -61,24 +50,21 @@ final class AliasDefinitionBuilder {
      */
     public function build() : AliasDefinition {
         return new class($this->abstractType, $this->concreteType) implements AliasDefinition {
-            private ServiceDefinition $abstractService;
-            private ServiceDefinition $concreteService;
+            public function __construct(
+                private readonly ObjectType $abstractService,
+                private readonly ObjectType $concreteService
+            ) {}
 
-            public function __construct(ServiceDefinition $abstractService, ServiceDefinition $concreteService) {
-                $this->abstractService = $abstractService;
-                $this->concreteService = $concreteService;
-            }
-
-            public function getAbstractService(): ServiceDefinition {
+            public function getAbstractService(): ObjectType {
                 return $this->abstractService;
             }
 
-            public function getConcreteService(): ServiceDefinition {
+            public function getConcreteService(): ObjectType {
                 return $this->concreteService;
             }
 
             public function equals(AliasDefinition $aliasDefinition): bool {
-                return $this->abstractService->equals($aliasDefinition->getAbstractService()) && $this->concreteService->equals($aliasDefinition->getConcreteService());
+                return $this->abstractService === $aliasDefinition->getAbstractService() && $this->concreteService === $aliasDefinition->getConcreteService();
             }
         };
     }

@@ -4,8 +4,42 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "06914de84a96863913c0b7603a324b7b",
+    "content-hash": "c8700bce3f7c37dcfe4bd136f9edf712",
     "packages": [
+        {
+            "name": "cspray/typiphy",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cspray/typiphy.git",
+                "reference": "fa6afbf62a53c79ccd5254d326c28d43f206d451"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cspray/typiphy/zipball/fa6afbf62a53c79ccd5254d326c28d43f206d451",
+                "reference": "fa6afbf62a53c79ccd5254d326c28d43f206d451",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Function/types.php"
+                ],
+                "psr-4": {
+                    "Cspray\\Typiphy\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "description": "A small library of value objects and functions for working with PHP's types.",
+            "support": {
+                "issues": "https://github.com/cspray/typiphy/issues",
+                "source": "https://github.com/cspray/typiphy/tree/0.1.0"
+            },
+            "time": "2022-04-23T05:06:18+00:00"
+        },
         {
             "name": "nikic/php-parser",
             "version": "v4.13.2",
@@ -184,28 +218,21 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.6.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
-                "reference": "6b57715d189ca82c4c2171307996a978a24aab68"
-            },
+            "version": "dev-main",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/6b57715d189ca82c4c2171307996a978a24aab68",
-                "reference": "6b57715d189ca82c4c2171307996a978a24aab68",
-                "shasum": ""
+                "type": "path",
+                "url": "../annotated-container-dummy-apps",
+                "reference": "6b57715d189ca82c4c2171307996a978a24aab68"
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "src/ThirdPartyServices/constants.php"
-                ],
                 "psr-4": {
                     "Cspray\\AnnotatedContainer\\DummyApps\\": "src"
-                }
+                },
+                "files": [
+                    "src/ThirdPartyServices/constants.php"
+                ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -218,11 +245,9 @@
                 }
             ],
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
-            "support": {
-                "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
-                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.6.0"
-            },
-            "time": "2022-04-16T21:02:22+00:00"
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "doctrine/instantiator",
@@ -2320,7 +2345,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "cspray/annotated-container-dummy-apps": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

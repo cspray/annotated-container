@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Auryn\InjectionException;
 use Auryn\Injector;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
+use Cspray\Typiphy\ObjectType;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -35,7 +36,7 @@ final class AurynContainerFactory implements ContainerFactory {
         $nameTypeMap = [];
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             if (!is_null($serviceDefinition->getName())) {
-                $nameTypeMap[$serviceDefinition->getName()->getCompileValue()] = $serviceDefinition->getType();
+                $nameTypeMap[$serviceDefinition->getName()] = $serviceDefinition->getType();
             }
         }
         return new class($this->createInjector($containerDefinition, $activeProfiles), $nameTypeMap) implements ContainerInterface {
@@ -73,26 +74,24 @@ final class AurynContainerFactory implements ContainerFactory {
     private function createInjector(ContainerDefinition $containerDefinition, array $activeProfiles) : Injector {
         $injector = new Injector();
         $servicePrepareDefinitions = $containerDefinition->getServicePrepareDefinitions();
-        $useServiceDefinitions = $containerDefinition->getInjectServiceDefinitions();
-        $injectScalarDefinitions = $containerDefinition->getInjectScalarDefinitions();
         $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
 
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            $injector->share($serviceDefinition->getType());
+            $injector->share($serviceDefinition->getType()->getName());
         }
 
         $aliasedTypes = [];
         $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
             if (!in_array($aliasDefinition->getAbstractService(), $aliasedTypes)) {
-                $typeAliasDefinitions = self::mapTypesAliasDefinitions($aliasDefinition->getAbstractService(), $aliasDefinitions, $activeProfiles);
+                $typeAliasDefinitions = self::mapTypesAliasDefinitions($containerDefinition, $aliasDefinition->getAbstractService(), $aliasDefinitions, $activeProfiles);
                 $aliasDefinition = null;
                 if (count($typeAliasDefinitions) === 1) {
                     $aliasDefinition = $typeAliasDefinitions[0];
                 } else {
                     /** @var AliasDefinition $typeAliasDefinition */
                     foreach ($typeAliasDefinitions as $typeAliasDefinition) {
-                        if ($typeAliasDefinition->getConcreteService()->isPrimary()) {
+                        if (self::isServicePrimary($containerDefinition, $typeAliasDefinition->getConcreteService())) {
                             $aliasDefinition = $typeAliasDefinition;
                             break;
                         }
@@ -101,8 +100,8 @@ final class AurynContainerFactory implements ContainerFactory {
 
                 if (isset($aliasDefinition)) {
                     $injector->alias(
-                        $aliasDefinition->getAbstractService()->getType(),
-                        $aliasDefinition->getConcreteService()->getType()
+                        $aliasDefinition->getAbstractService()->getName(),
+                        $aliasDefinition->getConcreteService()->getName()
                     );
                 }
             }
@@ -110,106 +109,72 @@ final class AurynContainerFactory implements ContainerFactory {
 
         $preparedTypes = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
-            $type = $servicePrepareDefinition->getService()->getType();
+            $type = $servicePrepareDefinition->getService();
             if (!in_array($type, $preparedTypes)) {
-                $injector->prepare($type, function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $injectScalarDefinitions, $useServiceDefinitions, $type, $activeProfiles) {
+                $injector->prepare($type, function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $type, $activeProfiles) {
                     $methods = self::mapTypesServicePrepares($type, $servicePrepareDefinitions);
                     foreach ($methods as $method) {
-                        $scalarArgs = self::mapTypesScalarArgs($type, $method, $injectScalarDefinitions, $activeProfiles);
-                        $serviceArgs = self::mapTypesServiceArgs($type, $method, $useServiceDefinitions);
-                        $injector->execute([$object, $method], array_merge([], $scalarArgs, $serviceArgs));
+                        $injector->execute([$object, $method]);
                     }
                 });
                 $preparedTypes[] = $type;
             }
         }
 
-        $typeArgsMap = [];
-        foreach ($injectScalarDefinitions as $injectScalarDefinition) {
-            $type = $injectScalarDefinition->getService()->getType();
-            if (!isset($typeArgsMap[$type])) {
-                $typeArgsMap[$type] = self::mapTypesScalarArgs($type, $injectScalarDefinition->getMethod(), $injectScalarDefinitions, $activeProfiles);
-            }
-        }
-
-        foreach ($useServiceDefinitions as $useServiceDefinition) {
-            $type = $useServiceDefinition->getService()->getType();
-            $defineArgs = self::mapTypesServiceArgs($type, '__construct', $useServiceDefinitions);
-            if (isset($typeArgsMap[$type])) {
-                $typeArgsMap[$type] = array_merge($typeArgsMap[$type], $defineArgs);
-            } else {
-                $typeArgsMap[$type] = $defineArgs;
-            }
-        }
-
-        foreach ($typeArgsMap as $type => $args) {
-            $injector->define($type, $args);
-        }
-
         foreach ($serviceDelegateDefinitions as $serviceDelegateDefinition) {
             $injector->delegate(
-                $serviceDelegateDefinition->getServiceType()->getType(),
-                [$serviceDelegateDefinition->getDelegateType(), $serviceDelegateDefinition->getDelegateMethod()]
+                $serviceDelegateDefinition->getServiceType()->getName(),
+                [$serviceDelegateDefinition->getDelegateType()->getName(), $serviceDelegateDefinition->getDelegateMethod()]
             );
         }
 
         return $injector;
     }
 
-    private static function mapTypesScalarArgs(string $type, string $method, array $injectScalarDefinitions, array $activeProfiles) : array {
-        $args = [];
-        /** @var InjectScalarDefinition $injectScalarDefinition */
-        foreach ($injectScalarDefinitions as $injectScalarDefinition) {
-            $scalarProfiles = $injectScalarDefinition->getProfiles()->getRuntimeValue();
-            if (empty($scalarProfiles)) {
-                $scalarProfiles = ['default'];
-            }
-            foreach ($activeProfiles as $activeProfile) {
-                if (in_array($activeProfile, $scalarProfiles) && $injectScalarDefinition->getService()->getType() === $type && $injectScalarDefinition->getMethod() === $method) {
-                    $args[':' . $injectScalarDefinition->getParamName()] = $injectScalarDefinition->getValue()->getRuntimeValue();
-                }
-            }
-        }
-        return $args;
-    }
-
-    private static function mapTypesServiceArgs(string $type, string $method, array $injectServiceDefinitions) : array {
-        $args = [];
-        /** @var InjectServiceDefinition $UseServiceDefinition */
-        foreach ($injectServiceDefinitions as $UseServiceDefinition) {
-            if ($UseServiceDefinition->getService()->getType() === $type && $UseServiceDefinition->getMethod() === $method) {
-                $args[$UseServiceDefinition->getParamName()] = $UseServiceDefinition->getInjectedService()->getRuntimeValue();
-            }
-        }
-        return $args;
-    }
-
-    static private function mapTypesServicePrepares(string $type, array $servicePreparesDefinition) : array {
+    static private function mapTypesServicePrepares(ObjectType $type, array $servicePreparesDefinition) : array {
         $methods = [];
         /** @var ServicePrepareDefinition $servicePrepareDefinition */
         foreach ($servicePreparesDefinition as $servicePrepareDefinition) {
-            if ($servicePrepareDefinition->getService()->getType() === $type) {
+            if ($servicePrepareDefinition->getService() === $type) {
                 $methods[] = $servicePrepareDefinition->getMethod();
             }
         }
         return $methods;
     }
 
-    static private function mapTypesAliasDefinitions(ServiceDefinition $serviceDefinition, array $aliasDefinitions, array $activeProfiles) : array {
+    static private function mapTypesAliasDefinitions(ContainerDefinition $containerDefinition, ObjectType $serviceDefinition, array $aliasDefinitions, array $activeProfiles) : array {
         $aliases = [];
         /** @var AliasDefinition $aliasDefinition */
         foreach ($aliasDefinitions as $aliasDefinition) {
-            $concreteProfiles = $aliasDefinition->getConcreteService()->getProfiles()->getRuntimeValue();
+            $concreteProfiles = self::getProfilesForService($containerDefinition, $aliasDefinition->getConcreteService());
             if (empty($concreteProfiles)) {
                 $concreteProfiles[] = 'default';
             }
             foreach ($activeProfiles as $activeProfile) {
-                if (in_array($activeProfile, $concreteProfiles) && $aliasDefinition->getAbstractService()->getType() === $serviceDefinition->getType()) {
+                if (in_array($activeProfile, $concreteProfiles) && $aliasDefinition->getAbstractService() === $serviceDefinition) {
                     $aliases[] = $aliasDefinition;
                 }
             }
         }
         return $aliases;
+    }
+
+    static private function getProfilesForService(ContainerDefinition $containerDefinition, ObjectType $objectType) : array {
+        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
+            if ($serviceDefinition->getType() === $objectType) {
+                return $serviceDefinition->getProfiles();
+            }
+        }
+        return [];
+    }
+
+    static private function isServicePrimary(ContainerDefinition $containerDefinition, ObjectType $objectType) : bool {
+        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
+            if ($serviceDefinition->getType() === $objectType) {
+                return $serviceDefinition->isPrimary();
+            }
+        }
+        return false;
     }
 
 }

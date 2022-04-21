@@ -17,16 +17,30 @@ use Psr\Container\ContainerExceptionInterface;
 
 /**
  * @covers \Cspray\AnnotatedContainer\AurynContainerFactory
- * @covers \Cspray\AnnotatedContainer\PhpParserContainerDefinitionCompiler
- * @covers \Cspray\AnnotatedContainer\ServiceDefinition
- * @covers \Cspray\AnnotatedContainer\AliasDefinition
- * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinition
- * @covers \Cspray\AnnotatedContainer\InjectScalarDefinition
+ * @covers \Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler
+ * @covers \Cspray\AnnotatedContainer\AliasDefinitionBuilder
+ * @covers \Cspray\AnnotatedContainer\Attribute\Service
+ * @covers \Cspray\AnnotatedContainer\ContainerDefinitionBuilder
+ * @covers \Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder
+ * @covers \Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter
+ * @covers \Cspray\AnnotatedContainer\PhpParserAnnotatedTargetCompiler
+ * @covers \Cspray\AnnotatedContainer\ServiceDefinitionBuilder
+ * @covers \Cspray\AnnotatedContainer\ContainerFactoryOptionsBuilder
+ * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder
+ * @covers \Cspray\AnnotatedContainer\Attribute\ServiceDelegate
+ * @covers \Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder
  */
 class AurynContainerFactoryTest extends TestCase {
 
+    private function getContainerDefinitionCompiler() : ContainerDefinitionCompiler {
+        return new AnnotatedTargetContainerDefinitionCompiler(
+            new PhpParserAnnotatedTargetCompiler(),
+            new DefaultAnnotatedTargetDefinitionConverter()
+        );
+    }
+
     public function testCreateSimpleServices() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->build()
         );
@@ -37,7 +51,7 @@ class AurynContainerFactoryTest extends TestCase {
     }
 
     public function testInterfaceServicePrepare() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InterfaceServicePrepare')->build()
         );
@@ -50,7 +64,7 @@ class AurynContainerFactoryTest extends TestCase {
     }
 
     public function testServicePrepareInvokedOnContainer() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InjectorExecuteServicePrepare')->build()
         );
@@ -62,90 +76,8 @@ class AurynContainerFactoryTest extends TestCase {
         $this->assertInstanceOf(DummyApps\InjectorExecuteServicePrepare\BarImplementation::class, $subject->getBar());
     }
 
-    public function testSimpleUseScalar() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseScalar')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-
-        $subject = $container->get(SimpleUseScalar\FooImplementation::class);
-
-        $this->assertSame('string param test value', $subject->stringParam);
-        $this->assertSame(42, $subject->intParam);
-        $this->assertSame(42.0, $subject->floatParam);
-        $this->assertTrue($subject->boolParam);
-    }
-
-    public function testMultipleUseScalars() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/MultipleUseScalars')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-
-        $subject = $container->get(MultipleUseScalars\FooImplementation::class);
-
-        $this->assertSame('constructor param', $subject->stringParam);
-        $this->assertSame('prepare param', $subject->prepareParam);
-    }
-
-    public function testConstantUseScalar() {
-        // we need to make sure this file is loaded so that our constant is defined
-        require_once DummyAppUtils::getRootDir() . '/ConstantUseScalar/FooImplementation.php';
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ConstantUseScalar')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-
-        $subject = $container->get(ConstantUseScalar\FooImplementation::class);
-
-        $this->assertSame('foo_bar_val', $subject->val);
-    }
-
-    public function testSimpleUseScalarFromEnv() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseScalarFromEnv')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-
-        $subject = $container->get(SimpleUseScalarFromEnv\FooImplementation::class);
-
-        $this->assertSame(getenv('USER'), $subject->user);
-    }
-
-    public function testSimpleUseServiceSetterInjection() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseService')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-
-        $subject = $container->get(SimpleUseService\SetterInjection::class);
-
-        $this->assertInstanceOf(SimpleUseService\BazImplementation::class, $subject->baz);
-        $this->assertInstanceOf(SimpleUseService\BarImplementation::class, $subject->bar);
-        $this->assertInstanceOf(SimpleUseService\QuxImplementation::class, $subject->qux);
-    }
-
-    public function testSimpleUseServiceConstructorInjection() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleUseService')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-
-        $subject = $container->get(SimpleUseService\ConstructorInjection::class);
-
-        $this->assertInstanceOf(SimpleUseService\BazImplementation::class, $subject->baz);
-        $this->assertInstanceOf(SimpleUseService\BarImplementation::class, $subject->bar);
-        $this->assertInstanceOf(SimpleUseService\QuxImplementation::class, $subject->qux);
-    }
-
     public function testMultipleAliasResolutionNoMakeDefine() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/MultipleAliasResolution')->build()
         );
@@ -156,7 +88,7 @@ class AurynContainerFactoryTest extends TestCase {
     }
 
     public function testServiceDelegate() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ServiceDelegate')->build()
         );
@@ -168,7 +100,7 @@ class AurynContainerFactoryTest extends TestCase {
     }
 
     public function testHasServiceIfCompiled() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->build()
         );
@@ -179,7 +111,7 @@ class AurynContainerFactoryTest extends TestCase {
     }
 
     public function testMultipleServicesWithPrimary() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/MultipleServicesWithPrimary')->build()
         );
@@ -189,7 +121,7 @@ class AurynContainerFactoryTest extends TestCase {
     }
 
     public function testProfileResolvedServices() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ProfileResolvedServices')->build()
         );
@@ -204,50 +136,8 @@ class AurynContainerFactoryTest extends TestCase {
         $this->assertInstanceOf(DummyApps\ProfileResolvedServices\DevFooImplementation::class, $instance);
     }
 
-    public function testInjectScalarProfilesDev() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InjectScalarProfiles')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition, ContainerFactoryOptionsBuilder::forActiveProfiles('default', 'dev')->build());
-
-        $instance = $container->get(DummyApps\InjectScalarProfiles\FooImplementation::class);
-
-        $this->assertNotNull($instance);
-        $this->assertSame('foo', $instance->getValue());
-    }
-
-    public function testInjectScalarProfilesProd() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InjectScalarProfiles')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer(
-            $containerDefinition,
-            ContainerFactoryOptionsBuilder::forActiveProfiles('default', 'prod')->build()
-        );
-
-        $instance = $container->get(DummyApps\InjectScalarProfiles\FooImplementation::class);
-
-        $this->assertNotNull($instance);
-        $this->assertSame('bar', $instance->getValue());
-    }
-
-    public function testInjectScalarProfilesTest() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InjectScalarProfiles')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition, ContainerFactoryOptionsBuilder::forActiveProfiles('default', 'test')->build());
-
-        $instance = $container->get(DummyApps\InjectScalarProfiles\FooImplementation::class);
-
-        $this->assertNotNull($instance);
-        $this->assertSame('baz', $instance->getValue());
-    }
-
     public function testCreateNamedService() {
-        $compiler = new PhpParserContainerDefinitionCompiler();
+        $compiler = $this->getContainerDefinitionCompiler();
         $containerDefinition = $compiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/NamedService')->build()
         );
