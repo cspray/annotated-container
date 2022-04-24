@@ -102,9 +102,9 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
             private function getAnnotatedService(Node\Stmt\Class_|Node\Stmt\Interface_ $node) : AnnotatedTarget {
                 return new class($node->namespacedName->toString(), 0) implements AnnotatedTarget {
 
-                    private readonly ReflectionClass $targetReflection;
-                    private readonly ReflectionAttribute $attributeReflection;
-                    private readonly object $attributeInstance;
+                    private ReflectionClass $targetReflection;
+                    private ReflectionAttribute $attributeReflection;
+                    private object $attributeInstance;
 
                     public function __construct(
                         private readonly string $targetType,

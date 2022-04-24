@@ -21,7 +21,8 @@
   "require-dev": {
     "cspray/annotated-container-dummy-apps": "^0.6",
     "phpunit/phpunit": "^9.5",
-    "mikey179/vfsstream": "^1.6"
+    "mikey179/vfsstream": "^1.6",
+    "vimeo/psalm": "^4.22"
   },
   "autoload": {
     "psr-4": {
