@@ -15,7 +15,7 @@ interface ServicePrepareDefinition {
     /**
      * The Service that requires some method to be invoked on it after it is instantiated.
      *
-     * @return ServiceDefinition
+     * @return ObjectType
      */
     public function getService() : ObjectType;
 

@@ -35,11 +35,11 @@ class ServicePrepareDefinitionBuilder {
                 private readonly string $method) {
             }
 
-            public function getService(): ObjectType {
+            public function getService() : ObjectType {
                 return $this->service;
             }
 
-            public function getMethod(): string {
+            public function getMethod() : string {
                 return $this->method;
             }
         };

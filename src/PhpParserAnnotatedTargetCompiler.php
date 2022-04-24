@@ -143,9 +143,9 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
                 $method = $node->name->toString();
                 return new class($classType, $method, $attributeType) implements AnnotatedTarget {
 
-                    private readonly ReflectionMethod $targetReflection;
-                    private readonly ReflectionAttribute $attributeReflection;
-                    private readonly object $attributeInstance;
+                    private ReflectionMethod $targetReflection;
+                    private ReflectionAttribute $attributeReflection;
+                    private object $attributeInstance;
 
                     public function __construct(
                         private readonly string $classType,
