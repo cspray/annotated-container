@@ -14,14 +14,14 @@ interface AliasDefinition {
     /**
      * An abstract Service used by your application but cannot be constructed directly.
      *
-     * @return ServiceDefinition
+     * @return ObjectType
      */
     public function getAbstractService() : ObjectType;
 
     /**
      * The concrete Service that should be used where your applications requires the corresponding abstract Service.
      *
-     * @return ServiceDefinition
+     * @return ObjectType
      */
     public function getConcreteService() : ObjectType;
 

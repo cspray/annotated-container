@@ -102,9 +102,9 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
             private function getAnnotatedService(Node\Stmt\Class_|Node\Stmt\Interface_ $node) : AnnotatedTarget {
                 return new class($node->namespacedName->toString(), 0) implements AnnotatedTarget {
 
-                    private readonly ReflectionClass $targetReflection;
-                    private readonly ReflectionAttribute $attributeReflection;
-                    private readonly object $attributeInstance;
+                    private ReflectionClass $targetReflection;
+                    private ReflectionAttribute $attributeReflection;
+                    private object $attributeInstance;
 
                     public function __construct(
                         private readonly string $targetType,
@@ -143,9 +143,9 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
                 $method = $node->name->toString();
                 return new class($classType, $method, $attributeType) implements AnnotatedTarget {
 
-                    private readonly ReflectionMethod $targetReflection;
-                    private readonly ReflectionAttribute $attributeReflection;
-                    private readonly object $attributeInstance;
+                    private ReflectionMethod $targetReflection;
+                    private ReflectionAttribute $attributeReflection;
+                    private object $attributeInstance;
 
                     public function __construct(
                         private readonly string $classType,
@@ -153,25 +153,25 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
                         private readonly AttributeType $attributeType
                     ) {}
 
-                    public function getTargetType(): AnnotatedTargetType {
+                    public function getTargetType() : AnnotatedTargetType {
                         return AnnotatedTargetType::MethodTarget;
                     }
 
-                    public function getTargetReflection(): ReflectionMethod {
+                    public function getTargetReflection() : ReflectionMethod {
                         if (!isset($this->targetReflection)) {
                             $this->targetReflection = new ReflectionMethod(sprintf('%s::%s', $this->classType, $this->method));
                         }
                         return $this->targetReflection;
                     }
 
-                    public function getAttributeReflection(): ReflectionAttribute {
+                    public function getAttributeReflection() : ReflectionAttribute {
                         if (!isset($this->attributeReflection)) {
                             $this->attributeReflection = $this->getTargetReflection()->getAttributes($this->attributeType->value)[0];
                         }
                         return $this->attributeReflection;
                     }
 
-                    public function getAttributeInstance(): object {
+                    public function getAttributeInstance() : object {
                         if (!isset($this->attributeInstance)) {
                             $this->attributeInstance = $this->getAttributeReflection()->newInstance();
                         }

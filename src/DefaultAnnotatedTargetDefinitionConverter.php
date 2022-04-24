@@ -8,7 +8,7 @@ use function Cspray\Typiphy\objectType;
 
 final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTargetDefinitionConverter {
 
-    public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectScalarDefinition|InjectServiceDefinition {
+    public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition {
         return match ($target->getAttributeReflection()->getName()) {
             AttributeType::Service->value => $this->buildServiceDefinition($target),
             AttributeType::ServiceDelegate->value => $this->buildServiceDelegateDefinition($target),

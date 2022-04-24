@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use Cspray\Typiphy\ObjectType;
 
 /**
@@ -18,9 +17,8 @@ final class AliasDefinitionBuilder {
     /**
      * Define the abstract Service that should have an alias defined for it.
      *
-     * @param ServiceDefinition $serviceDefinition
+     * @param ObjectType $serviceDefinition
      * @return static
-     * @throws DefinitionBuilderException
      */
     public static function forAbstract(ObjectType $serviceDefinition) : self {
         $instance = new self;
@@ -33,9 +31,8 @@ final class AliasDefinitionBuilder {
      *
      * This method is immutable and a new AliasDefinitionBuilder will be returned.
      *
-     * @param ServiceDefinition $serviceDefinition
+     * @param ObjectType $serviceDefinition
      * @return $this
-     * @throws DefinitionBuilderException
      */
     public function withConcrete(ObjectType $serviceDefinition) : self {
         $instance = clone $this;
@@ -55,11 +52,11 @@ final class AliasDefinitionBuilder {
                 private readonly ObjectType $concreteService
             ) {}
 
-            public function getAbstractService(): ObjectType {
+            public function getAbstractService() : ObjectType {
                 return $this->abstractService;
             }
 
-            public function getConcreteService(): ObjectType {
+            public function getConcreteService() : ObjectType {
                 return $this->concreteService;
             }
 

@@ -29,6 +29,7 @@ final class AurynContainerFactory implements ContainerFactory {
      * implementation will be deprecated.
      *
      * @param ContainerDefinition $containerDefinition
+     * @param ContainerFactoryOptions|null $containerFactoryOptions
      * @return ContainerInterface
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface {
@@ -41,7 +42,7 @@ final class AurynContainerFactory implements ContainerFactory {
         }
         return new class($this->createInjector($containerDefinition, $activeProfiles), $nameTypeMap) implements ContainerInterface {
 
-            public function __construct(private Injector $injector, private array $nameTypeMap) {}
+            public function __construct(private readonly Injector $injector, private readonly array $nameTypeMap) {}
 
             public function get(string $id) {
                 try {
