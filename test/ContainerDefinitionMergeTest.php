@@ -5,6 +5,9 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException;
 use PHPUnit\Framework\TestCase;
+use function Cspray\Typiphy\intType;
+use function Cspray\Typiphy\objectType;
+use function Cspray\Typiphy\stringType;
 
 class ContainerDefinitionMergeTest extends TestCase {
 
@@ -21,8 +24,8 @@ class ContainerDefinitionMergeTest extends TestCase {
     }
 
     public function testMergeHasCorrectServiceDefinitions() {
-        $serviceDefinition1 = ServiceDefinitionBuilder::forAbstract(DummyApps\SimpleServices\FooInterface::class)->build();
-        $serviceDefinition2 = ServiceDefinitionBuilder::forConcrete(DummyApps\SimpleServices\FooImplementation::class)->build();
+        $serviceDefinition1 = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\SimpleServices\FooInterface::class))->build();
+        $serviceDefinition2 = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\SimpleServices\FooImplementation::class))->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()->withServiceDefinition($serviceDefinition1)->build();
         $container2 = ContainerDefinitionBuilder::newDefinition()->withServiceDefinition($serviceDefinition2)->build();
@@ -36,8 +39,8 @@ class ContainerDefinitionMergeTest extends TestCase {
     }
 
     public function testMergeDuplicateServiceDefinitionThrowsException() {
-        $serviceDefinition1 = ServiceDefinitionBuilder::forAbstract(DummyApps\SimpleServices\FooInterface::class)->build();
-        $serviceDefinition2 = ServiceDefinitionBuilder::forAbstract(DummyApps\SimpleServices\FooInterface::class)->build();
+        $serviceDefinition1 = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\SimpleServices\FooInterface::class))->build();
+        $serviceDefinition2 = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\SimpleServices\FooInterface::class))->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()->withServiceDefinition($serviceDefinition1)->build();
         $container2 = ContainerDefinitionBuilder::newDefinition()->withServiceDefinition($serviceDefinition2)->build();
@@ -48,9 +51,9 @@ class ContainerDefinitionMergeTest extends TestCase {
     }
 
     public function testMergeHasCorrectAliasDefinitions() {
-        $fooServiceDefinition = ServiceDefinitionBuilder::forAbstract(DummyApps\MultipleAliasResolution\FooInterface::class)->build();
-        $bazServiceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\MultipleAliasResolution\BazImplementation::class)->build();
-        $fooBazAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition)->withConcrete($bazServiceDefinition)->build();
+        $fooServiceDefinition = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\MultipleAliasResolution\FooInterface::class))->build();
+        $bazServiceDefinition = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\MultipleAliasResolution\BazImplementation::class))->build();
+        $fooBazAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition->getType())->withConcrete($bazServiceDefinition->getType())->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()
             ->withServiceDefinition($fooServiceDefinition)
@@ -58,8 +61,8 @@ class ContainerDefinitionMergeTest extends TestCase {
             ->withAliasDefinition($fooBazAliasDefinition)
             ->build();
 
-        $barServiceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\MultipleAliasResolution\BarImplementation::class)->build();
-        $fooBarAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition)->withConcrete($barServiceDefinition)->build();
+        $barServiceDefinition = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\MultipleAliasResolution\BarImplementation::class))->build();
+        $fooBarAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition->getType())->withConcrete($barServiceDefinition->getType())->build();
 
         $container2 = ContainerDefinitionBuilder::newDefinition()
             ->withServiceDefinition($barServiceDefinition)
@@ -75,9 +78,9 @@ class ContainerDefinitionMergeTest extends TestCase {
     }
 
     public function testMergeDuplicateAliasDefinitionThrowsException() {
-        $fooServiceDefinition = ServiceDefinitionBuilder::forAbstract(DummyApps\MultipleAliasResolution\FooInterface::class)->build();
-        $bazServiceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\MultipleAliasResolution\BazImplementation::class)->build();
-        $fooBazAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition)->withConcrete($bazServiceDefinition)->build();
+        $fooServiceDefinition = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\MultipleAliasResolution\FooInterface::class))->build();
+        $bazServiceDefinition = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\MultipleAliasResolution\BazImplementation::class))->build();
+        $fooBazAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition->getType())->withConcrete($bazServiceDefinition->getType())->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()
             ->withServiceDefinition($fooServiceDefinition)
@@ -95,13 +98,13 @@ class ContainerDefinitionMergeTest extends TestCase {
     }
 
     public function testMergeHasCorrectServicePrepareDefinitions() {
-        $interfaceServiceDefinition = ServiceDefinitionBuilder::forAbstract(DummyApps\InterfaceServicePrepare\FooInterface::class)->build();
-        $interfaceServicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($interfaceServiceDefinition, 'setBar')->build();
+        $interfaceServiceDefinition = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\InterfaceServicePrepare\FooInterface::class))->build();
+        $interfaceServicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($interfaceServiceDefinition->getType(), 'setBar')->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()->withServicePrepareDefinition($interfaceServicePrepareDefinition)->build();
 
-        $classServiceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\ClassOverridesInterfaceServicePrepare\FooImplementation::class)->build();
-        $classServicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($classServiceDefinition, 'setBar')->build();
+        $classServiceDefinition = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\ClassOverridesInterfaceServicePrepare\FooImplementation::class))->build();
+        $classServicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($classServiceDefinition->getType(), 'setBar')->build();
 
         $container2 = ContainerDefinitionBuilder::newDefinition()->withServicePrepareDefinition($classServicePrepareDefinition)->build();
 
@@ -113,70 +116,20 @@ class ContainerDefinitionMergeTest extends TestCase {
         ], $subject->getServicePrepareDefinitions());
     }
 
-    public function testMergeHasCorrectInjectScalarDefinitions() {
-        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\SimpleUseScalar\FooImplementation::class)->build();
-        $injectScalarDefinition1 = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
-            ->withParam(ScalarType::String, 'stringParam')
-            ->withValue(scalarValue('string value'))
-            ->withProfiles(arrayValue(['default']))
-            ->build();
-
-        $container1 = ContainerDefinitionBuilder::newDefinition()->withInjectScalarDefinition($injectScalarDefinition1)->build();
-
-        $injectScalarDefinition2 = InjectScalarDefinitionBuilder::forMethod($serviceDefinition, '__construct')
-            ->withParam(ScalarType::Int, 'intParam')
-            ->withValue(scalarValue(42))
-            ->withProfiles(arrayValue(['default']))
-            ->build();
-
-        $container2 = ContainerDefinitionBuilder::newDefinition()->withInjectScalarDefinition($injectScalarDefinition2)->build();
-
-        $subject = $container1->merge($container2);
-
-        $this->assertInjectScalarParamValues([
-            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(stringParam)|default' => 'string value',
-            DummyApps\SimpleUseScalar\FooImplementation::class . '::__construct(intParam)|default' => 42
-        ], $subject->getInjectScalarDefinitions());
-    }
-
-    public function testMergeHasCorrectInjectServiceDefinitions() {
-        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(DummyApps\SimpleUseService\ConstructorInjection::class)->build();
-        $barInjectedDefinition = scalarValue(DummyApps\SimpleUseService\BarImplementation::class);
-        $barInjectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, '__construct')
-            ->withParam(DummyApps\SimpleUseService\FooInterface::class, 'bar')
-            ->withInjectedService($barInjectedDefinition)
-            ->build();
-        $container1 = ContainerDefinitionBuilder::newDefinition()->withInjectServiceDefinition($barInjectServiceDefinition)->build();
-
-        $bazInjectedDefinition = scalarValue(DummyApps\SimpleUseService\BazImplementation::class);
-        $bazInjectServiceDefinition = InjectServiceDefinitionBuilder::forMethod($serviceDefinition, '__construct')
-            ->withParam(DummyApps\SimpleUseService\BazImplementation::class, 'baz')
-            ->withInjectedService($bazInjectedDefinition)
-            ->build();
-        $container2 = ContainerDefinitionBuilder::newDefinition()->withInjectServiceDefinition($bazInjectServiceDefinition)->build();
-
-        $subject = $container1->merge($container2);
-
-        $this->assertUseServiceParamValues([
-            DummyApps\SimpleUseService\ConstructorInjection::class . '::__construct(bar)' => DummyApps\SimpleUseService\BarImplementation::class,
-            DummyApps\SimpleUseService\ConstructorInjection::class . '::__construct(baz)' => DummyApps\SimpleUseService\BazImplementation::class
-        ], $subject->getInjectServiceDefinitions());
-    }
-
     public function testMergeHasCorrectServiceDelegateDefinitions() {
         $container1 = ContainerDefinitionBuilder::newDefinition()->build();
 
-        $serviceDefinition = ServiceDefinitionBuilder::forAbstract(DummyApps\ServiceDelegate\ServiceInterface::class)->build();
-        $serviceDelegateDefinition = ServiceDelegateDefinitionBuilder::forService($serviceDefinition)
-            ->withDelegateMethod(DummyApps\ServiceDelegate\ServiceFactory::class, 'createService')
+        $serviceDefinition = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\ServiceDelegate\ServiceInterface::class))->build();
+        $serviceDelegateDefinition = ServiceDelegateDefinitionBuilder::forService($serviceDefinition->getType())
+            ->withDelegateMethod(objectType(DummyApps\ServiceDelegate\ServiceFactory::class), 'createService')
             ->build();
         $container2 = ContainerDefinitionBuilder::newDefinition()->withServiceDelegateDefinition($serviceDelegateDefinition)->build();
 
         $subject = $container1->merge($container2);
 
         $this->assertCount(1, $subject->getServiceDelegateDefinitions());
-        $this->assertSame(DummyApps\ServiceDelegate\ServiceInterface::class, $subject->getServiceDelegateDefinitions()[0]->getServiceType()->getType());
-        $this->assertSame(DummyApps\ServiceDelegate\ServiceFactory::class, $subject->getServiceDelegateDefinitions()[0]->getDelegateType());
+        $this->assertSame(DummyApps\ServiceDelegate\ServiceInterface::class, $subject->getServiceDelegateDefinitions()[0]->getServiceType()->getName());
+        $this->assertSame(DummyApps\ServiceDelegate\ServiceFactory::class, $subject->getServiceDelegateDefinitions()[0]->getDelegateType()->getName());
         $this->assertSame('createService', $subject->getServiceDelegateDefinitions()[0]->getDelegateMethod());
     }
 

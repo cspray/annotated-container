@@ -2,49 +2,27 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\Typiphy\ObjectType;
 
 final class ServiceDefinitionBuilder {
 
-    private ?AnnotationValue $name = null;
-    private string $type;
+    private ?string $name = null;
+    private ObjectType $type;
     private bool $isAbstract;
-    private ?AnnotationValue $profiles = null;
+    private array $profiles = [];
     private bool $isPrimary = false;
     private bool $isShared = true;
 
     private function __construct() {}
 
-    /**
-     * @param string $type
-     * @return static
-     * @throws DefinitionBuilderException
-     */
-    public static function forAbstract(string $type) : self {
-        if (empty($type)) {
-            throw new DefinitionBuilderException(sprintf(
-                'Must not pass an empty type to %s',
-                __METHOD__
-            ));
-        }
+    public static function forAbstract(ObjectType $type) : self {
         $instance = new self;
         $instance->type = $type;
         $instance->isAbstract = true;
         return $instance;
     }
 
-    /**
-     * @param string $type
-     * @return static
-     * @throws DefinitionBuilderException
-     */
-    public static function forConcrete(string $type, bool $isPrimary = false) : self {
-        if (empty($type)) {
-            throw new DefinitionBuilderException(sprintf(
-                'Must not pass an empty type to %s',
-                __METHOD__
-            ));
-        }
+    public static function forConcrete(ObjectType $type, bool $isPrimary = false) : self {
         $instance = new self;
         $instance->type = $type;
         $instance->isAbstract = false;
@@ -52,13 +30,13 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
-    public function withName(AnnotationValue $name) : self {
+    public function withName(string $name) : self {
         $instance = clone $this;
         $instance->name = $name;
         return $instance;
     }
 
-    public function withProfiles(CollectionAnnotationValue $profiles) : self {
+    public function withProfiles(array $profiles) : self {
         $instance = clone $this;
         $instance->profiles = $profiles;
         return $instance;
@@ -78,29 +56,26 @@ final class ServiceDefinitionBuilder {
 
     public function build() : ServiceDefinition {
         $profiles = $this->profiles;
-        if (is_null($profiles)) {
-            $profiles = arrayValue([]);
-        }
         return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary, $this->isShared) implements ServiceDefinition {
 
             public function __construct(
-                private ?AnnotationValue $name,
-                private string $type,
-                private bool $isAbstract,
-                private CollectionAnnotationValue $profiles,
-                private bool $isPrimary,
-                private bool $isShared
+                private readonly ?string $name,
+                private readonly ObjectType $type,
+                private readonly bool $isAbstract,
+                private readonly array $profiles,
+                private readonly bool $isPrimary,
+                private readonly bool $isShared
             ) {}
 
-            public function getName() : ?AnnotationValue {
+            public function getName() : ?string {
                 return $this->name;
             }
 
-            public function getType() : string {
+            public function getType() : ObjectType {
                 return $this->type;
             }
 
-            public function getProfiles() : CollectionAnnotationValue {
+            public function getProfiles() : array {
                 return $this->profiles;
             }
 

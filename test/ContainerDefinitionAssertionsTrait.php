@@ -43,7 +43,7 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
      */
     private function getServiceDefinition(array $serviceDefinitions, string $serviceDefinitionType) : ?ServiceDefinition {
         foreach ($serviceDefinitions as $serviceDefinition) {
-            if ($serviceDefinitionType === $serviceDefinition->getType()) {
+            if ($serviceDefinitionType === $serviceDefinition->getType()->getName()) {
                 return $serviceDefinition;
             }
         }
@@ -60,8 +60,8 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
         foreach ($aliasDefinitions as $aliasDefinition) {
             $this->assertInstanceOf(AliasDefinition::class, $aliasDefinition);
             $actualMap[] = [
-                $aliasDefinition->getAbstractService()->getType(),
-                $aliasDefinition->getConcreteService()->getType()
+                $aliasDefinition->getAbstractService()->getName(),
+                $aliasDefinition->getConcreteService()->getName()
             ];
         }
 
@@ -78,7 +78,7 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
         $actualMap = [];
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             $this->assertInstanceOf(ServicePrepareDefinition::class, $servicePrepareDefinition);
-            $key = $servicePrepareDefinition->getService()->getType();
+            $key = $servicePrepareDefinition->getService()->getName();
             $actualMap[] = [$key, $servicePrepareDefinition->getMethod()];
         }
 
@@ -97,21 +97,17 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
             $this->assertInstanceOf(InjectScalarDefinition::class, $injectScalarDefinition);
             $key = sprintf(
                 "%s::%s(%s)|%s",
-                $injectScalarDefinition->getService()->getType(),
+                $injectScalarDefinition->getService()->getName(),
                 $injectScalarDefinition->getMethod(),
                 $injectScalarDefinition->getParamName(),
-                join(',', $this->getCompiledValues($injectScalarDefinition->getProfiles()))
+                join(',', $injectScalarDefinition->getProfiles())
             );
-            $actualMap[$key] = $this->getCompiledValues($injectScalarDefinition->getValue());
+            $actualMap[$key] = $injectScalarDefinition->getValue();
         }
 
         ksort($actualMap);
         ksort($expectedValueMap);
         $this->assertEquals($expectedValueMap, $actualMap);
-    }
-
-    private function getCompiledValues(AnnotationValue $annotationValue) : string|int|bool|array|float {
-        return $annotationValue->getCompileValue();
     }
 
     protected function assertUseServiceParamValues(array $expectedValueMap, array $UseServiceDefinitions) : void {
@@ -124,11 +120,11 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
             $this->assertInstanceOf(InjectServiceDefinition::class, $UseServiceDefinition);
             $key = sprintf(
                 "%s::%s(%s)",
-                $UseServiceDefinition->getService()->getType(),
+                $UseServiceDefinition->getService()->getName(),
                 $UseServiceDefinition->getMethod(),
                 $UseServiceDefinition->getParamName()
             );
-            $actualMap[$key] = $UseServiceDefinition->getInjectedService()->getCompileValue();
+            $actualMap[$key] = $UseServiceDefinition->getInjectedService();
         }
 
         ksort($actualMap);

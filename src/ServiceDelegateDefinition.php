@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\Typiphy\ObjectType;
+
 /**
  * Defines a factory method for creating a specific type of Service.
  */
@@ -15,7 +17,7 @@ interface ServiceDelegateDefinition {
      *
      * @return string
      */
-    public function getDelegateType() : string;
+    public function getDelegateType() : ObjectType;
 
     /**
      * Return the method on the delegateType that should be invoked to create the Service.
@@ -27,6 +29,6 @@ interface ServiceDelegateDefinition {
      */
     public function getDelegateMethod() : string;
 
-    public function getServiceType() : ServiceDefinition;
+    public function getServiceType() : ObjectType;
 
 }

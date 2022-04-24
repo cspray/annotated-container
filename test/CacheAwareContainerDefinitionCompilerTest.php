@@ -11,13 +11,16 @@ use PHPUnit\Framework\TestCase;
 class CacheAwareContainerDefinitionCompilerTest extends TestCase {
 
     private CacheAwareContainerDefinitionCompiler $cacheAwareContainerDefinitionCompiler;
-    private PhpParserContainerDefinitionCompiler $phpParserContainerDefinitionCompiler;
+    private AnnotatedTargetContainerDefinitionCompiler $phpParserContainerDefinitionCompiler;
     private ContainerDefinitionSerializer $containerDefinitionSerializer;
     private vfsStreamDirectory $root;
 
     protected function setUp(): void {
         $this->cacheAwareContainerDefinitionCompiler = new CacheAwareContainerDefinitionCompiler(
-            $this->phpParserContainerDefinitionCompiler = new PhpParserContainerDefinitionCompiler(),
+            $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
+                new PhpParserAnnotatedTargetCompiler(),
+                new DefaultAnnotatedTargetDefinitionConverter()
+            ),
             $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
             'vfs://root'
         );
@@ -66,7 +69,10 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     public function testFailingToWriteCacheFileThrowsException() {
         $dir = DummyAppUtils::getRootDir() . '/ProfileResolvedServices';
         $subject = new CacheAwareContainerDefinitionCompiler(
-            $this->phpParserContainerDefinitionCompiler = new PhpParserContainerDefinitionCompiler(),
+            $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
+                new PhpParserAnnotatedTargetCompiler(),
+                new DefaultAnnotatedTargetDefinitionConverter()
+            ),
             $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
             'vfs://cache'
         );

@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use JsonSerializable;
+use function Cspray\Typiphy\objectType;
 
 /**
  * A ContainerDefinitionSerializer that will format a ContainerDefinition into a JSON string.
@@ -25,9 +26,9 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $addCompiledServiceDefinition = function(string $key, ServiceDefinition $serviceDefinition) use(&$compiledServiceDefinitions, &$addCompiledServiceDefinition) : void {
             if (!isset($compiledServiceDefinitions[$key])) {
                 $compiledServiceDefinitions[$key] = [
-                    'name' => is_null($serviceDefinition->getName()) ? null : $this->convertAnnotationValueToJson($serviceDefinition->getName()),
-                    'type' => $serviceDefinition->getType(),
-                    'profiles' => $this->convertAnnotationValueToJson($serviceDefinition->getProfiles()),
+                    'name' => is_null($serviceDefinition->getName()) ? null : $serviceDefinition->getName(),
+                    'type' => $serviceDefinition->getType()->getName(),
+                    'profiles' => $serviceDefinition->getProfiles(),
                     'isAbstract' => $serviceDefinition->isAbstract(),
                     'isConcrete' => $serviceDefinition->isConcrete(),
                     'isShared' => $serviceDefinition->isShared()
@@ -43,10 +44,8 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $aliasDefinitions = [];
         foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
-            $originalKey = md5($aliasDefinition->getAbstractService()->getType());
-            $addCompiledServiceDefinition($originalKey, $aliasDefinition->getAbstractService());
-            $aliasKey = md5($aliasDefinition->getConcreteService()->getType());
-            $addCompiledServiceDefinition($aliasKey, $aliasDefinition->getConcreteService());
+            $originalKey = md5($aliasDefinition->getAbstractService()->getName());
+            $aliasKey = md5($aliasDefinition->getConcreteService()->getName());
             $aliasDefinitions[] = [
                 'original' => $originalKey,
                 'alias' => $aliasKey
@@ -56,39 +55,17 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $servicePrepareDefinitions = [];
         foreach ($containerDefinition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
             $servicePrepareDefinitions[] = [
-                'type' => $servicePrepareDefinition->getService()->getType(),
+                'type' => $servicePrepareDefinition->getService()->getName(),
                 'method' => $servicePrepareDefinition->getMethod()
-            ];
-        }
-
-        $injectScalarDefinitions = [];
-        foreach ($containerDefinition->getInjectScalarDefinitions() as $injectScalarDefinition) {
-            $injectScalarDefinitions[] = [
-                'type' => $injectScalarDefinition->getService()->getType(),
-                'method' => $injectScalarDefinition->getMethod(),
-                'paramName' => $injectScalarDefinition->getParamName(),
-                'paramType' => strtolower($injectScalarDefinition->getParamType()->name),
-                'value' => $this->convertAnnotationValueToJson($injectScalarDefinition->getValue())
-            ];
-        }
-
-        $injectServiceDefinitions = [];
-        foreach ($containerDefinition->getInjectServiceDefinitions() as $injectServiceDefinition) {
-            $injectServiceDefinitions[] = [
-                'type' => $injectServiceDefinition->getService()->getType(),
-                'method' => $injectServiceDefinition->getMethod(),
-                'paramName' => $injectServiceDefinition->getParamName(),
-                'paramType' => $injectServiceDefinition->getParamType(),
-                'value' => $this->convertAnnotationValueToJson($injectServiceDefinition->getInjectedService())
             ];
         }
 
         $serviceDelegateDefinitions = [];
         foreach ($containerDefinition->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
             $serviceDelegateDefinitions[] = [
-                'delegateType' => $serviceDelegateDefinition->getDelegateType(),
+                'delegateType' => $serviceDelegateDefinition->getDelegateType()->getName(),
                 'delegateMethod' => $serviceDelegateDefinition->getDelegateMethod(),
-                'serviceType' => $serviceDelegateDefinition->getServiceType()->getType()
+                'serviceType' => $serviceDelegateDefinition->getServiceType()->getName()
             ];
         }
 
@@ -102,8 +79,6 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             'sharedServiceDefinitions' => $serviceDefinitions,
             'aliasDefinitions' => $aliasDefinitions,
             'servicePrepareDefinitions' => $servicePrepareDefinitions,
-            'injectScalarDefinitions' => $injectScalarDefinitions,
-            'injectServiceDefinitions' => $injectServiceDefinitions,
             'serviceDelegateDefinitions' => $serviceDelegateDefinitions
         ], $flags);
     }
@@ -136,42 +111,22 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         foreach ($data['aliasDefinitions'] as $aliasDefinition) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition(
-                AliasDefinitionBuilder::forAbstract($serviceDefinitions[$aliasDefinition['original']])->withConcrete($serviceDefinitions[$aliasDefinition['alias']])->build()
+                AliasDefinitionBuilder::forAbstract($serviceDefinitions[$aliasDefinition['original']]->getType())->withConcrete($serviceDefinitions[$aliasDefinition['alias']]->getType())->build()
             );
         }
 
         foreach ($data['servicePrepareDefinitions'] as $servicePrepareDefinition) {
             $service = $serviceDefinitions[md5($servicePrepareDefinition['type'])];
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServicePrepareDefinition(
-                ServicePrepareDefinitionBuilder::forMethod($service, $servicePrepareDefinition['method'])->build()
-            );
-        }
-
-        foreach ($data['injectScalarDefinitions'] as $useScalarDefinition) {
-            $service = $serviceDefinitions[md5($useScalarDefinition['type'])];
-            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectScalarDefinition(
-                InjectScalarDefinitionBuilder::forMethod($service, $useScalarDefinition['method'])
-                    ->withParam(ScalarType::String, $useScalarDefinition['paramName'])
-                    ->withValue($this->convertJsonToAnnotationValue($useScalarDefinition['value']))
-                    ->build()
-            );
-        }
-
-        foreach ($data['injectServiceDefinitions'] as $injectServiceDefinition) {
-            $targetService = $serviceDefinitions[md5($injectServiceDefinition['type'])];
-            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectServiceDefinition(
-                InjectServiceDefinitionBuilder::forMethod($targetService, $injectServiceDefinition['method'])
-                    ->withParam($injectServiceDefinition['paramType'], $injectServiceDefinition['paramName'])
-                    ->withInjectedService($this->convertJsonToAnnotationValue($injectServiceDefinition['value']))
-                    ->build()
+                ServicePrepareDefinitionBuilder::forMethod($service->getType(), $servicePrepareDefinition['method'])->build()
             );
         }
 
         foreach ($data['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
             $service = $serviceDefinitions[md5($serviceDelegateDefinition['serviceType'])];
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition(
-                ServiceDelegateDefinitionBuilder::forService($service)
-                    ->withDelegateMethod($serviceDelegateDefinition['delegateType'], $serviceDelegateDefinition['delegateMethod'])
+                ServiceDelegateDefinitionBuilder::forService($service->getType())
+                    ->withDelegateMethod(objectType($serviceDelegateDefinition['delegateType']), $serviceDelegateDefinition['delegateMethod'])
                     ->build()
             );
         }
@@ -189,11 +144,11 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 $factoryMethod = 'forConcrete';
             }
             /** @var ServiceDefinitionBuilder $serviceDefinitionBuilder */
-            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod($type);
-            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($this->convertJsonToAnnotationValue($compiledServiceDefinition['profiles']));
+            $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod(objectType($type));
+            $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($compiledServiceDefinition['profiles']);
 
             if (!is_null($compiledServiceDefinition['name'])) {
-                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($this->convertJsonToAnnotationValue($compiledServiceDefinition['name']));
+                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($compiledServiceDefinition['name']);
             }
 
             if ($compiledServiceDefinition['isShared']) {
@@ -208,23 +163,5 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         return $serviceDefinitionCacheMap[$serviceHash];
     }
 
-    private function convertAnnotationValueToJson(AnnotationValue $annotationValue) : JsonSerializable {
-        return new class($annotationValue) implements JsonSerializable {
-
-            public function __construct(private AnnotationValue $annotationValue) {}
-
-            public function jsonSerialize(): array {
-                return $this->getJsonForAnnotationValue($this->annotationValue);
-            }
-
-            private function getJsonForAnnotationValue(AnnotationValue $annotationValue) : array {
-                return ['annotationValue' => serialize($annotationValue)];
-            }
-        };
-    }
-
-    private function convertJsonToAnnotationValue(array $json) : AnnotationValue|CollectionAnnotationValue {
-        return unserialize($json['annotationValue']);
-    }
 
 }

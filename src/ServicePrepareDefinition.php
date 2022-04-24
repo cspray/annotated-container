@@ -3,6 +3,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\Typiphy\ObjectType;
+
 /**
  * Defines a method that should be invoked when the given type has been created by the Injector.
  *
@@ -15,7 +17,7 @@ interface ServicePrepareDefinition {
      *
      * @return ServiceDefinition
      */
-    public function getService() : ServiceDefinition;
+    public function getService() : ObjectType;
 
     /**
      * The method that should be invoked on the Service.

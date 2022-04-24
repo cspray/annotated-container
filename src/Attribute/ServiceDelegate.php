@@ -7,6 +7,6 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 final class ServiceDelegate {
 
-    public function __construct(private string $service) {}
+    public function __construct(public readonly string $service) {}
 
 }

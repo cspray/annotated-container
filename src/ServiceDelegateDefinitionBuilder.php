@@ -3,16 +3,17 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\Typiphy\ObjectType;
 
 class ServiceDelegateDefinitionBuilder {
 
-    private ServiceDefinition $service;
-    private string $delegateType;
+    private ObjectType $service;
+    private ObjectType $delegateType;
     private string $delegateMethod;
 
     private function __construct() {}
 
-    public static function forService(ServiceDefinition $service) : self {
+    public static function forService(ObjectType $service) : self {
         $instance = new self;
         $instance->service = $service;
         return $instance;
@@ -21,10 +22,7 @@ class ServiceDelegateDefinitionBuilder {
     /**
      * @throws DefinitionBuilderException
      */
-    public function withDelegateMethod(string $delegateType, string $delegateMethod) : self {
-        if (empty($delegateType)) {
-            throw new DefinitionBuilderException('The delegate type for a ServiceDelegateDefinition must not be blank.');
-        }
+    public function withDelegateMethod(ObjectType $delegateType, string $delegateMethod) : self {
         if (empty($delegateMethod)) {
             throw new DefinitionBuilderException('The delegate method for a ServiceDelegateDefinition must not be blank.');
         }
@@ -37,25 +35,25 @@ class ServiceDelegateDefinitionBuilder {
     public function build() : ServiceDelegateDefinition {
         return new class($this->service, $this->delegateType, $this->delegateMethod) implements ServiceDelegateDefinition {
 
-            private ServiceDefinition $serviceDefinition;
-            private string $delegateType;
+            private ObjectType $serviceDefinition;
+            private ObjectType $delegateType;
             private string $delegateMethod;
 
-            public function __construct(ServiceDefinition $serviceDefinition, string $delegateType, string $delegateMethod) {
+            public function __construct(ObjectType $serviceDefinition, ObjectType $delegateType, string $delegateMethod) {
                 $this->serviceDefinition = $serviceDefinition;
                 $this->delegateType = $delegateType;
                 $this->delegateMethod = $delegateMethod;
             }
 
-            public function getDelegateType(): string {
+            public function getDelegateType() : ObjectType {
                 return $this->delegateType;
             }
 
-            public function getDelegateMethod(): string {
+            public function getDelegateMethod() : string {
                 return $this->delegateMethod;
             }
 
-            public function getServiceType(): ServiceDefinition {
+            public function getServiceType() : ObjectType {
                 return $this->serviceDefinition;
             }
         };

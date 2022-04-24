@@ -15,8 +15,6 @@ final class ContainerDefinitionBuilder {
     private array $serviceDefinitions = [];
     private array $aliasDefinitions = [];
     private array $servicePrepareDefinitions = [];
-    private array $injectScalarDefinitions = [];
-    private array $injectServiceDefinitions = [];
     private array $serviceDelegateDefinitions = [];
 
     private function __construct() {}
@@ -46,18 +44,6 @@ final class ContainerDefinitionBuilder {
         return $instance;
     }
 
-    public function withInjectScalarDefinition(InjectScalarDefinition $injectScalarDefinition) : self {
-        $instance = clone $this;
-        $instance->injectScalarDefinitions[] = $injectScalarDefinition;
-        return $instance;
-    }
-
-    public function withInjectServiceDefinition(InjectServiceDefinition $injectServiceDefinition) : self {
-        $instance = clone $this;
-        $instance->injectServiceDefinitions[] = $injectServiceDefinition;
-        return $instance;
-    }
-
     public function withServiceDelegateDefinition(ServiceDelegateDefinition $serviceDelegateDefinition) : self {
         $instance = clone $this;
         $instance->serviceDelegateDefinitions[] = $serviceDelegateDefinition;
@@ -68,20 +54,11 @@ final class ContainerDefinitionBuilder {
         return $this->serviceDefinitions;
     }
 
-    public function getServiceDefinition(string $type) : ?ServiceDefinition {
-        return array_reduce(
-            $this->serviceDefinitions,
-            fn($carry, $item) => $item->getType() === $type ? $item : $carry
-        );
-    }
-
     public function build() : ContainerDefinition {
         return new class(
             $this->serviceDefinitions,
             $this->aliasDefinitions,
             $this->servicePrepareDefinitions,
-            $this->injectScalarDefinitions,
-            $this->injectServiceDefinitions,
             $this->serviceDelegateDefinitions
         ) implements ContainerDefinition {
 
@@ -89,8 +66,6 @@ final class ContainerDefinitionBuilder {
                 private array $serviceDefinitions,
                 private array $aliasDefinitions,
                 private array $servicePrepareDefinitions,
-                private array $injectScalarDefinitions,
-                private array $injectServiceDefinitions,
                 private array $serviceDelegateDefinitions
             ) {}
 
@@ -110,8 +85,8 @@ final class ContainerDefinitionBuilder {
                     if ($this->hasAliasDefinition($aliasDefinition)) {
                         throw new ContainerDefinitionMergeException(sprintf(
                             'The ContainerDefinition already has an AliasDefinition for %s aliased to %s.',
-                            $aliasDefinition->getAbstractService()->getType(),
-                            $aliasDefinition->getConcreteService()->getType()
+                            $aliasDefinition->getAbstractService()->getName(),
+                            $aliasDefinition->getConcreteService()->getName()
                         ));
                     }
                     $merged->aliasDefinitions[] = $aliasDefinition;
@@ -119,14 +94,6 @@ final class ContainerDefinitionBuilder {
 
                 foreach ($containerDefinition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
                     $merged->servicePrepareDefinitions[] = $servicePrepareDefinition;
-                }
-
-                foreach ($containerDefinition->getInjectScalarDefinitions() as $injectScalarDefinition) {
-                    $merged->injectScalarDefinitions[] = $injectScalarDefinition;
-                }
-
-                foreach ($containerDefinition->getInjectServiceDefinitions() as $injectServiceDefinition) {
-                    $merged->injectServiceDefinitions[] = $injectServiceDefinition;
                 }
 
                 foreach ($containerDefinition->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
@@ -146,14 +113,6 @@ final class ContainerDefinitionBuilder {
 
             public function getServicePrepareDefinitions(): array {
                 return $this->servicePrepareDefinitions;
-            }
-
-            public function getInjectScalarDefinitions(): array {
-                return $this->injectScalarDefinitions;
-            }
-
-            public function getInjectServiceDefinitions(): array {
-                return $this->injectServiceDefinitions;
             }
 
             public function getServiceDelegateDefinitions(): array {
