@@ -37,7 +37,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         };
         $serviceDefinitions = [];
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            $key = md5($serviceDefinition->getType());
+            $key = md5($serviceDefinition->getType()->getName());
             $addCompiledServiceDefinition($key, $serviceDefinition);
             $serviceDefinitions[] = $key;
         }

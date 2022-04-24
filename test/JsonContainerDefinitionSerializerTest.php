@@ -233,7 +233,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'isShared' => true
         ];
 
-        $actual = json_decode($this->subject->serialize($containerDefinition), 2);
+        $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
         $this->assertArrayHasKey('compiledServiceDefinitions', $actual);
         $this->assertCount(2, $actual['compiledServiceDefinitions']);
