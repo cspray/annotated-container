@@ -153,25 +153,25 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
                         private readonly AttributeType $attributeType
                     ) {}
 
-                    public function getTargetType(): AnnotatedTargetType {
+                    public function getTargetType() : AnnotatedTargetType {
                         return AnnotatedTargetType::MethodTarget;
                     }
 
-                    public function getTargetReflection(): ReflectionMethod {
+                    public function getTargetReflection() : ReflectionMethod {
                         if (!isset($this->targetReflection)) {
                             $this->targetReflection = new ReflectionMethod(sprintf('%s::%s', $this->classType, $this->method));
                         }
                         return $this->targetReflection;
                     }
 
-                    public function getAttributeReflection(): ReflectionAttribute {
+                    public function getAttributeReflection() : ReflectionAttribute {
                         if (!isset($this->attributeReflection)) {
                             $this->attributeReflection = $this->getTargetReflection()->getAttributes($this->attributeType->value)[0];
                         }
                         return $this->attributeReflection;
                     }
 
-                    public function getAttributeInstance(): object {
+                    public function getAttributeInstance() : object {
                         if (!isset($this->attributeInstance)) {
                             $this->attributeInstance = $this->getAttributeReflection()->newInstance();
                         }

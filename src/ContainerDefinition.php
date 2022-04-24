@@ -51,4 +51,9 @@ interface ContainerDefinition {
      */
     public function getServicePrepareDefinitions() : array;
 
+    /**
+     * @return ServiceDelegateDefinition[]
+     */
+    public function getServiceDelegateDefinitions() : array;
+
 }

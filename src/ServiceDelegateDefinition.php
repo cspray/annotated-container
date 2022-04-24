@@ -15,7 +15,7 @@ interface ServiceDelegateDefinition {
      * Please note that you can specify other Services in the Container and have them injected into the constructor
      * of this factory class.
      *
-     * @return string
+     * @return ObjectType
      */
     public function getDelegateType() : ObjectType;
 
