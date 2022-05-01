@@ -56,11 +56,12 @@ use Cspray\AnnotatedContainer\CallableContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use function Cspray\AnnotatedContainer\service;
 use function Cspray\AnnotatedContainer\serviceDelegate;
+use function Cspray\Typiphy\objectType;
 
 $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')
     ->withContainerDefinitionBuilderContextConsumer(new CallableContainerDefinitionBuilderContextConsumer(function($context) {
-        service($context, LoggerInterface::class);
-        serviceDelegate($context, $service, MonologLoggerFactory::class, 'createLogger');
+        service($context, $loggerType = objectType(LoggerInterface::class));
+        serviceDelegate($context, $loggerType, objectType(MonologLoggerFactory::class), 'createLogger');
     }))
     ->build();
 ```
@@ -79,8 +80,9 @@ use function Cspray\AnnotatedContainer\serviceDelegate;
 
 $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')
     ->withContainerDefinitionBuilderContextConsumer(new CallableContainerDefinitionBuilderContextConsumer(function($context) {
-        service($context, LoggerInterface::class);
-        serviceDelegate($context, $service, MonologLoggerFactory::class, 'createLogger');
+        service($context, $loggerType = objectType(LoggerInterface::class));
+        serviceDelegate($context, $loggerType, objectType(MonologLoggerFactory::class), 'createLogger');
+        servicePrepare();
     }))
     ->build();
 

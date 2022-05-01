@@ -111,14 +111,8 @@ $compileOptions == ContainerDefinitionCompileOptionsBuilder::scanDirectories(__D
     ->build();
 ```
 
-It is important...**always include the 'default' profile**! Many services will not be annotated with a specific profile 
-and will be implicitly added to the 'default' profile. Failure to include it in the list of active profiles will likely 
-make the vast majority of services configured incorrectly or unavailable.
+It is important...**always include the 'default' profile**! Many services will not be annotated with a specific profile and will be implicitly added to the 'default' profile. Failure to include it in the list of active profiles will likely make the vast majority of services configured incorrectly or unavailable.
 
 ## Profiles != Environments
 
-It is important to keep in mind that AnnotatedContainer profiles are _not_ a 1-for-1 mapping to environments. Sometimes 
-a profile name will make sense to match an environment name. Other times, it won't. Imagine a third `BlobStorage` implementation 
-might come along for a different cloud-provider or a client that still uses FTP. In this instance they'd both be considered 
-a "production" environment, perhaps, but that wouldn't be enough to distinguish which service to use. If it helps, think 
-of Profiles as a way to tag and identify certain attributes of an environment that helps determine which service might be used.
+It is important to keep in mind that AnnotatedContainer profiles are _not_ a 1-for-1 mapping to environments. Sometimes a profile name will make sense to match an environment name. Other times, it won't. Imagine a third `BlobStorage` implementation might come along for a different cloud-provider or a client that still uses FTP. In this instance they'd both be considered a "production" environment, perhaps, but that wouldn't be enough to distinguish which service to use. If it helps, think of Profiles as a way to tag and identify certain attributes of an environment that helps determine which service might be used.

@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased - 2022-XX-XX
+
+### Added
+
+- Added the `cspray/typiphy` package.
+- Added a new `#[Inject]` Attribute with the flexibility to handle use cases from previous Inject* Attributes.
+- Added a `ParameterStore` that allows injecting arbitrary values at runtime with `#[Inject]`.
+
+### Changed
+
+- Changed many definitions to no longer require other definitions, instead relying on an `ObjectType` from the Typiphy package. This allows for greater flexibility in creating ContainerDefinition and makes it more clear that we're really requiring an ObjectType in a lot of places, not necessarily the entire ServiceDefinition.
+
+### Removed
+
+- Many internal classes were removed to simplify static parsing process. The static parsing is now largely identifying which classes, methods, or parameters to target for reflection when the container is created.
+- Removed the `AttributeType` enum, where it was used was removed from the internal namespace and there's no valid use case anymore.
+- Removed the `#[InjectScalar]`, `#[InjectService]`, and `#[InjectEnv]`. All uses can now be covered by the new `#[Inject]` Attribute.
+
 ## [0.3.0](https://github.com/cspray/annotated-container/tree/v0.3.0) - 2022-04-16
 
 ### Added
