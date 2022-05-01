@@ -11,12 +11,6 @@
       "role": "Project Maintainer"
     }
   ],
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../annotated-container-dummy-apps"
-    }
-  ],
   "require": {
     "php": "^8.1",
     "cspray/typiphy": "^0.2",
