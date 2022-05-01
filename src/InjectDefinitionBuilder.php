@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier;
+use Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeUnion;
@@ -74,22 +75,21 @@ final class InjectDefinitionBuilder {
             throw new DefinitionBuilderException('A value MUST be provided when building an InjectDefinition.');
         }
 
-        $targetIdentifier =  new MethodParameterInjectTargetIdentifier($this->paramName, $this->method, $this->service);
+        if (isset($this->method)) {
+            $targetIdentifier = new MethodParameterInjectTargetIdentifier($this->paramName, $this->method, $this->service);
+        } else {
+            $targetIdentifier = new PropertyInjectTargetIdentifier($this->property, $this->service);
+        }
 
-        return new class($this->service, $targetIdentifier, $this->type, $this->value, $this->store, $this->profiles) implements InjectDefinition {
+        return new class($targetIdentifier, $this->type, $this->value, $this->store, $this->profiles) implements InjectDefinition {
 
             public function __construct(
-                private readonly ObjectType $service,
                 private readonly InjectTargetIdentifier $targetIdentifier,
                 private readonly Type|TypeUnion $type,
                 private readonly mixed $annotationValue,
                 private readonly ?string $store,
                 private readonly array $profiles
             ) {}
-
-            public function getService() : ObjectType {
-                return $this->service;
-            }
 
             public function getTargetIdentifier() : InjectTargetIdentifier {
                 return $this->targetIdentifier;
