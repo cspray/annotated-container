@@ -4,15 +4,26 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
+use Cspray\Typiphy\Type;
+use ReflectionNamedType;
+use function Cspray\Typiphy\arrayType;
+use function Cspray\Typiphy\boolType;
+use function Cspray\Typiphy\floatType;
+use function Cspray\Typiphy\intType;
+use function Cspray\Typiphy\mixedType;
+use function Cspray\Typiphy\nullType;
 use function Cspray\Typiphy\objectType;
+use function Cspray\Typiphy\stringType;
+use function Cspray\Typiphy\typeUnion;
 
 final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTargetDefinitionConverter {
 
-    public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition {
+    public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition {
         return match ($target->getAttributeReflection()->getName()) {
             AttributeType::Service->value => $this->buildServiceDefinition($target),
             AttributeType::ServiceDelegate->value => $this->buildServiceDelegateDefinition($target),
-            AttributeType::ServicePrepare->value => $this->buildServicePrepareDefinition($target)
+            AttributeType::ServicePrepare->value => $this->buildServicePrepareDefinition($target),
+            AttributeType::Inject->value => $this->buildInjectDefinition($target)
         };
     }
 
@@ -45,6 +56,54 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         $prepareType = $target->getTargetReflection()->getDeclaringClass()->getName();
         $method = $target->getTargetReflection()->getName();
         return ServicePrepareDefinitionBuilder::forMethod(objectType($prepareType), $method)->build();
+    }
+
+    private function buildInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
+        /** @var \ReflectionParameter $targetReflection */
+        $targetReflection = $target->getTargetReflection();
+        $serviceType = objectType($targetReflection->getDeclaringClass()->getName());
+        $method = $targetReflection->getDeclaringFunction()->getName();
+        $param = $targetReflection->getName();
+        if (is_null($targetReflection->getType())) {
+            $paramType = mixedType();
+        } else if ($targetReflection->getType() instanceof ReflectionNamedType) {
+            $paramType = $this->convertReflectionNamedType($targetReflection->getType());
+            // The ?type syntax is not recognized as a TypeUnion but we normalize it to use with our type system
+            if ($paramType !== mixedType() && $targetReflection->getType()->allowsNull()) {
+                $paramType = typeUnion($paramType, nullType());
+            }
+        } else {
+            $types = [];
+            foreach ($targetReflection->getType()->getTypes() as $type) {
+                $types[] = $this->convertReflectionNamedType($type);
+            }
+            $paramType = typeUnion(...$types);
+        }
+        $builder = InjectDefinitionBuilder::forService($serviceType)
+            ->withMethod($method, $paramType, $param)
+            ->withValue($target->getAttributeInstance()->value);
+
+        if (isset($target->getAttributeInstance()->from)) {
+            $builder = $builder->withStore($target->getAttributeInstance()->from);
+        }
+
+        if (!empty($target->getAttributeInstance()->profiles)) {
+            $builder = $builder->withProfiles(...$target->getAttributeInstance()->profiles);
+        }
+
+        return $builder->build();
+    }
+
+    private function convertReflectionNamedType(ReflectionNamedType $reflectionNamedType) : Type {
+        return  match ($type = $reflectionNamedType->getName()) {
+            'int' => intType(),
+            'string' => stringType(),
+            'bool' => boolType(),
+            'array' => arrayType(),
+            'float' => floatType(),
+            'mixed' => mixedType(),
+            default => objectType($type)
+        };
     }
 
 }

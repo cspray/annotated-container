@@ -25,12 +25,6 @@ class SimpleServicesCompilerTest extends AnnotatedTargetCompilerTestCase {
         $this->assertInstanceOf(AnnotatedTarget::class, $annotatedTargets[1]);
     }
 
-    public function testAnnotatedTargetsHaveCorrectTargetType() {
-        $annotatedTargets = $this->provider->getTargets();
-        $this->assertSame(AnnotatedTargetType::ClassTarget, $annotatedTargets[0]->getTargetType());
-        $this->assertSame(AnnotatedTargetType::ClassTarget, $annotatedTargets[1]->getTargetType());
-    }
-
     public function testAnnotatedTargetsHaveNonNullTargetReflection() {
         $annotatedTargets = $this->provider->getTargets();
         $this->assertInstanceOf(ReflectionClass::class, $annotatedTargets[0]->getTargetReflection());

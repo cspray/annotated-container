@@ -52,8 +52,15 @@ interface ContainerDefinition {
     public function getServicePrepareDefinitions() : array;
 
     /**
+     * Returns a set of ServiceDelegateDefinition that determine which services require factories to be constructed.
+     *
      * @return ServiceDelegateDefinition[]
      */
     public function getServiceDelegateDefinitions() : array;
+
+    /**
+     * @return InjectDefinition[]
+     */
+    public function getInjectDefinitions() : array;
 
 }

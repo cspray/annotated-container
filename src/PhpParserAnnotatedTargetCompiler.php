@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use FilesystemIterator;
@@ -20,6 +21,7 @@ use RecursiveIteratorIterator;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionParameter;
 
 final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler {
 
@@ -78,6 +80,11 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
                             $this->consumer->consume($this->getAnnotatedReflectionMethod($node, $attributeType));
                         }
                     }
+                } else if ($node instanceof Node\Param) {
+                    $attributes = $this->findAttributes(Inject::class, ...$node->attrGroups);
+                    foreach ($attributes as $index => $attribute) {
+                        $this->consumer->consume($this->getAnnotatedInject($node, $index));
+                    }
                 }
             }
 
@@ -110,10 +117,6 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
                         private readonly string $targetType,
                         private readonly int $attributeIndex
                     ) {}
-
-                    public function getTargetType() : AnnotatedTargetType {
-                        return AnnotatedTargetType::ClassTarget;
-                    }
 
                     public function getTargetReflection() : ReflectionClass {
                         if (!isset($this->targetReflection)) {
@@ -153,10 +156,6 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
                         private readonly AttributeType $attributeType
                     ) {}
 
-                    public function getTargetType() : AnnotatedTargetType {
-                        return AnnotatedTargetType::MethodTarget;
-                    }
-
                     public function getTargetReflection() : ReflectionMethod {
                         if (!isset($this->targetReflection)) {
                             $this->targetReflection = new ReflectionMethod(sprintf('%s::%s', $this->classType, $this->method));
@@ -176,6 +175,37 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
                             $this->attributeInstance = $this->getAttributeReflection()->newInstance();
                         }
                         return $this->attributeInstance;
+                    }
+                };
+            }
+
+            private function getAnnotatedInject(Node\Param $node, int $index) : AnnotatedTarget {
+                $classType = $node->getAttribute('parent')->getAttribute('parent')->namespacedName->toString();
+                $reflection = (new ReflectionClass($classType))->getMethod($node->getAttribute('parent')->name->toString());
+                $reflectionParameter = null;
+                foreach ($reflection->getParameters() as $parameter) {
+                    if ($parameter->getName() === $node->var->name) {
+                        $reflectionParameter = $parameter;
+                        break;
+                    }
+                }
+                return new class($reflectionParameter, $index) implements AnnotatedTarget {
+
+                    public function __construct(
+                        private readonly ReflectionParameter $targetReflection,
+                        private readonly int $index
+                    ) {}
+
+                    public function getTargetReflection(): ReflectionParameter {
+                        return $this->targetReflection;
+                    }
+
+                    public function getAttributeReflection(): ReflectionAttribute {
+                        return $this->getTargetReflection()->getAttributes(Inject::class)[$this->index];
+                    }
+
+                    public function getAttributeInstance(): object {
+                        return $this->getAttributeReflection()->newInstance();
                     }
                 };
             }

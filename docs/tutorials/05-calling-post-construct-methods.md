@@ -1,12 +1,8 @@
 ## Calling Post Construct Methods
 
-Sometimes you might not need the full power, and complexity, of having a service factory, but you do need to have some 
-method called after the object is constructed. AnnotatedContainer can help you _prepare_ your Services by automatically 
-calling these methods and injecting services and values into them.
+Sometimes you might not need the full power, and complexity, of having a service factory, but you do need to have some method called after the object is constructed. AnnotatedContainer can help you _prepare_ your Services by automatically calling these methods and injecting services and values into them.
 
-We're going to use the same example from `/docs/tutorials/01-getting-started.md` and change from using constructor injection 
-to setter injection. For clarity, here's the code from that tutorial with some slight modifications to change injection 
-types.
+We're going to use the same example from `/docs/tutorials/01-getting-started.md` and change from using constructor injection to setter injection. For clarity, here's the code from that tutorial with some slight modifications to change injection types.
 
 ```php
 <?php
@@ -89,7 +85,4 @@ class FilesystemStorage implements BlobStorage {
 }
 ```
 
-Note the new method, `FilesystemStorage::setEmitter`. It has an Attribute on it called `#[ServicePrepare]`; this tells 
-AnnotatedContainer that you want to invoke this method immediately after construction. Also note that we declared the 
-`BlobStorageEventEmitter` service as a dependency. Any service or value the container can inject you can declare in your 
-method's arguments.
+Note the new method, `FilesystemStorage::setEmitter`. It has an Attribute on it called `#[ServicePrepare]`; this tells AnnotatedContainer that you want to invoke this method immediately after construction. Also note that we declared the`BlobStorageEventEmitter` service as a dependency. Any service or value the container can inject you can declare in your method's arguments.

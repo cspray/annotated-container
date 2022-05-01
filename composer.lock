@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3da38816e93d3646274e4a1b6b24d8d6",
+    "content-hash": "82bcbd40cad64dae2d3a73b21cf846aa",
     "packages": [
         {
             "name": "cspray/typiphy",
-            "version": "0.1.0",
+            "version": "0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/typiphy.git",
-                "reference": "fa6afbf62a53c79ccd5254d326c28d43f206d451"
+                "reference": "f9823886e66be513a485d1b2a1fec4ad8c103f7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/typiphy/zipball/fa6afbf62a53c79ccd5254d326c28d43f206d451",
-                "reference": "fa6afbf62a53c79ccd5254d326c28d43f206d451",
+                "url": "https://api.github.com/repos/cspray/typiphy/zipball/f9823886e66be513a485d1b2a1fec4ad8c103f7e",
+                "reference": "f9823886e66be513a485d1b2a1fec4ad8c103f7e",
                 "shasum": ""
             },
             "require-dev": {
@@ -36,9 +36,9 @@
             "description": "A small library of value objects and functions for working with PHP's types.",
             "support": {
                 "issues": "https://github.com/cspray/typiphy/issues",
-                "source": "https://github.com/cspray/typiphy/tree/0.1.0"
+                "source": "https://github.com/cspray/typiphy/tree/0.2.0"
             },
-            "time": "2022-04-23T05:06:18+00:00"
+            "time": "2022-04-26T12:38:08+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -218,16 +218,16 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.6.0",
+            "version": "0.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
-                "reference": "6b57715d189ca82c4c2171307996a978a24aab68"
+                "reference": "94388a254750954fe814206bbd423f7e93347961"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/6b57715d189ca82c4c2171307996a978a24aab68",
-                "reference": "6b57715d189ca82c4c2171307996a978a24aab68",
+                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/94388a254750954fe814206bbd423f7e93347961",
+                "reference": "94388a254750954fe814206bbd423f7e93347961",
                 "shasum": ""
             },
             "type": "library",
@@ -254,9 +254,9 @@
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
-                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.6.0"
+                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.7.0"
             },
-            "time": "2022-04-16T21:02:22+00:00"
+            "time": "2022-05-01T13:53:57+00:00"
         },
         {
             "name": "doctrine/instantiator",

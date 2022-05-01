@@ -18,10 +18,9 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
      * ContainerDefinition.
      *
      * @param ContainerDefinition $containerDefinition
-     * @param ContainerDefinitionSerializerOptions|null $options
      * @return string
      */
-    public function serialize(ContainerDefinition $containerDefinition, ContainerDefinitionSerializerOptions $options = null) : string {
+    public function serialize(ContainerDefinition $containerDefinition) : string {
         $compiledServiceDefinitions = [];
         $addCompiledServiceDefinition = function(string $key, ServiceDefinition $serviceDefinition) use(&$compiledServiceDefinitions, &$addCompiledServiceDefinition) : void {
             if (!isset($compiledServiceDefinitions[$key])) {
@@ -69,18 +68,13 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             ];
         }
 
-        $options ??= new ContainerDefinitionSerializerOptions();
-        $flags = 0;
-        if ($options->isPrettyFormatted()) {
-            $flags |= JSON_PRETTY_PRINT;
-        }
         return json_encode([
             'compiledServiceDefinitions' => $compiledServiceDefinitions,
             'sharedServiceDefinitions' => $serviceDefinitions,
             'aliasDefinitions' => $aliasDefinitions,
             'servicePrepareDefinitions' => $servicePrepareDefinitions,
             'serviceDelegateDefinitions' => $serviceDelegateDefinitions
-        ], $flags);
+        ]);
     }
 
     /**

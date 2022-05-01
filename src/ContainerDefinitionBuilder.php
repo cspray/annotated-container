@@ -15,6 +15,7 @@ final class ContainerDefinitionBuilder {
     private array $serviceDefinitions = [];
     private array $aliasDefinitions = [];
     private array $servicePrepareDefinitions = [];
+    private array $injectDefinitions = [];
     private array $serviceDelegateDefinitions = [];
 
     private function __construct() {}
@@ -44,6 +45,12 @@ final class ContainerDefinitionBuilder {
         return $instance;
     }
 
+    public function withInjectDefinitions(InjectDefinition $injectDefinition) : self {
+        $instance = clone $this;
+        $instance->injectDefinitions[] = $injectDefinition;
+        return $instance;
+    }
+
     public function withServiceDelegateDefinition(ServiceDelegateDefinition $serviceDelegateDefinition) : self {
         $instance = clone $this;
         $instance->serviceDelegateDefinitions[] = $serviceDelegateDefinition;
@@ -59,6 +66,7 @@ final class ContainerDefinitionBuilder {
             $this->serviceDefinitions,
             $this->aliasDefinitions,
             $this->servicePrepareDefinitions,
+            $this->injectDefinitions,
             $this->serviceDelegateDefinitions
         ) implements ContainerDefinition {
 
@@ -66,6 +74,7 @@ final class ContainerDefinitionBuilder {
                 private array $serviceDefinitions,
                 private array $aliasDefinitions,
                 private array $servicePrepareDefinitions,
+                private array $injectDefinitions,
                 private array $serviceDelegateDefinitions
             ) {}
 
@@ -113,6 +122,10 @@ final class ContainerDefinitionBuilder {
 
             public function getServicePrepareDefinitions(): array {
                 return $this->servicePrepareDefinitions;
+            }
+
+            public function getInjectDefinitions(): array {
+                return $this->injectDefinitions;
             }
 
             public function getServiceDelegateDefinitions(): array {

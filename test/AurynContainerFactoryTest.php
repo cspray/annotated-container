@@ -3,17 +3,13 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
-use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceInterface;
-use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
-use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
-use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
-use Cspray\AnnotatedContainer\DummyApps\MultipleUseScalars;
-use Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar;
-use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
-use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
-use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
+use Cspray\AnnotatedContainer\Exception\ContainerException;
+use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
+use Cspray\Typiphy\Type;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use function Cspray\Typiphy\objectType;
 
 /**
  * @covers \Cspray\AnnotatedContainer\AurynContainerFactory
@@ -29,6 +25,10 @@ use Psr\Container\ContainerExceptionInterface;
  * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder
  * @covers \Cspray\AnnotatedContainer\Attribute\ServiceDelegate
  * @covers \Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder
+ * @covers \Cspray\AnnotatedContainer\InjectDefinitionBuilder
+ * @covers \Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier
+ * @covers \Cspray\AnnotatedContainer\Attribute\Inject
+ * @covers \Cspray\AnnotatedContainer\EnvironmentParameterStore
  */
 class AurynContainerFactoryTest extends TestCase {
 
@@ -39,37 +39,38 @@ class AurynContainerFactoryTest extends TestCase {
         );
     }
 
-    public function testCreateSimpleServices() {
+    private function getContainer(string $dir, array $profiles = [], ParameterStore $parameterStore = null) : ContainerInterface {
         $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-        $subject = $container->get(SimpleServices\FooInterface::class);
+        $optionsBuilder = ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir);
+        $containerDefinition = $compiler->compile($optionsBuilder->build());
+        $containerOptions = null;
+        if (!empty($profiles)) {
+            $containerOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles)->build();
+        }
+        $factory = (new AurynContainerFactory());
+        if (!is_null($parameterStore)) {
+            $factory->addParameterStore($parameterStore);
+        }
+        return $factory->createContainer($containerDefinition, $containerOptions);
+    }
 
-        $this->assertInstanceOf(SimpleServices\FooImplementation::class, $subject);
+    public function testCreateSimpleServices() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServices');
+        $subject = $container->get(DummyApps\SimpleServices\FooInterface::class);
+
+        $this->assertInstanceOf(DummyApps\SimpleServices\FooImplementation::class, $subject);
     }
 
     public function testInterfaceServicePrepare() {
-        $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InterfaceServicePrepare')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InterfaceServicePrepare');
+        $subject = $container->get(DummyApps\InterfaceServicePrepare\FooInterface::class);
 
-        $subject = $container->get(InterfaceServicePrepare\FooInterface::class);
-
-        $this->assertInstanceOf(InterfaceServicePrepare\FooImplementation::class, $subject);
+        $this->assertInstanceOf(DummyApps\InterfaceServicePrepare\FooImplementation::class, $subject);
         $this->assertEquals(1, $subject->getBarCounter());
     }
 
     public function testServicePrepareInvokedOnContainer() {
-        $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InjectorExecuteServicePrepare')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectorExecuteServicePrepare');
         $subject = $container->get(DummyApps\InjectorExecuteServicePrepare\FooInterface::class);
 
         $this->assertInstanceOf(DummyApps\InjectorExecuteServicePrepare\FooImplementation::class, $subject);
@@ -77,58 +78,34 @@ class AurynContainerFactoryTest extends TestCase {
     }
 
     public function testMultipleAliasResolutionNoMakeDefine() {
-        $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/MultipleAliasResolution')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/MultipleAliasResolution');
 
         $this->expectException(ContainerExceptionInterface::class);
-        $container->get(MultipleAliasResolution\FooInterface::class);
+        $container->get(DummyApps\MultipleAliasResolution\FooInterface::class);
     }
 
     public function testServiceDelegate() {
-        $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ServiceDelegate')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
-
-        $service = $container->get(ServiceInterface::class);
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/ServiceDelegate');
+        $service = $container->get(DummyApps\ServiceDelegate\ServiceInterface::class);
 
         $this->assertSame('From ServiceFactory From FooService', $service->getValue());
     }
 
     public function testHasServiceIfCompiled() {
-        $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServices');
 
         $this->assertTrue($container->has(DummyApps\SimpleServices\FooInterface::class));
         $this->assertFalse($container->has(DummyApps\MultipleSimpleServices\FooInterface::class));
     }
 
     public function testMultipleServicesWithPrimary() {
-        $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/MultipleServicesWithPrimary')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition);
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/MultipleServicesWithPrimary');
 
         $this->assertInstanceOf(DummyApps\MultipleServicesWithPrimary\FooImplementation::class, $container->get(DummyApps\MultipleServicesWithPrimary\FooInterface::class));
     }
 
     public function testProfileResolvedServices() {
-        $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ProfileResolvedServices')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer(
-            $containerDefinition,
-            ContainerFactoryOptionsBuilder::forActiveProfiles('default', 'dev')->build()
-        );
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/ProfileResolvedServices', ['default', 'dev']);
 
         $instance = $container->get(DummyApps\ProfileResolvedServices\FooInterface::class);
 
@@ -137,11 +114,7 @@ class AurynContainerFactoryTest extends TestCase {
     }
 
     public function testCreateNamedService() {
-        $compiler = $this->getContainerDefinitionCompiler();
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/NamedService')->build()
-        );
-        $container = (new AurynContainerFactory())->createContainer($containerDefinition, ContainerFactoryOptionsBuilder::forActiveProfiles('default')->build());
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/NamedService');
 
         $this->assertTrue($container->has('foo'));
 
@@ -151,4 +124,116 @@ class AurynContainerFactoryTest extends TestCase {
         $this->assertInstanceOf(DummyApps\NamedService\FooImplementation::class, $instance);
     }
 
+    public function testCreateInjectStringService() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectStringMethodParam');
+
+        $this->assertSame('foobar', $container->get(DummyApps\InjectStringMethodParam\FooImplementation::class)->getParameter());
+    }
+
+    public function testCreateMultipleInjectScalarService() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectMultipleScalarMethodParam');
+
+        /** @var DummyApps\InjectMultipleScalarMethodParam\FooImplementation $subject */
+        $subject = $container->get(DummyApps\InjectMultipleScalarMethodParam\FooImplementation::class);
+
+        $this->assertSame('foobar', $subject->getString());
+        $this->assertSame(42, $subject->getInt());
+        $this->assertSame(['a', 'b', 'c'], $subject->getArray());
+    }
+
+    public function testCreateInjectServicePrepare() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectIntMethodParam');
+
+        /** @var DummyApps\InjectIntMethodParam\FooImplementation $subject */
+        $subject = $container->get(DummyApps\InjectIntMethodParam\FooImplementation::class);
+
+        $this->assertSame(42, $subject->getValue());
+    }
+
+    public function testCreateInjectScalarConstructServicePrepare() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectScalarConstructServicePrepareMethodParam');
+
+        /** @var DummyApps\InjectScalarConstructServicePrepareMethodParam\FooImplementation $subject */
+        $subject = $container->get(DummyApps\InjectScalarConstructServicePrepareMethodParam\FooImplementation::class);
+
+        $this->assertSame('foobar', $subject->getValue());
+    }
+
+    public function testConcreteAliasDefinitionDoesNotHaveServiceDefinition() {
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()
+            ->withServiceDefinition(
+                ServiceDefinitionBuilder::forAbstract($abstract = objectType(DummyApps\SimpleServices\FooInterface::class))->build()
+            )
+            ->withAliasDefinition(
+                AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete = objectType(DummyApps\SimpleServices\FooImplementation::class))->build()
+            )->build();
+
+        $this->expectException(ContainerException::class);
+        $this->expectExceptionMessage('An AliasDefinition is defined with a concrete type ' . $concrete->getName() . ' that is not a registered #[Service].');
+        (new AurynContainerFactory())->createContainer($containerDefinition);
+    }
+
+    public function testMultipleServicePrepare() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectScalarMultipleServicePrepareMethodParam');
+
+        $subject = $container->get(DummyApps\InjectScalarMultipleServicePrepareMethodParam\FooImplementation::class);
+
+        $this->assertSame('foobar', $subject->getValue());
+    }
+
+    public function testInjectServiceObjectMethodParam() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectServiceMethodParam');
+
+        $subject = $container->get(DummyApps\InjectServiceMethodParam\ServiceInjector::class);
+
+        $this->assertInstanceOf(DummyApps\InjectServiceMethodParam\FooImplementation::class, $subject->getWidget());
+    }
+
+    public function testInjectEnvMethodParam() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectEnvMethodParam');
+
+        $subject = $container->get(DummyApps\InjectEnvMethodParam\FooImplementation::class);
+        $this->assertSame(getenv('USER'), $subject->getStringParam());
+    }
+
+    public function testCreateArbitraryStorePresent() {
+        $parameterStore = new class implements ParameterStore {
+
+            public function getName(): string {
+                return 'test-store';
+            }
+
+            public function fetch(Type $type, string $key): mixed {
+                return $key . '_test_store';
+            }
+        };
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectTestStoreMethodParam', parameterStore: $parameterStore);
+
+        $subject = $container->get(DummyApps\InjectTestStoreMethodParam\FooImplementation::class);
+        $this->assertSame('key_test_store', $subject->getValue());
+    }
+
+    public function testCreateArbitraryStoreNotPresent() {
+        $this->expectException(InvalidParameterException::class);
+        $this->expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
+        $this->getContainer(DummyAppUtils::getRootDir() . '/InjectTestStoreMethodParam');
+    }
+
+    public function profilesProvider() : array {
+        return [
+            ['from-prod', ['prod']],
+            ['from-test', ['test']],
+            ['from-dev', ['dev']]
+        ];
+    }
+
+    /**
+     * @dataProvider profilesProvider
+     */
+    public function testInjectProfilesMethodParam(string $expected, array $profiles)  {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectMultipleProfilesMethodParam', $profiles);
+        $subject = $container->get(DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class);
+
+        $this->assertSame($expected, $subject->getValue());
+    }
 }
