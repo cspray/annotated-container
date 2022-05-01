@@ -105,7 +105,7 @@ final class AurynContainerFactory implements ContainerFactory {
                 } else {
                     /** @var AliasDefinition $typeAliasDefinition */
                     foreach ($typeAliasDefinitions as $typeAliasDefinition) {
-                        if ($this->isServicePrimary($containerDefinition, $typeAliasDefinition->getConcreteService())) {
+                        if ($this->getServiceDefinition($containerDefinition, $typeAliasDefinition->getConcreteService())->isPrimary()) {
                             $aliasDefinition = $typeAliasDefinition;
                             break;
                         }
@@ -122,7 +122,7 @@ final class AurynContainerFactory implements ContainerFactory {
         }
         unset($aliasedTypes);
 
-        $definitionMap = $this->mapInjectDefinitions($containerDefinition);
+        $definitionMap = $this->mapInjectDefinitions($containerDefinition, $activeProfiles);
         foreach ($definitionMap as $service => $methods) {
             if (array_key_exists('__construct', $methods)) {
                 $injector->define($service, $methods['__construct']);
@@ -155,9 +155,14 @@ final class AurynContainerFactory implements ContainerFactory {
         return $injector;
     }
 
-    private function mapInjectDefinitions(ContainerDefinition $containerDefinition) : array {
+    private function mapInjectDefinitions(ContainerDefinition $containerDefinition, array $activeProfiles) : array {
         $definitionMap = [];
         foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
+            $injectProfiles = empty($injectDefinition->getProfiles()) ? ['default'] : $injectDefinition->getProfiles();
+            if (empty(array_intersect($activeProfiles, $injectProfiles))) {
+                continue;
+            }
+
             $serviceType = $injectDefinition->getTargetIdentifier()->getClass()->getName();
             if (!isset($definitionMap[$serviceType])) {
                 $definitionMap[$serviceType] = [];
@@ -204,7 +209,7 @@ final class AurynContainerFactory implements ContainerFactory {
         $aliases = [];
         /** @var AliasDefinition $aliasDefinition */
         foreach ($aliasDefinitions as $aliasDefinition) {
-            $concreteProfiles = $this->getProfilesForService($containerDefinition, $aliasDefinition->getConcreteService());
+            $concreteProfiles = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getConcreteService())?->getProfiles() ?? false;
             if ($concreteProfiles === false) {
                 throw new ContainerException(sprintf(
                     'An AliasDefinition is defined with a concrete type %s that is not a registered #[Service].',
@@ -230,14 +235,6 @@ final class AurynContainerFactory implements ContainerFactory {
         }
 
         return null;
-    }
-
-    private function getProfilesForService(ContainerDefinition $containerDefinition, ObjectType $objectType) : array|false {
-        return $this->getServiceDefinition($containerDefinition, $objectType)?->getProfiles() ?? false;
-    }
-
-    private function isServicePrimary(ContainerDefinition $containerDefinition, ObjectType $objectType) : bool {
-        return $this->getServiceDefinition($containerDefinition, $objectType)->isPrimary();
     }
 
 }

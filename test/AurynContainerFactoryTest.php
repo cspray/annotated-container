@@ -218,4 +218,22 @@ class AurynContainerFactoryTest extends TestCase {
         $this->expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
         $this->getContainer(DummyAppUtils::getRootDir() . '/InjectTestStoreMethodParam');
     }
+
+    public function profilesProvider() : array {
+        return [
+            ['from-prod', ['prod']],
+            ['from-test', ['test']],
+            ['from-dev', ['dev']]
+        ];
+    }
+
+    /**
+     * @dataProvider profilesProvider
+     */
+    public function testInjectProfilesMethodParam(string $expected, array $profiles)  {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectMultipleProfilesMethodParam', $profiles);
+        $subject = $container->get(DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class);
+
+        $this->assertSame($expected, $subject->getValue());
+    }
 }
