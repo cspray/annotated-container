@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\Typiphy\Type;
@@ -18,12 +19,13 @@ use function Cspray\Typiphy\typeUnion;
 
 final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTargetDefinitionConverter {
 
-    public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition {
+    public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition {
         return match ($target->getAttributeReflection()->getName()) {
             AttributeType::Service->value => $this->buildServiceDefinition($target),
             AttributeType::ServiceDelegate->value => $this->buildServiceDelegateDefinition($target),
             AttributeType::ServicePrepare->value => $this->buildServicePrepareDefinition($target),
-            AttributeType::Inject->value => $this->buildInjectDefinition($target)
+            AttributeType::Inject->value => $this->buildInjectDefinition($target),
+            AttributeType::Configuration->value => $this->buildConfigurationDefinition($target)
         };
     }
 
@@ -58,7 +60,19 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         return ServicePrepareDefinitionBuilder::forMethod(objectType($prepareType), $method)->build();
     }
 
+    private function buildConfigurationDefinition(AnnotatedTarget $target) : ConfigurationDefinition {
+        return ConfigurationDefinitionBuilder::forClass(objectType($target->getTargetReflection()->getName()))->build();
+    }
+
     private function buildInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
+        if ($target->getTargetReflection() instanceof \ReflectionProperty) {
+            return $this->buildPropertyInjectDefinition($target);
+        } else {
+            return $this->buildMethodInjectDefinition($target);
+        }
+    }
+
+    private function buildMethodInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
         /** @var \ReflectionParameter $targetReflection */
         $targetReflection = $target->getTargetReflection();
         $serviceType = objectType($targetReflection->getDeclaringClass()->getName());
@@ -83,6 +97,24 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             ->withMethod($method, $paramType, $param)
             ->withValue($target->getAttributeInstance()->value);
 
+        if (isset($target->getAttributeInstance()->from)) {
+            $builder = $builder->withStore($target->getAttributeInstance()->from);
+        }
+
+        if (!empty($target->getAttributeInstance()->profiles)) {
+            $builder = $builder->withProfiles(...$target->getAttributeInstance()->profiles);
+        }
+
+        return $builder->build();
+    }
+
+    private function buildPropertyInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
+        $builder = InjectDefinitionBuilder::forService(objectType($target->getTargetReflection()->getDeclaringClass()->getName()));
+        $builder = $builder->withProperty(
+            $this->convertReflectionNamedType($target->getTargetReflection()->getType()),
+            $target->getTargetReflection()->getName()
+        );
+        $builder = $builder->withValue($target->getAttributeInstance()->value);
         if (isset($target->getAttributeInstance()->from)) {
             $builder = $builder->withStore($target->getAttributeInstance()->from);
         }

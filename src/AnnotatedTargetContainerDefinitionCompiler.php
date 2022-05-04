@@ -104,7 +104,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         }
 
         foreach ($consumer->injectDefinitions as $injectDefinition) {
-            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectDefinitions($injectDefinition);
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectDefinition($injectDefinition);
+        }
+
+        foreach ($consumer->configurationDefinitions as $configurationDefinition) {
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withConfigurationDefinition($configurationDefinition);
         }
 
         return $containerDefinitionBuilder;

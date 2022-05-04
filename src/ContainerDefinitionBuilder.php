@@ -17,6 +17,7 @@ final class ContainerDefinitionBuilder {
     private array $servicePrepareDefinitions = [];
     private array $injectDefinitions = [];
     private array $serviceDelegateDefinitions = [];
+    private array $configurationDefinitions = [];
 
     private function __construct() {}
 
@@ -45,15 +46,21 @@ final class ContainerDefinitionBuilder {
         return $instance;
     }
 
-    public function withInjectDefinitions(InjectDefinition $injectDefinition) : self {
+    public function withServiceDelegateDefinition(ServiceDelegateDefinition $serviceDelegateDefinition) : self {
+        $instance = clone $this;
+        $instance->serviceDelegateDefinitions[] = $serviceDelegateDefinition;
+        return $instance;
+    }
+
+    public function withInjectDefinition(InjectDefinition $injectDefinition) : self {
         $instance = clone $this;
         $instance->injectDefinitions[] = $injectDefinition;
         return $instance;
     }
 
-    public function withServiceDelegateDefinition(ServiceDelegateDefinition $serviceDelegateDefinition) : self {
+    public function withConfigurationDefinition(ConfigurationDefinition $configurationDefinition) : self {
         $instance = clone $this;
-        $instance->serviceDelegateDefinitions[] = $serviceDelegateDefinition;
+        $instance->configurationDefinitions[] = $configurationDefinition;
         return $instance;
     }
 
@@ -67,7 +74,8 @@ final class ContainerDefinitionBuilder {
             $this->aliasDefinitions,
             $this->servicePrepareDefinitions,
             $this->injectDefinitions,
-            $this->serviceDelegateDefinitions
+            $this->serviceDelegateDefinitions,
+            $this->configurationDefinitions
         ) implements ContainerDefinition {
 
             public function __construct(
@@ -75,7 +83,8 @@ final class ContainerDefinitionBuilder {
                 private array $aliasDefinitions,
                 private array $servicePrepareDefinitions,
                 private array $injectDefinitions,
-                private array $serviceDelegateDefinitions
+                private array $serviceDelegateDefinitions,
+                private array $configurationDefinitions
             ) {}
 
             public function merge(ContainerDefinition $containerDefinition) : ContainerDefinition {
@@ -130,6 +139,10 @@ final class ContainerDefinitionBuilder {
 
             public function getServiceDelegateDefinitions(): array {
                 return $this->serviceDelegateDefinitions;
+            }
+
+            public function getConfigurationDefinitions() : array {
+                return $this->configurationDefinitions;
             }
 
             private function hasServiceDefinition(ServiceDefinition $serviceDefinition) : bool {

@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
@@ -11,6 +12,7 @@ use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
  * @Internal
  */
 enum AttributeType : string {
+    case Configuration = Configuration::class;
     case Inject = Inject::class;
     case Service = Service::class;
     case ServiceDelegate = ServiceDelegate::class;

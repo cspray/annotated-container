@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\Attribute;
 use Attribute;
 use UnitEnum;
 
-#[Attribute(Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
 class Inject {
 
     public function __construct(

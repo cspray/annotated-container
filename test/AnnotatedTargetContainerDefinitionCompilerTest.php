@@ -15,13 +15,6 @@ use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
 use Cspray\AnnotatedContainer\DummyApps\MultipleSimpleServices;
 use Cspray\AnnotatedContainer\DummyApps\SimpleServicesSomeNotAnnotated;
 use Cspray\AnnotatedContainer\DummyApps\NestedServices;
-use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalar;
-use Cspray\AnnotatedContainer\DummyApps\NegativeNumberUseScalar;
-use Cspray\AnnotatedContainer\DummyApps\MultipleUseScalars;
-use Cspray\AnnotatedContainer\DummyApps\ClassConstantUseScalar;
-use Cspray\AnnotatedContainer\DummyApps\ConstantUseScalar;
-use Cspray\AnnotatedContainer\DummyApps\SimpleUseScalarFromEnv;
-use Cspray\AnnotatedContainer\DummyApps\SimpleUseService;
 use Cspray\AnnotatedContainer\DummyApps\MultipleAliasResolution;
 use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
 use Cspray\AnnotatedContainer\DummyApps\ImplementsServiceExtendsSameService;
@@ -369,6 +362,15 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         $this->expectException(InvalidAnnotationException::class);
         $this->expectExceptionMessage('The #[ServicePrepare] Attribute on ' . LogicalErrorApps\ServicePrepareNotService\FooImplementation::class . '::postConstruct is not on a type marked as a #[Service].');;
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
+    }
+
+    public function testSimpleConfigurationGetConfigurationDefinitions() {
+        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleConfiguration');
+
+        $this->assertCount(1, $containerDefinition->getConfigurationDefinitions());
+        $configDefinition = $containerDefinition->getConfigurationDefinitions()[0];
+
+        $this->assertSame(DummyApps\SimpleConfiguration\MyConfig::class, $configDefinition->getClass()->getName());
     }
 
 }

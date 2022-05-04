@@ -29,6 +29,8 @@ use function Cspray\Typiphy\objectType;
  * @covers \Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier
  * @covers \Cspray\AnnotatedContainer\Attribute\Inject
  * @covers \Cspray\AnnotatedContainer\EnvironmentParameterStore
+ * @covers \Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder
+ * @covers \Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier
  */
 class AurynContainerFactoryTest extends TestCase {
 
@@ -235,5 +237,25 @@ class AurynContainerFactoryTest extends TestCase {
         $subject = $container->get(DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class);
 
         $this->assertSame($expected, $subject->getValue());
+    }
+
+    public function testConfigurationSharedInstance() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleConfiguration', ['default', 'dev']);
+
+        $this->assertSame(
+            $container->get(DummyApps\SimpleConfiguration\MyConfig::class),
+            $container->get(DummyApps\SimpleConfiguration\MyConfig::class)
+        );
+    }
+
+    public function testConfigurationValues() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleConfiguration', ['default', 'dev']);
+        /** @var DummyApps\SimpleConfiguration\MyConfig $subject */
+        $subject = $container->get(DummyApps\SimpleConfiguration\MyConfig::class);
+
+        $this->assertSame('my-api-key', $subject->key);
+        $this->assertSame(1234, $subject->port);
+        $this->assertSame(getenv('USER'), $subject->user);
+        $this->assertTrue($subject->testMode);
     }
 }
