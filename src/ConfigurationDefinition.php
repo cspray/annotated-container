@@ -8,4 +8,6 @@ interface ConfigurationDefinition {
 
     public function getClass() : ObjectType;
 
+    public function getName() : ?string;
+
 }

@@ -55,6 +55,12 @@ final class AurynContainerFactory implements ContainerFactory {
             }
         }
 
+        foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
+            if (!is_null($configurationDefinition->getName())) {
+                $nameTypeMap[$configurationDefinition->getName()] = $configurationDefinition->getClass();
+            }
+        }
+
         return new class($this->createInjector($containerDefinition, $activeProfiles), $nameTypeMap) implements ContainerInterface {
 
             public function __construct(private readonly Injector $injector, private readonly array $nameTypeMap) {}

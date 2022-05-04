@@ -7,6 +7,7 @@ use Cspray\Typiphy\ObjectType;
 final class ConfigurationDefinitionBuilder {
 
     private ObjectType $classType;
+    private ?string $name = null;
 
     private function __construct() {}
 
@@ -16,12 +17,25 @@ final class ConfigurationDefinitionBuilder {
         return $instance;
     }
 
+    public function withName(string $name) : self {
+        $instance = clone $this;
+        $instance->name = $name;
+        return $instance;
+    }
+
     public function build() : ConfigurationDefinition {
-        return new class($this->classType) implements ConfigurationDefinition {
-            public function __construct(private readonly ObjectType $classType) {}
+        return new class($this->classType, $this->name) implements ConfigurationDefinition {
+            public function __construct(
+                private readonly ObjectType $classType,
+                private readonly ?string $name
+            ) {}
 
             public function getClass() : ObjectType {
                 return $this->classType;
+            }
+
+            public function getName() : ?string {
+                return $this->name;
             }
         };
     }

@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
+use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
@@ -18,7 +19,7 @@ use ReflectionProperty;
 
 abstract class AnnotatedTargetDefinitionConverterTestCase extends TestCase {
 
-    protected ServiceDefinition|ServiceDelegateDefinition|ServicePrepareDefinition|InjectDefinition $definition;
+    protected ServiceDefinition|ServiceDelegateDefinition|ServicePrepareDefinition|InjectDefinition|ConfigurationDefinition $definition;
 
     protected function setUp() : void {
         $subject = new DefaultAnnotatedTargetDefinitionConverter();

@@ -61,7 +61,11 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
     }
 
     private function buildConfigurationDefinition(AnnotatedTarget $target) : ConfigurationDefinition {
-        return ConfigurationDefinitionBuilder::forClass(objectType($target->getTargetReflection()->getName()))->build();
+        $builder = ConfigurationDefinitionBuilder::forClass(objectType($target->getTargetReflection()->getName()));
+        if (!is_null($target->getAttributeInstance()->name)) {
+            $builder = $builder->withName($target->getAttributeInstance()->name);
+        }
+        return $builder->build();
     }
 
     private function buildInjectDefinition(AnnotatedTarget $target) : InjectDefinition {

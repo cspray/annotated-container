@@ -31,6 +31,7 @@ use function Cspray\Typiphy\objectType;
  * @covers \Cspray\AnnotatedContainer\EnvironmentParameterStore
  * @covers \Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder
  * @covers \Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier
+ * @covers \Cspray\AnnotatedContainer\Attribute\Configuration
  */
 class AurynContainerFactoryTest extends TestCase {
 
@@ -257,5 +258,11 @@ class AurynContainerFactoryTest extends TestCase {
         $this->assertSame(1234, $subject->port);
         $this->assertSame(getenv('USER'), $subject->user);
         $this->assertTrue($subject->testMode);
+    }
+
+    public function testNamedConfigurationInstanceOf() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleNamedConfiguration');
+
+        $this->assertInstanceOf(DummyApps\SimpleNamedConfiguration\MyConfig::class, $container->get('my-config'));
     }
 }
