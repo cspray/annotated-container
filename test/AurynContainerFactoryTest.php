@@ -9,6 +9,7 @@ use Cspray\Typiphy\Type;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use function Cspray\Typiphy\objectType;
 
 /**
@@ -55,6 +56,14 @@ class AurynContainerFactoryTest extends TestCase {
             $factory->addParameterStore($parameterStore);
         }
         return $factory->createContainer($containerDefinition, $containerOptions);
+    }
+
+    public function testCreateServiceNotHasThrowsException() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServicesSomeNotAnnotated');
+
+        $this->expectException(NotFoundExceptionInterface::class);
+        $this->expectExceptionMessage('The service "' . DummyApps\SimpleServicesSomeNotAnnotated\NotAnnotatedBarImplementation::class . '" could not be found in this container.');
+        $container->get(DummyApps\SimpleServicesSomeNotAnnotated\NotAnnotatedBarImplementation::class);
     }
 
     public function testCreateSimpleServices() {
