@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\AnnotatedTargetCompilerTests;
 use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\AnnotatedTargetConsumer;
 use Cspray\AnnotatedContainer\AnnotatedTargetProvider;
-use Cspray\AnnotatedContainer\PhpParserAnnotatedTargetCompiler;
+use Cspray\AnnotatedContainer\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -53,7 +53,7 @@ abstract class AnnotatedTargetCompilerTestCase extends TestCase {
 
     protected function compileDirectories() : AnnotatedTargetProvider {
         $consumer = $this->getGatheringConsumer();
-        (new PhpParserAnnotatedTargetCompiler())->compile($this->getDirectories(), $consumer);
+        (new PhpParserAnnotatedTargetParser())->parse($this->getDirectories(), $consumer);
         return $consumer;
     }
 

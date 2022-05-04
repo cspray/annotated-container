@@ -39,7 +39,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
     public function setUp() : void {
         $this->subject = new AnnotatedTargetContainerDefinitionCompiler(
-            new PhpParserAnnotatedTargetCompiler(),
+            new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
     }

@@ -23,7 +23,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 
-final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler {
+final class PhpParserAnnotatedTargetParser implements AnnotatedTargetParser {
 
     private readonly Parser $parser;
     private readonly NodeTraverser $nodeTraverser;
@@ -35,7 +35,7 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
         $this->nodeTraverser->addVisitor(new NodeConnectingVisitor());
     }
 
-    public function compile(array $dirs, AnnotatedTargetConsumer $consumer) : void {
+    public function parse(array $dirs, AnnotatedTargetConsumer $consumer) : void {
         $this->nodeTraverser->addVisitor($visitor = $this->getVisitor($consumer));
         foreach ($dirs as $dir) {
             $dirIterator = new RecursiveIteratorIterator(

@@ -8,7 +8,7 @@ use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\LogicalErrorApps\NoInterfaceServiceAlias;
-use Cspray\AnnotatedContainer\PhpParserAnnotatedTargetCompiler;
+use Cspray\AnnotatedContainer\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 
 class LogicalConstraintValidatorTest extends TestCase {
@@ -18,7 +18,7 @@ class LogicalConstraintValidatorTest extends TestCase {
 
     protected function setUp(): void {
         $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-            new PhpParserAnnotatedTargetCompiler(),
+            new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
         $this->subject = new LogicalConstraintValidator();

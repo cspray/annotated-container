@@ -13,7 +13,7 @@ use Cspray\Typiphy\ObjectType;
 final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefinitionCompiler {
 
     public function __construct(
-        private readonly AnnotatedTargetCompiler $annotatedTargetCompiler,
+        private readonly AnnotatedTargetParser $annotatedTargetCompiler,
         private readonly AnnotatedTargetDefinitionConverter $definitionConverter
     ) {}
 
@@ -34,7 +34,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         }
 
         $consumer = $this->getTargetConsumer();
-        $this->annotatedTargetCompiler->compile($containerDefinitionCompileOptions->getScanDirectories(), $consumer);
+        $this->annotatedTargetCompiler->parse($containerDefinitionCompileOptions->getScanDirectories(), $consumer);
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
         $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer);
