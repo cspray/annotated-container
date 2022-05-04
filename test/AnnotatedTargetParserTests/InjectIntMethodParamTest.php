@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\AnnotatedTargetCompilerTests;
+namespace Cspray\AnnotatedContainer\AnnotatedTargetParserTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
 
-class InjectIntMethodParamTest extends AnnotatedTargetCompilerTestCase {
+class InjectIntMethodParamTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
         return [DummyAppUtils::getRootDir() . '/InjectIntMethodParam'];
@@ -18,7 +18,6 @@ class InjectIntMethodParamTest extends AnnotatedTargetCompilerTestCase {
      */
     private function getExpectedTargets() : array {
         return $this->getAnnotatedTargetsForTargetReflectParameter(
-            $this->provider,
               DummyApps\InjectIntMethodParam\FooImplementation::class,
             'setSomething',
             'value'
@@ -26,7 +25,7 @@ class InjectIntMethodParamTest extends AnnotatedTargetCompilerTestCase {
     }
 
     public function testTargetCount() {
-        $this->assertCount(3, $this->provider->getTargets());
+        $this->assertCount(3, $this->targets);
     }
 
     public function testExpectedTargetCount() {

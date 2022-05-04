@@ -19,7 +19,7 @@ use function Cspray\Typiphy\objectType;
  * @covers \Cspray\AnnotatedContainer\ContainerDefinitionBuilder
  * @covers \Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder
  * @covers \Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter
- * @covers \Cspray\AnnotatedContainer\PhpParserAnnotatedTargetParser
+ * @covers \Cspray\AnnotatedContainer\StaticAnalysisAnnotatedTargetParser
  * @covers \Cspray\AnnotatedContainer\ServiceDefinitionBuilder
  * @covers \Cspray\AnnotatedContainer\ContainerFactoryOptionsBuilder
  * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder
@@ -34,7 +34,7 @@ class AurynContainerFactoryTest extends TestCase {
 
     private function getContainerDefinitionCompiler() : ContainerDefinitionCompiler {
         return new AnnotatedTargetContainerDefinitionCompiler(
-            new PhpParserAnnotatedTargetParser(),
+            new StaticAnalysisAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
     }

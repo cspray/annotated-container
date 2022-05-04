@@ -18,7 +18,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     protected function setUp(): void {
         $this->cacheAwareContainerDefinitionCompiler = new CacheAwareContainerDefinitionCompiler(
             $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-                new PhpParserAnnotatedTargetParser(),
+                new StaticAnalysisAnnotatedTargetParser(),
                 new DefaultAnnotatedTargetDefinitionConverter()
             ),
             $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
@@ -70,7 +70,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $dir = DummyAppUtils::getRootDir() . '/ProfileResolvedServices';
         $subject = new CacheAwareContainerDefinitionCompiler(
             $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-                new PhpParserAnnotatedTargetParser(),
+                new StaticAnalysisAnnotatedTargetParser(),
                 new DefaultAnnotatedTargetDefinitionConverter()
             ),
             $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),

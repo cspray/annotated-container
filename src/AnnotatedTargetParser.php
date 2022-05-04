@@ -6,6 +6,6 @@ use Generator;
 
 interface AnnotatedTargetParser {
 
-    public function parse(array $dirs, AnnotatedTargetConsumer $consumer) : void;
+    public function parse(array $dirs) : Generator;
 
 }

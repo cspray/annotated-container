@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\AnnotatedTargetCompilerTests;
+namespace Cspray\AnnotatedContainer\AnnotatedTargetParserTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
 
-class InterfaceServicePrepareCompilerTest extends AnnotatedTargetCompilerTestCase {
+class InterfaceServicePrepareParserTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
         return [DummyAppUtils::getRootDir() . '/InterfaceServicePrepare'];
@@ -15,14 +15,13 @@ class InterfaceServicePrepareCompilerTest extends AnnotatedTargetCompilerTestCas
 
     private function getExpectedTarget() : ?AnnotatedTarget {
         return $this->getAnnotatedTargetForTargetReflectionMethod(
-            $this->provider,
             DummyApps\InterfaceServicePrepare\FooInterface::class,
             'setBar'
         );
     }
 
     public function testHasCorrectCount() {
-        $this->assertCount(3, $this->provider->getTargets());
+        $this->assertCount(3, $this->targets);
     }
 
     public function testHasCorrectServicePrepareMethod() {

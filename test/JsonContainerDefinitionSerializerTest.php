@@ -17,7 +17,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     protected function setUp(): void {
         $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-            new PhpParserAnnotatedTargetParser(),
+            new StaticAnalysisAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
         $this->subject = new JsonContainerDefinitionSerializer();
