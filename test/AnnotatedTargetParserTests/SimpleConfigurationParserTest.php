@@ -1,44 +1,47 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\AnnotatedTargetCompilerTests;
+namespace Cspray\AnnotatedContainer\AnnotatedTargetParserTests;
 
 use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
 
-class MultiplePropsConfigurationCompilerTest extends AnnotatedTargetCompilerTestCase {
+class SimpleConfigurationParserTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories() : array {
-        return [DummyAppUtils::getRootDir() . '/MultiplePropsConfiguration'];
+        return [DummyAppUtils::getRootDir() . '/SimpleConfiguration'];
     }
 
     public function testCountExpectedTargets() {
-        $this->assertCount(3, $this->provider->getTargets());
+        $this->assertCount(6, $this->targets);
     }
 
     public function testConfigurationReflectionTargetGetName() {
-        $annotatedTarget = $this->provider->getTargets()[2];
+        $annotatedTarget = $this->targets[5];
 
-        $this->assertSame(DummyApps\MultiplePropsConfiguration\MyConfig::class, $annotatedTarget->getTargetReflection()->getName());
+        $this->assertSame(DummyApps\SimpleConfiguration\MyConfig::class, $annotatedTarget->getTargetReflection()->getName());
     }
 
     public function testConfigurationReflectionAttributeGetName() {
-        $annotatedTarget = $this->provider->getTargets()[2];
+        $annotatedTarget = $this->targets[5];
 
         $this->assertSame(Configuration::class, $annotatedTarget->getAttributeReflection()->getName());
     }
 
     public function testConfigurationReflectionAttributeInstanceOf() {
-        $annotatedTarget = $this->provider->getTargets()[2];
+        $annotatedTarget = $this->targets[5];
 
         $this->assertInstanceOf(Configuration::class, $annotatedTarget->getAttributeInstance());
     }
 
     public function injectNameProvider() : array {
         return [
-            [0, 'foo'],
-            [1, 'bar']
+            [0, 'key'],
+            [1, 'port'],
+            [2, 'user'],
+            [3, 'testMode'],
+            [4, 'testMode']
         ];
     }
 
@@ -46,7 +49,7 @@ class MultiplePropsConfigurationCompilerTest extends AnnotatedTargetCompilerTest
      * @dataProvider injectNameProvider
      */
     public function testInjectReflectionTargetGetName(int $index, string $name) {
-        $annotatedTarget = $this->provider->getTargets()[$index];
+        $annotatedTarget = $this->targets[$index];
 
         $this->assertSame($name, $annotatedTarget->getTargetReflection()->getName());
     }
@@ -54,7 +57,10 @@ class MultiplePropsConfigurationCompilerTest extends AnnotatedTargetCompilerTest
     public function injectInstanceOfProvider() : array {
         return [
             [0, Inject::class],
-            [1, Inject::class]
+            [1, Inject::class],
+            [2, Inject::class],
+            [3, Inject::class],
+            [4, Inject::class]
         ];
     }
 
@@ -62,23 +68,26 @@ class MultiplePropsConfigurationCompilerTest extends AnnotatedTargetCompilerTest
      * @dataProvider injectInstanceOfProvider
      */
     public function testInjectReflectionAttributeGetName(int $index, string $class) {
-        $annotatedTarget = $this->provider->getTargets()[$index];
+        $annotatedTarget = $this->targets[$index];
 
         $this->assertSame($class, $annotatedTarget->getAttributeReflection()->getName());
     }
 
     public function injectValueProvider() : array {
         return [
-            [0, 'baz'],
-            [1, 'baz'],
+            [0, 'my-api-key'],
+            [1, 1234],
+            [2, 'USER'],
+            [3, true],
+            [4, false]
         ];
     }
 
     /**
      * @dataProvider injectValueProvider
      */
-    public function testInjectReflectionAttributeInstanceValue(int $index, string $value) {
-        $annotatedTarget = $this->provider->getTargets()[$index];
+    public function testInjectReflectionAttributeInstanceValue(int $index, string|int|bool $value) {
+        $annotatedTarget = $this->targets[$index];
 
         $this->assertSame($value, $annotatedTarget->getAttributeInstance()->value);
     }
@@ -86,7 +95,10 @@ class MultiplePropsConfigurationCompilerTest extends AnnotatedTargetCompilerTest
     public function injectProfilesProvider() : array {
         return [
             [0, []],
-            [1, []]
+            [1, []],
+            [2, []],
+            [3, ['dev', 'test']],
+            [4, ['prod']]
         ];
     }
 
@@ -94,7 +106,7 @@ class MultiplePropsConfigurationCompilerTest extends AnnotatedTargetCompilerTest
      * @dataProvider injectProfilesProvider
      */
     public function testInjectProfilesValues(int $index, array $profiles) {
-        $annotatedTarget = $this->provider->getTargets()[$index];
+        $annotatedTarget = $this->targets[$index];
         $this->assertSame($profiles, $annotatedTarget->getAttributeInstance()->profiles);
     }
 

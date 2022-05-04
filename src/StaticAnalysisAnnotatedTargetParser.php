@@ -72,9 +72,10 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
 
             public function leaveNode(Node $node) {
                 if ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) {
-                    $attributes = $this->findAttributes(AttributeType::Service->value, ...$node->attrGroups);
-                    if (!empty($attributes)) {
-                        $this->targets[] = $this->getAnnotatedService($node);
+                    if (!empty($this->findAttributes(AttributeType::Service->value, ...$node->attrGroups))) {
+                        $this->targets[] = $this->getAnnotatedReflectionClass($node, AttributeType::Service);
+                    } else if (!empty($this->findAttributes(AttributeType::Configuration->value, ...$node->attrGroups))) {
+                        $this->targets[] = $this->getAnnotatedReflectionClass($node, AttributeType::Configuration);
                     }
                 } else if ($node instanceof Node\Stmt\ClassMethod) {
                     foreach ([AttributeType::ServicePrepare, AttributeType::ServiceDelegate] as $attributeType) {
@@ -86,7 +87,13 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                 } else if ($node instanceof Node\Param) {
                     $attributes = $this->findAttributes(Inject::class, ...$node->attrGroups);
                     foreach ($attributes as $index => $attribute) {
-                        $this->targets[] = $this->getAnnotatedInject($node, $index);
+                        $this->targets[] = $this->getAnnotatedMethodInject($node, $index);
+                    }
+                } else if ($node instanceof Node\Stmt\Property) {
+                    foreach ($this->findAttributes(Inject::class, ...$node->attrGroups) as $index => $attribute) {
+                        foreach ($node->props as $prop) {
+                            $this->targets[] = $this->getAnnotatedPropertyInject($prop, $index);
+                        }
                     }
                 }
             }
