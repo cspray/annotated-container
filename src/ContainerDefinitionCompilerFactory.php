@@ -18,7 +18,7 @@ final class ContainerDefinitionCompilerFactory {
 
     public function getCompiler() : ContainerDefinitionCompiler {
         $phpParserCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-            new PhpParserAnnotatedTargetCompiler(),
+            new StaticAnalysisAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
         if (!isset($this->cacheDir)) {

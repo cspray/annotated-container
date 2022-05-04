@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\Typiphy\ObjectType;
+use stdClass;
 
 /**
  * A ContainerDefinitionCompiler that uses PhpParser to statically analyze source code for Attributes defined by
@@ -13,7 +14,7 @@ use Cspray\Typiphy\ObjectType;
 final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefinitionCompiler {
 
     public function __construct(
-        private readonly AnnotatedTargetCompiler $annotatedTargetCompiler,
+        private readonly AnnotatedTargetParser $annotatedTargetCompiler,
         private readonly AnnotatedTargetDefinitionConverter $definitionConverter
     ) {}
 
@@ -33,10 +34,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             ));
         }
 
-        $consumer = $this->getTargetConsumer();
-        $this->annotatedTargetCompiler->compile($containerDefinitionCompileOptions->getScanDirectories(), $consumer);
-
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
+        $consumer = $this->parse($containerDefinitionCompileOptions);
         $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer);
         $containerDefinitionBuilder = $this->addThirdPartyServices($containerDefinitionCompileOptions, $containerDefinitionBuilder);
         $containerDefinitionBuilder = $this->addAliasDefinitions($containerDefinitionBuilder);
@@ -44,27 +43,22 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         return $containerDefinitionBuilder->build();
     }
 
-    private function getTargetConsumer() : AnnotatedTargetConsumer {
-        return new class($this->definitionConverter) implements AnnotatedTargetConsumer {
-            public array $serviceDefinitions = [];
-            public array $servicePrepareDefinitions = [];
-            public array $serviceDelegateDefinitions = [];
-            public array $injectDefinitions = [];
-
-            public function __construct(
-                private readonly AnnotatedTargetDefinitionConverter $converter
-            ) {}
-
-            public function consume(AnnotatedTarget $annotatedTarget): void {
-                $definition = $this->converter->convert($annotatedTarget);
-                match (true) {
-                    $definition instanceof ServiceDefinition => $this->serviceDefinitions[] = $definition,
-                    $definition instanceof ServicePrepareDefinition => $this->servicePrepareDefinitions[] = $definition,
-                    $definition instanceof ServiceDelegateDefinition => $this->serviceDelegateDefinitions[] = $definition,
-                    $definition instanceof InjectDefinition => $this->injectDefinitions[] = $definition
-                };
-            }
-        };
+    private function parse(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : stdClass {
+        $consumer = new stdClass();
+        $consumer->serviceDefinitions = [];
+        $consumer->servicePrepareDefinitions = [];
+        $consumer->serviceDelegateDefinitions = [];
+        $consumer->injectDefinitions = [];
+        foreach ($this->annotatedTargetCompiler->parse($containerDefinitionCompileOptions->getScanDirectories()) as $target) {
+            $definition = $this->definitionConverter->convert($target);
+            match (true) {
+                $definition instanceof ServiceDefinition => $consumer->serviceDefinitions[] = $definition,
+                $definition instanceof ServicePrepareDefinition => $consumer->servicePrepareDefinitions[] = $definition,
+                $definition instanceof ServiceDelegateDefinition => $consumer->serviceDelegateDefinitions[] = $definition,
+                $definition instanceof InjectDefinition => $consumer->injectDefinitions[] = $definition
+            };
+        }
+        return $consumer;
     }
 
     private function addAnnotatedDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, object $consumer) : ContainerDefinitionBuilder {

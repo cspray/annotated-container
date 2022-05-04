@@ -7,7 +7,7 @@ use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\PhpParserAnnotatedTargetCompiler;
+use Cspray\AnnotatedContainer\StaticAnalysisAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 
 class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
@@ -17,7 +17,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
     protected function setUp(): void {
         $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-            new PhpParserAnnotatedTargetCompiler(),
+            new StaticAnalysisAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
         $this->subject = new NoAbstractServiceAliasLogicalConstraint();

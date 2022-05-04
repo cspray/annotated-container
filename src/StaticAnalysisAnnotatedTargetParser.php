@@ -16,6 +16,7 @@ use PhpParser\NodeVisitor\NodeConnectingVisitor;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
+use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionAttribute;
@@ -23,7 +24,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
 
-final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler {
+final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser {
 
     private readonly Parser $parser;
     private readonly NodeTraverser $nodeTraverser;
@@ -35,8 +36,8 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
         $this->nodeTraverser->addVisitor(new NodeConnectingVisitor());
     }
 
-    public function compile(array $dirs, AnnotatedTargetConsumer $consumer) : void {
-        $this->nodeTraverser->addVisitor($visitor = $this->getVisitor($consumer));
+    public function parse(array $dirs) : Generator {
+        $this->nodeTraverser->addVisitor($visitor = $this->getVisitor());
         foreach ($dirs as $dir) {
             $dirIterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator(
@@ -56,34 +57,36 @@ final class PhpParserAnnotatedTargetCompiler implements AnnotatedTargetCompiler 
             }
         }
         $this->nodeTraverser->removeVisitor($visitor);
+
+        yield from $visitor->getTargets();
     }
 
-    private function getVisitor(AnnotatedTargetConsumer $consumer) : NodeVisitor {
-        return new class($consumer) extends NodeVisitorAbstract {
+    private function getVisitor() : NodeVisitor {
+        return new class extends NodeVisitorAbstract {
 
-            private readonly AnnotatedTargetConsumer $consumer;
+            private array $targets = [];
 
-            public function __construct(AnnotatedTargetConsumer $consumer) {
-                $this->consumer = $consumer;
+            public function getTargets() : array {
+                return $this->targets;
             }
 
             public function leaveNode(Node $node) {
                 if ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) {
                     $attributes = $this->findAttributes(Service::class, ...$node->attrGroups);
                     if (!empty($attributes)) {
-                        $this->consumer->consume($this->getAnnotatedService($node));
+                        $this->targets[] = $this->getAnnotatedService($node);
                     }
                 } else if ($node instanceof Node\Stmt\ClassMethod) {
                     foreach ([AttributeType::ServicePrepare, AttributeType::ServiceDelegate] as $attributeType) {
                         $attributes = $this->findAttributes($attributeType->value, ...$node->attrGroups);
                         if (!empty($attributes)) {
-                            $this->consumer->consume($this->getAnnotatedReflectionMethod($node, $attributeType));
+                            $this->targets[] = $this->getAnnotatedReflectionMethod($node, $attributeType);
                         }
                     }
                 } else if ($node instanceof Node\Param) {
                     $attributes = $this->findAttributes(Inject::class, ...$node->attrGroups);
                     foreach ($attributes as $index => $attribute) {
-                        $this->consumer->consume($this->getAnnotatedInject($node, $index));
+                        $this->targets[] = $this->getAnnotatedInject($node, $index);
                     }
                 }
             }

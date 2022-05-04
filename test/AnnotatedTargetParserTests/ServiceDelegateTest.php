@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\AnnotatedTargetCompilerTests;
+namespace Cspray\AnnotatedContainer\AnnotatedTargetParserTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\AnnotatedTargetType;
@@ -8,7 +8,7 @@ use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
 
-class ServiceDelegateTest extends AnnotatedTargetCompilerTestCase {
+class ServiceDelegateTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
         return [DummyAppUtils::getRootDir() . '/ServiceDelegate'];
@@ -16,16 +16,13 @@ class ServiceDelegateTest extends AnnotatedTargetCompilerTestCase {
 
     private function getExpectedTarget() : ?AnnotatedTarget {
         return $this->getAnnotatedTargetForTargetReflectionMethod(
-            $this->provider,
             DummyApps\ServiceDelegate\ServiceFactory::class,
             'createService'
         );
     }
 
     public function testHasCorrectAnnotatedTargetCount() {
-        $consumer = $this->compileDirectories();
-
-        $this->assertCount(3, $consumer->getTargets());
+        $this->assertCount(3, $this->targets);
     }
 
     public function testCorrectTargetPresent() {

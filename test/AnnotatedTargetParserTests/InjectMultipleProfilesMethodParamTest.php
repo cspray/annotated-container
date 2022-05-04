@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\AnnotatedTargetCompilerTests;
+namespace Cspray\AnnotatedContainer\AnnotatedTargetParserTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
 
-class InjectMultipleProfilesMethodParamTest extends AnnotatedTargetCompilerTestCase {
+class InjectMultipleProfilesMethodParamTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
         return [DummyAppUtils::getRootDir() . '/InjectMultipleProfilesMethodParam'];
@@ -18,7 +18,6 @@ class InjectMultipleProfilesMethodParamTest extends AnnotatedTargetCompilerTestC
      */
     private function getExpectedTargets() : array {
         return $this->getAnnotatedTargetsForTargetReflectParameter(
-            $this->provider,
             DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class,
             '__construct',
             'stringParam'
@@ -26,7 +25,7 @@ class InjectMultipleProfilesMethodParamTest extends AnnotatedTargetCompilerTestC
     }
 
     public function testTargetCount() {
-        $this->assertCount(4, $this->provider->getTargets());
+        $this->assertCount(4, $this->targets);
     }
 
     public function testExpectedTargetCount() {
