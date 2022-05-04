@@ -4,6 +4,6 @@ namespace Cspray\AnnotatedContainer;
 
 interface AnnotatedTargetDefinitionConverter {
 
-    public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition;
+    public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition;
 
 }

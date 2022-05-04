@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-class CallableContainerDefinitionBuilderContextConsumer implements ContainerDefinitionBuilderContextConsumer {
+final class CallableContainerDefinitionBuilderContextConsumer implements ContainerDefinitionBuilderContextConsumer {
 
     private $callable;
 

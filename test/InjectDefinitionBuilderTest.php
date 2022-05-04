@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\objectType;
@@ -67,16 +68,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertNotSame($builder, $builder->withProfiles('profile'));
     }
 
-    public function testValidInjectDefinitionGetService() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
-            ->withMethod('methodName', stringType(), 'paramName')
-            ->withValue('foobar')
-            ->build();
-
-        $this->assertSame(objectType(DummyApps\SimpleServices\FooImplementation::class), $injectDefinition->getService());
-    }
-
-    public function testValidParameterInjectDefinitionGetTargetIdentifierIsMethod() {
+    public function testValidMethodInjectDefinitionGetTargetIdentifierIsMethod() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -85,7 +77,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertTrue($injectDefinition->getTargetIdentifier()->isMethodParameter());
     }
 
-    public function testValidParameterInjectDefinitionGetTargetIdentifierIsProperty() {
+    public function testValidMethodInjectDefinitionGetTargetIdentifierIsProperty() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -94,7 +86,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertFalse($injectDefinition->getTargetIdentifier()->isClassProperty());
     }
 
-    public function testValidParameterInjectDefinitionGetTargetIdentifierGetName() {
+    public function testValidMethodInjectDefinitionGetTargetIdentifierGetName() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -103,7 +95,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertSame('paramName', $injectDefinition->getTargetIdentifier()->getName());
     }
 
-    public function testValidInjectDefinitionTargetIdentifierGetValue() {
+    public function testValidMethodInjectDefinitionTargetIdentifierGetValue() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -112,7 +104,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertSame('methodName', $injectDefinition->getTargetIdentifier()->getMethodName());
     }
 
-    public function testValidInjectDefinitionTargetIdentifierGetClass() {
+    public function testValidMethodInjectDefinitionTargetIdentifierGetClass() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -121,7 +113,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertSame(objectType(DummyApps\SimpleServices\FooImplementation::class), $injectDefinition->getTargetIdentifier()->getClass());
     }
 
-    public function testValidInjectDefinitionGetType() {
+    public function testValidMethodInjectDefinitionGetType() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', $expectedType = stringType(), 'paramName')
             ->withValue('foobar')
@@ -130,7 +122,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertSame($expectedType, $injectDefinition->getType());
     }
 
-    public function testValidInjectDefinitionGetValue() {
+    public function testValidMethodInjectDefinitionGetValue() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -139,7 +131,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertSame('foobar', $injectDefinition->getValue());
     }
 
-    public function testValidInjectDefinitionWithNoProfilesGetProfiles() {
+    public function testValidMethodInjectDefinitionWithNoProfilesGetProfiles() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -148,7 +140,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertEmpty($injectDefinition->getProfiles());
     }
 
-    public function testValidInjectDefinitionWithOneProfileGetProfiles() {
+    public function testValidMethodInjectDefinitionWithOneProfileGetProfiles() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -158,7 +150,7 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertSame(['foo'], $injectDefinition->getProfiles());
     }
 
-    public function testValidInjectDefinitionWithAdditionalProfilesGetProfiles() {
+    public function testValidMethodInjectDefinitionWithAdditionalProfilesGetProfiles() {
         $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
@@ -168,4 +160,48 @@ class InjectDefinitionBuilderTest extends TestCase {
         $this->assertSame(['foo', 'bar', 'baz'], $injectDefinition->getProfiles());
     }
 
+    public function testValidPropertyInjectDefinitionGetTargetIdentifierIsMethod() {
+        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+            ->withProperty(stringType(), 'key')
+            ->withValue('my-api-key')
+            ->build();
+
+        $this->assertFalse($injectDefinition->getTargetIdentifier()->isMethodParameter());
+    }
+
+    public function testValidPropertyInjectDefinitionGetTargetIdentifierIsProperty() {
+        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+            ->withProperty(stringType(), 'key')
+            ->withValue('my-api-key')
+            ->build();
+
+        $this->assertTrue($injectDefinition->getTargetIdentifier()->isClassProperty());
+    }
+
+    public function testValidPropertyInjectDefinitionGetTargetIdentifierGetName() {
+        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+            ->withProperty(stringType(), 'key')
+            ->withValue('my-api-key')
+            ->build();
+
+        $this->assertSame('key', $injectDefinition->getTargetIdentifier()->getName());
+    }
+
+    public function testValidPropertyInjectDefinitionGetTargetIdentifierGetClass() {
+        $injectDefinition = InjectDefinitionBuilder::forService($classType = objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+            ->withProperty(stringType(), 'key')
+            ->withValue('my-api-key')
+            ->build();
+
+        $this->assertSame($classType, $injectDefinition->getTargetIdentifier()->getClass());
+    }
+
+    public function testValidPropertyInjectDefinitionGetTargetIdentifierGetMethod() {
+        $injectDefinition = InjectDefinitionBuilder::forService($classType = objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+            ->withProperty(stringType(), 'key')
+            ->withValue('my-api-key')
+            ->build();
+
+        $this->assertNull($injectDefinition->getTargetIdentifier()->getMethodName());
+    }
 }

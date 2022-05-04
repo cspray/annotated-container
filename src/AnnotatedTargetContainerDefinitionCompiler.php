@@ -49,13 +49,15 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $consumer->servicePrepareDefinitions = [];
         $consumer->serviceDelegateDefinitions = [];
         $consumer->injectDefinitions = [];
+        $consumer->configurationDefinitions = [];
         foreach ($this->annotatedTargetCompiler->parse($containerDefinitionCompileOptions->getScanDirectories()) as $target) {
             $definition = $this->definitionConverter->convert($target);
             match (true) {
                 $definition instanceof ServiceDefinition => $consumer->serviceDefinitions[] = $definition,
                 $definition instanceof ServicePrepareDefinition => $consumer->servicePrepareDefinitions[] = $definition,
                 $definition instanceof ServiceDelegateDefinition => $consumer->serviceDelegateDefinitions[] = $definition,
-                $definition instanceof InjectDefinition => $consumer->injectDefinitions[] = $definition
+                $definition instanceof InjectDefinition => $consumer->injectDefinitions[] = $definition,
+                $definition instanceof ConfigurationDefinition => $consumer->configurationDefinitions[] = $definition
             };
         }
         return $consumer;
@@ -104,7 +106,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         }
 
         foreach ($consumer->injectDefinitions as $injectDefinition) {
-            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectDefinitions($injectDefinition);
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectDefinition($injectDefinition);
+        }
+
+        foreach ($consumer->configurationDefinitions as $configurationDefinition) {
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withConfigurationDefinition($configurationDefinition);
         }
 
         return $containerDefinitionBuilder;

@@ -4,7 +4,7 @@
 
 A Dependency Injection framework for creating an autowired, feature-rich, [PSR-11](https://github.com/cspray/annotated-container-dummy-apps) compatible Container using PHP 8 Attributes!
 
-- Compile and analyze the configuration for a Container without ever running any code
+- Compile and analyze the configuration for a Container without ever running your app code
 - Designate an interface as a Service and easily configure which concrete implementations to use
 - Delegate service construction to a factory
 - Inject scalar values, environment variables, and other services into your constructors and setters

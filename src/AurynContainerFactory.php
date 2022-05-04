@@ -14,11 +14,13 @@ use Psr\Container\ContainerInterface;
  */
 final class AurynContainerFactory implements ContainerFactory {
 
+    /**
+     * @var ParameterStore[]
+     */
     private array $parameterStores = [];
 
     public function __construct() {
-        $envStore = new EnvironmentParameterStore();
-        $this->parameterStores[$envStore->getName()] = $envStore;
+        $this->addParameterStore(new EnvironmentParameterStore());
     }
 
     public function addParameterStore(ParameterStore $parameterStore): void {
@@ -50,6 +52,12 @@ final class AurynContainerFactory implements ContainerFactory {
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             if (!is_null($serviceDefinition->getName())) {
                 $nameTypeMap[$serviceDefinition->getName()] = $serviceDefinition->getType();
+            }
+        }
+
+        foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
+            if (!is_null($configurationDefinition->getName())) {
+                $nameTypeMap[$configurationDefinition->getName()] = $configurationDefinition->getClass();
             }
         }
 
@@ -92,6 +100,33 @@ final class AurynContainerFactory implements ContainerFactory {
 
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             $injector->share($serviceDefinition->getType()->getName());
+        }
+
+        foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
+            $injector->share($configurationDefinition->getClass()->getName());
+            $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($containerDefinition, $configurationDefinition, $activeProfiles) {
+                $configReflection = (new \ReflectionClass($configurationDefinition->getClass()->getName()));
+                $configInstance = $configReflection->newInstanceWithoutConstructor();
+                foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
+                    $injectProfiles = $injectDefinition->getProfiles();
+                    if (empty($injectProfiles)) {
+                        $injectProfiles[] = 'default';
+                    }
+                    if ($injectDefinition->getTargetIdentifier()->isMethodParameter() ||
+                        $injectDefinition->getTargetIdentifier()->getClass() !== $configurationDefinition->getClass() ||
+                        empty(array_intersect($activeProfiles, $injectProfiles))) {
+                        continue;
+                    }
+
+                    $reflectionProperty = $configReflection->getProperty($injectDefinition->getTargetIdentifier()->getName());
+                    $value = $injectDefinition->getValue();
+                    if (!is_null($injectDefinition->getStoreName())) {
+                        $value = $this->parameterStores[$injectDefinition->getStoreName()]->fetch($injectDefinition->getType(), $value);
+                    }
+                    $reflectionProperty->setValue($configInstance, $value);
+                }
+                return $configInstance;
+            });
         }
 
         $aliasedTypes = [];

@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Attribute\Inject;
-use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use FilesystemIterator;
 use PhpParser\Node;
@@ -23,6 +22,7 @@ use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
+use ReflectionProperty;
 
 final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser {
 
@@ -72,9 +72,10 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
 
             public function leaveNode(Node $node) {
                 if ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) {
-                    $attributes = $this->findAttributes(Service::class, ...$node->attrGroups);
-                    if (!empty($attributes)) {
-                        $this->targets[] = $this->getAnnotatedService($node);
+                    if (!empty($this->findAttributes(AttributeType::Service->value, ...$node->attrGroups))) {
+                        $this->targets[] = $this->getAnnotatedReflectionClass($node, AttributeType::Service);
+                    } else if (!empty($this->findAttributes(AttributeType::Configuration->value, ...$node->attrGroups))) {
+                        $this->targets[] = $this->getAnnotatedReflectionClass($node, AttributeType::Configuration);
                     }
                 } else if ($node instanceof Node\Stmt\ClassMethod) {
                     foreach ([AttributeType::ServicePrepare, AttributeType::ServiceDelegate] as $attributeType) {
@@ -86,7 +87,13 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                 } else if ($node instanceof Node\Param) {
                     $attributes = $this->findAttributes(Inject::class, ...$node->attrGroups);
                     foreach ($attributes as $index => $attribute) {
-                        $this->targets[] = $this->getAnnotatedInject($node, $index);
+                        $this->targets[] = $this->getAnnotatedMethodInject($node, $index);
+                    }
+                } else if ($node instanceof Node\Stmt\Property) {
+                    foreach ($this->findAttributes(Inject::class, ...$node->attrGroups) as $index => $attribute) {
+                        foreach ($node->props as $prop) {
+                            $this->targets[] = $this->getAnnotatedPropertyInject($prop, $index);
+                        }
                     }
                 }
             }
@@ -96,7 +103,7 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
              * @param AttributeGroup ...$attributeGroups
              * @return Attribute[]
              */
-            private function findAttributes(string $attributeType, AttributeGroup... $attributeGroups) : array {
+            private function findAttributes(string $attributeType, AttributeGroup...$attributeGroups) : array {
                 $attributes = [];
                 foreach ($attributeGroups as $attributeGroup) {
                     foreach ($attributeGroup->attrs as $attribute) {
@@ -109,8 +116,8 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                 return $attributes;
             }
 
-            private function getAnnotatedService(Node\Stmt\Class_|Node\Stmt\Interface_ $node) : AnnotatedTarget {
-                return new class($node->namespacedName->toString(), 0) implements AnnotatedTarget {
+            private function getAnnotatedReflectionClass(Node\Stmt\Class_|Node\Stmt\Interface_ $node, AttributeType $attributeType) : AnnotatedTarget {
+                return new class($node->namespacedName->toString(), $attributeType) implements AnnotatedTarget {
 
                     private ReflectionClass $targetReflection;
                     private ReflectionAttribute $attributeReflection;
@@ -118,8 +125,9 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
 
                     public function __construct(
                         private readonly string $targetType,
-                        private readonly int $attributeIndex
-                    ) {}
+                        private readonly AttributeType $attributeType
+                    ) {
+                    }
 
                     public function getTargetReflection() : ReflectionClass {
                         if (!isset($this->targetReflection)) {
@@ -130,7 +138,7 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
 
                     public function getAttributeReflection() : ReflectionAttribute {
                         if (!isset($this->attributeReflection)) {
-                            $this->attributeReflection = $this->getTargetReflection()->getAttributes(Service::class)[$this->attributeIndex];
+                            $this->attributeReflection = $this->getTargetReflection()->getAttributes($this->attributeType->value)[0];
                         }
                         return $this->attributeReflection;
                     }
@@ -157,7 +165,8 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                         private readonly string $classType,
                         private readonly string $method,
                         private readonly AttributeType $attributeType
-                    ) {}
+                    ) {
+                    }
 
                     public function getTargetReflection() : ReflectionMethod {
                         if (!isset($this->targetReflection)) {
@@ -182,7 +191,7 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                 };
             }
 
-            private function getAnnotatedInject(Node\Param $node, int $index) : AnnotatedTarget {
+            private function getAnnotatedMethodInject(Node\Param $node, int $index) : AnnotatedTarget {
                 $classType = $node->getAttribute('parent')->getAttribute('parent')->namespacedName->toString();
                 $reflection = (new ReflectionClass($classType))->getMethod($node->getAttribute('parent')->name->toString());
                 $reflectionParameter = null;
@@ -199,15 +208,43 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                         private readonly int $index
                     ) {}
 
-                    public function getTargetReflection(): ReflectionParameter {
+                    public function getTargetReflection() : ReflectionParameter {
                         return $this->targetReflection;
                     }
 
-                    public function getAttributeReflection(): ReflectionAttribute {
+                    public function getAttributeReflection() : ReflectionAttribute {
                         return $this->getTargetReflection()->getAttributes(Inject::class)[$this->index];
                     }
 
-                    public function getAttributeInstance(): object {
+                    public function getAttributeInstance() : object {
+                        return $this->getAttributeReflection()->newInstance();
+                    }
+                };
+            }
+
+            private function getAnnotatedPropertyInject(Node\Stmt\PropertyProperty $property, int $index) : AnnotatedTarget {
+                $reflectionProperty = new ReflectionProperty(
+                    $property->getAttribute('parent')->getAttribute('parent')->namespacedName->toString(),
+                    $property->name->toString()
+                );
+
+                return new class($reflectionProperty, $index) implements AnnotatedTarget {
+
+                    public function __construct(
+                        private readonly ReflectionProperty $reflectionProperty,
+                        private readonly int $index
+                    ) {
+                    }
+
+                    public function getTargetReflection() : ReflectionProperty {
+                        return $this->reflectionProperty;
+                    }
+
+                    public function getAttributeReflection() : ReflectionAttribute {
+                        return $this->getTargetReflection()->getAttributes(Inject::class)[$this->index];
+                    }
+
+                    public function getAttributeInstance() : Inject {
                         return $this->getAttributeReflection()->newInstance();
                     }
                 };

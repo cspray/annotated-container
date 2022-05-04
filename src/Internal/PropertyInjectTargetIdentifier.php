@@ -5,23 +5,18 @@ namespace Cspray\AnnotatedContainer\Internal;
 use Cspray\AnnotatedContainer\InjectTargetIdentifier;
 use Cspray\Typiphy\ObjectType;
 
-/**
- * @Internal
- */
-final class MethodParameterInjectTargetIdentifier implements InjectTargetIdentifier {
-
+final class PropertyInjectTargetIdentifier implements InjectTargetIdentifier {
     public function __construct(
         private readonly string $name,
-        private readonly string $methodName,
-        private readonly ObjectType $class
+        private readonly ?ObjectType $class
     ) {}
 
     public function isMethodParameter() : bool {
-        return true;
+        return false;
     }
 
     public function isClassProperty() : bool {
-        return false;
+        return true;
     }
 
     public function getName() : string {
@@ -32,7 +27,7 @@ final class MethodParameterInjectTargetIdentifier implements InjectTargetIdentif
         return $this->class;
     }
 
-    public function getMethodName() : string {
-        return $this->methodName;
+    public function getMethodName() : ?string {
+        return null;
     }
 }

@@ -63,4 +63,9 @@ interface ContainerDefinition {
      */
     public function getInjectDefinitions() : array;
 
+    /**
+     * @return ConfigurationDefinition[]
+     */
+    public function getConfigurationDefinitions() : array;
+
 }

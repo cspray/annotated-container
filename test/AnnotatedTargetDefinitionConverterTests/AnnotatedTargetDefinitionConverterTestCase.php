@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
+use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
@@ -14,26 +15,27 @@ use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
+use ReflectionProperty;
 
 abstract class AnnotatedTargetDefinitionConverterTestCase extends TestCase {
 
-    protected ServiceDefinition|ServiceDelegateDefinition|ServicePrepareDefinition|InjectDefinition $definition;
+    protected ServiceDefinition|ServiceDelegateDefinition|ServicePrepareDefinition|InjectDefinition|ConfigurationDefinition $definition;
 
     protected function setUp() : void {
         $subject = new DefaultAnnotatedTargetDefinitionConverter();
         $this->definition = $subject->convert($this->getSubjectTarget());
     }
 
-    protected function getAnnotatedTarget(AttributeType $attributeType, ReflectionClass|ReflectionMethod|ReflectionParameter $reflection, int $attributeIndex = 0) : AnnotatedTarget {
+    protected function getAnnotatedTarget(AttributeType $attributeType, ReflectionClass|ReflectionMethod|ReflectionParameter|ReflectionProperty $reflection, int $attributeIndex = 0) : AnnotatedTarget {
         return new class($attributeType, $reflection, $attributeIndex) implements AnnotatedTarget {
 
             public function __construct(
                 private readonly AttributeType $attributeType,
-                private readonly ReflectionClass|ReflectionMethod|ReflectionParameter $reflection,
+                private readonly ReflectionClass|ReflectionMethod|ReflectionParameter|ReflectionProperty $reflection,
                 private readonly int $attributeIndex
             ) {}
 
-            public function getTargetReflection(): ReflectionClass|ReflectionMethod|ReflectionParameter {
+            public function getTargetReflection(): ReflectionClass|ReflectionMethod|ReflectionParameter|ReflectionProperty {
                 return $this->reflection;
             }
 
