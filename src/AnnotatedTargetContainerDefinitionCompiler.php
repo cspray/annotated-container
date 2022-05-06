@@ -8,8 +8,8 @@ use Cspray\Typiphy\ObjectType;
 use stdClass;
 
 /**
- * A ContainerDefinitionCompiler that uses PhpParser to statically analyze source code for Attributes defined by
- * AnnotatedContainer.
+ * A ContainerDefinitionCompiler that utilizes the AnnotatedTarget concept by parsing given source code directories and
+ * converting any found targets into the appropriate definition object.
  */
 final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefinitionCompiler {
 
@@ -24,9 +24,9 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
      *
      * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
-     * @throws InvalidCompileOptionsException
+     * @throws InvalidCompileOptionsException|InvalidAnnotationException
      */
-    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions): ContainerDefinition {
+    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
         if (empty($containerDefinitionCompileOptions->getScanDirectories())) {
             throw new InvalidCompileOptionsException(sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s must include at least 1 directory to scan, but none were provided.',
@@ -63,6 +63,12 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         return $consumer;
     }
 
+    /**
+     * @param ContainerDefinitionBuilder $containerDefinitionBuilder
+     * @param object $consumer
+     * @return ContainerDefinitionBuilder
+     * @throws InvalidAnnotationException
+     */
     private function addAnnotatedDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, object $consumer) : ContainerDefinitionBuilder {
         foreach ($consumer->serviceDefinitions as $serviceDefinition) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinition);
@@ -72,7 +78,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition($serviceDelegateDefinition);
         }
 
-        $concretePrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function(ServicePrepareDefinition $prepareDef) use($containerDefinitionBuilder) {
+        $concretePrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
             if (is_null($serviceDef)) {
                 throw new InvalidAnnotationException(sprintf(
@@ -83,7 +89,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             }
             return $serviceDef->isConcrete();
         });
-        $abstractPrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function(ServicePrepareDefinition $prepareDef) use($containerDefinitionBuilder) {
+        $abstractPrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
             return $serviceDef->isAbstract();
         });
@@ -127,13 +133,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
 
     private function addThirdPartyServices(ContainerDefinitionCompileOptions $compileOptions, ContainerDefinitionBuilder $builder) : ContainerDefinitionBuilder {
         $context = new class($builder) implements ContainerDefinitionBuilderContext {
-            public function __construct(private ContainerDefinitionBuilder $builder) {}
+            public function __construct(private ContainerDefinitionBuilder $builder) {
+            }
 
-            public function getBuilder(): ContainerDefinitionBuilder {
+            public function getBuilder() : ContainerDefinitionBuilder {
                 return $this->builder;
             }
 
-            public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) {
+            public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) : void {
                 $this->builder = $containerDefinitionBuilder;
             }
         };

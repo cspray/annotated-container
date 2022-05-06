@@ -86,7 +86,7 @@ $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DI
     }))
     ->build();
 
-$containerCompiler = \Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
+$containerCompiler = \Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder::withoutCache()->build();
 $containerDefinition = $containerCompiler->compile($compileOptions);
 
 $container = (new \Cspray\AnnotatedContainer\AurynContainerFactory())->createContainer($containerDefinition);

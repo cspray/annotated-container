@@ -6,7 +6,7 @@ use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
 
 /**
  * A ContainerDefinitionCompiler decorator that allows for a ContainerDefinition to be serialized and cached to the
- * filesystem; this could potentially save time on very large codebases or be used when building production to not
+ * filesystem; this could potentially save time on very large codebase or be used when building production to not
  * require Container compilation on every request.
  */
 final class CacheAwareContainerDefinitionCompiler implements ContainerDefinitionCompiler {
@@ -37,6 +37,8 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
      *
      * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
+     * @throws Exception\InvalidAnnotationException
+     * @throws Exception\InvalidCompileOptionsException
      * @throws InvalidCacheException
      */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions): ContainerDefinition {

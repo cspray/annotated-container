@@ -16,6 +16,12 @@ interface ContainerFactory {
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface;
 
+    /**
+     * Assign a custom ParameterStore this ContainerFactory to allow injecting arbitrary values.
+     *
+     * @param ParameterStore $parameterStore
+     * @return void
+     */
     public function addParameterStore(ParameterStore $parameterStore) : void;
 
 }

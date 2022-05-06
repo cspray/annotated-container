@@ -3,6 +3,11 @@
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
+use Cspray\AnnotatedContainer\Attribute\Configuration;
+use Cspray\AnnotatedContainer\Attribute\Inject;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\InjectDefinition;
@@ -43,7 +48,7 @@ abstract class AnnotatedTargetDefinitionConverterTestCase extends TestCase {
                 return $this->reflection->getAttributes($this->attributeType->value)[$this->attributeIndex];
             }
 
-            public function getAttributeInstance(): object {
+            public function getAttributeInstance(): Service|ServicePrepare|ServiceDelegate|Configuration|Inject {
                 return $this->getAttributeReflection()->newInstance();
             }
         };
