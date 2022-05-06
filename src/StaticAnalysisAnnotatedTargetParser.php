@@ -2,7 +2,11 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Inject;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use FilesystemIterator;
 use PhpParser\Node;
@@ -143,7 +147,7 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                         return $this->attributeReflection;
                     }
 
-                    public function getAttributeInstance() : object {
+                    public function getAttributeInstance() : Service|Configuration {
                         if (!isset($this->attributeInstance)) {
                             $this->attributeInstance = $this->getAttributeReflection()->newInstance();
                         }
@@ -182,7 +186,7 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                         return $this->attributeReflection;
                     }
 
-                    public function getAttributeInstance() : object {
+                    public function getAttributeInstance() : ServicePrepare|ServiceDelegate {
                         if (!isset($this->attributeInstance)) {
                             $this->attributeInstance = $this->getAttributeReflection()->newInstance();
                         }
@@ -216,7 +220,7 @@ final class StaticAnalysisAnnotatedTargetParser implements AnnotatedTargetParser
                         return $this->getTargetReflection()->getAttributes(Inject::class)[$this->index];
                     }
 
-                    public function getAttributeInstance() : object {
+                    public function getAttributeInstance() : Inject {
                         return $this->getAttributeReflection()->newInstance();
                     }
                 };

@@ -59,11 +59,17 @@ interface ContainerDefinition {
     public function getServiceDelegateDefinitions() : array;
 
     /**
+     * Returns a set of InjectDefinition that determine what values are injected into methods or properties that
+     * cannot be reliably autowired.
+     *
      * @return InjectDefinition[]
      */
     public function getInjectDefinitions() : array;
 
     /**
+     * Returns a set of ConfigurationDefinition that determine what Configuration instances are available in the
+     * container.
+     *
      * @return ConfigurationDefinition[]
      */
     public function getConfigurationDefinitions() : array;

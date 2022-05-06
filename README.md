@@ -10,6 +10,7 @@ A Dependency Injection framework for creating an autowired, feature-rich, [PSR-1
 - Inject scalar values, environment variables, and other services into your constructors and setters
 - Automatically invoke methods after the service is constructed
 - Use Profiles to easily use different services in different runtimes
+- Create type-safe, highly flexible configuration objects
 
 ## Installation
 
@@ -61,9 +62,9 @@ class FilesystemStorage implements BlobStorage {
 use Cspray\AnnotatedContainer\AurynContainerFactory;
 use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder;
 
-$compiler = ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
+$compiler = ContainerDefinitionCompilerBuilder::withoutCache()->build();
 $containerDefinition = $compiler->compile(
     ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
 );

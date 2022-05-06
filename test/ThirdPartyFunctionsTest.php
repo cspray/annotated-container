@@ -20,7 +20,7 @@ class ThirdPartyFunctionsTest extends TestCase {
                 return $this->builder;
             }
 
-            public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) {
+            public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) : void {
                 $this->builder = $containerDefinitionBuilder;
             }
         };

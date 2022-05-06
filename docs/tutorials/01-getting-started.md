@@ -106,10 +106,10 @@ The `FilesystemStorage` service has been refactored from our example in README.m
 require __DIR__ . '/vendor/autoload.php';
 
 use Cspray\AnnotatedContainer\AurynContainerFactory;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompilerFactory;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 
-$compiler = ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
+$compiler = ContainerDefinitionCompilerBuilder::withoutCache()->build();
 $containerDefinition = $compiler->compile(
     ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
 );

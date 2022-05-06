@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\Typiphy\Type;
@@ -17,6 +16,9 @@ use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 use function Cspray\Typiphy\typeUnion;
 
+/**
+ *
+ */
 final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTargetDefinitionConverter {
 
     public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition {

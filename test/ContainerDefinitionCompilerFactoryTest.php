@@ -7,12 +7,12 @@ use PHPUnit\Framework\TestCase;
 class ContainerDefinitionCompilerFactoryTest extends TestCase {
 
     public function testWithoutCacheReturnsCorrectInstanceOf() {
-        $compiler = ContainerDefinitionCompilerFactory::withoutCache()->getCompiler();
+        $compiler = ContainerDefinitionCompilerBuilder::withoutCache()->build();
         $this->assertInstanceOf(AnnotatedTargetContainerDefinitionCompiler::class, $compiler);
     }
 
     public function testWithCacheReturnsCorrectInstanceOf() {
-        $compiler = ContainerDefinitionCompilerFactory::withCache(sys_get_temp_dir())->getCompiler();
+        $compiler = ContainerDefinitionCompilerBuilder::withCache(sys_get_temp_dir())->build();
         $this->assertInstanceOf(CacheAwareContainerDefinitionCompiler::class, $compiler);
     }
 

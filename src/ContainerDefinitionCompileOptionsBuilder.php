@@ -25,6 +25,12 @@ final class ContainerDefinitionCompileOptionsBuilder {
         return $instance;
     }
 
+    /**
+     * Specify that the ContainerDefinitionBuilder should be modified before the ContainerDefinition is built.
+     *
+     * @param ContainerDefinitionBuilderContextConsumer $consumer
+     * @return $this
+     */
     public function withContainerDefinitionBuilderContextConsumer(ContainerDefinitionBuilderContextConsumer $consumer) : self {
         $instance = clone $this;
         $instance->consumer = $consumer;

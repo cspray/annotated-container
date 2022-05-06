@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer;
 
 use Auryn\InjectionException;
 use Auryn\Injector;
+use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\Typiphy\ObjectType;
@@ -20,9 +21,19 @@ final class AurynContainerFactory implements ContainerFactory {
     private array $parameterStores = [];
 
     public function __construct() {
+        // Injecting environment variables is something we have supported since early versions.
+        // We don't require adding this parameter store explicitly to continue providing this functionality
+        // without the end-user having to change how they construct their ContainerFactory.
         $this->addParameterStore(new EnvironmentParameterStore());
     }
 
+    /**
+     * Add a custom ParameterStore, allowing you to Inject arbitrary values into your Services.
+     *
+     * @param ParameterStore $parameterStore
+     * @return void
+     * @see Inject
+     */
     public function addParameterStore(ParameterStore $parameterStore): void {
         $this->parameterStores[$parameterStore->getName()] = $parameterStore;
     }
