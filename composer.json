@@ -19,7 +19,7 @@
     "nikic/php-parser": "^4.10"
   },
   "require-dev": {
-    "cspray/annotated-container-dummy-apps": "0.9.0",
+    "cspray/annotated-container-dummy-apps": "0.9.1",
     "phpunit/phpunit": "^9.5",
     "mikey179/vfsstream": "^1.6"
   },

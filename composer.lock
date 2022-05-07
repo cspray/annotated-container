@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01a8c98762bd4609c679083a793b1479",
+    "content-hash": "de0d86f9182d0f4280c705011019c575",
     "packages": [
         {
             "name": "cspray/typiphy",
@@ -218,16 +218,16 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.9.0",
+            "version": "0.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
-                "reference": "cc754e80f68ca5929cda8763fd8bf7dd9d37842e"
+                "reference": "b7e2546f40e4e01b21a6814e1795ddb93a503d35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/cc754e80f68ca5929cda8763fd8bf7dd9d37842e",
-                "reference": "cc754e80f68ca5929cda8763fd8bf7dd9d37842e",
+                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/b7e2546f40e4e01b21a6814e1795ddb93a503d35",
+                "reference": "b7e2546f40e4e01b21a6814e1795ddb93a503d35",
                 "shasum": ""
             },
             "type": "library",
@@ -254,9 +254,9 @@
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
-                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.9.0"
+                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.9.1"
             },
-            "time": "2022-05-04T03:24:10+00:00"
+            "time": "2022-05-07T11:59:38+00:00"
         },
         {
             "name": "doctrine/instantiator",
