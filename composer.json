@@ -35,5 +35,8 @@
     "psr-4": {
       "Cspray\\AnnotatedContainer\\": "test"
     }
+  },
+  "suggest": {
+    "cspray/annotated-container-auryn": "An implementation that uses Auryn as the backing Container!"
   }
 }
