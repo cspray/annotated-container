@@ -510,56 +510,11 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     /** ======================================== Deserialization Testing ==============================================*/
 
-    public function testDeserializeSimpleServices() {
-        $serializer = new JsonContainerDefinitionSerializer();
-        $json = $serializer->serialize($this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->build()
-        ));
-        $injectorDefinition = $serializer->deserialize($json);
-
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
-
-        $foo1 = $injector->get(SimpleServices\FooInterface::class);
-
-        $this->assertInstanceOf(SimpleServices\FooImplementation::class, $foo1);
-
-        $foo2 = $injector->get(SimpleServices\FooInterface::class);
-
-        $this->assertSame($foo1, $foo2);
-    }
-
-    public function testDeserializeInterfaceServicePrepare() {
-        $serializer = new JsonContainerDefinitionSerializer();
-        $json = $serializer->serialize($this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/InterfaceServicePrepare')->build()
-        ));
-        $injectorDefinition = $serializer->deserialize($json);
-
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
-
-        $foo = $injector->get(InterfaceServicePrepare\FooInterface::class);
-
-        $this->assertInstanceOf(InterfaceServicePrepare\FooImplementation::class, $foo);
-
-        $this->assertSame(1, $foo->getBarCounter());
-    }
-
-    public function testDeserializeServiceDelegate() {
-        $serializer = new JsonContainerDefinitionSerializer();
-        $json = $serializer->serialize($this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/ServiceDelegate')->build()
-        ));
-        $injectorDefinition = $serializer->deserialize($json);
-
-        $injector = (new AurynContainerFactory())->createContainer($injectorDefinition);
-
-        $service = $injector->get(ServiceDelegate\ServiceInterface::class);
-
-        $this->assertSame('From ServiceFactory From FooService', $service->getValue());
-    }
-
     public function serializeDeserializeSerializeDirs() : array {
         return [
+            [DummyAppUtils::getRootDir() . '/SimpleServices'],
+            [DummyAppUtils::getRootDir() . '/ServiceDelegate'],
+            [DummyAppUtils::getRootDir() . '/InterfaceServicePrepare'],
             [DummyAppUtils::getRootDir() . '/ProfileResolvedServices'],
             [DummyAppUtils::getRootDir() . '/AbstractSharedServices'],
             [DummyAppUtils::getRootDir() . '/NamedService'],
