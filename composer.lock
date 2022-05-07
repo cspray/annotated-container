@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "832f0429439fc494930a2bc035c096c4",
+    "content-hash": "55defedf178faed786095cb850263488",
     "packages": [
         {
             "name": "cspray/typiphy",
@@ -152,8 +152,46 @@
     ],
     "packages-dev": [
         {
+            "name": "cspray/annotated-container-auryn",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cspray/annotated-container-auryn.git",
+                "reference": "a830126250f33922b012af8573cf175899e5588d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cspray/annotated-container-auryn/zipball/a830126250f33922b012af8573cf175899e5588d",
+                "reference": "a830126250f33922b012af8573cf175899e5588d",
+                "shasum": ""
+            },
+            "require": {
+                "cspray/annotated-container": "dev-main",
+                "rdlowrey/auryn": "^1.4"
+            },
+            "require-dev": {
+                "cspray/annotated-container-dummy-apps": "dev-main",
+                "cspray/annotated-container-factory-test": "dev-main",
+                "phpunit/phpunit": "9.5.20"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cspray\\AnnotatedContainer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "description": "An AnnotatedContainer backed by Auryn!",
+            "support": {
+                "issues": "https://github.com/cspray/annotated-container-auryn/issues",
+                "source": "https://github.com/cspray/annotated-container-auryn/tree/main"
+            },
+            "time": "2022-05-07T23:25:09+00:00"
+        },
+        {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.9.1",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
@@ -165,6 +203,7 @@
                 "reference": "b7e2546f40e4e01b21a6814e1795ddb93a503d35",
                 "shasum": ""
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "files": [
@@ -192,6 +231,76 @@
                 "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.9.1"
             },
             "time": "2022-05-07T11:59:38+00:00"
+        },
+        {
+            "name": "cspray/annotated-container-factory-test",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cspray/annotated-container-factory-test.git",
+                "reference": "ebdedf24c81e7dcd92e36f239275ae577a778a2a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cspray/annotated-container-factory-test/zipball/ebdedf24c81e7dcd92e36f239275ae577a778a2a",
+                "reference": "ebdedf24c81e7dcd92e36f239275ae577a778a2a",
+                "shasum": ""
+            },
+            "require": {
+                "cspray/annotated-container": "dev-main",
+                "cspray/annotated-container-dummy-apps": "dev-main",
+                "phpunit/phpunit": "^9.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cspray\\AnnotatedContainer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "support": {
+                "issues": "https://github.com/cspray/annotated-container-factory-test/issues",
+                "source": "https://github.com/cspray/annotated-container-factory-test/tree/main"
+            },
+            "time": "2022-05-07T12:22:48+00:00"
+        },
+        {
+            "name": "cspray/annotated-container-php-di",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cspray/annotated-container-php-di.git",
+                "reference": "5858102f8150678a00f2d18ec5ed0b4400d60c79"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cspray/annotated-container-php-di/zipball/5858102f8150678a00f2d18ec5ed0b4400d60c79",
+                "reference": "5858102f8150678a00f2d18ec5ed0b4400d60c79",
+                "shasum": ""
+            },
+            "require": {
+                "cspray/annotated-container": "dev-main",
+                "php-di/php-di": "v7.x-dev"
+            },
+            "require-dev": {
+                "cspray/annotated-container-dummy-apps": "dev-main",
+                "cspray/annotated-container-factory-test": "dev-main",
+                "phpunit/phpunit": "^9.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cspray\\AnnotatedContainer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "support": {
+                "issues": "https://github.com/cspray/annotated-container-php-di/issues",
+                "source": "https://github.com/cspray/annotated-container-php-di/tree/main"
+            },
+            "time": "2022-05-07T22:55:43+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -262,6 +371,65 @@
                 }
             ],
             "time": "2022-03-03T08:28:38+00:00"
+        },
+        {
+            "name": "laravel/serializable-closure",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/serializable-closure.git",
+                "reference": "9e4b005daa20b0c161f3845040046dc9ddc1d74e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/9e4b005daa20b0c161f3845040046dc9ddc1d74e",
+                "reference": "9e4b005daa20b0c161f3845040046dc9ddc1d74e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3|^8.0"
+            },
+            "require-dev": {
+                "pestphp/pest": "^1.18",
+                "phpstan/phpstan": "^0.12.98",
+                "symfony/var-dumper": "^5.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\SerializableClosure\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                },
+                {
+                    "name": "Nuno Maduro",
+                    "email": "nuno@laravel.com"
+                }
+            ],
+            "description": "Laravel Serializable Closure provides an easy and secure way to serialize closures in PHP.",
+            "keywords": [
+                "closure",
+                "laravel",
+                "serializable"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/serializable-closure/issues",
+                "source": "https://github.com/laravel/serializable-closure"
+            },
+            "time": "2022-02-11T19:23:53+00:00"
         },
         {
             "name": "mikey179/vfsstream",
@@ -483,6 +651,134 @@
                 "source": "https://github.com/phar-io/version/tree/3.2.1"
             },
             "time": "2022-02-21T01:04:05+00:00"
+        },
+        {
+            "name": "php-di/invoker",
+            "version": "2.3.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHP-DI/Invoker.git",
+                "reference": "cd6d9f267d1a3474bdddf1be1da079f01b942786"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHP-DI/Invoker/zipball/cd6d9f267d1a3474bdddf1be1da079f01b942786",
+                "reference": "cd6d9f267d1a3474bdddf1be1da079f01b942786",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3",
+                "psr/container": "^1.0|^2.0"
+            },
+            "require-dev": {
+                "athletic/athletic": "~0.1.8",
+                "mnapoli/hard-mode": "~0.3.0",
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Invoker\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Generic and extensible callable invoker",
+            "homepage": "https://github.com/PHP-DI/Invoker",
+            "keywords": [
+                "callable",
+                "dependency",
+                "dependency-injection",
+                "injection",
+                "invoke",
+                "invoker"
+            ],
+            "support": {
+                "issues": "https://github.com/PHP-DI/Invoker/issues",
+                "source": "https://github.com/PHP-DI/Invoker/tree/2.3.3"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/mnapoli",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-12-13T09:22:56+00:00"
+        },
+        {
+            "name": "php-di/php-di",
+            "version": "v7.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHP-DI/PHP-DI.git",
+                "reference": "8d355595a3d9c2f13a020efd478090b636b565fb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHP-DI/PHP-DI/zipball/8d355595a3d9c2f13a020efd478090b636b565fb",
+                "reference": "8d355595a3d9c2f13a020efd478090b636b565fb",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/serializable-closure": "^1.0",
+                "php": ">=8.0",
+                "php-di/invoker": "^2.0",
+                "psr/container": "^1.1 || ^2.0"
+            },
+            "provide": {
+                "psr/container-implementation": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3",
+                "mnapoli/phpunit-easymock": "^1.3",
+                "ocramius/proxy-manager": "^2.11.2",
+                "phpunit/phpunit": "^9.5",
+                "vimeo/psalm": "^4.6"
+            },
+            "suggest": {
+                "ocramius/proxy-manager": "Install it if you want to use lazy injection (version ^2.3)"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
+                "psr-4": {
+                    "DI\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "The dependency injection container for humans",
+            "homepage": "https://php-di.org/",
+            "keywords": [
+                "PSR-11",
+                "container",
+                "container-interop",
+                "dependency injection",
+                "di",
+                "ioc",
+                "psr11"
+            ],
+            "support": {
+                "issues": "https://github.com/PHP-DI/PHP-DI/issues",
+                "source": "https://github.com/PHP-DI/PHP-DI/tree/v7"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/mnapoli",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/php-di/php-di",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2022-04-12T14:47:56+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -1131,6 +1427,71 @@
                 }
             ],
             "time": "2022-04-01T12:37:26+00:00"
+        },
+        {
+            "name": "rdlowrey/auryn",
+            "version": "v1.4.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rdlowrey/auryn.git",
+                "reference": "dae57592229d313b59414a2c8334e61e6eb00928"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rdlowrey/auryn/zipball/dae57592229d313b59414a2c8334e61e6eb00928",
+                "reference": "dae57592229d313b59414a2c8334e61e6eb00928",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "athletic/athletic": "~0.1",
+                "fabpot/php-cs-fixer": "~1.9",
+                "phpunit/phpunit": "^4.8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Auryn\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Lowrey",
+                    "email": "rdlowrey@gmail.com",
+                    "homepage": "https://github.com/rdlowrey",
+                    "role": "Creator / Main Developer"
+                },
+                {
+                    "name": "Levi Morrison",
+                    "email": "levim@php.net",
+                    "homepage": "http://morrisonlevi.github.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Dan Ackroyd",
+                    "email": "Danack@basereality.com",
+                    "homepage": "http://www.basereality.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Auryn is a dependency injector for bootstrapping object-oriented PHP applications.",
+            "homepage": "https://github.com/rdlowrey/auryn",
+            "keywords": [
+                "dependency injection",
+                "dic",
+                "ioc"
+            ],
+            "support": {
+                "issues": "https://github.com/rdlowrey/auryn/issues",
+                "source": "https://github.com/rdlowrey/auryn/tree/v1.4.4"
+            },
+            "time": "2021-03-04T20:26:52+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -2289,7 +2650,13 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "cspray/annotated-container-factory-test": 20,
+        "cspray/annotated-container-dummy-apps": 20,
+        "cspray/annotated-container-auryn": 20,
+        "cspray/annotated-container-php-di": 20,
+        "php-di/php-di": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
