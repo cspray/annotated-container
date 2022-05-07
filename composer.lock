@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6f1eded832d95852ded9b765f7caf0f0",
+    "content-hash": "63486b80cf60436ae7321e4edae40a06",
     "packages": [
         {
             "name": "cspray/typiphy",
@@ -218,28 +218,21 @@
     "packages-dev": [
         {
             "name": "cspray/annotated-container-dummy-apps",
-            "version": "0.8.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cspray/annotated-container-dummy-apps.git",
-                "reference": "cc754e80f68ca5929cda8763fd8bf7dd9d37842e"
-            },
+            "version": "dev-main",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-dummy-apps/zipball/cc754e80f68ca5929cda8763fd8bf7dd9d37842e",
-                "reference": "cc754e80f68ca5929cda8763fd8bf7dd9d37842e",
-                "shasum": ""
+                "type": "path",
+                "url": "../annotated-container-dummy-apps",
+                "reference": "cc754e80f68ca5929cda8763fd8bf7dd9d37842e"
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "src/ThirdPartyServices/constants.php"
-                ],
                 "psr-4": {
                     "Cspray\\AnnotatedContainer\\DummyApps\\": "src"
-                }
+                },
+                "files": [
+                    "src/ThirdPartyServices/constants.php"
+                ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -252,11 +245,9 @@
                 }
             ],
             "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
-            "support": {
-                "issues": "https://github.com/cspray/annotated-container-dummy-apps/issues",
-                "source": "https://github.com/cspray/annotated-container-dummy-apps/tree/0.8.0"
-            },
-            "time": "2022-05-04T03:24:10+00:00"
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "doctrine/instantiator",
@@ -2354,7 +2345,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "cspray/annotated-container-dummy-apps": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

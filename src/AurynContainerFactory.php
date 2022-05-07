@@ -110,8 +110,16 @@ final class AurynContainerFactory implements ContainerFactory {
                 return $anyDefined > 0;
             }
 
-            public function make(string $classType, array $parameters = []) : object{
-                // TODO: Implement make() method.
+            public function make(string $classType, ?AutowireableParameterSet $parameters = null) : object {
+                $args = [];
+                if (!is_null($parameters)) {
+                    /** @var AutowireableParameter $parameter */
+                    foreach ($parameters as $parameter) {
+                        $name = $parameter->isServiceIdentifier() ? $parameter->getName() : ':' . $parameter->getName();
+                        $args[$name] = $parameter->isServiceIdentifier() ? $parameter->getValue()->getName() : $parameter->getValue();
+                    }
+                }
+                return $this->injector->make($classType, $args);
             }
         };
     }

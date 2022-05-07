@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Countable;
 use IteratorAggregate;
 
-interface AutowireableParameterList extends Countable, IteratorAggregate {
+interface AutowireableParameterSet extends Countable, IteratorAggregate {
 
     public function add(AutowireableParameter $autowireableParameter) : void;
 
