@@ -7,6 +7,7 @@ use Auryn\Injector;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
+use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
 use Cspray\Typiphy\ObjectType;
 use Psr\Container\ContainerInterface;
 
@@ -57,7 +58,7 @@ final class AurynContainerFactory implements ContainerFactory {
      * @param ContainerFactoryOptions|null $containerFactoryOptions
      * @return ContainerInterface
      */
-    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface {
+    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface&AutowireableFactory {
         $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
         $nameTypeMap = [];
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
@@ -72,12 +73,19 @@ final class AurynContainerFactory implements ContainerFactory {
             }
         }
 
-        return new class($this->createInjector($containerDefinition, $activeProfiles), $nameTypeMap) implements ContainerInterface {
+        return new class($this->createInjector($containerDefinition, $activeProfiles), $nameTypeMap) implements ContainerInterface, AutowireableFactory {
 
             public function __construct(private readonly Injector $injector, private readonly array $nameTypeMap) {}
 
             public function get(string $id) {
                 try {
+                    if (!$this->has($id)) {
+                        throw new ServiceNotFoundException(sprintf(
+                            'The service "%s" could not be found in this container.',
+                            $id
+                        ));
+                    }
+
                     if (isset($this->nameTypeMap[$id])) {
                         $id = $this->nameTypeMap[$id];
                     }
@@ -100,6 +108,18 @@ final class AurynContainerFactory implements ContainerFactory {
                     $anyDefined += count($definitions);
                 }
                 return $anyDefined > 0;
+            }
+
+            public function make(string $classType, ?AutowireableParameterSet $parameters = null) : object {
+                $args = [];
+                if (!is_null($parameters)) {
+                    /** @var AutowireableParameter $parameter */
+                    foreach ($parameters as $parameter) {
+                        $name = $parameter->isServiceIdentifier() ? $parameter->getName() : ':' . $parameter->getName();
+                        $args[$name] = $parameter->isServiceIdentifier() ? $parameter->getValue()->getName() : $parameter->getValue();
+                    }
+                }
+                return $this->injector->make($classType, $args);
             }
         };
     }

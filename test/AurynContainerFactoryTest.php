@@ -9,6 +9,7 @@ use Cspray\Typiphy\Type;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use function Cspray\Typiphy\objectType;
 
 /**
@@ -42,7 +43,7 @@ class AurynContainerFactoryTest extends TestCase {
         );
     }
 
-    private function getContainer(string $dir, array $profiles = [], ParameterStore $parameterStore = null) : ContainerInterface {
+    private function getContainer(string $dir, array $profiles = [], ParameterStore $parameterStore = null) : ContainerInterface&AutowireableFactory {
         $compiler = $this->getContainerDefinitionCompiler();
         $optionsBuilder = ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir);
         $containerDefinition = $compiler->compile($optionsBuilder->build());
@@ -55,6 +56,14 @@ class AurynContainerFactoryTest extends TestCase {
             $factory->addParameterStore($parameterStore);
         }
         return $factory->createContainer($containerDefinition, $containerOptions);
+    }
+
+    public function testCreateServiceNotHasThrowsException() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServicesSomeNotAnnotated');
+
+        $this->expectException(NotFoundExceptionInterface::class);
+        $this->expectExceptionMessage('The service "' . DummyApps\SimpleServicesSomeNotAnnotated\NotAnnotatedBarImplementation::class . '" could not be found in this container.');
+        $container->get(DummyApps\SimpleServicesSomeNotAnnotated\NotAnnotatedBarImplementation::class);
     }
 
     public function testCreateSimpleServices() {
@@ -264,5 +273,34 @@ class AurynContainerFactoryTest extends TestCase {
         $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleNamedConfiguration');
 
         $this->assertInstanceOf(DummyApps\SimpleNamedConfiguration\MyConfig::class, $container->get('my-config'));
+    }
+
+    /**
+     * @covers ::\Cspray\AnnotatedContainer\autowiredParams
+     * @covers ::\Cspray\AnnotatedContainer\rawParam
+     */
+    public function testMakeAutowiredObject() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/AutowireableFactory');
+        $subject = $container->make(DummyApps\AutowireableFactory\ConstructionTarget::class, autowiredParams(rawParam('value', '802')));
+
+        $this->assertInstanceOf(DummyApps\AutowireableFactory\ServiceTargetImplementation::class, $subject->serviceTarget);
+        $this->assertSame('802', $subject->value);
+    }
+
+    /**
+     * @covers ::\Cspray\AnnotatedContainer\autowiredParams
+     * @covers ::\Cspray\AnnotatedContainer\rawParam
+     * @covers ::\Cspray\AnnotatedContainer\serviceParam
+     */
+    public function testMakeAutowiredObjectReplaceServiceTarget() {
+        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/AutowireableFactory');
+        $subject = $container->make(DummyApps\AutowireableFactory\ConstructionTarget::class, autowiredParams(
+            rawParam('value', 'quarters'),
+            serviceParam('serviceTarget', objectType(DummyApps\AutowireableFactory\NotServiceTarget::class))
+        ));
+
+        $this->assertInstanceOf(DummyApps\AutowireableFactory\NotServiceTarget::class, $subject->serviceTarget);
+        $this->assertSame('quarters', $subject->value);
+
     }
 }
