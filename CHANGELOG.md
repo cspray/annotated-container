@@ -19,17 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an `AutowireableFactory` interface that allows for creating arbitrary objects and defining parameters that cannot be autowired. This interface is intended to allow for the autowire object construction without depending on a Container directly.
 - Added new `compiler()` and `containerFactory()` functions for easily interacting with the library in the most common scenarios.
 - Added a new `#[Configuration]` Attribute that allows properties to have arbitrary values populated with `#[Inject]`.
+- Added a new `PhpDiContainerFactory` for creating a Container with PHP-DI. This class is only available if php-di/php-di is explicitly installed.
 
 ### Changed
 
 - Changed many definitions to no longer require other definitions, instead relying on an `ObjectType` from the Typiphy package. This allows for greater flexibility in creating ContainerDefinition and makes it more clear that we're really requiring an ObjectType in a lot of places, not necessarily the entire ServiceDefinition.
+- Moved the `AurynContainerFactory` into the `Cspray\AnnotatedContainer\ContainerFactory` namespace. This class is now only available if rdlowrey/auryn is explicitly installed.
 
 ### Removed
 
 - Many internal classes were removed to simplify static parsing process. The static parsing is now largely identifying which classes, methods, or parameters to target for reflection when the container is created.
-- Removed the `AttributeType` enum, where it was used was removed from the internal namespace and there's no valid use case anymore.
 - Removed the `#[InjectScalar]`, `#[InjectService]`, and `#[InjectEnv]`. All uses can now be covered by the new `#[Inject]` Attribute.
-- Removed the `AurynContainerFactory` from this library. Install `cspray/annotated-container-auryn` to continue using this backing container.
 
 ## [0.3.0](https://github.com/cspray/annotated-container/tree/v0.3.0) - 2022-04-16
 
