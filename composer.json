@@ -34,7 +34,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Cspray\\AnnotatedContainer\\": "test"
+      "Cspray\\AnnotatedContainer\\": "test",
+      "Acme\\AnnotatedContainer\\": "examples/readme-quick-start"
     }
   },
   "suggest": {

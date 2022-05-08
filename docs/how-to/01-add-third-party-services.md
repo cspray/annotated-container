@@ -75,6 +75,8 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Cspray\AnnotatedContainer\CallableContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use function Cspray\AnnotatedContainer\compiler;
+use function Cspray\AnnotatedContainer\containerFactory;
 use function Cspray\AnnotatedContainer\service;
 use function Cspray\AnnotatedContainer\serviceDelegate;
 
@@ -86,8 +88,7 @@ $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DI
     }))
     ->build();
 
-$containerCompiler = \Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder::withoutCache()->build();
-$containerDefinition = $containerCompiler->compile($compileOptions);
+$containerDefinition = compiler()->compile($compileOptions);
 
-$container = (new \Cspray\AnnotatedContainer\AurynContainerFactory())->createContainer($containerDefinition);
+$container = containerFactory()->createContainer($containerDefinition);
 ```

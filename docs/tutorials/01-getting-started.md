@@ -105,15 +105,15 @@ The `FilesystemStorage` service has been refactored from our example in README.m
 
 require __DIR__ . '/vendor/autoload.php';
 
-use Cspray\AnnotatedContainer\AurynContainerFactory;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use function Cspray\AnnotatedContainer\compiler;
+use function Cspray\AnnotatedContainer\containerFactory;
 
-$compiler = ContainerDefinitionCompilerBuilder::withoutCache()->build();
-$containerDefinition = $compiler->compile(
+$containerDefinition = compiler()->compile(
     ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
 );
-$container = (new AurynContainerFactory)->createContainer($injectorDefinition);
+$container = containerFactory()->createContainer($containerDefinition);
 
 $emitter = $container->get(BlobStorageEventEmitter::class);
 $emitter->onStore(fn(string $identifier) -> echo "Stored $identifier");
