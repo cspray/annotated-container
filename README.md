@@ -4,19 +4,35 @@
 
 A Dependency Injection framework for creating an autowired, feature-rich, [PSR-11](https://github.com/cspray/annotated-container-dummy-apps) compatible Container using PHP 8 Attributes!
 
-- Compile and analyze the configuration for a Container without ever running your app code
 - Designate an interface as a Service and easily configure which concrete implementations to use
 - Delegate service construction to a factory
 - Inject scalar values, environment variables, and other services into your constructors and setters
 - Automatically invoke methods after the service is constructed
 - Use Profiles to easily use different services in different runtimes
 - Create type-safe, highly flexible configuration objects
+- Bring Your Own Container!
 
 ## Installation
 
 ```
 composer require cspray/annotated-container
 ```
+
+### Choose a Backing Container
+
+AnnotatedContainer does not provide any of the actual Container functionality. We provide Attributes and definition objects that can determine how actual implementations are intended to be setup. AnnotatedContainer currently supports the following backing Containers:
+
+```
+composer require cspray/annotated-container-auryn
+```
+
+Uses the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) Injector.
+
+```
+composer require cspray/annotated-container-php-di
+```
+
+Uses the [php-di/php-di](https://github.com/php-di/php-di) Container.
 
 ## Quick Start
 
@@ -27,13 +43,10 @@ In our example we've been given a task to store some blob data. How that data mi
 ```php
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
-
 // interfaces and classes in __DIR__ . '/src'
 
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\InjectEnv;
-use Cspray\AnnotatedContainer\AurynContainerFactory;
 
 #[Service]
 interface BlobStorage {
@@ -58,18 +71,18 @@ class FilesystemStorage implements BlobStorage {
 }
 
 // app bootstrap in __DIR__ . '/app.php'
+require __DIR__ . '/vendor/autoload.php';
 
-use Cspray\AnnotatedContainer\AurynContainerFactory;
-use Cspray\AnnotatedContainer\PhpParserInjectorDefinitionCompiler;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder;
+use function Cspray\AnnotatedContainer\compiler;
+use function Cspray\AnnotatedContainer\containerFactory;
 
-$compiler = ContainerDefinitionCompilerBuilder::withoutCache()->build();
-$containerDefinition = $compiler->compile(
+$containerDefinition = compiler()->compile(
     ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
 );
 
-$container = (new AurynContainerFactory)->createContainer($containerDefinition);
+// If you have not installed a backing container at this point you'll get an exception thrown 
+$container = containerFactory()->createContainer($containerDefinition);
 
 var_dump($container->get(BlobStorage::class) instanceof FilesystemStorage); // true
 var_dump($container->get(BlobStorage::class) === $container->get(BlobStorage::class)); // true
