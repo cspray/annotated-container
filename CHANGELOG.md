@@ -5,13 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased - 2022-XX-XX
+## Unreleased Changes
+
+## [0.4.0](https://github.com/cspray/annotated-container/tree/v0.4.0) - 2022-05-08
+
+> This version introduces many backwards breaking changes. This release also represents a significant step towards a stable API. This level of BC break is not expected in future versions.
 
 ### Added
 
 - Added the `cspray/typiphy` package.
 - Added a new `#[Inject]` Attribute with the flexibility to handle use cases from previous Inject* Attributes.
 - Added a `ParameterStore` that allows injecting arbitrary values at runtime with `#[Inject]`.
+- Added an `AutowireableFactory` interface that allows for creating arbitrary objects and defining parameters that cannot be autowired. This interface is intended to allow for the autowire object construction without depending on a Container directly.
+- Added new `compiler()` and `containerFactory()` functions for easily interacting with the library in the most common scenarios.
+- Added a new `#[Configuration]` Attribute that allows properties to have arbitrary values populated with `#[Inject]`.
 
 ### Changed
 
@@ -22,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Many internal classes were removed to simplify static parsing process. The static parsing is now largely identifying which classes, methods, or parameters to target for reflection when the container is created.
 - Removed the `AttributeType` enum, where it was used was removed from the internal namespace and there's no valid use case anymore.
 - Removed the `#[InjectScalar]`, `#[InjectService]`, and `#[InjectEnv]`. All uses can now be covered by the new `#[Inject]` Attribute.
+- Removed the `AurynContainerFactory` from this library. Install `cspray/annotated-container-auryn` to continue using this backing container.
 
 ## [0.3.0](https://github.com/cspray/annotated-container/tree/v0.3.0) - 2022-04-16
 

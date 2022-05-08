@@ -2,7 +2,7 @@
 
 [![Unit Tests](https://github.com/cspray/annotated-container/actions/workflows/php.yml/badge.svg)](https://github.com/cspray/annotated-container/actions/workflows/php.yml)
 
-A Dependency Injection framework for creating an autowired, feature-rich, [PSR-11](https://github.com/cspray/annotated-container-dummy-apps) compatible Container using PHP 8 Attributes!
+A Dependency Injection framework for creating an autowired, feature-rich, [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible Container using PHP 8 Attributes!
 
 - Designate an interface as a Service and easily configure which concrete implementations to use
 - Delegate service construction to a factory
