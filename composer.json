@@ -27,8 +27,9 @@
       "Cspray\\AnnotatedContainer\\": "src"
     },
     "files": [
+      "src/Function/auto-wired-parameters.php",
       "src/Function/definitions.php",
-      "src/Function/auto-wired-parameters.php"
+      "src/Function/user-api.php"
     ]
   },
   "autoload-dev": {
@@ -37,6 +38,7 @@
     }
   },
   "suggest": {
-    "cspray/annotated-container-auryn": "An implementation that uses Auryn as the backing Container!"
+    "cspray/annotated-container-auryn": "An implementation that uses Auryn as the backing Container!",
+    "cspray/annotated-container-php-di": "An implementation that uses PHP-DI as the backing Container!"
   }
 }
