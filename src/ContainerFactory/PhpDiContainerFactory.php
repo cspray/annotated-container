@@ -2,10 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
-use Auryn\Injector;
+use DI\Container;
 
 // @codeCoverageIgnoreStart
-if (!class_exists(Injector::class)) {
+if (!class_exists(Container::class)) {
     throw new \RuntimeException("To enable the PhpDiContainerFactory please install php-di/php-di 7+!");
 }
 // @codeCoverageIgnoreEnd
@@ -24,7 +24,6 @@ use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
 use Cspray\AnnotatedContainer\ParameterStore;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\Typiphy\ObjectType;
-use DI\Container;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use function DI\autowire;
