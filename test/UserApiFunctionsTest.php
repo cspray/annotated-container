@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Exception\ContainerFactoryNotFoundException;
 use PHPUnit\Framework\TestCase;
 
 class UserApiFunctionsTest extends TestCase {
@@ -17,12 +16,6 @@ class UserApiFunctionsTest extends TestCase {
         $compiler = compiler(sys_get_temp_dir());
 
         $this->assertInstanceOf(CacheAwareContainerDefinitionCompiler::class, $compiler);
-    }
-
-    public function testContainerFactoryWithNoBackingContainerThrowsException() {
-        $this->expectException(ContainerFactoryNotFoundException::class);
-        $this->expectExceptionMessage('There is no backing Container library found. Please run "composer suggests" for supported containers.');
-        containerFactory();
     }
 
 }

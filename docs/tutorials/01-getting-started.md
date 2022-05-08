@@ -4,6 +4,8 @@ Thanks for choosing to learn more about AnnotatedContainer! In this document we'
 
 Our requirements have some external code executed when a blob is stored or retrieved. We decide to introduce a new abstract and concrete Service that will emit blob storage events. Our existing Service will become dependent on this new Service. Let's start digging into some code!
 
+> The rest of this guide assumes you've installed a backing container library! Please check out the README Installation for more details.
+
 ## Abstract Services
 
 ```php

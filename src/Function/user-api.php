@@ -2,7 +2,11 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Auryn\Injector;
+use Cspray\AnnotatedContainer\ContainerFactory\AurynContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\Exception\ContainerFactoryNotFoundException;
+use DI\Container;
 
 function compiler(string $cacheDir = null) : ContainerDefinitionCompiler {
     if (is_null($cacheDir)) {
@@ -13,9 +17,9 @@ function compiler(string $cacheDir = null) : ContainerDefinitionCompiler {
 }
 
 function containerFactory() : ContainerFactory {
-    if (class_exists(AurynContainerFactory::class)) {
+    if (class_exists(Injector::class)) {
         return new AurynContainerFactory();
-    } else if (class_exists(PhpDiContainerFactory::class)) {
+    } else if (class_exists(Container::class)) {
         return new PhpDiContainerFactory();
     } else {
         throw new ContainerFactoryNotFoundException('There is no backing Container library found. Please run "composer suggests" for supported containers.');
