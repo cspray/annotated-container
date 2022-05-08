@@ -23,13 +23,13 @@ composer require cspray/annotated-container
 AnnotatedContainer does not provide any of the actual Container functionality. We provide Attributes and definition objects that can determine how actual implementations are intended to be setup. AnnotatedContainer currently supports the following backing Containers:
 
 ```
-composer require cspray/annotated-container-auryn
+composer require rdlowrey/auryn
 ```
 
 Uses the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) Injector.
 
 ```
-composer require cspray/annotated-container-php-di
+composer require php-di/php-di
 ```
 
 Uses the [php-di/php-di](https://github.com/php-di/php-di) Container.

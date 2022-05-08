@@ -19,8 +19,10 @@
   },
   "require-dev": {
     "cspray/annotated-container-dummy-apps": "0.9.1",
+    "mikey179/vfsstream": "^1.6",
     "phpunit/phpunit": "^9.5",
-    "mikey179/vfsstream": "^1.6"
+    "rdlowrey/auryn": "^1.4",
+    "php-di/php-di": "v7.x-dev"
   },
   "autoload": {
     "psr-4": {
@@ -39,7 +41,7 @@
     }
   },
   "suggest": {
-    "cspray/annotated-container-auryn": "An implementation that uses Auryn as the backing Container!",
-    "cspray/annotated-container-php-di": "An implementation that uses PHP-DI as the backing Container!"
+    "rdlowrey/auryn": "Install to use the Auryn\\Injector as the backing container.",
+    "php-di/php-di": "Install to use the DI\\Container as the backing container."
   }
 }
