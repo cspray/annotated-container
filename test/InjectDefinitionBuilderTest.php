@@ -10,6 +10,10 @@ use function Cspray\Typiphy\stringType;
 
 class InjectDefinitionBuilderTest extends TestCase {
 
+    protected function setUp() : void {
+        $this->markTestSkipped('This test requires a Fixture with Inject attributes');
+    }
+
     public function testInjectDefinitionWithNoMethodOrPropertyThrowsException() {
         $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
 

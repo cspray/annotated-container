@@ -46,6 +46,7 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
     }
 
     public function testSingleAliasResolvedHasNoViolations() {
+        $this->markTestSkipped('This test requires a Fixture with an alias.');
         $containerDefinition = $this->containerDefinitionCompiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyApps\DummyAppUtils::getRootDir() . '/SimpleServices')->build()
         );

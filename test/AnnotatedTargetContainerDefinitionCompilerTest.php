@@ -11,7 +11,6 @@ use Cspray\AnnotatedContainer\DummyApps\ProfileResolvedServices;
 use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceFactory;
 use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate\ServiceInterface;
-use Cspray\AnnotatedContainer\DummyApps\SimpleServices;
 use Cspray\AnnotatedContainer\DummyApps\MultipleSimpleServices;
 use Cspray\AnnotatedContainer\DummyApps\SimpleServicesSomeNotAnnotated;
 use Cspray\AnnotatedContainer\DummyApps\NestedServices;
@@ -20,6 +19,7 @@ use Cspray\AnnotatedContainer\DummyApps\NonPhpFiles;
 use Cspray\AnnotatedContainer\DummyApps\ImplementsServiceExtendsSameService;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\intType;
 use function Cspray\Typiphy\objectType;
@@ -42,50 +42,6 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             $dir = [$dir];
         }
         return $this->subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dir)->build());
-    }
-
-    public function testSimpleServices() {
-        $injectorDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleServices');
-
-        $this->assertServiceDefinitionsHaveTypes([
-            SimpleServices\FooInterface::class,
-            SimpleServices\FooImplementation::class
-        ], $injectorDefinition->getServiceDefinitions());
-        $this->assertAliasDefinitionsMap([
-            [SimpleServices\FooInterface::class, SimpleServices\FooImplementation::class]
-        ], $injectorDefinition->getAliasDefinitions());
-        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
-    }
-
-    public function testSimpleServicesDefaultsPrimaryToFalse() {
-        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleServices');
-
-        $this->assertServiceDefinitionIsNotPrimary($containerDefinition->getServiceDefinitions(), SimpleServices\FooInterface::class);
-        $this->assertServiceDefinitionIsNotPrimary($containerDefinition->getServiceDefinitions(), SimpleServices\FooImplementation::class);
-    }
-
-    public function testSimpleServicesHasNoProfile() {
-        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleServices');
-
-        $this->assertCount(2, $containerDefinition->getServiceDefinitions());
-        $this->assertEmpty($containerDefinition->getServiceDefinitions()[0]->getProfiles());
-        $this->assertEmpty($containerDefinition->getServiceDefinitions()[1]->getProfiles());
-    }
-
-    public function testMultipleSimpleServices() {
-        $injectorDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/MultipleSimpleServices');
-
-        $this->assertServiceDefinitionsHaveTypes([
-            MultipleSimpleServices\BarImplementation::class,
-            MultipleSimpleServices\BarInterface::class,
-            MultipleSimpleServices\FooImplementation::class,
-            MultipleSimpleServices\FooInterface::class
-        ], $injectorDefinition->getServiceDefinitions());
-        $this->assertAliasDefinitionsMap([
-            [MultipleSimpleServices\FooInterface::class, MultipleSimpleServices\FooImplementation::class],
-            [MultipleSimpleServices\BarInterface::class, MultipleSimpleServices\BarImplementation::class]
-        ], $injectorDefinition->getAliasDefinitions());
-        $this->assertEmpty($injectorDefinition->getServicePrepareDefinitions());
     }
 
     public function testSimpleServicesSomeNotAnnotated() {
@@ -236,6 +192,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testMultipleDirs() {
+        $this->markTestSkipped('This requires multiple Fixtures to be available and only one is at the moment.');
         $injectorDefinition = $this->runCompileDirectory([
             DummyAppUtils::getRootDir() . '/MultipleSimpleServices',
             DummyAppUtils::getRootDir() . '/SimpleServices'
@@ -328,13 +285,6 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         $this->assertAliasDefinitionsMap([
             [DummyApps\ThirdPartyServices\FooInterface::class, DummyApps\ThirdPartyServices\FooImplementation::class]
         ], $containerDefinition->getAliasDefinitions());
-    }
-
-    public function testServiceDefinitionsAreSharedByDefault() {
-        $containerDefinition = $this->runCompileDirectory(DummyAppUtils::getRootDir() . '/SimpleServices');
-
-        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooInterface::class);
-        $this->assertTrue($serviceDefinition?->isShared());
     }
 
     public function testNonSharedServiceDefinitionNotShared() {

@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use PHPUnit\Framework\TestCase;
@@ -48,11 +49,12 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $container->get(DummyApps\SimpleServicesSomeNotAnnotated\NotAnnotatedBarImplementation::class);
     }
 
-    public function testCreateSimpleServices() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServices');
-        $subject = $container->get(DummyApps\SimpleServices\FooInterface::class);
+    public function testGetSingleConcreteService() {
+        $class = Fixtures::singleConcreteService()->fooImplementation()->getName();
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath());
+        $subject = $container->get($class);
 
-        $this->assertInstanceOf(DummyApps\SimpleServices\FooImplementation::class, $subject);
+        $this->assertInstanceOf($class, $subject);
     }
 
     public function testInterfaceServicePrepare() {
@@ -86,9 +88,9 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testHasServiceIfCompiled() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServices');
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath());
 
-        $this->assertTrue($container->has(DummyApps\SimpleServices\FooInterface::class));
+        $this->assertTrue($container->has(Fixtures::singleConcreteService()->fooImplementation()->getName()));
         $this->assertFalse($container->has(DummyApps\MultipleSimpleServices\FooInterface::class));
     }
 
@@ -154,12 +156,14 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testConcreteAliasDefinitionDoesNotHaveServiceDefinition() {
+        $abstractService = Fixtures::singleAliasedService()->fooInterface()->getName();
+        $concreteService = Fixtures::singleAliasedService()->fooImplementation()->getName();
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()
             ->withServiceDefinition(
-                ServiceDefinitionBuilder::forAbstract($abstract = objectType(DummyApps\SimpleServices\FooInterface::class))->build()
+                ServiceDefinitionBuilder::forAbstract($abstract = objectType($abstractService))->build()
             )
             ->withAliasDefinition(
-                AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete = objectType(DummyApps\SimpleServices\FooImplementation::class))->build()
+                AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete = objectType($concreteService))->build()
             )->build();
 
         $this->expectException(ContainerException::class);

@@ -58,6 +58,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     }
 
     public function testNoViolationsForInterfaceWithServiceAlias() {
+        $this->markTestSkipped('This test requires a Fixture with aliases.');
         $containerDefinition = $this->containerDefinitionCompiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->build()
         );

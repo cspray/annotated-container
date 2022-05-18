@@ -11,6 +11,7 @@
       "role": "Project Maintainer"
     }
   ],
+  "repositories": [{"type": "path", "url":  "../annotated-container-dummy-apps"}],
   "require": {
     "php": "^8.1",
     "cspray/typiphy": "^0.2",
@@ -18,7 +19,7 @@
     "nikic/php-parser": "^4.10"
   },
   "require-dev": {
-    "cspray/annotated-container-dummy-apps": "0.9.1",
+    "cspray/annotated-container-dummy-apps": "dev-main",
     "mikey179/vfsstream": "^1.6",
     "phpunit/phpunit": "^9.5",
     "rdlowrey/auryn": "^1.4",
@@ -37,11 +38,16 @@
   "autoload-dev": {
     "psr-4": {
       "Cspray\\AnnotatedContainer\\": "test",
-      "Acme\\AnnotatedContainer\\": "examples/readme-quick-start"
+      "Cspray\\AnnotatedContainerFixture\\": "fixture_src"
     }
   },
   "suggest": {
     "rdlowrey/auryn": "Install to use the Auryn\\Injector as the backing container.",
     "php-di/php-di": "Install to use the DI\\Container as the backing container."
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": false
+    }
   }
 }
