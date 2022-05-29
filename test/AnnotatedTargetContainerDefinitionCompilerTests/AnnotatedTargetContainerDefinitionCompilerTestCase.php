@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTe
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\StaticAnalysisAnnotatedTargetParser;
@@ -15,24 +16,12 @@ abstract class AnnotatedTargetContainerDefinitionCompilerTestCase extends TestCa
 
     use ContainerDefinitionAssertionsTrait;
 
+    protected ContainerDefinition $subject;
+
     /**
      * @return Fixture[]|Fixture
      */
     abstract protected function getFixtures() : array|Fixture;
-
-    abstract protected function getExpectedServiceDefinitionCount() : int;
-
-    abstract protected function getExpectedAliasDefinitionCount() : int;
-
-    abstract protected function getExpectedServiceDelegateDefinitionCount() : int;
-
-    abstract protected function getExpectedServicePrepareDefinitionCount() : int;
-
-    abstract protected function getExpectedInjectDefinitionCount() : int;
-
-    abstract protected function getExpectedConfigurationDefinitionCount() : int;
-
-    protected ContainerDefinition $subject;
 
     protected function setUp() : void {
         $compiler = new AnnotatedTargetContainerDefinitionCompiler(
@@ -49,32 +38,21 @@ abstract class AnnotatedTargetContainerDefinitionCompilerTestCase extends TestCa
             $dirs[] = $fixture->getPath();
         }
 
-        $this->subject = $compiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dirs)->build());
+        $builder = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dirs);
+        $consumer = $this->getContainerDefinitionBuilderContextConsumer();
+        if (!is_null($consumer)) {
+            $builder = $builder->withContainerDefinitionBuilderContextConsumer($consumer);
+        }
+
+        $this->subject = $compiler->compile($builder->build());
     }
 
-    final public function testServiceDefinitionsCount() : void {
-        $this->assertCount($this->getExpectedServiceDefinitionCount(), $this->subject->getServiceDefinitions());
+    protected function getContainerDefinitionBuilderContextConsumer() : ?ContainerDefinitionBuilderContextConsumer {
+        return null;
     }
 
-    final public function testAliasDefinitionsCount() : void {
-        $this->assertCount($this->getExpectedAliasDefinitionCount(), $this->subject->getAliasDefinitions());
+    final protected function getSubject() : ContainerDefinition {
+        return $this->subject;
     }
-
-    final public function testServiceDelegateDefinitionsCount() : void {
-        $this->assertCount($this->getExpectedServiceDelegateDefinitionCount(), $this->subject->getServiceDelegateDefinitions());
-    }
-
-    final public function testServicePrepareDefinitionsCount() : void {
-        $this->assertCount($this->getExpectedServicePrepareDefinitionCount(), $this->subject->getServicePrepareDefinitions());
-    }
-
-    final public function testInjectDefinitionsCount() : void {
-        $this->assertCount($this->getExpectedInjectDefinitionCount(), $this->subject->getInjectDefinitions());
-    }
-
-    final public function testConfigurationDefinitionsCount() : void {
-        $this->assertCount($this->getExpectedConfigurationDefinitionCount(), $this->subject->getConfigurationDefinitions());
-    }
-
 
 }

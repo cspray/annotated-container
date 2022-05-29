@@ -4,18 +4,15 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
 class InjectDefinitionBuilderTest extends TestCase {
 
-    protected function setUp() : void {
-        $this->markTestSkipped('This test requires a Fixture with Inject attributes');
-    }
-
     public function testInjectDefinitionWithNoMethodOrPropertyThrowsException() {
-        $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
         $this->expectException(DefinitionBuilderException::class);
         $this->expectExceptionMessage('A method or property to inject into MUST be provided before building an InjectDefinition.');
@@ -23,7 +20,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testInjectDefinitionWithMethodAndPropertyThrowsException() {
-        $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
         $builder = $builder->withMethod('does-not-matter', stringType(), 'else')->withProperty(stringType(), 'else');
 
@@ -33,7 +30,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testInjectDefinitionWithoutValueThrowsException() {
-        $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->serviceScalarUnionPrepareInjector());
 
         $builder = $builder->withMethod('does-not-matter', stringType(), 'else');
 
@@ -43,37 +40,37 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testInjectDefinitionWithMethodHasDifferentObject() {
-        $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
         $this->assertNotSame($builder, $builder->withMethod('foo', stringType(), 'baz'));
     }
 
     public function testInjectDefinitionWithPropertyHasDifferentObject() {
-        $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
         $this->assertNotSame($builder, $builder->withProperty(stringType(), 'bar'));
     }
 
     public function testInjectDefinitionWithValueHasDifferentObject() {
-        $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
         $this->assertNotSame($builder, $builder->withValue('foo'));
     }
 
     public function testInjectDefinitionWithStoreHasDifferentObject() {
-        $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
         $this->assertNotSame($builder, $builder->withStore('foo-store'));
     }
 
     public function testInjectDefinitionWithProfilesHasDifferentObject() {
-        $builder = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class));
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
         $this->assertNotSame($builder, $builder->withProfiles('profile'));
     }
 
     public function testValidMethodInjectDefinitionGetTargetIdentifierIsMethod() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->build();
@@ -82,7 +79,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidMethodInjectDefinitionGetTargetIdentifierIsProperty() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->build();
@@ -91,7 +88,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidMethodInjectDefinitionGetTargetIdentifierGetName() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->build();
@@ -100,7 +97,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidMethodInjectDefinitionTargetIdentifierGetValue() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->build();
@@ -109,16 +106,16 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidMethodInjectDefinitionTargetIdentifierGetClass() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->build();
 
-        $this->assertSame(objectType(DummyApps\SimpleServices\FooImplementation::class), $injectDefinition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectPrepareServices()->prepareInjector(), $injectDefinition->getTargetIdentifier()->getClass());
     }
 
     public function testValidMethodInjectDefinitionGetType() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', $expectedType = stringType(), 'paramName')
             ->withValue('foobar')
             ->build();
@@ -127,7 +124,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidMethodInjectDefinitionGetValue() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->build();
@@ -136,7 +133,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidMethodInjectDefinitionWithNoProfilesGetProfiles() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->build();
@@ -145,7 +142,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidMethodInjectDefinitionWithOneProfileGetProfiles() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->withProfiles('foo')
@@ -155,7 +152,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidMethodInjectDefinitionWithAdditionalProfilesGetProfiles() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleServices\FooImplementation::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withMethod('methodName', stringType(), 'paramName')
             ->withValue('foobar')
             ->withProfiles('foo', 'bar', 'baz')
@@ -165,7 +162,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidPropertyInjectDefinitionGetTargetIdentifierIsMethod() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withProperty(stringType(), 'key')
             ->withValue('my-api-key')
             ->build();
@@ -174,7 +171,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidPropertyInjectDefinitionGetTargetIdentifierIsProperty() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withProperty(stringType(), 'key')
             ->withValue('my-api-key')
             ->build();
@@ -183,7 +180,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidPropertyInjectDefinitionGetTargetIdentifierGetName() {
-        $injectDefinition = InjectDefinitionBuilder::forService(objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withProperty(stringType(), 'key')
             ->withValue('my-api-key')
             ->build();
@@ -192,7 +189,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidPropertyInjectDefinitionGetTargetIdentifierGetClass() {
-        $injectDefinition = InjectDefinitionBuilder::forService($classType = objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+        $injectDefinition = InjectDefinitionBuilder::forService($classType = Fixtures::injectPrepareServices()->prepareInjector())
             ->withProperty(stringType(), 'key')
             ->withValue('my-api-key')
             ->build();
@@ -201,7 +198,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     }
 
     public function testValidPropertyInjectDefinitionGetTargetIdentifierGetMethod() {
-        $injectDefinition = InjectDefinitionBuilder::forService($classType = objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
             ->withProperty(stringType(), 'key')
             ->withValue('my-api-key')
             ->build();

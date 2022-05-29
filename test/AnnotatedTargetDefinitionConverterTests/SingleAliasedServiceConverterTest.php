@@ -12,7 +12,7 @@ use function Cspray\Typiphy\objectType;
 class SingleAliasedServiceConverterTest extends AnnotatedTargetDefinitionConverterTestCase {
 
     private function getClass() : string {
-        return Fixtures::singleAliasedService()->fooInterface()->getName();
+        return Fixtures::implicitAliasedServices()->fooInterface()->getName();
     }
 
     protected function getSubjectTarget(): AnnotatedTarget {

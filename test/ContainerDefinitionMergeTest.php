@@ -25,9 +25,8 @@ class ContainerDefinitionMergeTest extends TestCase {
     }
 
     public function testMergeHasCorrectServiceDefinitions() {
-        $this->markTestSkipped('This test requires a Fixture with aliases.');
-        $serviceDefinition1 = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\SimpleServices\FooInterface::class))->build();
-        $serviceDefinition2 = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\SimpleServices\FooImplementation::class))->build();
+        $serviceDefinition1 = ServiceDefinitionBuilder::forAbstract(Fixtures::implicitAliasedServices()->fooInterface())->build();
+        $serviceDefinition2 = ServiceDefinitionBuilder::forConcrete(Fixtures::implicitAliasedServices()->fooImplementation())->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()->withServiceDefinition($serviceDefinition1)->build();
         $container2 = ContainerDefinitionBuilder::newDefinition()->withServiceDefinition($serviceDefinition2)->build();
@@ -35,8 +34,8 @@ class ContainerDefinitionMergeTest extends TestCase {
         $subject = $container1->merge($container2);
 
         $this->assertServiceDefinitionsHaveTypes([
-            DummyApps\SimpleServices\FooInterface::class,
-            DummyApps\SimpleServices\FooImplementation::class
+            Fixtures::implicitAliasedServices()->fooInterface()->getName(),
+            Fixtures::implicitAliasedServices()->fooImplementation()->getName()
         ], $subject->getServiceDefinitions());
     }
 
@@ -54,8 +53,8 @@ class ContainerDefinitionMergeTest extends TestCase {
     }
 
     public function testMergeHasCorrectAliasDefinitions() {
-        $fooServiceDefinition = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\MultipleAliasResolution\FooInterface::class))->build();
-        $bazServiceDefinition = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\MultipleAliasResolution\BazImplementation::class))->build();
+        $fooServiceDefinition = ServiceDefinitionBuilder::forAbstract(Fixtures::ambiguousAliasedServices()->fooInterface())->build();
+        $bazServiceDefinition = ServiceDefinitionBuilder::forConcrete(Fixtures::ambiguousAliasedServices()->bazImplementation())->build();
         $fooBazAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition->getType())->withConcrete($bazServiceDefinition->getType())->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()
@@ -64,7 +63,7 @@ class ContainerDefinitionMergeTest extends TestCase {
             ->withAliasDefinition($fooBazAliasDefinition)
             ->build();
 
-        $barServiceDefinition = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\MultipleAliasResolution\BarImplementation::class))->build();
+        $barServiceDefinition = ServiceDefinitionBuilder::forConcrete(Fixtures::ambiguousAliasedServices()->barImplementation())->build();
         $fooBarAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition->getType())->withConcrete($barServiceDefinition->getType())->build();
 
         $container2 = ContainerDefinitionBuilder::newDefinition()
@@ -75,14 +74,14 @@ class ContainerDefinitionMergeTest extends TestCase {
         $subject = $container1->merge($container2);
 
         $this->assertAliasDefinitionsMap([
-            [DummyApps\MultipleAliasResolution\FooInterface::class, DummyApps\MultipleAliasResolution\BazImplementation::class],
-            [DummyApps\MultipleAliasResolution\FooInterface::class, DummyApps\MultipleAliasResolution\BarImplementation::class]
+            [Fixtures::ambiguousAliasedServices()->fooInterface(), Fixtures::ambiguousAliasedServices()->bazImplementation()],
+            [Fixtures::ambiguousAliasedServices()->fooInterface(), Fixtures::ambiguousAliasedServices()->barImplementation()]
         ], $subject->getAliasDefinitions());
     }
 
     public function testMergeDuplicateAliasDefinitionThrowsException() {
-        $fooServiceDefinition = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\MultipleAliasResolution\FooInterface::class))->build();
-        $bazServiceDefinition = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\MultipleAliasResolution\BazImplementation::class))->build();
+        $fooServiceDefinition = ServiceDefinitionBuilder::forAbstract(Fixtures::ambiguousAliasedServices()->fooInterface())->build();
+        $bazServiceDefinition = ServiceDefinitionBuilder::forConcrete(Fixtures::ambiguousAliasedServices()->bazImplementation())->build();
         $fooBazAliasDefinition = AliasDefinitionBuilder::forAbstract($fooServiceDefinition->getType())->withConcrete($bazServiceDefinition->getType())->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()
@@ -96,17 +95,17 @@ class ContainerDefinitionMergeTest extends TestCase {
             ->build();
 
         $this->expectException(ContainerDefinitionMergeException::class);
-        $this->expectExceptionMessage('The ContainerDefinition already has an AliasDefinition for ' . DummyApps\MultipleAliasResolution\FooInterface::class . ' aliased to ' . DummyApps\MultipleAliasResolution\BazImplementation::class . '.');
+        $this->expectExceptionMessage('The ContainerDefinition already has an AliasDefinition for ' . Fixtures::ambiguousAliasedServices()->fooInterface() . ' aliased to ' . Fixtures::ambiguousAliasedServices()->bazImplementation() . '.');
         $container1->merge($container2);
     }
 
     public function testMergeHasCorrectServicePrepareDefinitions() {
-        $interfaceServiceDefinition = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\InterfaceServicePrepare\FooInterface::class))->build();
+        $interfaceServiceDefinition = ServiceDefinitionBuilder::forAbstract(Fixtures::classOverridesPrepareServices()->fooInterface())->build();
         $interfaceServicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($interfaceServiceDefinition->getType(), 'setBar')->build();
 
         $container1 = ContainerDefinitionBuilder::newDefinition()->withServicePrepareDefinition($interfaceServicePrepareDefinition)->build();
 
-        $classServiceDefinition = ServiceDefinitionBuilder::forConcrete(objectType(DummyApps\ClassOverridesInterfaceServicePrepare\FooImplementation::class))->build();
+        $classServiceDefinition = ServiceDefinitionBuilder::forConcrete(Fixtures::classOverridesPrepareServices()->fooImplementation())->build();
         $classServicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($classServiceDefinition->getType(), 'setBar')->build();
 
         $container2 = ContainerDefinitionBuilder::newDefinition()->withServicePrepareDefinition($classServicePrepareDefinition)->build();
@@ -114,25 +113,25 @@ class ContainerDefinitionMergeTest extends TestCase {
         $subject = $container1->merge($container2);
 
         $this->assertServicePrepareTypes([
-            [DummyApps\InterfaceServicePrepare\FooInterface::class, 'setBar'],
-            [DummyApps\ClassOverridesInterfaceServicePrepare\FooImplementation::class, 'setBar']
+            [Fixtures::classOverridesPrepareServices()->fooInterface(), 'setBar'],
+            [Fixtures::classOverridesPrepareServices()->fooImplementation(), 'setBar']
         ], $subject->getServicePrepareDefinitions());
     }
 
     public function testMergeHasCorrectServiceDelegateDefinitions() {
         $container1 = ContainerDefinitionBuilder::newDefinition()->build();
 
-        $serviceDefinition = ServiceDefinitionBuilder::forAbstract(objectType(DummyApps\ServiceDelegate\ServiceInterface::class))->build();
+        $serviceDefinition = ServiceDefinitionBuilder::forAbstract(Fixtures::delegatedService()->serviceInterface())->build();
         $serviceDelegateDefinition = ServiceDelegateDefinitionBuilder::forService($serviceDefinition->getType())
-            ->withDelegateMethod(objectType(DummyApps\ServiceDelegate\ServiceFactory::class), 'createService')
+            ->withDelegateMethod(Fixtures::delegatedService()->serviceFactory(), 'createService')
             ->build();
         $container2 = ContainerDefinitionBuilder::newDefinition()->withServiceDelegateDefinition($serviceDelegateDefinition)->build();
 
         $subject = $container1->merge($container2);
 
         $this->assertCount(1, $subject->getServiceDelegateDefinitions());
-        $this->assertSame(DummyApps\ServiceDelegate\ServiceInterface::class, $subject->getServiceDelegateDefinitions()[0]->getServiceType()->getName());
-        $this->assertSame(DummyApps\ServiceDelegate\ServiceFactory::class, $subject->getServiceDelegateDefinitions()[0]->getDelegateType()->getName());
+        $this->assertSame(Fixtures::delegatedService()->serviceInterface()->getName(), $subject->getServiceDelegateDefinitions()[0]->getServiceType()->getName());
+        $this->assertSame(Fixtures::delegatedService()->serviceFactory()->getName(), $subject->getServiceDelegateDefinitions()[0]->getDelegateType()->getName());
         $this->assertSame('createService', $subject->getServiceDelegateDefinitions()[0]->getDelegateMethod());
     }
 

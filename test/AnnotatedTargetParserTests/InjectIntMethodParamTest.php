@@ -6,11 +6,12 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class InjectIntMethodParamTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
-        return [DummyAppUtils::getRootDir() . '/InjectIntMethodParam'];
+        return [Fixtures::injectConstructorServices()->getPath()];
     }
 
     /**
@@ -18,14 +19,14 @@ class InjectIntMethodParamTest extends AnnotatedTargetParserTestCase {
      */
     private function getExpectedTargets() : array {
         return $this->getAnnotatedTargetsForTargetReflectParameter(
-              DummyApps\InjectIntMethodParam\FooImplementation::class,
-            'setSomething',
-            'value'
+              Fixtures::injectConstructorServices()->injectIntService()->getName(),
+            '__construct',
+            'meaningOfLife'
         );
     }
 
     public function testTargetCount() {
-        $this->assertCount(3, $this->targets);
+        $this->assertCount(24, $this->targets);
     }
 
     public function testExpectedTargetCount() {

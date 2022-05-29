@@ -4,16 +4,15 @@ namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
-use function Cspray\Typiphy\objectType;
 
 class AbstractSharedServicesTest extends AnnotatedTargetDefinitionConverterTestCase {
 
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(AttributeType::Service, new ReflectionClass(
-            DummyApps\AbstractSharedServices\AbstractFoo::class
+            Fixtures::abstractClassAliasedService()->fooAbstract()->getName()
         ));
     }
 
@@ -22,7 +21,7 @@ class AbstractSharedServicesTest extends AnnotatedTargetDefinitionConverterTestC
     }
 
     public function testGetServiceDefinitionType() {
-        $this->assertSame(objectType(DummyApps\AbstractSharedServices\AbstractFoo::class), $this->definition->getType());
+        $this->assertSame(Fixtures::abstractClassAliasedService()->fooAbstract(), $this->definition->getType());
     }
 
     public function testServiceIsAbstract() {

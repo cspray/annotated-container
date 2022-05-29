@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 class AliasDefinitionBuilderTest extends TestCase {
 
     public function testWithConcreteImmutableBuilder() {
-        $abstract = Fixtures::singleAliasedService()->fooInterface();
-        $concrete = Fixtures::singleAliasedService()->fooImplementation();
+        $abstract = Fixtures::implicitAliasedServices()->fooInterface();
+        $concrete = Fixtures::implicitAliasedServices()->fooImplementation();
         $builder1 = AliasDefinitionBuilder::forAbstract($abstract);
         $builder2 = $builder1->withConcrete($concrete);
 
@@ -17,8 +17,8 @@ class AliasDefinitionBuilderTest extends TestCase {
     }
 
     public function testWithConcreteReturnsCorrectServiceDefinitions() {
-        $abstract = Fixtures::singleAliasedService()->fooInterface();
-        $concrete = Fixtures::singleAliasedService()->fooImplementation();
+        $abstract = Fixtures::implicitAliasedServices()->fooInterface();
+        $concrete = Fixtures::implicitAliasedServices()->fooImplementation();
         $aliasDefinition = AliasDefinitionBuilder::forAbstract($abstract)
             ->withConcrete($concrete)
             ->build();

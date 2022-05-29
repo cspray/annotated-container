@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\intType;
 use function Cspray\Typiphy\objectType;
@@ -15,7 +16,7 @@ class InjectBoolMethodParamTest extends AnnotatedTargetDefinitionConverterTestCa
     protected function getSubjectTarget() : AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionParameter([DummyApps\InjectBoolMethodParam\FooImplementation::class, '__construct'],
+            new \ReflectionParameter([Fixtures::injectConstructorServices()->injectBoolService()->getName(), '__construct'],
             'flag'
         ));
     }
@@ -25,7 +26,7 @@ class InjectBoolMethodParamTest extends AnnotatedTargetDefinitionConverterTestCa
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectBoolMethodParam\FooImplementation::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectBoolService(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -41,7 +42,7 @@ class InjectBoolMethodParamTest extends AnnotatedTargetDefinitionConverterTestCa
     }
 
     public function testGetValue() {
-        $this->assertTrue($this->definition->getValue());
+        $this->assertFalse($this->definition->getValue());
     }
 
     public function testGetStore() {

@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\stringType;
 
@@ -14,8 +15,7 @@ class SimpleUserConfigurationTest extends AnnotatedTargetDefinitionConverterTest
     protected function getSubjectTarget() : AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionProperty(DummyApps\SimpleConfiguration\MyConfig::class, 'user'),
-            0
+            new \ReflectionProperty(Fixtures::configurationServices()->myConfig()->getName(), 'user'),
         );
     }
 
@@ -24,7 +24,7 @@ class SimpleUserConfigurationTest extends AnnotatedTargetDefinitionConverterTest
     }
 
     public function testGetTargetReflectionClass() {
-        $this->assertSame(DummyApps\SimpleConfiguration\MyConfig::class, $this->definition->getTargetIdentifier()->getClass()->getName());
+        $this->assertSame(Fixtures::configurationServices()->myConfig()->getName(), $this->definition->getTargetIdentifier()->getClass()->getName());
     }
 
     public function testGetTargetReflectionName() {

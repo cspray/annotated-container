@@ -2,14 +2,13 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
-use Cspray\AnnotatedContainer\DummyApps;
-use function Cspray\Typiphy\objectType;
 
 class ConfigurationDefinitionBuilderTest extends TestCase {
 
     public function testWithNameDifferentObject() {
-        $configDefinition = ConfigurationDefinitionBuilder::forClass(objectType(DummyApps\SimpleConfiguration\MyConfig::class));
+        $configDefinition = ConfigurationDefinitionBuilder::forClass(Fixtures::configurationServices()->myConfig());
 
         $a = $configDefinition->withName('foo');
         $b = $a->withName('bar');
@@ -18,13 +17,13 @@ class ConfigurationDefinitionBuilderTest extends TestCase {
     }
 
     public function testForServiceBuild() {
-        $configurationDefinition = ConfigurationDefinitionBuilder::forClass($configType = objectType(DummyApps\SimpleConfiguration\MyConfig::class))->build();
+        $configurationDefinition = ConfigurationDefinitionBuilder::forClass(Fixtures::configurationServices()->myConfig())->build();
 
-        $this->assertSame($configType, $configurationDefinition->getClass());
+        $this->assertSame(Fixtures::configurationServices()->myConfig(), $configurationDefinition->getClass());
     }
 
     public function testWithNameBuild() {
-        $configurationDefinition = ConfigurationDefinitionBuilder::forClass(objectType(DummyApps\SimpleConfiguration\MyConfig::class))
+        $configurationDefinition = ConfigurationDefinitionBuilder::forClass(Fixtures::configurationServices()->myConfig())
             ->withName('my-config')
             ->build();
 

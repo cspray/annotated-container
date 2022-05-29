@@ -8,6 +8,7 @@ use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\StaticAnalysisAnnotatedTargetParser;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 
 class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
@@ -58,9 +59,8 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     }
 
     public function testNoViolationsForInterfaceWithServiceAlias() {
-        $this->markTestSkipped('This test requires a Fixture with aliases.');
         $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(DummyAppUtils::getRootDir() . '/SimpleServices')->build()
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::implicitAliasedServices()->getPath())->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 

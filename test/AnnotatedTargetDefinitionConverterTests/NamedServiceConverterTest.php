@@ -6,20 +6,21 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
 use function Cspray\Typiphy\objectType;
 
 class NamedServiceConverterTest extends AnnotatedTargetDefinitionConverterTestCase {
 
     protected function getSubjectTarget(): AnnotatedTarget {
-        return $this->getAnnotatedTarget(AttributeType::Service, new ReflectionClass(DummyApps\NamedService\FooInterface::class));
+        return $this->getAnnotatedTarget(AttributeType::Service, new ReflectionClass(Fixtures::namedServices()->fooInterface()->getName()));
     }
     public function testGetServiceDefinitionInstance() {
         $this->assertInstanceOf(ServiceDefinition::class, $this->definition);
     }
 
     public function testGetServiceDefinitionType() {
-        $this->assertSame(objectType(DummyApps\NamedService\FooInterface::class), $this->definition->getType());
+        $this->assertSame(Fixtures::namedServices()->fooInterface(), $this->definition->getType());
     }
 
     public function testServiceIsAbstract() {

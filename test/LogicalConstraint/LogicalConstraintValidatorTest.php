@@ -9,6 +9,7 @@ use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\LogicalErrorApps\NoInterfaceServiceAlias;
 use Cspray\AnnotatedContainer\StaticAnalysisAnnotatedTargetParser;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 
 class LogicalConstraintValidatorTest extends TestCase {
@@ -26,7 +27,7 @@ class LogicalConstraintValidatorTest extends TestCase {
 
     public function testValidatorRunsAllConstraints() {
         $containerDefinition = $this->containerDefinitionCompiler->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(
-            DummyAppUtils::getRootDir() . '/MultipleAliasResolution',
+            Fixtures::ambiguousAliasedServices()->getPath(),
             dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias'
         )->build());
         $violations = $this->subject->validate($containerDefinition);

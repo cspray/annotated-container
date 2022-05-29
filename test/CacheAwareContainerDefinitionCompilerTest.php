@@ -43,7 +43,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testFileDoesExistDoesNotCallCompiler() {
-        $dir = DummyAppUtils::getRootDir() . '/ProfileResolvedServices';
+        $dir = Fixtures::implicitAliasedServices()->getPath();
         $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
         );
@@ -68,7 +68,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testFailingToWriteCacheFileThrowsException() {
-        $dir = DummyAppUtils::getRootDir() . '/ProfileResolvedServices';
+        $dir = Fixtures::implicitAliasedServices()->getPath();
         $subject = new CacheAwareContainerDefinitionCompiler(
             $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
                 new StaticAnalysisAnnotatedTargetParser(),

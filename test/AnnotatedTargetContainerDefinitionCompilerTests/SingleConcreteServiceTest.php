@@ -2,81 +2,75 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests;
 
-use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceIsAbstract;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceIsConcrete;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceIsPrimary;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceIsShared;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceName;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceProfiles;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceType;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoAliasDefinitionsTrait;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoConfigurationDefinitionsTrait;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoInjectDefinitionsTrait;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class SingleConcreteServiceTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
 
+    use HasServiceDefinitionTestsTrait;
+
+    use HasNoAliasDefinitionsTrait,
+        HasNoServiceDelegateDefinitionsTrait,
+        HasNoServicePrepareDefinitionsTrait,
+        HasNoInjectDefinitionsTrait,
+        HasNoConfigurationDefinitionsTrait;
 
     protected function getFixtures() : Fixture {
         return Fixtures::singleConcreteService();
     }
 
-    protected function getExpectedServiceDefinitionCount() : int {
-        return 1;
+    protected function serviceTypeProvider() : array {
+        return [
+            [new ExpectedServiceType(Fixtures::singleConcreteService()->fooImplementation())]
+        ];
     }
 
-    protected function getExpectedAliasDefinitionCount() : int {
-        return 0;
+    protected function serviceNameProvider() : array {
+        return [
+            [new ExpectedServiceName(Fixtures::singleConcreteService()->fooImplementation(), null)]
+        ];
     }
 
-    protected function getExpectedServiceDelegateDefinitionCount() : int {
-        return 0;
+    protected function serviceIsPrimaryProvider() : array {
+        return [
+            [new ExpectedServiceIsPrimary(Fixtures::singleConcreteService()->fooImplementation(), false)]
+        ];
     }
 
-    protected function getExpectedServicePrepareDefinitionCount() : int {
-        return 0;
+    protected function serviceIsConcreteProvider() : array {
+        return [
+            [new ExpectedServiceIsConcrete(Fixtures::singleConcreteService()->fooImplementation(), true)]
+        ];
     }
 
-    protected function getExpectedInjectDefinitionCount() : int {
-        return 0;
+    protected function serviceIsAbstractProvider() : array {
+        return [
+            [new ExpectedServiceIsAbstract(Fixtures::singleConcreteService()->fooImplementation(), false)]
+        ];
     }
 
-    protected function getExpectedConfigurationDefinitionCount() : int {
-        return 0;
+    protected function serviceIsSharedProvider() : array {
+        return [
+            [new ExpectedServiceIsShared(Fixtures::singleConcreteService()->fooImplementation(), true)]
+        ];
     }
 
-    public function testServiceDefinitionType() : void {
-        $serviceDefinition = $this->getServiceDefinition($this->subject->getServiceDefinitions(), Fixtures::singleConcreteService()->fooImplementation()->getName());
-
-        $this->assertNotNull($serviceDefinition);
+    protected function serviceProfilesProvider() : array {
+        return [
+            [new ExpectedServiceProfiles(Fixtures::singleConcreteService()->fooImplementation(), [])]
+        ];
     }
-
-    public function testServiceDefinitionHasNullName() : void {
-        $serviceDefinition = $this->getServiceDefinition($this->subject->getServiceDefinitions(), Fixtures::singleConcreteService()->fooImplementation()->getName());
-
-        $this->assertNull($serviceDefinition?->getName());
-    }
-
-    public function testServiceDefinitionIsNotPrimary() : void {
-        $serviceDefinition = $this->getServiceDefinition($this->subject->getServiceDefinitions(), Fixtures::singleConcreteService()->fooImplementation()->getName());
-
-        $this->assertFalse($serviceDefinition?->isPrimary());
-    }
-
-    public function testServiceDefinitionIsConcrete() : void {
-        $serviceDefinition = $this->getServiceDefinition($this->subject->getServiceDefinitions(), Fixtures::singleConcreteService()->fooImplementation()->getName());
-
-        $this->assertTrue($serviceDefinition?->isConcrete());
-    }
-
-    public function testServiceDefinitionIsAbstract() : void {
-        $serviceDefinition = $this->getServiceDefinition($this->subject->getServiceDefinitions(), Fixtures::singleConcreteService()->fooImplementation()->getName());
-
-        $this->assertFalse($serviceDefinition?->isAbstract());
-    }
-
-    public function testServiceDefinitionIsShared() : void {
-        $serviceDefinition = $this->getServiceDefinition($this->subject->getServiceDefinitions(), Fixtures::singleConcreteService()->fooImplementation()->getName());
-
-        $this->assertTrue($serviceDefinition?->isShared());
-    }
-
-    public function testServiceDefinitionHasEmptyProfiles() : void {
-        $serviceDefinition = $this->getServiceDefinition($this->subject->getServiceDefinitions(), Fixtures::singleConcreteService()->fooImplementation()->getName());
-
-        $this->assertEmpty($serviceDefinition->getProfiles());
-    }
-
 }

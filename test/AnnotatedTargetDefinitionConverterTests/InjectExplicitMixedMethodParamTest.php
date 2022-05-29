@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\intType;
@@ -17,8 +18,8 @@ class InjectExplicitMixedMethodParamTest extends AnnotatedTargetDefinitionConver
     protected function getSubjectTarget() : AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionParameter([DummyApps\InjectExplicitMixedMethodParam\FooImplementation::class, '__construct'],
-            'val'
+            new \ReflectionParameter([Fixtures::injectConstructorServices()->injectExplicitMixedService()->getName(), '__construct'],
+            'value'
         ));
     }
 
@@ -27,7 +28,7 @@ class InjectExplicitMixedMethodParamTest extends AnnotatedTargetDefinitionConver
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectExplicitMixedMethodParam\FooImplementation::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectExplicitMixedService(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -35,7 +36,7 @@ class InjectExplicitMixedMethodParamTest extends AnnotatedTargetDefinitionConver
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('val', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('value', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetType() {
@@ -43,7 +44,7 @@ class InjectExplicitMixedMethodParamTest extends AnnotatedTargetDefinitionConver
     }
 
     public function testGetValue() {
-        $this->assertSame(8080, $this->definition->getValue());
+        $this->assertSame('whatever', $this->definition->getValue());
     }
 
     public function testGetStore() {

@@ -5,18 +5,17 @@ namespace Cspray\AnnotatedContainerFixture;
 use Cspray\Typiphy\ObjectType;
 use function Cspray\Typiphy\objectType;
 
-final class SingleAliasedServiceFixture implements Fixture {
+final class ThirdPartyServicesFixture implements Fixture {
 
     public function getPath() : string {
-        return __DIR__ . '/SingleAliasedService';
+        return __DIR__ . '/ThirdPartyServices';
     }
 
     public function fooInterface() : ObjectType {
-        return objectType(SingleAliasedService\FooInterface::class);
+        return objectType(ThirdPartyServices\FooInterface::class);
     }
 
     public function fooImplementation() : ObjectType {
-        return objectType(SingleAliasedService\FooImplementation::class);
+        return objectType(ThirdPartyServices\FooImplementation::class);
     }
-
 }

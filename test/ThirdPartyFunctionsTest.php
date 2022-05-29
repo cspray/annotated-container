@@ -48,34 +48,31 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testAbstractDefinedServiceIsAbstract() {
-        $this->markTestSkipped('This test requires a Fixture with an abstract service.');
         $context = $this->getContext();
-        service($context, objectType(DummyApps\SimpleServices\FooInterface::class));
+        service($context, Fixtures::implicitAliasedServices()->fooInterface());
 
         $containerDefinition = $context->getBuilder()->build();
-        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooInterface::class);
+        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), Fixtures::implicitAliasedServices()->fooInterface()->getName());
 
         $this->assertTrue($serviceDefinition?->isAbstract());
     }
 
     public function testAbstractDefinedServiceGetName() {
-        $this->markTestSkipped('This test requires a Fixture with an abstract service.');
         $context = $this->getContext();
-        service($context, objectType(DummyApps\SimpleServices\FooInterface::class), 'fooService');
+        service($context, Fixtures::implicitAliasedServices()->fooInterface(), 'fooService');
 
         $containerDefinition = $context->getBuilder()->build();
-        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooInterface::class);
+        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), Fixtures::implicitAliasedServices()->fooInterface()->getName());
 
         $this->assertSame('fooService', $serviceDefinition?->getName());
     }
 
     public function testAbstractDefinedServiceGetProfiles() {
-        $this->markTestSkipped('This test requires a Fixture with an abstract service.');
         $context = $this->getContext();
-        service($context, objectType(DummyApps\SimpleServices\FooImplementation::class), profiles: ['default', 'dev']);
+        service($context, Fixtures::implicitAliasedServices()->fooInterface(), profiles: ['default', 'dev']);
 
         $containerDefinition = $context->getBuilder();
-        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\SimpleServices\FooImplementation::class);
+        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), Fixtures::implicitAliasedServices()->fooInterface()->getName());
 
         $this->assertSame(['default', 'dev'], $serviceDefinition->getProfiles());
     }
@@ -101,49 +98,48 @@ class ThirdPartyFunctionsTest extends TestCase {
     }
 
     public function testAddAliasDefinition() {
-        $this->markTestSkipped('This test requires a Fixture with an abstract service.');
         $context = $this->getContext();
-        $abstract = objectType(DummyApps\SimpleServices\FooInterface::class);
-        $concrete = objectType(DummyApps\SimpleServices\FooImplementation::class);
+        $abstract = Fixtures::implicitAliasedServices()->fooInterface();
+        $concrete = Fixtures::implicitAliasedServices()->fooImplementation();
         alias($context, $abstract, $concrete);
 
         $containerDefinition = $context->getBuilder()->build();
         $this->assertAliasDefinitionsMap([
-            [DummyApps\SimpleServices\FooInterface::class, DummyApps\SimpleServices\FooImplementation::class]
+            [Fixtures::implicitAliasedServices()->fooInterface()->getName(), Fixtures::implicitAliasedServices()->fooImplementation()->getName()]
         ], $containerDefinition->getAliasDefinitions());
     }
 
     public function testServiceDelegateDefinition() {
         $context = $this->getContext();
-        $service = objectType(DummyApps\ServiceDelegate\ServiceInterface::class);
-        serviceDelegate($context, $service, objectType(DummyApps\ServiceDelegate\ServiceFactory::class), 'createService');
+        $service = Fixtures::delegatedService()->serviceInterface();
+        serviceDelegate($context, $service, Fixtures::delegatedService()->serviceFactory(), 'createService');
 
         $containerDefinition = $context->getBuilder()->build();
 
         $this->assertCount(1, $containerDefinition->getServiceDelegateDefinitions());
-        $this->assertSame(DummyApps\ServiceDelegate\ServiceInterface::class, $containerDefinition->getServiceDelegateDefinitions()[0]->getServiceType()->getName());
-        $this->assertSame(DummyApps\ServiceDelegate\ServiceFactory::class, $containerDefinition->getServiceDelegateDefinitions()[0]->getDelegateType()->getName());
+        $this->assertSame(Fixtures::delegatedService()->serviceInterface()->getName(), $containerDefinition->getServiceDelegateDefinitions()[0]->getServiceType()->getName());
+        $this->assertSame(Fixtures::delegatedService()->serviceFactory()->getName(), $containerDefinition->getServiceDelegateDefinitions()[0]->getDelegateType()->getName());
         $this->assertSame('createService', $containerDefinition->getServiceDelegateDefinitions()[0]->getDelegateMethod());
     }
 
     public function testServicePrepareDefinition() {
         $context = $this->getContext();
-        servicePrepare($context, objectType(DummyApps\InterfaceServicePrepare\FooInterface::class), 'setBar');
+        servicePrepare($context, Fixtures::interfacePrepareServices()->fooInterface(), 'setBar');
 
         $containerDefinition = $context->getBuilder()->build();
 
         $this->assertServicePrepareTypes([
-            [DummyApps\InterfaceServicePrepare\FooInterface::class, 'setBar']
+            [Fixtures::interfacePrepareServices()->fooInterface()->getName(), 'setBar']
         ], $containerDefinition->getServicePrepareDefinitions());
     }
 
     public function testNonSharedService() {
         $context = $this->getContext();
-        service($context, objectType(DummyApps\NonSharedService\FooImplementation::class), isShared: false);
+        service($context, Fixtures::nonSharedServices()->fooImplementation(), isShared: false);
 
         $containerDefinition = $context->getBuilder()->build();
 
-        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), DummyApps\NonSharedService\FooImplementation::class);
+        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), Fixtures::nonSharedServices()->fooImplementation()->getName());
         $this->assertFalse($serviceDefinition->isShared());
     }
 

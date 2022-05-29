@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
@@ -13,7 +14,7 @@ class InjectEnvMethodParamTest extends AnnotatedTargetDefinitionConverterTestCas
 
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(AttributeType::Inject, new \ReflectionParameter(
-             [DummyApps\InjectEnvMethodParam\FooImplementation::class, '__construct'], 'stringParam'
+             [Fixtures::injectConstructorServices()->injectEnvService()->getName(), '__construct'], 'user'
         ));
     }
 
@@ -22,7 +23,7 @@ class InjectEnvMethodParamTest extends AnnotatedTargetDefinitionConverterTestCas
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectEnvMethodParam\FooImplementation::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectEnvService(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -30,7 +31,7 @@ class InjectEnvMethodParamTest extends AnnotatedTargetDefinitionConverterTestCas
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('stringParam', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('user', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetType() {

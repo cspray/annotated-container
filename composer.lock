@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ef591cac69b83ee67d53e032590835fb",
+    "content-hash": "c4c982d04cda9f0f48616b0d466c1f99",
     "packages": [
         {
             "name": "cspray/typiphy",
@@ -152,39 +152,6 @@
     ],
     "packages-dev": [
         {
-            "name": "cspray/annotated-container-dummy-apps",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "../annotated-container-dummy-apps",
-                "reference": "b7e2546f40e4e01b21a6814e1795ddb93a503d35"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Cspray\\AnnotatedContainer\\DummyApps\\": "src"
-                },
-                "files": [
-                    "src/ThirdPartyServices/constants.php"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Charles Sprayberry",
-                    "email": "771345+cspray@users.noreply.github.com",
-                    "homepage": "https://cspray.io",
-                    "role": "Project Maintainer"
-                }
-            ],
-            "description": "Dummy code examples that have been annotated with Attributes from cspray/annotated-container.",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
             "name": "doctrine/instantiator",
             "version": "1.4.1",
             "source": {
@@ -256,16 +223,16 @@
         },
         {
             "name": "laravel/serializable-closure",
-            "version": "v1.1.1",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/serializable-closure.git",
-                "reference": "9e4b005daa20b0c161f3845040046dc9ddc1d74e"
+                "reference": "09f0e9fb61829f628205b7c94906c28740ff9540"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/9e4b005daa20b0c161f3845040046dc9ddc1d74e",
-                "reference": "9e4b005daa20b0c161f3845040046dc9ddc1d74e",
+                "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/09f0e9fb61829f628205b7c94906c28740ff9540",
+                "reference": "09f0e9fb61829f628205b7c94906c28740ff9540",
                 "shasum": ""
             },
             "require": {
@@ -311,7 +278,7 @@
                 "issues": "https://github.com/laravel/serializable-closure/issues",
                 "source": "https://github.com/laravel/serializable-closure"
             },
-            "time": "2022-02-11T19:23:53+00:00"
+            "time": "2022-05-16T17:09:47+00:00"
         },
         {
             "name": "mikey179/vfsstream",
@@ -2533,7 +2500,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "cspray/annotated-container-dummy-apps": 20,
         "php-di/php-di": 20
     },
     "prefer-stable": false,

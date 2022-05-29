@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
+
 trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
@@ -81,6 +83,21 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
         foreach ($serviceDefinitions as $serviceDefinition) {
             if ($serviceDefinitionType === $serviceDefinition->getType()->getName()) {
                 return $serviceDefinition;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param ConfigurationDefinition[] $configurationDefinitions
+     * @param string $type
+     * @return ConfigurationDefinition|null
+     */
+    protected function getConfigurationDefinition(array $configurationDefinitions, string $type) : ?ConfigurationDefinition {
+        foreach ($configurationDefinitions as $configurationDefinition) {
+            if ($configurationDefinition->getClass()->getName() === $type) {
+                return $configurationDefinition;
             }
         }
 

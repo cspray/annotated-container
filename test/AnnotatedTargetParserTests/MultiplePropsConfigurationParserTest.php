@@ -4,41 +4,40 @@ namespace Cspray\AnnotatedContainer\AnnotatedTargetParserTests;
 
 use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Inject;
-use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
-use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class MultiplePropsConfigurationParserTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories() : array {
-        return [DummyAppUtils::getRootDir() . '/MultiplePropsConfiguration'];
+        return [Fixtures::configurationServices()->getPath()];
     }
 
     public function testCountExpectedTargets() {
-        $this->assertCount(3, $this->targets);
+        $this->assertCount(9, $this->targets);
     }
 
     public function testConfigurationReflectionTargetGetName() {
-        $annotatedTarget = $this->targets[2];
+        $annotatedTarget = $this->targets[8];
 
-        $this->assertSame(DummyApps\MultiplePropsConfiguration\MyConfig::class, $annotatedTarget->getTargetReflection()->getName());
+        $this->assertSame(Fixtures::configurationServices()->multiPropConfig()->getName(), $annotatedTarget->getTargetReflection()->getName());
     }
 
     public function testConfigurationReflectionAttributeGetName() {
-        $annotatedTarget = $this->targets[2];
+        $annotatedTarget = $this->targets[8];
 
         $this->assertSame(Configuration::class, $annotatedTarget->getAttributeReflection()->getName());
     }
 
     public function testConfigurationReflectionAttributeInstanceOf() {
-        $annotatedTarget = $this->targets[2];
+        $annotatedTarget = $this->targets[8];
 
         $this->assertInstanceOf(Configuration::class, $annotatedTarget->getAttributeInstance());
     }
 
     public function injectNameProvider() : array {
         return [
-            [0, 'foo'],
-            [1, 'bar']
+            [6, 'foo'],
+            [7, 'bar']
         ];
     }
 
@@ -53,8 +52,8 @@ class MultiplePropsConfigurationParserTest extends AnnotatedTargetParserTestCase
 
     public function injectInstanceOfProvider() : array {
         return [
-            [0, Inject::class],
-            [1, Inject::class]
+            [6, Inject::class],
+            [7, Inject::class]
         ];
     }
 
@@ -69,8 +68,8 @@ class MultiplePropsConfigurationParserTest extends AnnotatedTargetParserTestCase
 
     public function injectValueProvider() : array {
         return [
-            [0, 'baz'],
-            [1, 'baz'],
+            [6, 'baz'],
+            [7, 'baz'],
         ];
     }
 
@@ -85,8 +84,8 @@ class MultiplePropsConfigurationParserTest extends AnnotatedTargetParserTestCase
 
     public function injectProfilesProvider() : array {
         return [
-            [0, []],
-            [1, []]
+            [6, []],
+            [7, []]
         ];
     }
 

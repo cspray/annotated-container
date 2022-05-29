@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
 use function Cspray\Typiphy\objectType;
 
@@ -14,7 +15,7 @@ class MultipleServicesWithPrimaryTest extends AnnotatedTargetDefinitionConverter
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Service,
-            new ReflectionClass(DummyApps\MultipleServicesWithPrimary\FooImplementation::class)
+            new ReflectionClass(Fixtures::primaryAliasedServices()->fooImplementation()->getName())
         );
     }
     public function testGetServiceDefinitionInstance() {
@@ -22,7 +23,7 @@ class MultipleServicesWithPrimaryTest extends AnnotatedTargetDefinitionConverter
     }
 
     public function testGetServiceDefinitionType() {
-        $this->assertSame(objectType(DummyApps\MultipleServicesWithPrimary\FooImplementation::class), $this->definition->getType());
+        $this->assertSame(Fixtures::primaryAliasedServices()->fooImplementation(), $this->definition->getType());
     }
 
     public function testServiceIsConcrete() {

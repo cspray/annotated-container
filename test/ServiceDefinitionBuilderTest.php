@@ -16,11 +16,11 @@ class ServiceDefinitionBuilderTest extends TestCase {
     }
 
     private function getAbstractType() : string {
-        return Fixtures::singleAliasedService()->fooInterface()->getName();
+        return Fixtures::implicitAliasedServices()->fooInterface()->getName();
     }
 
     private function getConcreteType() : string {
-        return Fixtures::singleAliasedService()->fooImplementation()->getName();
+        return Fixtures::implicitAliasedServices()->fooImplementation()->getName();
     }
 
     public function testBuildingTypeForAbstractHasCorrectServiceDefinitionType() {

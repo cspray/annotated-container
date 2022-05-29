@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
@@ -13,8 +14,8 @@ class InjectMultipleProfilesFirstMethodParamTest extends AnnotatedTargetDefiniti
 
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(AttributeType::Inject, new \ReflectionParameter(
-                [DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class, '__construct'], 'stringParam'
-        ), 0);
+                [Fixtures::injectConstructorServices()->injectProfilesStringService()->getName(), '__construct'], 'val'
+        ));
     }
 
     public function testDefinitionInstanceOf() {
@@ -22,7 +23,7 @@ class InjectMultipleProfilesFirstMethodParamTest extends AnnotatedTargetDefiniti
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectProfilesStringService(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -30,7 +31,7 @@ class InjectMultipleProfilesFirstMethodParamTest extends AnnotatedTargetDefiniti
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('stringParam', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('val', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetType() {
