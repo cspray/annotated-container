@@ -42,10 +42,5 @@
   "suggest": {
     "rdlowrey/auryn": "Install to use the Auryn\\Injector as the backing container.",
     "php-di/php-di": "Install to use the DI\\Container as the backing container."
-  },
-  "config": {
-    "allow-plugins": {
-      "pestphp/pest-plugin": false
-    }
   }
 }
