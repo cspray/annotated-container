@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\nullType;
 use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\typeUnion;
@@ -15,7 +16,7 @@ class InjectNullableServiceMethodParamTest extends AnnotatedTargetDefinitionConv
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionParameter([DummyApps\InjectNullableServiceMethodParam\ServiceInjector::class, '__construct'], 'widget')
+            new \ReflectionParameter([Fixtures::injectServiceConstructorServices()->nullableServiceInjector()->getName(), '__construct'], 'maybeFoo')
         );
     }
 
@@ -24,7 +25,7 @@ class InjectNullableServiceMethodParamTest extends AnnotatedTargetDefinitionConv
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectNullableServiceMethodParam\ServiceInjector::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectServiceConstructorServices()->nullableServiceInjector(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -32,15 +33,15 @@ class InjectNullableServiceMethodParamTest extends AnnotatedTargetDefinitionConv
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('widget', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('maybeFoo', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetType() {
-        $this->assertSame(typeUnion(nullType(), objectType(DummyApps\InjectNullableServiceMethodParam\WidgetInterface::class)), $this->definition->getType());
+        $this->assertSame(typeUnion(nullType(), Fixtures::injectServiceConstructorServices()->fooInterface()), $this->definition->getType());
     }
 
     public function testGetValue() {
-        $this->assertSame(DummyApps\InjectNullableServiceMethodParam\FooImplementation::class, $this->definition->getValue());
+        $this->assertSame(null, $this->definition->getValue());
     }
 
     public function testGetStore() {

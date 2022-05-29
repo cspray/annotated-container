@@ -6,16 +6,17 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class InterfaceServicePrepareParserTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
-        return [DummyAppUtils::getRootDir() . '/InterfaceServicePrepare'];
+        return [Fixtures::interfacePrepareServices()->getPath()];
     }
 
     private function getExpectedTarget() : ?AnnotatedTarget {
         return $this->getAnnotatedTargetForTargetReflectionMethod(
-            DummyApps\InterfaceServicePrepare\FooInterface::class,
+            Fixtures::interfacePrepareServices()->fooInterface()->getName(),
             'setBar'
         );
     }

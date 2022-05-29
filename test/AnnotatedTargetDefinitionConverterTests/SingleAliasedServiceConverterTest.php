@@ -4,15 +4,19 @@ namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
 use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
 use function Cspray\Typiphy\objectType;
 
-class SimpleServicesConcreteConverterTest extends AnnotatedTargetDefinitionConverterTestCase {
+class SingleAliasedServiceConverterTest extends AnnotatedTargetDefinitionConverterTestCase {
+
+    private function getClass() : string {
+        return Fixtures::implicitAliasedServices()->fooInterface()->getName();
+    }
 
     protected function getSubjectTarget(): AnnotatedTarget {
-        return $this->getAnnotatedTarget(AttributeType::Service, reflection: new ReflectionClass(DummyApps\SimpleServices\FooImplementation::class));
+        return $this->getAnnotatedTarget(AttributeType::Service, new ReflectionClass($this->getClass()));
     }
 
     public function testGetServiceDefinitionInstance() {
@@ -20,11 +24,11 @@ class SimpleServicesConcreteConverterTest extends AnnotatedTargetDefinitionConve
     }
 
     public function testGetServiceDefinitionType() {
-        $this->assertSame(objectType(DummyApps\SimpleServices\FooImplementation::class), $this->definition->getType());
+        $this->assertSame(objectType($this->getClass()), $this->definition->getType());
     }
 
-    public function testServiceIsConcrete() {
-        $this->assertTrue($this->definition->isConcrete());
+    public function testServiceIsAbstract() {
+        $this->assertTrue($this->definition->isAbstract());
     }
 
     public function testServiceIsShared() {

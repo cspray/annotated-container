@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\objectType;
 
 class InjectServiceMethodParamTest extends AnnotatedTargetDefinitionConverterTestCase {
@@ -13,7 +14,7 @@ class InjectServiceMethodParamTest extends AnnotatedTargetDefinitionConverterTes
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionParameter([DummyApps\InjectServiceMethodParam\ServiceInjector::class, '__construct'], 'widget')
+            new \ReflectionParameter([Fixtures::injectServiceConstructorServices()->serviceInjector()->getName(), '__construct'], 'foo')
         );
     }
 
@@ -22,7 +23,7 @@ class InjectServiceMethodParamTest extends AnnotatedTargetDefinitionConverterTes
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectServiceMethodParam\ServiceInjector::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectServiceConstructorServices()->serviceInjector(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -30,15 +31,15 @@ class InjectServiceMethodParamTest extends AnnotatedTargetDefinitionConverterTes
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('widget', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('foo', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetType() {
-        $this->assertSame(objectType(DummyApps\InjectServiceMethodParam\WidgetInterface::class), $this->definition->getType());
+        $this->assertSame(Fixtures::injectServiceConstructorServices()->fooInterface(), $this->definition->getType());
     }
 
     public function testGetValue() {
-        $this->assertSame(DummyApps\InjectServiceMethodParam\FooImplementation::class, $this->definition->getValue());
+        $this->assertSame(Fixtures::injectServiceConstructorServices()->fooImplementation()->getName(), $this->definition->getValue());
     }
 
     public function testGetStore() {

@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\floatType;
@@ -19,7 +20,7 @@ class InjectScalarTypeUnionMethodParamTest extends AnnotatedTargetDefinitionConv
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionParameter([DummyApps\InjectScalarTypeUnionMethodParam\FooImplementation::class, '__construct'], 'anyVal')
+            new \ReflectionParameter([Fixtures::injectConstructorServices()->injectTypeUnionService()->getName(), '__construct'], 'value')
         );
     }
 
@@ -28,7 +29,7 @@ class InjectScalarTypeUnionMethodParamTest extends AnnotatedTargetDefinitionConv
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectScalarTypeUnionMethodParam\FooImplementation::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectTypeUnionService(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -36,15 +37,15 @@ class InjectScalarTypeUnionMethodParamTest extends AnnotatedTargetDefinitionConv
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('anyVal', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('value', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetTypeUnion() {
-        $this->assertSame(typeUnion(stringType(), intType(), floatType(), boolType(), arrayType()), $this->definition->getType());
+        $this->assertSame(typeUnion(stringType(), intType(), floatType()), $this->definition->getType());
     }
 
     public function testGetValue() {
-        $this->assertSame('something', $this->definition->getValue());
+        $this->assertSame(4.20, $this->definition->getValue());
     }
 
     public function testGetStore() {

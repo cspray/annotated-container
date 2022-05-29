@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\intType;
@@ -16,8 +17,8 @@ class InjectArrayMethodParamTest extends AnnotatedTargetDefinitionConverterTestC
     protected function getSubjectTarget() : AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionParameter([DummyApps\InjectArrayMethodParam\FooImplementation::class, '__construct'],
-            'items'
+            new \ReflectionParameter([Fixtures::injectConstructorServices()->injectArrayService()->getName(), '__construct'],
+            'values'
         ));
     }
 
@@ -26,7 +27,7 @@ class InjectArrayMethodParamTest extends AnnotatedTargetDefinitionConverterTestC
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectArrayMethodParam\FooImplementation::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectArrayService(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -34,7 +35,7 @@ class InjectArrayMethodParamTest extends AnnotatedTargetDefinitionConverterTestC
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('items', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('values', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetType() {
@@ -42,7 +43,7 @@ class InjectArrayMethodParamTest extends AnnotatedTargetDefinitionConverterTestC
     }
 
     public function testGetValue() {
-        $this->assertSame(['a', 'b', 'c'], $this->definition->getValue());
+        $this->assertSame(['dependency', 'injection', 'rocks'], $this->definition->getValue());
     }
 
     public function testGetStore() {

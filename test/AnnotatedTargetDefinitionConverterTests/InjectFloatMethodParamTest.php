@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\floatType;
 use function Cspray\Typiphy\intType;
 use function Cspray\Typiphy\objectType;
@@ -15,8 +16,8 @@ class InjectFloatMethodParamTest extends AnnotatedTargetDefinitionConverterTestC
     protected function getSubjectTarget() : AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionParameter([DummyApps\InjectFloatMethodParam\FooImplementation::class, 'setSomething'],
-            'pie'
+            new \ReflectionParameter([Fixtures::injectConstructorServices()->injectFloatService()->getName(), '__construct'],
+            'dessert'
         ));
     }
 
@@ -25,15 +26,15 @@ class InjectFloatMethodParamTest extends AnnotatedTargetDefinitionConverterTestC
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectFloatMethodParam\FooImplementation::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectFloatService(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
-        $this->assertSame('setSomething', $this->definition->getTargetIdentifier()->getMethodName());
+        $this->assertSame('__construct', $this->definition->getTargetIdentifier()->getMethodName());
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('pie', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('dessert', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetType() {

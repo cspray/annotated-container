@@ -3,14 +3,15 @@
 namespace Cspray\AnnotatedContainer\AnnotatedTargetParserTests;
 
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class SimpleServicesSomeNotAnnotatedTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
-        return [DummyAppUtils::getRootDir() . '/SimpleServicesSomeNotAnnotated'];
+        return [Fixtures::nonAnnotatedServices()->getPath()];
     }
 
     public function testAssertCount() {
-        $this->assertCount(2, $this->targets);
+        $this->assertCount(1, $this->targets);
     }
 }

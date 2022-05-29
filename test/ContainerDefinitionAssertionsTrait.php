@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
+
 trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
@@ -34,21 +36,6 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
         }
 
         $this->assertFalse($serviceDefinition->isPrimary());
-    }
-
-    /**
-     * @param ServiceDefinition[] $serviceDefinitions
-     * @param string $serviceDefinitionType
-     * @return ServiceDefinition|null
-     */
-    private function getServiceDefinition(array $serviceDefinitions, string $serviceDefinitionType) : ?ServiceDefinition {
-        foreach ($serviceDefinitions as $serviceDefinition) {
-            if ($serviceDefinitionType === $serviceDefinition->getType()->getName()) {
-                return $serviceDefinition;
-            }
-        }
-
-        return null;
     }
 
     protected function assertAliasDefinitionsMap(array $expectedAliasMap, array $aliasDefinitions) : void {
@@ -87,49 +74,34 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
         $this->assertEquals($expectedServicePrepare, $actualMap);
     }
 
-    protected function assertInjectScalarParamValues(array $expectedValueMap, array $injectScalarDefinitions) : void {
-        if (($countExpected = count($expectedValueMap)) !== ($countActual = count($injectScalarDefinitions))) {
-            $this->fail("Expected ${countExpected} InjectScalarDefinition but received ${countActual}");
+    /**
+     * @param ServiceDefinition[] $serviceDefinitions
+     * @param string $serviceDefinitionType
+     * @return ServiceDefinition|null
+     */
+    protected function getServiceDefinition(array $serviceDefinitions, string $serviceDefinitionType) : ?ServiceDefinition {
+        foreach ($serviceDefinitions as $serviceDefinition) {
+            if ($serviceDefinitionType === $serviceDefinition->getType()->getName()) {
+                return $serviceDefinition;
+            }
         }
 
-        $actualMap = [];
-        foreach ($injectScalarDefinitions as $injectScalarDefinition) {
-            $this->assertInstanceOf(InjectScalarDefinition::class, $injectScalarDefinition);
-            $key = sprintf(
-                "%s::%s(%s)|%s",
-                $injectScalarDefinition->getService()->getName(),
-                $injectScalarDefinition->getMethod(),
-                $injectScalarDefinition->getParamName(),
-                join(',', $injectScalarDefinition->getProfiles())
-            );
-            $actualMap[$key] = $injectScalarDefinition->getValue();
-        }
-
-        ksort($actualMap);
-        ksort($expectedValueMap);
-        $this->assertEquals($expectedValueMap, $actualMap);
+        return null;
     }
 
-    protected function assertUseServiceParamValues(array $expectedValueMap, array $UseServiceDefinitions) : void {
-        if (($countExpected = count($expectedValueMap)) !== ($countActual = count($UseServiceDefinitions))) {
-            $this->fail("Expected ${countExpected} InjectServiceDefinition but received ${countActual}");
+    /**
+     * @param ConfigurationDefinition[] $configurationDefinitions
+     * @param string $type
+     * @return ConfigurationDefinition|null
+     */
+    protected function getConfigurationDefinition(array $configurationDefinitions, string $type) : ?ConfigurationDefinition {
+        foreach ($configurationDefinitions as $configurationDefinition) {
+            if ($configurationDefinition->getClass()->getName() === $type) {
+                return $configurationDefinition;
+            }
         }
 
-        $actualMap = [];
-        foreach ($UseServiceDefinitions as $UseServiceDefinition) {
-            $this->assertInstanceOf(InjectServiceDefinition::class, $UseServiceDefinition);
-            $key = sprintf(
-                "%s::%s(%s)",
-                $UseServiceDefinition->getService()->getName(),
-                $UseServiceDefinition->getMethod(),
-                $UseServiceDefinition->getParamName()
-            );
-            $actualMap[$key] = $UseServiceDefinition->getInjectedService();
-        }
-
-        ksort($actualMap);
-        ksort($expectedValueMap);
-        $this->assertEquals($expectedValueMap, $actualMap);
+        return null;
     }
 
 }

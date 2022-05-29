@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionMethod;
 use function Cspray\Typiphy\objectType;
 
@@ -13,7 +14,7 @@ class ServicePrepareConverterTest extends AnnotatedTargetDefinitionConverterTest
 
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(AttributeType::ServicePrepare, new ReflectionMethod(
-            DummyApps\InterfaceServicePrepare\FooInterface::class,
+            Fixtures::interfacePrepareServices()->fooInterface()->getName(),
             'setBar'
         ));
     }
@@ -23,7 +24,7 @@ class ServicePrepareConverterTest extends AnnotatedTargetDefinitionConverterTest
     }
 
     public function testGetService() {
-        $this->assertSame(objectType(DummyApps\InterfaceServicePrepare\FooInterface::class), $this->definition->getService());
+        $this->assertSame(Fixtures::interfacePrepareServices()->fooInterface(), $this->definition->getService());
     }
 
     public function testGetMethodIsCorrect() {

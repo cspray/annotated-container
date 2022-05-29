@@ -6,44 +6,46 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
 
-class SimpleServicesParserTest extends AnnotatedTargetParserTestCase {
+class SingleConcreteServiceParserTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories() : array {
-        return [DummyAppUtils::getRootDir() . '/SimpleServices'];
+        return [
+            Fixtures::singleConcreteService()->getPath()
+        ];
     }
 
     public function testHasCorrectAnnotatedTargetCount() {
-        $this->assertCount(2, $this->targets);
+        $this->assertCount(1, $this->targets);
     }
 
     public function testAnnotatedTargetsAreCorrectType() {
         $annotatedTargets = $this->targets;
         $this->assertInstanceOf(AnnotatedTarget::class, $annotatedTargets[0]);
-        $this->assertInstanceOf(AnnotatedTarget::class, $annotatedTargets[1]);
     }
 
     public function testAnnotatedTargetsHaveNonNullTargetReflection() {
         $annotatedTargets = $this->targets;
         $this->assertInstanceOf(ReflectionClass::class, $annotatedTargets[0]->getTargetReflection());
-        $this->assertInstanceOf(ReflectionClass::class, $annotatedTargets[0]->getTargetReflection());
     }
 
     public function testAnnotatedTargetsHaveFooInterfaceTargetReflection() {
-        $target = $this->getAnnotatedTargetForTargetReflectionClass(DummyApps\SimpleServices\FooInterface::class);
+        $class = Fixtures::singleConcreteService()->fooImplementation()->getName();
+        $target = $this->getAnnotatedTargetForTargetReflectionClass($class);
         $this->assertNotNull($target);
     }
 
     public function testAnnotatedTargetsHaveFooImplementationTargetReflection() {
-        $target = $this->getAnnotatedTargetForTargetReflectionClass(DummyApps\SimpleServices\FooImplementation::class);
+        $class = Fixtures::singleConcreteService()->fooImplementation()->getName();
+        $target = $this->getAnnotatedTargetForTargetReflectionClass($class);
         $this->assertNotNull($target);
     }
 
     public function testAnnotatedTargetsHaveServiceReflectionAttribute() {
         $targets = $this->targets;
         $this->assertSame(Service::class, $targets[0]->getAttributeReflection()->getName());
-        $this->assertSame(Service::class, $targets[1]->getAttributeReflection()->getName());
     }
 
     public function testAnnotatedTargetHasSameTargetReflection() {
@@ -59,7 +61,6 @@ class SimpleServicesParserTest extends AnnotatedTargetParserTestCase {
     public function testAnnotatedTargetGetAttributeInstance() {
         $targets = $this->targets;
         $this->assertInstanceOf(Service::class, $targets[0]->getAttributeInstance());
-        $this->assertInstanceOf(Service::class, $targets[1]->getAttributeInstance());
     }
 
     public function testAnnotatedTargetAttributeInstanceSameObject() {

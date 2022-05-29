@@ -5,14 +5,14 @@ namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class SimpleNamedConfigurationConverterTest extends AnnotatedTargetDefinitionConverterTestCase {
 
     protected function getSubjectTarget() : AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Configuration,
-            new \ReflectionClass(DummyApps\SimpleNamedConfiguration\MyConfig::class)
+            new \ReflectionClass(Fixtures::namedConfigurationServices()->myConfig()->getName())
         );
     }
 

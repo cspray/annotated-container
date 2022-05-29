@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\floatType;
@@ -20,7 +21,7 @@ class InjectNullableStringMethodParamTest extends AnnotatedTargetDefinitionConve
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(
             AttributeType::Inject,
-            new \ReflectionParameter([DummyApps\InjectNullableStringMethodParam\FooImplementation::class, '__construct'], 'someValue')
+            new \ReflectionParameter([Fixtures::injectConstructorServices()->injectNullableStringService()->getName(), '__construct'], 'maybe')
         );
     }
 
@@ -29,7 +30,7 @@ class InjectNullableStringMethodParamTest extends AnnotatedTargetDefinitionConve
     }
 
     public function testDefinitionGetService() {
-        $this->assertSame(objectType(DummyApps\InjectNullableStringMethodParam\FooImplementation::class), $this->definition->getTargetIdentifier()->getClass());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectNullableStringService(), $this->definition->getTargetIdentifier()->getClass());
     }
 
     public function testDefinitionGetMethod() {
@@ -37,7 +38,7 @@ class InjectNullableStringMethodParamTest extends AnnotatedTargetDefinitionConve
     }
 
     public function testDefinitionGetParamName() {
-        $this->assertSame('someValue', $this->definition->getTargetIdentifier()->getName());
+        $this->assertSame('maybe', $this->definition->getTargetIdentifier()->getName());
     }
 
     public function testDefinitionGetTypeUnion() {

@@ -6,11 +6,12 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class InjectMultipleProfilesMethodParamTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
-        return [DummyAppUtils::getRootDir() . '/InjectMultipleProfilesMethodParam'];
+        return [Fixtures::injectConstructorServices()->getPath()];
     }
 
     /**
@@ -18,14 +19,14 @@ class InjectMultipleProfilesMethodParamTest extends AnnotatedTargetParserTestCas
      */
     private function getExpectedTargets() : array {
         return $this->getAnnotatedTargetsForTargetReflectParameter(
-            DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class,
+            Fixtures::injectConstructorServices()->injectProfilesStringService()->getName(),
             '__construct',
-            'stringParam'
+            'val'
         );
     }
 
     public function testTargetCount() {
-        $this->assertCount(4, $this->targets);
+        $this->assertCount(24, $this->targets);
     }
 
     public function testExpectedTargetCount() {
@@ -42,7 +43,7 @@ class InjectMultipleProfilesMethodParamTest extends AnnotatedTargetParserTestCas
     public function testExpectedTargetReflectionDeclaringClass(int $index) {
         $target = $this->getExpectedTargets()[$index];
         $actual = $target->getTargetReflection()->getDeclaringClass()->getName();
-        $this->assertSame(DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class, $actual);
+        $this->assertSame(Fixtures::injectConstructorServices()->injectProfilesStringService()->getName(), $actual);
     }
 
     /**
@@ -60,7 +61,7 @@ class InjectMultipleProfilesMethodParamTest extends AnnotatedTargetParserTestCas
     public function testExpectedTargetReflectionName(int $index) {
         $target = $this->getExpectedTargets()[$index];
         $actual = $target->getTargetReflection()->getName();
-        $this->assertSame('stringParam', $actual);
+        $this->assertSame('val', $actual);
     }
 
     /**

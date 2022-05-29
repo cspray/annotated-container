@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionMethod;
 use function Cspray\Typiphy\objectType;
 
@@ -13,7 +14,7 @@ class ServiceDelegateConverterTest extends AnnotatedTargetDefinitionConverterTes
 
     protected function getSubjectTarget(): AnnotatedTarget {
         return $this->getAnnotatedTarget(AttributeType::ServiceDelegate, new ReflectionMethod(
-            DummyApps\ServiceDelegate\ServiceFactory::class,
+            Fixtures::delegatedService()->serviceFactory()->getName(),
             'createService'
         ));
     }
@@ -23,7 +24,7 @@ class ServiceDelegateConverterTest extends AnnotatedTargetDefinitionConverterTes
     }
 
     public function testGetDelegateTypeIsServiceFactory() {
-        $this->assertSame(objectType(DummyApps\ServiceDelegate\ServiceFactory::class), $this->definition->getDelegateType());
+        $this->assertSame(Fixtures::delegatedService()->serviceFactory(), $this->definition->getDelegateType());
     }
 
     public function testGetDelegateMethodIsCorrect() {
@@ -31,7 +32,7 @@ class ServiceDelegateConverterTest extends AnnotatedTargetDefinitionConverterTes
     }
 
     public function testGetServiceType() {
-        $this->assertSame(objectType(DummyApps\ServiceDelegate\ServiceInterface::class), $this->definition->getServiceType());
+        $this->assertSame(Fixtures::delegatedService()->serviceInterface(), $this->definition->getServiceType());
     }
 
 

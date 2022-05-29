@@ -6,21 +6,22 @@ use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class SimpleConfigurationParserTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories() : array {
-        return [DummyAppUtils::getRootDir() . '/SimpleConfiguration'];
+        return [Fixtures::configurationServices()->getPath()];
     }
 
     public function testCountExpectedTargets() {
-        $this->assertCount(6, $this->targets);
+        $this->assertCount(9, $this->targets);
     }
 
     public function testConfigurationReflectionTargetGetName() {
         $annotatedTarget = $this->targets[5];
 
-        $this->assertSame(DummyApps\SimpleConfiguration\MyConfig::class, $annotatedTarget->getTargetReflection()->getName());
+        $this->assertSame(Fixtures::configurationServices()->myConfig()->getName(), $annotatedTarget->getTargetReflection()->getName());
     }
 
     public function testConfigurationReflectionAttributeGetName() {

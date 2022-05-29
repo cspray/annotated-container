@@ -7,16 +7,17 @@ use Cspray\AnnotatedContainer\AnnotatedTargetType;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class ServiceDelegateTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories(): array {
-        return [DummyAppUtils::getRootDir() . '/ServiceDelegate'];
+        return [Fixtures::delegatedService()->getPath()];
     }
 
     private function getExpectedTarget() : ?AnnotatedTarget {
         return $this->getAnnotatedTargetForTargetReflectionMethod(
-            DummyApps\ServiceDelegate\ServiceFactory::class,
+            Fixtures::delegatedService()->serviceFactory()->getName(),
             'createService'
         );
     }

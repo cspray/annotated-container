@@ -2,22 +2,21 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
-use Cspray\AnnotatedContainer\DummyApps\InterfaceServicePrepare;
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\objectType;
 
 class ServicePrepareDefinitionBuilderTest extends TestCase {
 
     public function testBuildHasService() {
-        $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(objectType(InterfaceServicePrepare\FooInterface::class), 'setBar')->build();
+        $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(Fixtures::interfacePrepareServices()->fooInterface(), 'setBar')->build();
 
-        $this->assertSame(objectType(InterfaceServicePrepare\FooInterface::class), $prepareDefinition->getService());
+        $this->assertSame(Fixtures::interfacePrepareServices()->fooInterface(), $prepareDefinition->getService());
     }
 
     public function testBuildHasMethod() {
-        $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(objectType(InterfaceServicePrepare\FooInterface::class), 'setBar')->build();
+        $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(Fixtures::interfacePrepareServices()->fooInterface(), 'setBar')->build();
 
         $this->assertSame('setBar', $prepareDefinition->getMethod());
     }

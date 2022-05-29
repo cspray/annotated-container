@@ -2,9 +2,10 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
+use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use PHPUnit\Framework\TestCase;
@@ -41,125 +42,100 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testCreateServiceNotHasThrowsException() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServicesSomeNotAnnotated');
+        $container = $this->getContainer(Fixtures::nonAnnotatedServices()->getPath());
 
         $this->expectException(NotFoundExceptionInterface::class);
-        $this->expectExceptionMessage('The service "' . DummyApps\SimpleServicesSomeNotAnnotated\NotAnnotatedBarImplementation::class . '" could not be found in this container.');
-        $container->get(DummyApps\SimpleServicesSomeNotAnnotated\NotAnnotatedBarImplementation::class);
+        $this->expectExceptionMessage('The service "' . Fixtures::nonAnnotatedServices()->nonAnnotatedService()->getName() . '" could not be found in this container.');
+        $container->get(Fixtures::nonAnnotatedServices()->nonAnnotatedService()->getName());
     }
 
-    public function testCreateSimpleServices() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServices');
-        $subject = $container->get(DummyApps\SimpleServices\FooInterface::class);
+    public function testGetSingleConcreteService() {
+        $class = Fixtures::singleConcreteService()->fooImplementation()->getName();
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath());
+        $subject = $container->get($class);
 
-        $this->assertInstanceOf(DummyApps\SimpleServices\FooImplementation::class, $subject);
+        $this->assertInstanceOf($class, $subject);
     }
 
     public function testInterfaceServicePrepare() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InterfaceServicePrepare');
-        $subject = $container->get(DummyApps\InterfaceServicePrepare\FooInterface::class);
+        $container = $this->getContainer(Fixtures::interfacePrepareServices()->getPath());
+        $subject = $container->get(Fixtures::interfacePrepareServices()->fooInterface()->getName());
 
-        $this->assertInstanceOf(DummyApps\InterfaceServicePrepare\FooImplementation::class, $subject);
+        $this->assertInstanceOf(Fixtures::interfacePrepareServices()->fooImplementation()->getName(), $subject);
         $this->assertEquals(1, $subject->getBarCounter());
     }
 
     public function testServicePrepareInvokedOnContainer() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectorExecuteServicePrepare');
-        $subject = $container->get(DummyApps\InjectorExecuteServicePrepare\FooInterface::class);
+        $container = $this->getContainer(Fixtures::injectPrepareServices()->getPath());
+        $subject = $container->get(Fixtures::injectPrepareServices()->prepareInjector()->getName());
 
-        $this->assertInstanceOf(DummyApps\InjectorExecuteServicePrepare\FooImplementation::class, $subject);
-        $this->assertInstanceOf(DummyApps\InjectorExecuteServicePrepare\BarImplementation::class, $subject->getBar());
+        $this->assertInstanceOf(Fixtures::injectPrepareServices()->prepareInjector()->getName(), $subject);
+        $this->assertSame('foo', $subject->getVal());
+        $this->assertInstanceOf(Fixtures::injectPrepareServices()->barImplementation()->getName(), $subject->getService());
     }
 
     public function testMultipleAliasResolutionNoMakeDefine() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/MultipleAliasResolution');
+        $container = $this->getContainer(Fixtures::ambiguousAliasedServices()->getPath());
 
         $this->expectException(ContainerExceptionInterface::class);
-        $container->get(DummyApps\MultipleAliasResolution\FooInterface::class);
+        $container->get(Fixtures::ambiguousAliasedServices()->fooInterface()->getName());
     }
 
     public function testServiceDelegate() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/ServiceDelegate');
-        $service = $container->get(DummyApps\ServiceDelegate\ServiceInterface::class);
+        $container = $this->getContainer(Fixtures::delegatedService()->getPath());
+        $service = $container->get(Fixtures::delegatedService()->serviceInterface()->getName());
 
         $this->assertSame('From ServiceFactory From FooService', $service->getValue());
     }
 
     public function testHasServiceIfCompiled() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleServices');
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath());
 
-        $this->assertTrue($container->has(DummyApps\SimpleServices\FooInterface::class));
-        $this->assertFalse($container->has(DummyApps\MultipleSimpleServices\FooInterface::class));
+        $this->assertTrue($container->has(Fixtures::singleConcreteService()->fooImplementation()->getName()));
+        $this->assertFalse($container->has(Fixtures::ambiguousAliasedServices()->fooInterface()->getName()));
     }
 
     public function testMultipleServicesWithPrimary() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/MultipleServicesWithPrimary');
+        $container = $this->getContainer(Fixtures::primaryAliasedServices()->getPath());
 
-        $this->assertInstanceOf(DummyApps\MultipleServicesWithPrimary\FooImplementation::class, $container->get(DummyApps\MultipleServicesWithPrimary\FooInterface::class));
+        $this->assertInstanceOf(Fixtures::primaryAliasedServices()->fooImplementation()->getName(), $container->get(Fixtures::primaryAliasedServices()->fooInterface()->getName()));
     }
 
     public function testProfileResolvedServices() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/ProfileResolvedServices', ['default', 'dev']);
+        $container = $this->getContainer(Fixtures::profileResolvedServices()->getPath(), ['default', 'dev']);
 
-        $instance = $container->get(DummyApps\ProfileResolvedServices\FooInterface::class);
+        $instance = $container->get(Fixtures::profileResolvedServices()->fooInterface()->getName());
 
         $this->assertNotNull($instance);
-        $this->assertInstanceOf(DummyApps\ProfileResolvedServices\DevFooImplementation::class, $instance);
+        $this->assertInstanceOf(Fixtures::profileResolvedServices()->devImplementation()->getName(), $instance);
     }
 
     public function testCreateNamedService() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/NamedService');
+        $container = $this->getContainer(Fixtures::namedServices()->getPath());
 
         $this->assertTrue($container->has('foo'));
 
         $instance = $container->get('foo');
 
         $this->assertNotNull($instance);
-        $this->assertInstanceOf(DummyApps\NamedService\FooImplementation::class, $instance);
+        $this->assertInstanceOf(Fixtures::namedServices()->fooImplementation()->getName(), $instance);
     }
 
     public function testCreateInjectStringService() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectStringMethodParam');
+        $container = $this->getContainer(Fixtures::injectConstructorServices()->getPath());
 
-        $this->assertSame('foobar', $container->get(DummyApps\InjectStringMethodParam\FooImplementation::class)->getParameter());
-    }
-
-    public function testCreateMultipleInjectScalarService() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectMultipleScalarMethodParam');
-
-        /** @var DummyApps\InjectMultipleScalarMethodParam\FooImplementation $subject */
-        $subject = $container->get(DummyApps\InjectMultipleScalarMethodParam\FooImplementation::class);
-
-        $this->assertSame('foobar', $subject->getString());
-        $this->assertSame(42, $subject->getInt());
-        $this->assertSame(['a', 'b', 'c'], $subject->getArray());
-    }
-
-    public function testCreateInjectServicePrepare() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectIntMethodParam');
-
-        /** @var DummyApps\InjectIntMethodParam\FooImplementation $subject */
-        $subject = $container->get(DummyApps\InjectIntMethodParam\FooImplementation::class);
-
-        $this->assertSame(42, $subject->getValue());
-    }
-
-    public function testCreateInjectScalarConstructServicePrepare() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectScalarConstructServicePrepareMethodParam');
-
-        /** @var DummyApps\InjectScalarConstructServicePrepareMethodParam\FooImplementation $subject */
-        $subject = $container->get(DummyApps\InjectScalarConstructServicePrepareMethodParam\FooImplementation::class);
-
-        $this->assertSame('foobar', $subject->getValue());
+        $this->assertSame('foobar', $container->get(Fixtures::injectConstructorServices()->injectStringService()->getName())->val);
     }
 
     public function testConcreteAliasDefinitionDoesNotHaveServiceDefinition() {
+        $abstractService = Fixtures::implicitAliasedServices()->fooInterface()->getName();
+        $concreteService = Fixtures::implicitAliasedServices()->fooImplementation()->getName();
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()
             ->withServiceDefinition(
-                ServiceDefinitionBuilder::forAbstract($abstract = objectType(DummyApps\SimpleServices\FooInterface::class))->build()
+                ServiceDefinitionBuilder::forAbstract($abstract = objectType($abstractService))->build()
             )
             ->withAliasDefinition(
-                AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete = objectType(DummyApps\SimpleServices\FooImplementation::class))->build()
+                AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete = objectType($concreteService))->build()
             )->build();
 
         $this->expectException(ContainerException::class);
@@ -168,26 +144,26 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testMultipleServicePrepare() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectScalarMultipleServicePrepareMethodParam');
+        $container = $this->getContainer(Fixtures::multiplePrepareServices()->getPath());
 
-        $subject = $container->get(DummyApps\InjectScalarMultipleServicePrepareMethodParam\FooImplementation::class);
+        $subject = $container->get(Fixtures::multiplePrepareServices()->fooImplementation()->getName());
 
-        $this->assertSame('foobar', $subject->getValue());
+        $this->assertSame('foobar', $subject->getProperty());
     }
 
     public function testInjectServiceObjectMethodParam() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectServiceMethodParam');
+        $container = $this->getContainer(Fixtures::injectServiceConstructorServices()->getPath());
 
-        $subject = $container->get(DummyApps\InjectServiceMethodParam\ServiceInjector::class);
+        $subject = $container->get(Fixtures::injectServiceConstructorServices()->serviceInjector()->getName());
 
-        $this->assertInstanceOf(DummyApps\InjectServiceMethodParam\FooImplementation::class, $subject->getWidget());
+        $this->assertInstanceOf(Fixtures::injectServiceConstructorServices()->fooImplementation()->getName(), $subject->foo);
     }
 
     public function testInjectEnvMethodParam() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectEnvMethodParam');
+        $container = $this->getContainer(Fixtures::injectConstructorServices()->getPath());
 
-        $subject = $container->get(DummyApps\InjectEnvMethodParam\FooImplementation::class);
-        $this->assertSame(getenv('USER'), $subject->getStringParam());
+        $subject = $container->get(Fixtures::injectConstructorServices()->injectEnvService()->getName());
+        $this->assertSame(getenv('USER'), $subject->user);
     }
 
     public function testCreateArbitraryStorePresent() {
@@ -201,16 +177,16 @@ abstract class ContainerFactoryTestCase extends TestCase {
                 return $key . '_test_store';
             }
         };
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectTestStoreMethodParam', parameterStore: $parameterStore);
+        $container = $this->getContainer(Fixtures::injectCustomStoreServices()->getPath(), parameterStore: $parameterStore);
 
-        $subject = $container->get(DummyApps\InjectTestStoreMethodParam\FooImplementation::class);
-        $this->assertSame('key_test_store', $subject->getValue());
+        $subject = $container->get(Fixtures::injectCustomStoreServices()->fooImplementation()->getName());
+        $this->assertSame('key_test_store', $subject->key);
     }
 
     public function testCreateArbitraryStoreNotPresent() {
         $this->expectException(InvalidParameterException::class);
         $this->expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
-        $this->getContainer(DummyAppUtils::getRootDir() . '/InjectTestStoreMethodParam');
+        $this->getContainer(Fixtures::injectCustomStoreServices()->getPath());
     }
 
     public function profilesProvider() : array {
@@ -225,25 +201,25 @@ abstract class ContainerFactoryTestCase extends TestCase {
      * @dataProvider profilesProvider
      */
     public function testInjectProfilesMethodParam(string $expected, array $profiles)  {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/InjectMultipleProfilesMethodParam', $profiles);
-        $subject = $container->get(DummyApps\InjectMultipleProfilesMethodParam\FooImplementation::class);
+        $container = $this->getContainer(Fixtures::injectConstructorServices()->getPath(), $profiles);
+        $subject = $container->get(Fixtures::injectConstructorServices()->injectProfilesStringService()->getName());
 
-        $this->assertSame($expected, $subject->getValue());
+        $this->assertSame($expected, $subject->val);
     }
 
     public function testConfigurationSharedInstance() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleConfiguration', ['default', 'dev']);
+        $container = $this->getContainer(Fixtures::configurationServices()->getPath(), ['default', 'dev']);
 
         $this->assertSame(
-            $container->get(DummyApps\SimpleConfiguration\MyConfig::class),
-            $container->get(DummyApps\SimpleConfiguration\MyConfig::class)
+            $container->get(Fixtures::configurationServices()->myConfig()->getName()),
+            $container->get(Fixtures::configurationServices()->myConfig()->getName())
         );
     }
 
     public function testConfigurationValues() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleConfiguration', ['default', 'dev']);
-        /** @var DummyApps\SimpleConfiguration\MyConfig $subject */
-        $subject = $container->get(DummyApps\SimpleConfiguration\MyConfig::class);
+        $container = $this->getContainer(Fixtures::configurationServices()->getPath(), ['default', 'dev']);
+        /** @var AnnotatedContainerFixture\ConfigurationServices\MyConfig $subject */
+        $subject = $container->get(Fixtures::configurationServices()->myConfig()->getName());
 
         $this->assertSame('my-api-key', $subject->key);
         $this->assertSame(1234, $subject->port);
@@ -252,28 +228,28 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testNamedConfigurationInstanceOf() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/SimpleNamedConfiguration');
+        $container = $this->getContainer(Fixtures::namedConfigurationServices()->getPath());
 
-        $this->assertInstanceOf(DummyApps\SimpleNamedConfiguration\MyConfig::class, $container->get('my-config'));
+        $this->assertInstanceOf(Fixtures::namedConfigurationServices()->myConfig()->getName(), $container->get('my-config'));
     }
 
     public function testMakeAutowiredObject() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/AutowireableFactory');
-        $subject = $container->make(DummyApps\AutowireableFactory\ConstructionTarget::class, autowiredParams(rawParam('value', '802')));
+        $container = $this->getContainer(Fixtures::autowireableFactoryServices()->getPath());
+        $subject = $container->make(Fixtures::autowireableFactoryServices()->factoryCreatedService()->getName(), autowiredParams(rawParam('scalar', '802')));
 
-        $this->assertInstanceOf(DummyApps\AutowireableFactory\ServiceTargetImplementation::class, $subject->serviceTarget);
-        $this->assertSame('802', $subject->value);
+        $this->assertInstanceOf(Fixtures::autowireableFactoryServices()->fooImplementation()->getName(), $subject->foo);
+        $this->assertSame('802', $subject->scalar);
     }
 
     public function testMakeAutowiredObjectReplaceServiceTarget() {
-        $container = $this->getContainer(DummyAppUtils::getRootDir() . '/AutowireableFactory');
-        $subject = $container->make(DummyApps\AutowireableFactory\ConstructionTarget::class, autowiredParams(
-            rawParam('value', 'quarters'),
-            serviceParam('serviceTarget', objectType(DummyApps\AutowireableFactory\NotServiceTarget::class))
+        $container = $this->getContainer(Fixtures::autowireableFactoryServices()->getPath());
+        $subject = $container->make(Fixtures::autowireableFactoryServices()->factoryCreatedService()->getName(), autowiredParams(
+            rawParam('scalar', 'quarters'),
+            serviceParam('foo', Fixtures::autowireableFactoryServices()->barImplementation())
         ));
 
-        $this->assertInstanceOf(DummyApps\AutowireableFactory\NotServiceTarget::class, $subject->serviceTarget);
-        $this->assertSame('quarters', $subject->value);
+        $this->assertInstanceOf(Fixtures::autowireableFactoryServices()->barImplementation()->getName(), $subject->foo);
+        $this->assertSame('quarters', $subject->scalar);
     }
 
     public function testBackingContainerInstanceOf() {

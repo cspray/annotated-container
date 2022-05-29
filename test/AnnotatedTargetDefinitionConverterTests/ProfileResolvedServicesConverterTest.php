@@ -6,13 +6,14 @@ use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
 use function Cspray\Typiphy\objectType;
 
 class ProfileResolvedServicesConverterTest extends AnnotatedTargetDefinitionConverterTestCase {
 
     protected function getSubjectTarget(): AnnotatedTarget {
-        return $this->getAnnotatedTarget(AttributeType::Service, new ReflectionClass(DummyApps\ProfileResolvedServices\DevFooImplementation::class));
+        return $this->getAnnotatedTarget(AttributeType::Service, new ReflectionClass(Fixtures::profileResolvedServices()->devImplementation()->getName()));
     }
 
     public function testGetServiceDefinitionInstance() {
@@ -20,7 +21,7 @@ class ProfileResolvedServicesConverterTest extends AnnotatedTargetDefinitionConv
     }
 
     public function testGetServiceDefinitionType() {
-        $this->assertSame(objectType(DummyApps\ProfileResolvedServices\DevFooImplementation::class), $this->definition->getType());
+        $this->assertSame(Fixtures::profileResolvedServices()->devImplementation(), $this->definition->getType());
     }
 
     public function testServiceIsConcrete() {
