@@ -102,4 +102,8 @@ final class Fixtures {
         return new AutowireableFactoryServicesFixture();
     }
 
+    public static function injectNamedServices() : InjectNamedServicesFixture {
+        return new InjectNamedServicesFixture();
+    }
+
 }
