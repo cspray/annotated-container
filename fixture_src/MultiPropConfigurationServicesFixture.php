@@ -5,14 +5,14 @@ namespace Cspray\AnnotatedContainerFixture;
 use Cspray\Typiphy\ObjectType;
 use function Cspray\Typiphy\objectType;
 
-final class ConfigurationServicesFixture implements Fixture {
+class MultiPropConfigurationServicesFixture implements Fixture {
 
     public function getPath() : string {
-        return __DIR__ . '/ConfigurationServices';
+        return __DIR__ . '/MultiPropConfigurationServices';
     }
 
     public function myConfig() : ObjectType {
-        return objectType(ConfigurationServices\MyConfig::class);
+        return objectType(MultiPropConfigurationServices\MyConfig::class);
     }
 
 }

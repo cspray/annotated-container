@@ -54,6 +54,10 @@ class PhpDiContainerFactory implements ContainerFactory {
             if (!is_null($serviceDefinition->getName())) {
                 $serviceTypes[] = $serviceDefinition->getName();
             }
+            $definitions[$serviceDefinition->getType()->getName()] = autowire();
+            if (!is_null($serviceDefinition->getName())) {
+                $definitions[$serviceDefinition->getName()] = get($serviceDefinition->getType()->getName());
+            }
         }
 
         $aliasedTypes = [];

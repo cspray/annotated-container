@@ -264,4 +264,23 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $this->assertSame($container, $container->get(AutowireableFactory::class));
     }
 
+    public function testNamedServicesShared() : void {
+        $container = $this->getContainer(Fixtures::injectNamedServices()->getPath());
+
+        $namedService = $container->get('bar');
+        $typedService = $container->get(Fixtures::injectNamedServices()->barImplementation()->getName());
+
+        $this->assertSame($namedService, $typedService);
+    }
+
+    public function testInjectingNamedServices() : void {
+        $container = $this->getContainer(Fixtures::injectNamedServices()->getPath());
+
+        /** @var AnnotatedContainerFixture\InjectNamedServices\ServiceConsumer $service */
+        $service = $container->get(Fixtures::injectNamedServices()->serviceConsumer()->getName());
+
+        $this->assertInstanceOf(Fixtures::injectNamedServices()->fooImplementation()->getName(), $service->foo);
+        $this->assertInstanceOf(Fixtures::injectNamedServices()->barImplementation()->getName(), $service->bar);
+    }
+
 }

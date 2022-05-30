@@ -102,4 +102,12 @@ final class Fixtures {
         return new AutowireableFactoryServicesFixture();
     }
 
+    public static function injectNamedServices() : InjectNamedServicesFixture {
+        return new InjectNamedServicesFixture();
+    }
+
+    public static function multiPropConfigurationServices() : MultiPropConfigurationServicesFixture {
+        return new MultiPropConfigurationServicesFixture();
+    }
+
 }

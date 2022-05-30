@@ -4,8 +4,6 @@ namespace Cspray\AnnotatedContainer\AnnotatedTargetParserTests;
 
 use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Inject;
-use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
-use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
 class SimpleConfigurationParserTest extends AnnotatedTargetParserTestCase {
@@ -15,7 +13,7 @@ class SimpleConfigurationParserTest extends AnnotatedTargetParserTestCase {
     }
 
     public function testCountExpectedTargets() {
-        $this->assertCount(9, $this->targets);
+        $this->assertCount(6, $this->targets);
     }
 
     public function testConfigurationReflectionTargetGetName() {
