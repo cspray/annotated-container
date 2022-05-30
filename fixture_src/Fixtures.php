@@ -106,4 +106,8 @@ final class Fixtures {
         return new InjectNamedServicesFixture();
     }
 
+    public static function multiPropConfigurationServices() : MultiPropConfigurationServicesFixture {
+        return new MultiPropConfigurationServicesFixture();
+    }
+
 }

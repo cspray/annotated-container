@@ -9,35 +9,35 @@ use Cspray\AnnotatedContainerFixture\Fixtures;
 class MultiplePropsConfigurationParserTest extends AnnotatedTargetParserTestCase {
 
     protected function getDirectories() : array {
-        return [Fixtures::configurationServices()->getPath()];
+        return [Fixtures::multiPropConfigurationServices()->getPath()];
     }
 
     public function testCountExpectedTargets() {
-        $this->assertCount(9, $this->targets);
+        $this->assertCount(3, $this->targets);
     }
 
     public function testConfigurationReflectionTargetGetName() {
-        $annotatedTarget = $this->targets[8];
+        $annotatedTarget = $this->targets[2];
 
-        $this->assertSame(Fixtures::configurationServices()->multiPropConfig()->getName(), $annotatedTarget->getTargetReflection()->getName());
+        $this->assertSame(Fixtures::multiPropConfigurationServices()->myConfig()->getName(), $annotatedTarget->getTargetReflection()->getName());
     }
 
     public function testConfigurationReflectionAttributeGetName() {
-        $annotatedTarget = $this->targets[8];
+        $annotatedTarget = $this->targets[2];
 
         $this->assertSame(Configuration::class, $annotatedTarget->getAttributeReflection()->getName());
     }
 
     public function testConfigurationReflectionAttributeInstanceOf() {
-        $annotatedTarget = $this->targets[8];
+        $annotatedTarget = $this->targets[2];
 
         $this->assertInstanceOf(Configuration::class, $annotatedTarget->getAttributeInstance());
     }
 
     public function injectNameProvider() : array {
         return [
-            [6, 'foo'],
-            [7, 'bar']
+            [0, 'foo'],
+            [1, 'bar']
         ];
     }
 
@@ -52,8 +52,8 @@ class MultiplePropsConfigurationParserTest extends AnnotatedTargetParserTestCase
 
     public function injectInstanceOfProvider() : array {
         return [
-            [6, Inject::class],
-            [7, Inject::class]
+            [0, Inject::class],
+            [1, Inject::class]
         ];
     }
 
@@ -68,8 +68,8 @@ class MultiplePropsConfigurationParserTest extends AnnotatedTargetParserTestCase
 
     public function injectValueProvider() : array {
         return [
-            [6, 'baz'],
-            [7, 'baz'],
+            [0, 'baz'],
+            [1, 'baz'],
         ];
     }
 
@@ -84,8 +84,8 @@ class MultiplePropsConfigurationParserTest extends AnnotatedTargetParserTestCase
 
     public function injectProfilesProvider() : array {
         return [
-            [6, []],
-            [7, []]
+            [0, []],
+            [1, []]
         ];
     }
 

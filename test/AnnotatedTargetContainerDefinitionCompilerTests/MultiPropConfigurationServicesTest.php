@@ -13,70 +13,47 @@ use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\Ha
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
-use function Cspray\Typiphy\boolType;
-use function Cspray\Typiphy\intType;
 use function Cspray\Typiphy\stringType;
 
-class ConfigurationServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class MultiPropConfigurationServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
 
     use HasConfigurationDefinitionTestsTrait,
         HasInjectDefinitionTestsTrait;
 
-    use HasNoAliasDefinitionsTrait,
+    use HasNoServicePrepareDefinitionsTrait,
         HasNoServiceDelegateDefinitionsTrait,
-        HasNoServicePrepareDefinitionsTrait,
+        HasNoAliasDefinitionsTrait,
         HasNoServiceDefinitionsTrait;
 
     protected function getFixtures() : array|Fixture {
-        return Fixtures::configurationServices();
+        return Fixtures::multiPropConfigurationServices();
     }
 
     protected function configurationTypeProvider() : array {
         return [
-            [new ExpectedConfigurationType(Fixtures::configurationServices()->myConfig())]
+            [new ExpectedConfigurationType(Fixtures::multiPropConfigurationServices()->myConfig())]
         ];
     }
 
     protected function configurationNameProvider() : array {
         return [
-            [new ExpectedConfigurationName(Fixtures::configurationServices()->myConfig(), null)]
+            [new ExpectedConfigurationName(Fixtures::multiPropConfigurationServices()->myConfig(), null)]
         ];
     }
 
     protected function injectProvider() : array {
         return [
             [ExpectedInject::forClassProperty(
-                Fixtures::configurationServices()->myConfig(),
-                'key',
+                Fixtures::multiPropConfigurationServices()->myConfig(),
+                'foo',
                 stringType(),
-                'my-api-key'
+                'baz'
             )],
             [ExpectedInject::forClassProperty(
-                Fixtures::configurationServices()->myConfig(),
-                'port',
-                intType(),
-                1234
-            )],
-            [ExpectedInject::forClassProperty(
-                Fixtures::configurationServices()->myConfig(),
-                'user',
+                Fixtures::multiPropConfigurationServices()->myConfig(),
+                'bar',
                 stringType(),
-                'USER',
-                store: 'env'
-            )],
-            [ExpectedInject::forClassProperty(
-                Fixtures::configurationServices()->myConfig(),
-                'testMode',
-                boolType(),
-                true,
-                profiles: ['dev', 'test']
-            )],
-            [ExpectedInject::forClassProperty(
-                Fixtures::configurationServices()->myConfig(),
-                'testMode',
-                boolType(),
-                false,
-                ['prod']
+                'baz'
             )]
         ];
     }

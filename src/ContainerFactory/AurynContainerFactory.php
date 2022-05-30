@@ -19,6 +19,7 @@ use Cspray\AnnotatedContainer\HasBackingContainer;
 use Cspray\AnnotatedContainer\ParameterStore;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\Typiphy\ObjectType;
 use Psr\Container\ContainerInterface;
 
@@ -87,7 +88,7 @@ final class AurynContainerFactory implements ContainerFactory {
             }
         }
 
-        return new class($this->createInjector($containerDefinition, $activeProfiles), $nameTypeMap) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
+        return new class($this->createInjector($containerDefinition, $activeProfiles, $nameTypeMap), $nameTypeMap) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
 
             public function __construct(private readonly Injector $injector, private readonly array $nameTypeMap) {
                 $this->injector->delegate(AutowireableFactory::class, fn() => $this);
@@ -103,7 +104,7 @@ final class AurynContainerFactory implements ContainerFactory {
                     }
 
                     if (isset($this->nameTypeMap[$id])) {
-                        $id = $this->nameTypeMap[$id];
+                        $id = $this->nameTypeMap[$id]->getName();
                     }
                     return $this->injector->make($id);
                 } catch (InjectionException $injectionException) {
@@ -144,7 +145,7 @@ final class AurynContainerFactory implements ContainerFactory {
         };
     }
 
-    private function createInjector(ContainerDefinition $containerDefinition, array $activeProfiles) : Injector {
+    private function createInjector(ContainerDefinition $containerDefinition, array $activeProfiles, array $nameTypeMap) : Injector {
         $injector = new Injector();
         $servicePrepareDefinitions = $containerDefinition->getServicePrepareDefinitions();
         $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
@@ -208,7 +209,7 @@ final class AurynContainerFactory implements ContainerFactory {
         }
         unset($aliasedTypes);
 
-        $definitionMap = $this->mapInjectDefinitions($containerDefinition, $activeProfiles);
+        $definitionMap = $this->mapInjectDefinitions($containerDefinition, $activeProfiles, $nameTypeMap);
         foreach ($definitionMap as $service => $methods) {
             if (array_key_exists('__construct', $methods)) {
                 $injector->define($service, $methods['__construct']);
@@ -241,7 +242,7 @@ final class AurynContainerFactory implements ContainerFactory {
         return $injector;
     }
 
-    private function mapInjectDefinitions(ContainerDefinition $containerDefinition, array $activeProfiles) : array {
+    private function mapInjectDefinitions(ContainerDefinition $containerDefinition, array $activeProfiles, array $nameTypeMap) : array {
         $definitionMap = [];
         foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
             $injectProfiles = empty($injectDefinition->getProfiles()) ? ['default'] : $injectDefinition->getProfiles();
@@ -259,12 +260,15 @@ final class AurynContainerFactory implements ContainerFactory {
                 $definitionMap[$serviceType][$method] = [];
             }
 
+            $value = $injectDefinition->getValue();
             if ($injectDefinition->getType() instanceof ObjectType) {
                 $key = $injectDefinition->getTargetIdentifier()->getName();
+                if (isset($nameTypeMap[$value])) {
+                    $value = $nameTypeMap[$value]->getName();
+                }
             } else {
                 $key = ':' . $injectDefinition->getTargetIdentifier()->getName();
             }
-            $value = $injectDefinition->getValue();
             if (!is_null($injectDefinition->getStoreName())) {
                 $parameterStore = $this->parameterStores[$injectDefinition->getStoreName()] ?? null;
                 if (is_null($parameterStore)) {
