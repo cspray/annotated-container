@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [0.5.0](https://github.com/cspray/annotated-container/tree/v.0.5.0) - 2022-06-04
+
+### Added
+
+- A new `fixture_src/` directory that stores example source code used for the automated test suite.
+- Several improvements to the way that Fixtures are handled in the test suite such that the code examples in `fixture_src/` have a first-class representation in the test suite through the `Cspray\AnnotatedContainerFixture\Fixtures` class.
+- Implementations for 
+
+### Changed
+
+- Improved many test cases, especially testing definition creation, to be more thorough and improve the test:assertion ratio.
+
+### Fixed
+
+- A bug where fetching a named service by name and then by type would result in non-shared instances.
+- A bug where injecting services by name would not work appropriately.
+
+### Removed
+
+- Removed reliance on the `cspray/annotated-container-dummy-apps` package. All code required for the test suite is located in the newly added `fixture_src/` directory.
+
 ## [0.4.0](https://github.com/cspray/annotated-container/tree/v0.4.0) - 2022-05-08
 
 > This version introduces many backwards breaking changes. This release also represents a significant step towards a stable API. This level of BC break is not expected in future versions.
