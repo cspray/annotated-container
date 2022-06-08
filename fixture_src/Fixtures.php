@@ -110,4 +110,8 @@ final class Fixtures {
         return new MultiPropConfigurationServicesFixture();
     }
 
+    public static function injectServiceIntersectConstructorServices() : InjectServiceIntersectConstructorServicesFixture {
+        return new InjectServiceIntersectConstructorServicesFixture();
+    }
+
 }

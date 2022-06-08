@@ -7,6 +7,7 @@ use Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier;
 use Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
+use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
 
 final class InjectDefinitionBuilder {
@@ -15,7 +16,7 @@ final class InjectDefinitionBuilder {
     private string $method;
     private string $paramName;
     private string $property;
-    private Type|TypeUnion $type;
+    private Type|TypeUnion|TypeIntersect $type;
     private mixed $value;
     private bool $isValueCalled = false;
     private array $profiles = [];
@@ -29,7 +30,7 @@ final class InjectDefinitionBuilder {
         return $instance;
     }
 
-    public function withMethod(string $method, Type|TypeUnion $type, string $paramName) : self {
+    public function withMethod(string $method, Type|TypeUnion|TypeIntersect $type, string $paramName) : self {
         $instance = clone $this;
         $instance->method = $method;
         $instance->paramName = $paramName;
@@ -85,7 +86,7 @@ final class InjectDefinitionBuilder {
 
             public function __construct(
                 private readonly InjectTargetIdentifier $targetIdentifier,
-                private readonly Type|TypeUnion $type,
+                private readonly Type|TypeUnion|TypeIntersect $type,
                 private readonly mixed $annotationValue,
                 private readonly ?string $store,
                 private readonly array $profiles
@@ -95,7 +96,7 @@ final class InjectDefinitionBuilder {
                 return $this->targetIdentifier;
             }
 
-            public function getType() : Type|TypeUnion {
+            public function getType() : Type|TypeUnion|TypeIntersect {
                 return $this->type;
             }
 

@@ -7,6 +7,7 @@ use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\Typiphy\Type;
 use ReflectionNamedType;
+use ReflectionUnionType;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\floatType;
@@ -15,6 +16,7 @@ use function Cspray\Typiphy\mixedType;
 use function Cspray\Typiphy\nullType;
 use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
+use function Cspray\Typiphy\typeIntersect;
 use function Cspray\Typiphy\typeUnion;
 
 /**
@@ -98,7 +100,11 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             foreach ($targetReflection->getType()->getTypes() as $type) {
                 $types[] = $this->convertReflectionNamedType($type);
             }
-            $paramType = typeUnion(...$types);
+            if ($targetReflection->getType() instanceof ReflectionUnionType) {
+                $paramType = typeUnion(...$types);
+            } else {
+                $paramType = typeIntersect(...$types);
+            }
         }
         $builder = InjectDefinitionBuilder::forService($serviceType)
             ->withMethod($method, $paramType, $param)
