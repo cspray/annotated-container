@@ -48,6 +48,7 @@ class PhpDiContainerFactory implements ContainerFactory {
         }
         $containerBuilder = new ContainerBuilder();
         $definitions = [];
+        $nonSharedServices = [];
         $serviceTypes = [AutowireableFactory::class];
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             $serviceTypes[] = $serviceDefinition->getType()->getName();
@@ -55,6 +56,7 @@ class PhpDiContainerFactory implements ContainerFactory {
                 $serviceTypes[] = $serviceDefinition->getName();
             }
             $definitions[$serviceDefinition->getType()->getName()] = autowire();
+            $nonSharedServices[] = $serviceDefinition->getType()->getName();
             if (!is_null($serviceDefinition->getName())) {
                 $definitions[$serviceDefinition->getName()] = get($serviceDefinition->getType()->getName());
             }
@@ -151,9 +153,13 @@ class PhpDiContainerFactory implements ContainerFactory {
         $containerBuilder->addDefinitions($definitions);
         $containerBuilder->addDefinitions($servicePrepareDefinitions);
         $container = $containerBuilder->build();
-        return new class($container, $serviceTypes) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
+        return new class($container, $serviceTypes, $nonSharedServices) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
 
-            public function __construct(private readonly Container $container, private readonly array $serviceTypes) {
+            public function __construct(
+                private readonly Container $container,
+                private readonly array $serviceTypes,
+                private readonly array $nonSharedServices
+            ) {
                 $this->container->set(AutowireableFactory::class, $this);
             }
 
@@ -175,7 +181,14 @@ class PhpDiContainerFactory implements ContainerFactory {
                         $id
                     ));
                 }
-                return $this->container->get($id);
+
+                $service = $this->container->get($id);
+                if (in_array($id, $this->nonSharedServices)) {
+                    (function() use($id) {
+                        $this->resolvedEntries[$id] = null;
+                    })->call($this->container);
+                }
+                return $service;
             }
 
             public function has(string $id) : bool {

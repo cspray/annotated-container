@@ -321,4 +321,13 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $this->assertInstanceOf(Fixtures::injectNamedServices()->barImplementation()->getName(), $service->bar);
     }
 
+    public function testCreatingNonSharedServices() : void {
+        $container = $this->getContainer(Fixtures::nonSharedServices()->getPath());
+
+        $a = $container->get(Fixtures::nonSharedServices()->fooImplementation()->getName());
+        $b = $container->get(Fixtures::nonSharedServices()->fooImplementation()->getName());
+
+        $this->assertNotSame($a, $b);
+    }
+
 }
