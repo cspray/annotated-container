@@ -7,6 +7,7 @@ use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\Typiphy\Type;
 use ReflectionNamedType;
+use ReflectionUnionType;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\floatType;
@@ -15,6 +16,7 @@ use function Cspray\Typiphy\mixedType;
 use function Cspray\Typiphy\nullType;
 use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
+use function Cspray\Typiphy\typeIntersect;
 use function Cspray\Typiphy\typeUnion;
 
 /**
@@ -98,7 +100,11 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             foreach ($targetReflection->getType()->getTypes() as $type) {
                 $types[] = $this->convertReflectionNamedType($type);
             }
-            $paramType = typeUnion(...$types);
+            if ($targetReflection->getType() instanceof ReflectionUnionType) {
+                $paramType = typeUnion(...$types);
+            } else {
+                $paramType = typeIntersect(...$types);
+            }
         }
         $builder = InjectDefinitionBuilder::forService($serviceType)
             ->withMethod($method, $paramType, $param)
@@ -117,8 +123,21 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
 
     private function buildPropertyInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
         $builder = InjectDefinitionBuilder::forService(objectType($target->getTargetReflection()->getDeclaringClass()->getName()));
+        if ($target->getTargetReflection()->getType() instanceof ReflectionNamedType) {
+            $propType = $this->convertReflectionNamedType($target->getTargetReflection()->getType());
+        } else {
+            $types = [];
+            foreach ($target->getTargetReflection()->getType()->getTypes() as $reflectionType) {
+                $types[] = $this->convertReflectionNamedType($reflectionType);
+            }
+            if ($target->getTargetReflection()->getType() instanceof \ReflectionIntersectionType) {
+                $propType = typeIntersect(...$types);
+            } else {
+                $propType = typeUnion(...$types);
+            }
+        }
         $builder = $builder->withProperty(
-            $this->convertReflectionNamedType($target->getTargetReflection()->getType()),
+            $propType,
             $target->getTargetReflection()->getName()
         );
         $builder = $builder->withValue($target->getAttributeInstance()->value);
@@ -144,5 +163,6 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             default => objectType($type)
         };
     }
+
 
 }

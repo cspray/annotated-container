@@ -3,13 +3,14 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\Typiphy\Type;
+use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
 
 interface InjectDefinition {
 
     public function getTargetIdentifier() : InjectTargetIdentifier;
 
-    public function getType() : Type|TypeUnion;
+    public function getType() : Type|TypeUnion|TypeIntersect;
 
     public function getValue() : mixed;
 

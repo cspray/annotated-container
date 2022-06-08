@@ -110,4 +110,16 @@ final class Fixtures {
         return new MultiPropConfigurationServicesFixture();
     }
 
+    public static function injectServiceIntersectConstructorServices() : InjectServiceIntersectConstructorServicesFixture {
+        return new InjectServiceIntersectConstructorServicesFixture();
+    }
+
+    public static function injectUnionCustomStoreServices() : InjectUnionCustomStoreServicesFixture {
+        return new InjectUnionCustomStoreServicesFixture();
+    }
+
+    public static function injectIntersectCustomStoreServices() : InjectIntersectCustomStoreServicesFixture {
+        return new InjectIntersectCustomStoreServicesFixture();
+    }
+
 }

@@ -11,7 +11,7 @@ final class InjectCustomStoreServicesFixture implements Fixture {
         return __DIR__ . '/InjectCustomStoreServices';
     }
 
-    public function fooImplementation() : ObjectType {
-        return objectType(InjectCustomStoreServices\FooImplementation::class);
+    public function scalarInjector() : ObjectType {
+        return objectType(InjectCustomStoreServices\ScalarInjector::class);
     }
 }
