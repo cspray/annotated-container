@@ -38,7 +38,7 @@ final class InjectDefinitionBuilder {
         return $instance;
     }
 
-    public function withProperty(Type $type, string $name) : self {
+    public function withProperty(Type|TypeUnion|TypeIntersect $type, string $name) : self {
         $instance = clone $this;
         $instance->type = $type;
         $instance->property = $name;

@@ -123,8 +123,21 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
 
     private function buildPropertyInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
         $builder = InjectDefinitionBuilder::forService(objectType($target->getTargetReflection()->getDeclaringClass()->getName()));
+        if ($target->getTargetReflection()->getType() instanceof ReflectionNamedType) {
+            $propType = $this->convertReflectionNamedType($target->getTargetReflection()->getType());
+        } else {
+            $types = [];
+            foreach ($target->getTargetReflection()->getType()->getTypes() as $reflectionType) {
+                $types[] = $this->convertReflectionNamedType($reflectionType);
+            }
+            if ($target->getTargetReflection()->getType() instanceof \ReflectionIntersectionType) {
+                $propType = typeIntersect(...$types);
+            } else {
+                $propType = typeUnion(...$types);
+            }
+        }
         $builder = $builder->withProperty(
-            $this->convertReflectionNamedType($target->getTargetReflection()->getType()),
+            $propType,
             $target->getTargetReflection()->getName()
         );
         $builder = $builder->withValue($target->getAttributeInstance()->value);
@@ -150,5 +163,6 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             default => objectType($type)
         };
     }
+
 
 }

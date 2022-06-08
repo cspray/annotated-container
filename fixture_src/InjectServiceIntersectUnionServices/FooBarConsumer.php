@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainerFixture\InjectServiceIntersectConstructorServices;
+namespace Cspray\AnnotatedContainerFixture\InjectServiceIntersectUnionServices;
 
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Attribute\Service;

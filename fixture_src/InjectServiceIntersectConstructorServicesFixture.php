@@ -8,22 +8,30 @@ use function Cspray\Typiphy\objectType;
 final class InjectServiceIntersectConstructorServicesFixture implements Fixture {
 
     public function getPath() : string {
-        return __DIR__ . '/InjectServiceIntersectConstructorServices';
+        return __DIR__ . '/InjectServiceIntersectUnionServices';
     }
 
     public function fooInterface() : ObjectType {
-        return objectType(InjectServiceIntersectConstructorServices\FooInterface::class);
+        return objectType(InjectServiceIntersectUnionServices\FooInterface::class);
     }
 
     public function barInterface() : ObjectType {
-        return objectType(InjectServiceIntersectConstructorServices\BarInterface::class);
+        return objectType(InjectServiceIntersectUnionServices\BarInterface::class);
     }
 
     public function fooBarImplementation() : ObjectType {
-        return objectType(InjectServiceIntersectConstructorServices\FooBarImplementation::class);
+        return objectType(InjectServiceIntersectUnionServices\FooBarImplementation::class);
+    }
+
+    public function barImplementation() : ObjectType {
+        return objectType(InjectServiceIntersectUnionServices\BarImplementation::class);
     }
 
     public function fooBarConsumer() : ObjectType {
-        return objectType(InjectServiceIntersectConstructorServices\FooBarConsumer::class);
+        return objectType(InjectServiceIntersectUnionServices\FooBarConsumer::class);
+    }
+
+    public function fooBarConfiguration() : ObjectType {
+        return objectType(InjectServiceIntersectUnionServices\FooBarConfiguration::class);
     }
 }
