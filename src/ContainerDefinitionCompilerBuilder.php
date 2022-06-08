@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
+
 /**
  * A convenience builder to allow easily getting a ContainerDefinitionCompiler instance.
  */
@@ -46,7 +48,7 @@ final class ContainerDefinitionCompilerBuilder {
      */
     public function build() : ContainerDefinitionCompiler {
         $phpParserCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-            new StaticAnalysisAnnotatedTargetParser(),
+            new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
         if (!isset($this->cacheDir)) {

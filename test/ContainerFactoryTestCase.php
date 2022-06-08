@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +22,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
     private function getContainerDefinitionCompiler() : ContainerDefinitionCompiler {
         return new AnnotatedTargetContainerDefinitionCompiler(
-            new StaticAnalysisAnnotatedTargetParser(),
+            new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
     }

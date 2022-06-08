@@ -2,13 +2,11 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
-use Cspray\AnnotatedContainer\AnnotatedTarget;
+use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
-use function Cspray\Typiphy\objectType;
 
 class NamedServiceConverterTest extends AnnotatedTargetDefinitionConverterTestCase {
 

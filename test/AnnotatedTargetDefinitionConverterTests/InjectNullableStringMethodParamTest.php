@@ -2,17 +2,11 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
-use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainerFixture\Fixtures;
-use function Cspray\Typiphy\arrayType;
-use function Cspray\Typiphy\boolType;
-use function Cspray\Typiphy\floatType;
-use function Cspray\Typiphy\intType;
+use Cspray\AnnotatedTarget\AnnotatedTarget;
 use function Cspray\Typiphy\nullType;
-use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 use function Cspray\Typiphy\typeUnion;
 

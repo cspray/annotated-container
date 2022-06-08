@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
-use Cspray\AnnotatedContainer\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Attribute\Configuration;
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Attribute\Service;
@@ -15,6 +14,7 @@ use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
+use Cspray\AnnotatedTarget\AnnotatedTarget;
 use PHPUnit\Framework\TestCase;
 use ReflectionAttribute;
 use ReflectionClass;

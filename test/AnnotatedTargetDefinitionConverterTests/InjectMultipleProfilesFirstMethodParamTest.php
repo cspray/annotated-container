@@ -2,12 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
-use Cspray\AnnotatedContainer\AnnotatedTarget;
+use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\DummyApps;
 use Cspray\AnnotatedContainerFixture\Fixtures;
-use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
 class InjectMultipleProfilesFirstMethodParamTest extends AnnotatedTargetDefinitionConverterTestCase {
