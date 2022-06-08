@@ -4,8 +4,12 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedContainer\Internal\AttributeType;
+use Cspray\AnnotatedTarget\AnnotatedTargetParser;
+use Cspray\AnnotatedTarget\AnnotatedTargetParserOptionsBuilder;
 use Cspray\Typiphy\ObjectType;
 use stdClass;
+use function Cspray\Typiphy\objectType;
 
 /**
  * A ContainerDefinitionCompiler that utilizes the AnnotatedTarget concept by parsing given source code directories and
@@ -50,7 +54,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $consumer->serviceDelegateDefinitions = [];
         $consumer->injectDefinitions = [];
         $consumer->configurationDefinitions = [];
-        foreach ($this->annotatedTargetCompiler->parse($containerDefinitionCompileOptions->getScanDirectories()) as $target) {
+        $attributeTypes = array_map(fn(AttributeType $attributeType) => objectType($attributeType->value), AttributeType::cases());
+        $options = AnnotatedTargetParserOptionsBuilder::scanDirectories(...$containerDefinitionCompileOptions->getScanDirectories())
+            ->filterAttributes(...$attributeTypes)
+            ->build();
+        foreach ($this->annotatedTargetCompiler->parse($options) as $target) {
             $definition = $this->definitionConverter->convert($target);
             match (true) {
                 $definition instanceof ServiceDefinition => $consumer->serviceDefinitions[] = $definition,

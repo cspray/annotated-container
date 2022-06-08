@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use Cspray\Typiphy\ObjectType;
 
-class ServicePrepareDefinitionBuilder {
+final class ServicePrepareDefinitionBuilder {
 
     private ObjectType $service;
     private string $method;

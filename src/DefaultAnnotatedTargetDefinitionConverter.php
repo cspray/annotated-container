@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
+use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\Typiphy\Type;
 use ReflectionNamedType;
 use function Cspray\Typiphy\arrayType;

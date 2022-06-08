@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedTarget\AnnotatedTarget;
+
 /**
  * Responsible for converting an AnnotatedTarget into the appropriate definition object.
  */

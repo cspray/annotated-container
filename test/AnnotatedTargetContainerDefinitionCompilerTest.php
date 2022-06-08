@@ -2,9 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 
 class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
@@ -15,7 +15,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
     public function setUp() : void {
         $this->subject = new AnnotatedTargetContainerDefinitionCompiler(
-            new StaticAnalysisAnnotatedTargetParser(),
+            new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
     }

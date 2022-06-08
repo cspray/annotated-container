@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-class CsvActiveProfilesParser implements ActiveProfilesParser {
+final class CsvActiveProfilesParser implements ActiveProfilesParser {
 
     public function parse(string $profiles) : array {
         if (empty($profiles)) {

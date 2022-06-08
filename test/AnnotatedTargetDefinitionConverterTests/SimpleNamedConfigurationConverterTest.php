@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
-use Cspray\AnnotatedContainer\AnnotatedTarget;
+use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainerFixture\Fixtures;

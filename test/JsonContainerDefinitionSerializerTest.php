@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 
 class JsonContainerDefinitionSerializerTest extends TestCase {
@@ -12,7 +13,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
     protected function setUp(): void {
         $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-            new StaticAnalysisAnnotatedTargetParser(),
+            new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
         $this->subject = new JsonContainerDefinitionSerializer();

@@ -8,8 +8,8 @@ use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
 use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
-use Cspray\AnnotatedContainer\StaticAnalysisAnnotatedTargetParser;
 use Cspray\AnnotatedContainerFixture\Fixture;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 
 abstract class AnnotatedTargetContainerDefinitionCompilerTestCase extends TestCase {
@@ -25,7 +25,7 @@ abstract class AnnotatedTargetContainerDefinitionCompilerTestCase extends TestCa
 
     protected function setUp() : void {
         $compiler = new AnnotatedTargetContainerDefinitionCompiler(
-            new StaticAnalysisAnnotatedTargetParser(),
+            new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
 

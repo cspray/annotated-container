@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +20,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     protected function setUp(): void {
         $this->cacheAwareContainerDefinitionCompiler = new CacheAwareContainerDefinitionCompiler(
             $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-                new StaticAnalysisAnnotatedTargetParser(),
+                new PhpParserAnnotatedTargetParser(),
                 new DefaultAnnotatedTargetDefinitionConverter()
             ),
             $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
@@ -71,7 +72,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $dir = Fixtures::implicitAliasedServices()->getPath();
         $subject = new CacheAwareContainerDefinitionCompiler(
             $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
-                new StaticAnalysisAnnotatedTargetParser(),
+                new PhpParserAnnotatedTargetParser(),
                 new DefaultAnnotatedTargetDefinitionConverter()
             ),
             $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),

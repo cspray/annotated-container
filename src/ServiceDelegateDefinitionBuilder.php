@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use Cspray\Typiphy\ObjectType;
 
-class ServiceDelegateDefinitionBuilder {
+final class ServiceDelegateDefinitionBuilder {
 
     private ObjectType $service;
     private ObjectType $delegateType;
