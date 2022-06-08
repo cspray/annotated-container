@@ -114,4 +114,12 @@ final class Fixtures {
         return new InjectServiceIntersectConstructorServicesFixture();
     }
 
+    public static function injectUnionCustomStoreServices() : InjectUnionCustomStoreServicesFixture {
+        return new InjectUnionCustomStoreServicesFixture();
+    }
+
+    public static function injectIntersectCustomStoreServices() : InjectIntersectCustomStoreServicesFixture {
+        return new InjectIntersectCustomStoreServicesFixture();
+    }
+
 }

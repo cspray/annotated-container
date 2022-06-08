@@ -9,6 +9,8 @@ use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
+use Cspray\Typiphy\TypeIntersect;
+use Cspray\Typiphy\TypeUnion;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -169,19 +171,54 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
     public function testCreateArbitraryStorePresent() {
         $parameterStore = new class implements ParameterStore {
-
             public function getName(): string {
                 return 'test-store';
             }
 
-            public function fetch(Type $type, string $key): mixed {
+            public function fetch(Type|TypeUnion|TypeIntersect $type, string $key) : mixed {
                 return $key . '_test_store';
             }
         };
         $container = $this->getContainer(Fixtures::injectCustomStoreServices()->getPath(), parameterStore: $parameterStore);
 
-        $subject = $container->get(Fixtures::injectCustomStoreServices()->fooImplementation()->getName());
+        $subject = $container->get(Fixtures::injectCustomStoreServices()->scalarInjector()->getName());
         $this->assertSame('key_test_store', $subject->key);
+    }
+
+    public function testCreateArbitraryStoreWithUnionType() {
+        $parameterStore = new class implements ParameterStore {
+            public function getName() : string {
+                return 'union-store';
+            }
+
+            public function fetch(Type|TypeUnion|TypeIntersect $type, string $key) : mixed {
+                $type = Fixtures::injectUnionCustomStoreServices()->fooImplementation()->getName();
+                return new $type();
+            }
+        };
+
+        $container = $this->getContainer(Fixtures::injectUnionCustomStoreServices()->getPath(), parameterStore: $parameterStore);
+        $subject = $container->get(Fixtures::injectUnionCustomStoreServices()->unionInjector()->getName());
+
+        $this->assertInstanceOf(Fixtures::injectUnionCustomStoreServices()->fooImplementation()->getName(), $subject->fooOrBar);
+    }
+
+    public function testCreateArbitraryStoreWithIntersectType() {
+        $parameterStore = new class implements ParameterStore {
+            public function getName() : string {
+                return 'intersect-store';
+            }
+
+            public function fetch(Type|TypeUnion|TypeIntersect $type, string $key) : mixed {
+                $type = Fixtures::injectIntersectCustomStoreServices()->fooBarImplementation()->getName();
+                return new $type();
+            }
+        };
+
+        $container = $this->getContainer(Fixtures::injectIntersectCustomStoreServices()->getPath(), parameterStore: $parameterStore);
+        $subject = $container->get(Fixtures::injectIntersectCustomStoreServices()->intersectInjector()->getName());
+
+        $this->assertInstanceOf(Fixtures::injectIntersectCustomStoreServices()->fooBarImplementation()->getName(), $subject->fooAndBar);
     }
 
     public function testCreateArbitraryStoreNotPresent() {
