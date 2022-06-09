@@ -84,8 +84,8 @@ class ClassOnlyPrepareServicesTest extends AnnotatedTargetContainerDefinitionCom
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::classOnlyPrepareServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::classOnlyPrepareServices()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::classOnlyPrepareServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::classOnlyPrepareServices()->fooImplementation(), ['default'])]
         ];
     }
 

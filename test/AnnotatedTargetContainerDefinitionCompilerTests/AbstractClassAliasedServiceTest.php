@@ -84,8 +84,8 @@ class AbstractClassAliasedServiceTest extends AnnotatedTargetContainerDefinition
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::abstractClassAliasedService()->fooAbstract(), [])],
-            [new ExpectedServiceProfiles(Fixtures::abstractClassAliasedService()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::abstractClassAliasedService()->fooAbstract(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::abstractClassAliasedService()->fooImplementation(), ['default'])]
         ];
     }
 

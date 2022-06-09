@@ -19,15 +19,15 @@ final class ExpectedInject {
         public readonly ?string $store = null
     ) {}
 
-    public static function forConstructParam(ObjectType $service, string $param, Type|TypeUnion $type, mixed $value, array $profiles = [], ?string $store = null) : ExpectedInject {
+    public static function forConstructParam(ObjectType $service, string $param, Type|TypeUnion $type, mixed $value, array $profiles = ['default'], ?string $store = null) : ExpectedInject {
         return self::forMethodParam($service, '__construct', $param, $type, $value, $profiles, $store);
     }
 
-    public static function forMethodParam(ObjectType $service, string $method, string $param, Type|TypeUnion $type, mixed $value, array $profiles = [], ?string $store = null) : ExpectedInject {
+    public static function forMethodParam(ObjectType $service, string $method, string $param, Type|TypeUnion $type, mixed $value, array $profiles = ['default'], ?string $store = null) : ExpectedInject {
         return new self($service, InjectTargetType::MethodParameter, $param, $value, $type, $method, $profiles, $store);
     }
 
-    public static function forClassProperty(ObjectType $service, string $property, Type $type, mixed $value, array $profiles = [], ?string $store = null) : ExpectedInject {
+    public static function forClassProperty(ObjectType $service, string $property, Type $type, mixed $value, array $profiles = ['default'], ?string $store = null) : ExpectedInject {
         return new self($service, InjectTargetType::ClassProperty, $property, $value, $type, profiles: $profiles, store: $store);
     }
 

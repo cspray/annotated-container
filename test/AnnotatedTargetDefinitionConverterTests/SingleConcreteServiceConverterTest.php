@@ -44,6 +44,6 @@ class SingleConcreteServiceConverterTest extends AnnotatedTargetDefinitionConver
     }
 
     public function testServiceProfiles() {
-        $this->assertSame([], $this->definition->getProfiles());
+        $this->assertSame(['default'], $this->definition->getProfiles());
     }
 }

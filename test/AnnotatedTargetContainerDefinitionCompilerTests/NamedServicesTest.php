@@ -83,8 +83,8 @@ class NamedServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCa
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::namedServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::namedServices()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::namedServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::namedServices()->fooImplementation(), ['default'])]
         ];
     }
 }

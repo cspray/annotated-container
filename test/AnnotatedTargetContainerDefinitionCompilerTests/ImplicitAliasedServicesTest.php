@@ -77,8 +77,8 @@ class ImplicitAliasedServicesTest extends AnnotatedTargetContainerDefinitionComp
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooInterface(), [])]
+            [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooInterface(), ['default'])]
         ];
     }
 

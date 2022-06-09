@@ -92,8 +92,8 @@ class ThirdPartyServicesTest extends AnnotatedTargetContainerDefinitionCompilerT
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::thirdPartyServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::thirdPartyServices()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::thirdPartyServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::thirdPartyServices()->fooImplementation(), ['default'])]
         ];
     }
 }

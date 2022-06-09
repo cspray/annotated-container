@@ -70,7 +70,7 @@ class NonAnnotatedServicesTest extends AnnotatedTargetContainerDefinitionCompile
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::nonAnnotatedServices()->annotatedService(), [])]
+            [new ExpectedServiceProfiles(Fixtures::nonAnnotatedServices()->annotatedService(), ['default'])]
         ];
     }
 

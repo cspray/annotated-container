@@ -84,8 +84,8 @@ class InterfacePrepareServicesTest extends AnnotatedTargetContainerDefinitionCom
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::interfacePrepareServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::interfacePrepareServices()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::interfacePrepareServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::interfacePrepareServices()->fooImplementation(), ['default'])]
         ];
     }
 

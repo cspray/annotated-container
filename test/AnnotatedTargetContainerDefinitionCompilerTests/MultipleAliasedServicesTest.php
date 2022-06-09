@@ -97,10 +97,10 @@ class MultipleAliasedServicesTest extends AnnotatedTargetContainerDefinitionComp
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->barImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->bazImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->quxImplementation(), [])],
+            [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->barImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->bazImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->quxImplementation(), ['default'])],
         ];
     }
 }

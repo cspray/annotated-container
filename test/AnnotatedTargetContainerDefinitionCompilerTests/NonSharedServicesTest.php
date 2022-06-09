@@ -70,7 +70,7 @@ class NonSharedServicesTest extends AnnotatedTargetContainerDefinitionCompilerTe
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::nonSharedServices()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::nonSharedServices()->fooImplementation(), ['default'])]
         ];
     }
 }

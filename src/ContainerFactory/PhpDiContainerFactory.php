@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Cspray\AnnotatedContainerFixture\Fixtures;
 use DI\Container;
 
 // @codeCoverageIgnoreStart
@@ -181,12 +182,14 @@ class PhpDiContainerFactory implements ContainerFactory {
                         $id
                     ));
                 }
-
                 $service = $this->container->get($id);
+                // PHP-DI doesn't have the concept of a non-shared service as a first-class citizen
+                // We need to hack out way into their protected API to unset the internal cache to
+                // cause the Container to recreate the service.
                 if (in_array($id, $this->nonSharedServices)) {
-                    (function() use($id) {
-                        $this->resolvedEntries[$id] = null;
-                    })->call($this->container);
+                    \Closure::bind(function() use($id) {
+                        unset($this->resolvedEntries[$id]);
+                    }, $this->container, Container::class)();
                 }
                 return $service;
             }

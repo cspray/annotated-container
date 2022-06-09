@@ -38,7 +38,7 @@ class SimpleUserConfigurationTest extends AnnotatedTargetDefinitionConverterTest
     }
 
     public function testGetDefinitionProfiles() {
-        $this->assertSame([], $this->definition->getProfiles());
+        $this->assertSame(['default'], $this->definition->getProfiles());
     }
 
     public function testGetDefinitionStore() {

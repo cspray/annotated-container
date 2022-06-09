@@ -45,7 +45,8 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         }
 
         $builder = $attribute->shared ? $builder->withShared() : $builder->withNotShared();
-        $builder = $builder->withProfiles($attribute->profiles);
+        $profiles = empty($attribute->profiles) ? ['default'] : $attribute->profiles;
+        $builder = $builder->withProfiles($profiles);
         if ($attribute->name !== null) {
             $builder = $builder->withName($attribute->name);
         }
@@ -114,10 +115,12 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             $builder = $builder->withStore($target->getAttributeInstance()->from);
         }
 
-        if (!empty($target->getAttributeInstance()->profiles)) {
-            $builder = $builder->withProfiles(...$target->getAttributeInstance()->profiles);
+        $profiles = $target->getAttributeInstance()->profiles;
+        if (empty($profiles)) {
+            $profiles[] = 'default';
         }
 
+        $builder = $builder->withProfiles(...$profiles);
         return $builder->build();
     }
 
@@ -145,10 +148,12 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             $builder = $builder->withStore($target->getAttributeInstance()->from);
         }
 
-        if (!empty($target->getAttributeInstance()->profiles)) {
-            $builder = $builder->withProfiles(...$target->getAttributeInstance()->profiles);
+        $profiles = $target->getAttributeInstance()->profiles;
+        if (empty($profiles)) {
+            $profiles[] = 'default';
         }
 
+        $builder = $builder->withProfiles(...$profiles);
         return $builder->build();
     }
 

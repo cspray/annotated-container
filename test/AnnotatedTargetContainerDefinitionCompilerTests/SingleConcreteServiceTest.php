@@ -70,7 +70,7 @@ class SingleConcreteServiceTest extends AnnotatedTargetContainerDefinitionCompil
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::singleConcreteService()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::singleConcreteService()->fooImplementation(), ['default'])]
         ];
     }
 }
