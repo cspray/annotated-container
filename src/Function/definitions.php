@@ -18,9 +18,10 @@ function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?
         $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($name);
     }
 
-    if (isset($profiles)) {
-        $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($profiles);
+    if (empty($profiles)) {
+        $profiles[] = 'default';
     }
+    $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($profiles);
 
     if ($isShared) {
         $serviceDefinitionBuilder = $serviceDefinitionBuilder->withShared();

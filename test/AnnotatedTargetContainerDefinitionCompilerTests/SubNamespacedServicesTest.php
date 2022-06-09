@@ -109,12 +109,12 @@ class SubNamespacedServicesTest extends AnnotatedTargetContainerDefinitionCompil
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->barInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->bazInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->barImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->bazImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->fooImplementation(), [])],
+            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->barInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->bazInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->barImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->bazImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->fooImplementation(), ['default'])],
         ];
     }
 }

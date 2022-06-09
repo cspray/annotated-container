@@ -89,7 +89,7 @@ class ProfileResolvedServicesTest extends AnnotatedTargetContainerDefinitionComp
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::profileResolvedServices()->fooInterface(), [])],
+            [new ExpectedServiceProfiles(Fixtures::profileResolvedServices()->fooInterface(), ['default'])],
             [new ExpectedServiceProfiles(Fixtures::profileResolvedServices()->devImplementation(), ['dev'])],
             [new ExpectedServiceProfiles(Fixtures::profileResolvedServices()->testImplementation(), ['test'])],
             [new ExpectedServiceProfiles(Fixtures::profileResolvedServices()->prodImplementation(), ['prod'])],

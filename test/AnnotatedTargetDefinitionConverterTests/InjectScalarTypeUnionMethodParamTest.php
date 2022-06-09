@@ -49,6 +49,6 @@ class InjectScalarTypeUnionMethodParamTest extends AnnotatedTargetDefinitionConv
     }
 
     public function testGetProfiles() {
-        $this->assertEmpty($this->definition->getProfiles());
+        $this->assertSame(['default'], $this->definition->getProfiles());
     }
 }

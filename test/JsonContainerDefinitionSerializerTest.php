@@ -30,7 +30,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $expectedFooImplementation = [
             'name' => null,
             'type' => Fixtures::singleConcreteService()->fooImplementation()->getName(),
-            'profiles' => [],
+            'profiles' => ['default'],
             'isAbstract' => false,
             'isConcrete' => true,
             'isShared' => true
@@ -169,7 +169,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertContains([
             'name' => 'foo',
             'type' => Fixtures::namedServices()->fooInterface()->getName(),
-            'profiles' => [],
+            'profiles' => ['default'],
             'isAbstract' => true,
             'isConcrete' => false,
             'isShared' => true
@@ -186,7 +186,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         $this->assertContains([
             'name' => null,
             'type' => Fixtures::nonSharedServices()->fooImplementation()->getName(),
-            'profiles' => [],
+            'profiles' => ['default'],
             'isAbstract' => false,
             'isConcrete' => true,
             'isShared' => false

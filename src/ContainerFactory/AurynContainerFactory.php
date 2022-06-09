@@ -178,9 +178,6 @@ final class AurynContainerFactory implements ContainerFactory {
                 $configInstance = $configReflection->newInstanceWithoutConstructor();
                 foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
                     $injectProfiles = $injectDefinition->getProfiles();
-                    if (empty($injectProfiles)) {
-                        $injectProfiles[] = 'default';
-                    }
                     if ($injectDefinition->getTargetIdentifier()->isMethodParameter() ||
                         $injectDefinition->getTargetIdentifier()->getClass() !== $configurationDefinition->getClass() ||
                         empty(array_intersect($activeProfiles, $injectProfiles))) {
@@ -262,7 +259,7 @@ final class AurynContainerFactory implements ContainerFactory {
     private function mapInjectDefinitions(ContainerDefinition $containerDefinition, array $activeProfiles, array $nameTypeMap) : array {
         $definitionMap = [];
         foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
-            $injectProfiles = empty($injectDefinition->getProfiles()) ? ['default'] : $injectDefinition->getProfiles();
+            $injectProfiles = $injectDefinition->getProfiles();
             if (empty(array_intersect($activeProfiles, $injectProfiles))) {
                 continue;
             }
@@ -322,9 +319,8 @@ final class AurynContainerFactory implements ContainerFactory {
                     'An AliasDefinition is defined with a concrete type %s that is not a registered #[Service].',
                     $aliasDefinition->getConcreteService()->getName()
                 ));
-            } else if (empty($concreteProfiles)) {
-                $concreteProfiles[] = 'default';
             }
+
             foreach ($activeProfiles as $activeProfile) {
                 if (in_array($activeProfile, $concreteProfiles) && $aliasDefinition->getAbstractService() === $serviceDefinition) {
                     $aliases[] = $aliasDefinition;

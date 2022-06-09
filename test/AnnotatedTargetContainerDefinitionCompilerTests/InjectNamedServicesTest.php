@@ -116,10 +116,10 @@ class InjectNamedServicesTest extends AnnotatedTargetContainerDefinitionCompiler
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->fooImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->barImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->serviceConsumer(), [])]
+            [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->fooImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->barImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->serviceConsumer(), ['default'])]
         ];
     }
 }

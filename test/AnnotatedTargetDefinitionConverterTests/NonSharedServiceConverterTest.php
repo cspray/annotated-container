@@ -39,7 +39,7 @@ class NonSharedServiceConverterTest extends AnnotatedTargetDefinitionConverterTe
     }
 
     public function testServiceProfiles() {
-        $this->assertSame([], $this->definition->getProfiles());
+        $this->assertSame(['default'], $this->definition->getProfiles());
     }
 
 }

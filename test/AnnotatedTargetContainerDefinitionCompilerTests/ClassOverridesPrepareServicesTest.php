@@ -84,8 +84,8 @@ class ClassOverridesPrepareServicesTest extends AnnotatedTargetContainerDefiniti
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::classOverridesPrepareServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::classOverridesPrepareServices()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::classOverridesPrepareServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::classOverridesPrepareServices()->fooImplementation(), ['default'])]
         ];
     }
 

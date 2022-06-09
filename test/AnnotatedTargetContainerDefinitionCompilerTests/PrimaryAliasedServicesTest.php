@@ -97,10 +97,10 @@ class PrimaryAliasedServicesTest extends AnnotatedTargetContainerDefinitionCompi
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->fooImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->barImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->bazImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->fooImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->barImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->bazImplementation(), ['default'])]
         ];
     }
 }

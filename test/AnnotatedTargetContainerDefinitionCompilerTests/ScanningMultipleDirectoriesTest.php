@@ -91,9 +91,9 @@ class ScanningMultipleDirectoriesTest extends AnnotatedTargetContainerDefinition
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooImplementation(), [])],
-            [new ExpectedServiceProfiles(Fixtures::singleConcreteService()->fooImplementation(), [])]
+            [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooImplementation(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::singleConcreteService()->fooImplementation(), ['default'])]
         ];
     }
 }

@@ -46,6 +46,6 @@ class InjectStringMethodParamTest extends AnnotatedTargetDefinitionConverterTest
     }
 
     public function testGetProfiles() {
-        $this->assertEmpty($this->definition->getProfiles());
+        $this->assertSame(['default'], $this->definition->getProfiles());
     }
 }

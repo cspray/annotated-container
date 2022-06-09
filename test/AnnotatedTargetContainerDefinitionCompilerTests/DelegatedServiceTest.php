@@ -77,8 +77,8 @@ class DelegatedServiceTest extends AnnotatedTargetContainerDefinitionCompilerTes
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::delegatedService()->serviceInterface(), [])],
-            [new ExpectedServiceProfiles(Fixtures::delegatedService()->fooService(), [])]
+            [new ExpectedServiceProfiles(Fixtures::delegatedService()->serviceInterface(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::delegatedService()->fooService(), ['default'])]
         ];
     }
 

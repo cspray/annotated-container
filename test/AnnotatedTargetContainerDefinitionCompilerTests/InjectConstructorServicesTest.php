@@ -227,17 +227,17 @@ class InjectConstructorServicesTest extends AnnotatedTargetContainerDefinitionCo
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectArrayService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectIntService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectBoolService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectFloatService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectStringService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectEnvService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectExplicitMixedService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectImplicitMixedService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectNullableStringService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectProfilesStringService(), [])],
-            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectTypeUnionService(), [])]
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectArrayService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectIntService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectBoolService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectFloatService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectStringService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectEnvService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectExplicitMixedService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectImplicitMixedService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectNullableStringService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectProfilesStringService(), ['default'])],
+            [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectTypeUnionService(), ['default'])]
         ];
     }
 }
