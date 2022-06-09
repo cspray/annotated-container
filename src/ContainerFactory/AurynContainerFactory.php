@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Auryn\InjectionException;
 use Auryn\Injector;
+use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AliasDefinition;
 use Cspray\AnnotatedContainer\AutowireableFactory;
 use Cspray\AnnotatedContainer\AutowireableParameter;
@@ -97,15 +98,33 @@ final class AurynContainerFactory implements ContainerFactory {
             }
         }
 
+        $injector = $this->createInjector($containerDefinition, $activeProfiles, $nameTypeMap);
+        $activeProfiles = new class($activeProfiles) implements ActiveProfiles {
+
+            public function __construct(
+                private readonly array $profiles
+            ) {}
+
+            public function getProfiles() : array {
+                return $this->profiles;
+            }
+
+            public function isActive(string $profile) : bool {
+                return in_array($profile, $this->profiles);
+            }
+        };
+
         /** @var ContainerInterface&AutowireableFactory&HasBackingContainer $injector */
-        $injector = new class($this->createInjector($containerDefinition, $activeProfiles, $nameTypeMap), $nameTypeMap, $nonSharedServicesList) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
+        $injector = new class($injector, $nameTypeMap, $nonSharedServicesList, $activeProfiles) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
 
             public function __construct(
                 private readonly Injector $injector,
                 private readonly array $nameTypeMap,
-                private readonly array $nonSharedServicesList
+                private readonly array $nonSharedServicesList,
+                ActiveProfiles $activeProfiles
             ) {
                 $this->injector->delegate(AutowireableFactory::class, fn() => $this);
+                $this->injector->delegate(ActiveProfiles::class, fn() => $activeProfiles);
             }
 
             public function get(string $id) {

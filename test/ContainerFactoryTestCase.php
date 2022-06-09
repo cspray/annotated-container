@@ -330,4 +330,41 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $this->assertNotSame($a, $b);
     }
 
+    public function testGettingActiveProfilesImplicitlyShared() : void {
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath());
+
+        $a = $container->get(ActiveProfiles::class);
+        $b = $container->get(ActiveProfiles::class);
+
+        $this->assertInstanceOf(ActiveProfiles::class, $a);
+        $this->assertSame($a, $b);
+    }
+
+    public function testGettingActiveProfilesHasCorrectList() : void {
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), ['default', 'foo', 'bar']);
+
+        /** @var ActiveProfiles $activeProfile */
+        $activeProfile = $container->get(ActiveProfiles::class);
+
+        $this->assertSame(['default', 'foo', 'bar'], $activeProfile->getProfiles());
+    }
+
+    public function testIsActiveProfileNotListed() : void {
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), ['default', 'foo', 'bar']);
+
+        /** @var ActiveProfiles $activeProfile */
+        $activeProfile = $container->get(ActiveProfiles::class);
+
+        $this->assertFalse($activeProfile->isActive('baz'));
+    }
+
+    public function testIsActiveProfileListed() : void {
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), ['default', 'foo', 'bar']);
+
+        /** @var ActiveProfiles $activeProfile */
+        $activeProfile = $container->get(ActiveProfiles::class);
+
+        $this->assertTrue($activeProfile->isActive('foo'));
+    }
+
 }
