@@ -23,12 +23,6 @@ function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?
     }
     $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($profiles);
 
-    if ($isShared) {
-        $serviceDefinitionBuilder = $serviceDefinitionBuilder->withShared();
-    } else {
-        $serviceDefinitionBuilder = $serviceDefinitionBuilder->withNotShared();
-    }
-
     $serviceDefinition = $serviceDefinitionBuilder->build();
     $context->setBuilder($context->getBuilder()->withServiceDefinition($serviceDefinition));
     return $serviceDefinition;

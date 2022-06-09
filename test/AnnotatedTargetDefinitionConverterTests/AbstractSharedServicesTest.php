@@ -28,10 +28,6 @@ class AbstractSharedServicesTest extends AnnotatedTargetDefinitionConverterTestC
         $this->assertTrue($this->definition->isAbstract());
     }
 
-    public function testServiceIsShared() {
-        $this->assertTrue($this->definition->isShared());
-    }
-
     public function testServiceNameIsNull() {
         $this->assertNull($this->definition->getName());
     }

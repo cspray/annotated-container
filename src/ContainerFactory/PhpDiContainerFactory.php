@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Cspray\AnnotatedContainer\ActiveProfiles;
-use Cspray\AnnotatedContainerFixture\Fixtures;
 use DI\Container;
 
 // @codeCoverageIgnoreStart
@@ -50,7 +49,6 @@ class PhpDiContainerFactory implements ContainerFactory {
         }
         $containerBuilder = new ContainerBuilder();
         $definitions = [];
-        $nonSharedServices = [];
         // We have to maintain a set of known services to let our Container comply with PSR-11
         $serviceTypes = [AutowireableFactory::class, ActiveProfiles::class];
         $definitions[ActiveProfiles::class] = function() use($activeProfiles) : ActiveProfiles {
@@ -73,7 +71,6 @@ class PhpDiContainerFactory implements ContainerFactory {
                 $serviceTypes[] = $serviceDefinition->getName();
             }
             $definitions[$serviceDefinition->getType()->getName()] = autowire();
-            $nonSharedServices[] = $serviceDefinition->getType()->getName();
             if (!is_null($serviceDefinition->getName())) {
                 $definitions[$serviceDefinition->getName()] = get($serviceDefinition->getType()->getName());
             }
@@ -170,12 +167,11 @@ class PhpDiContainerFactory implements ContainerFactory {
         $containerBuilder->addDefinitions($definitions);
         $containerBuilder->addDefinitions($servicePrepareDefinitions);
         $container = $containerBuilder->build();
-        return new class($container, $serviceTypes, $nonSharedServices) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
+        return new class($container, $serviceTypes) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
 
             public function __construct(
                 private readonly Container $container,
-                private readonly array $serviceTypes,
-                private readonly array $nonSharedServices
+                private readonly array $serviceTypes
             ) {
                 $this->container->set(AutowireableFactory::class, $this);
             }
@@ -198,16 +194,7 @@ class PhpDiContainerFactory implements ContainerFactory {
                         $id
                     ));
                 }
-                $service = $this->container->get($id);
-                // PHP-DI doesn't have the concept of a non-shared service as a first-class citizen
-                // We need to hack out way into their protected API to unset the internal cache to
-                // cause the Container to recreate the service.
-                if (in_array($id, $this->nonSharedServices)) {
-                    \Closure::bind(function() use($id) {
-                        unset($this->resolvedEntries[$id]);
-                    }, $this->container, Container::class)();
-                }
-                return $service;
+                return $this->container->get($id);
             }
 
             public function has(string $id) : bool {

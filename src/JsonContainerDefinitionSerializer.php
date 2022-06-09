@@ -29,8 +29,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                     'type' => $serviceDefinition->getType()->getName(),
                     'profiles' => $serviceDefinition->getProfiles(),
                     'isAbstract' => $serviceDefinition->isAbstract(),
-                    'isConcrete' => $serviceDefinition->isConcrete(),
-                    'isShared' => $serviceDefinition->isShared()
+                    'isConcrete' => $serviceDefinition->isConcrete()
                 ];
             }
         };
@@ -143,12 +142,6 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
             if (!is_null($compiledServiceDefinition['name'])) {
                 $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($compiledServiceDefinition['name']);
-            }
-
-            if ($compiledServiceDefinition['isShared']) {
-                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withShared();
-            } else {
-                $serviceDefinitionBuilder = $serviceDefinitionBuilder->withNotShared();
             }
 
             $serviceDefinitionCacheMap[$serviceHash] = $serviceDefinitionBuilder->build();

@@ -32,8 +32,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => Fixtures::singleConcreteService()->fooImplementation()->getName(),
             'profiles' => ['default'],
             'isAbstract' => false,
-            'isConcrete' => true,
-            'isShared' => true
+            'isConcrete' => true
         ];
         $actual = json_decode($this->subject->serialize($containerDefinition), true);
 
@@ -138,24 +137,21 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'type' => Fixtures::profileResolvedServices()->devImplementation()->getName(),
             'profiles' => ['dev'],
             'isAbstract' => false,
-            'isConcrete' => true,
-            'isShared' => true
+            'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
         $this->assertContains([
             'name' => null,
             'type' => Fixtures::profileResolvedServices()->testImplementation()->getName(),
             'profiles' => ['test'],
             'isAbstract' => false,
-            'isConcrete' => true,
-            'isShared' => true
+            'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
         $this->assertContains([
             'name' => null,
             'type' => Fixtures::profileResolvedServices()->prodImplementation()->getName(),
             'profiles' => ['prod'],
             'isAbstract' => false,
-            'isConcrete' => true,
-            'isShared' => true
+            'isConcrete' => true
         ], $json['compiledServiceDefinitions']);
     }
 
@@ -172,24 +168,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'profiles' => ['default'],
             'isAbstract' => true,
             'isConcrete' => false,
-            'isShared' => true
-        ], $json['compiledServiceDefinitions']);
-    }
-
-    public function testSerializeNonSharedService() {
-        $serializer = new JsonContainerDefinitionSerializer();
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::nonSharedServices()->getPath())->build()
-        );
-
-        $json = json_decode($serializer->serialize($containerDefinition), true);
-        $this->assertContains([
-            'name' => null,
-            'type' => Fixtures::nonSharedServices()->fooImplementation()->getName(),
-            'profiles' => ['default'],
-            'isAbstract' => false,
-            'isConcrete' => true,
-            'isShared' => false
         ], $json['compiledServiceDefinitions']);
     }
 
@@ -203,7 +181,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             [Fixtures::profileResolvedServices()->getPath()],
             [Fixtures::abstractClassAliasedService()->getPath()],
             [Fixtures::namedServices()->getPath()],
-            [Fixtures::nonSharedServices()->getPath()]
         ];
     }
 
@@ -226,20 +203,6 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             $serializer->serialize($containerDefinition1),
             $serializer->serialize($containerDefinition2)
         );
-    }
-
-    public function testDeserializeNonSharedService() {
-        $serializer = new JsonContainerDefinitionSerializer();
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::nonSharedServices()->getPath())->build()
-        );
-
-        $json = $serializer->serialize($containerDefinition);
-        $subject = $serializer->deserialize($json);
-
-        $this->assertCount(1, $subject->getServiceDefinitions());
-        $serviceDefinition = $subject->getServiceDefinitions()[0];
-        $this->assertFalse($serviceDefinition->isShared());
     }
 
 

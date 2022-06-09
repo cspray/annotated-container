@@ -31,10 +31,6 @@ class SingleConcreteServiceConverterTest extends AnnotatedTargetDefinitionConver
         $this->assertTrue($this->definition->isConcrete());
     }
 
-    public function testServiceIsShared() {
-        $this->assertTrue($this->definition->isShared());
-    }
-
     public function testServiceNameIsNull() {
         $this->assertNull($this->definition->getName());
     }
