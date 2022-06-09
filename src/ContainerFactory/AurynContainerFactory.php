@@ -7,6 +7,7 @@ use Auryn\Injector;
 use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AliasDefinition;
 use Cspray\AnnotatedContainer\AutowireableFactory;
+use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
 use Cspray\AnnotatedContainer\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerDefinition;
@@ -74,7 +75,7 @@ final class AurynContainerFactory implements ContainerFactory {
      * @param ContainerFactoryOptions|null $containerFactoryOptions
      * @return ContainerInterface&AutowireableFactory&HasBackingContainer
      */
-    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface&AutowireableFactory&HasBackingContainer {
+    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface&AutowireableFactory&AutowireableInvoker&HasBackingContainer {
         $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
         // We need to keep a nameTypeMap because Auryn does not support arbitrarily named services out of the box
         $nameTypeMap = [];
@@ -110,7 +111,11 @@ final class AurynContainerFactory implements ContainerFactory {
         };
 
         /** @var ContainerInterface&AutowireableFactory&HasBackingContainer $injector */
-        $injector = new class($injector, $nameTypeMap, $activeProfiles) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
+        $injector = new class($injector, $nameTypeMap, $activeProfiles) implements
+            ContainerInterface,
+            AutowireableFactory,
+            AutowireableInvoker,
+            HasBackingContainer {
 
             public function __construct(
                 private readonly Injector $injector,
@@ -154,20 +159,34 @@ final class AurynContainerFactory implements ContainerFactory {
                 return $anyDefined > 0;
             }
 
-            public function make(string $classType, ?AutowireableParameterSet $parameters = null) : object {
-                $args = [];
-                if (!is_null($parameters)) {
-                    /** @var AutowireableParameter $parameter */
-                    foreach ($parameters as $parameter) {
-                        $name = $parameter->isServiceIdentifier() ? $parameter->getName() : ':' . $parameter->getName();
-                        $args[$name] = $parameter->isServiceIdentifier() ? $parameter->getValue()->getName() : $parameter->getValue();
-                    }
-                }
-                return $this->injector->make($classType, $args);
+            public function make(string $classType, AutowireableParameterSet $parameters = null) : object {
+                return $this->injector->make(
+                    $classType,
+                    $this->convertAutowireableParameterSet($parameters)
+                );
             }
 
             public function getBackingContainer() : Injector {
                 return $this->injector;
+            }
+
+            public function invoke(callable $callable, AutowireableParameterSet $parameters = null) : mixed {
+                return $this->injector->execute(
+                    $callable,
+                    $this->convertAutowireableParameterSet($parameters)
+                );
+            }
+
+            private function convertAutowireableParameterSet(AutowireableParameterSet $parameters = null) : array {
+                $params = [];
+                if (!is_null($parameters)) {
+                    /** @var AutowireableParameter $parameter */
+                    foreach ($parameters as $parameter) {
+                        $name = $parameter->isServiceIdentifier() ? $parameter->getName() : ':' . $parameter->getName();
+                        $params[$name] = $parameter->isServiceIdentifier() ? $parameter->getValue()->getName() : $parameter->getValue();
+                    }
+                }
+                return $params;
             }
         };
         return $injector;
