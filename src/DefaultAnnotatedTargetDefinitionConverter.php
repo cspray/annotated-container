@@ -44,7 +44,6 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             $builder = ServiceDefinitionBuilder::forConcrete($serviceType, $attribute->primary);
         }
 
-        $builder = $attribute->shared ? $builder->withShared() : $builder->withNotShared();
         $profiles = empty($attribute->profiles) ? ['default'] : $attribute->profiles;
         $builder = $builder->withProfiles($profiles);
         if ($attribute->name !== null) {

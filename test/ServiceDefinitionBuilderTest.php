@@ -89,42 +89,4 @@ class ServiceDefinitionBuilderTest extends TestCase {
         $this->assertSame(['default', 'dev', 'local'], $serviceDefinition->getProfiles());
     }
 
-    public function testWithSharedReturnsDifferentObject() {
-        $a = ServiceDefinitionBuilder::forConcrete(objectType($this->getConcreteType()));
-        $b = $a->withShared();
-
-        $this->assertNotSame($a, $b);
-    }
-
-    public function testWithNoSharedReturnsDifferentObject() {
-        $a = ServiceDefinitionBuilder::forConcrete(objectType($this->getConcreteType()));
-        $b = $a->withNotShared();
-
-        $this->assertNotSame($a, $b);
-    }
-
-    public function testIsSharedByDefault() {
-        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(objectType($this->getConcreteType()))
-            ->build();
-
-        $this->assertTrue($serviceDefinition->isShared());
-    }
-
-    public function testWithNotShared() {
-        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(objectType($this->getConcreteType()))
-            ->withNotShared()
-            ->build();
-
-        $this->assertFalse($serviceDefinition->isShared());
-    }
-
-    public function testWithShared() {
-        $serviceDefinition = ServiceDefinitionBuilder::forConcrete(objectType($this->getConcreteType()))
-            ->withNotShared()
-            ->withShared()
-            ->build();
-
-        $this->assertTrue($serviceDefinition->isShared());
-    }
-
 }

@@ -28,8 +28,6 @@ trait HasServiceDefinitionTestsTrait {
 
     abstract protected function serviceIsAbstractProvider() : array;
 
-    abstract protected function serviceIsSharedProvider() : array;
-
     abstract protected function serviceProfilesProvider() : array;
 
     final public function testExpectedServiceTypeCount() : void {
@@ -141,15 +139,6 @@ trait HasServiceDefinitionTestsTrait {
         $serviceDefinition = $this->getServiceDefinition($this->getSubject()->getServiceDefinitions(), $expectedServiceIsAbstract->type->getName());
 
         $this->assertSame($expectedServiceIsAbstract->isAbstract, $serviceDefinition?->isAbstract());
-    }
-
-    /**
-     * @dataProvider serviceIsSharedProvider
-     */
-    final public function testExpectedServiceIsShared(ExpectedServiceIsShared $expectedServiceIsShared) : void {
-        $serviceDefinition = $this->getServiceDefinition($this->getSubject()->getServiceDefinitions(), $expectedServiceIsShared->type->getName());
-
-        $this->assertSame($expectedServiceIsShared->isShared, $serviceDefinition?->isShared());
     }
 
     /**

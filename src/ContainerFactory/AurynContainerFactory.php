@@ -81,14 +81,9 @@ final class AurynContainerFactory implements ContainerFactory {
         // We need to keep a list of non-shared services because otherwise the Injector may not be aware of the service
         // and would throw a NotFoundException when the service is retrieved when in reality Auryn would have no problem
         // constructing this. The NotFoundException is thrown to correspond with the specs of the PSR-11 interface
-        $nonSharedServicesList = [];
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             if (!is_null($serviceDefinition->getName())) {
                 $nameTypeMap[$serviceDefinition->getName()] = $serviceDefinition->getType();
-            }
-
-            if (!$serviceDefinition->isShared()) {
-                $nonSharedServicesList[] = $serviceDefinition->getType();
             }
         }
 
@@ -115,12 +110,11 @@ final class AurynContainerFactory implements ContainerFactory {
         };
 
         /** @var ContainerInterface&AutowireableFactory&HasBackingContainer $injector */
-        $injector = new class($injector, $nameTypeMap, $nonSharedServicesList, $activeProfiles) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
+        $injector = new class($injector, $nameTypeMap, $activeProfiles) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
 
             public function __construct(
                 private readonly Injector $injector,
                 private readonly array $nameTypeMap,
-                private readonly array $nonSharedServicesList,
                 ActiveProfiles $activeProfiles
             ) {
                 $this->injector->delegate(AutowireableFactory::class, fn() => $this);
@@ -149,7 +143,7 @@ final class AurynContainerFactory implements ContainerFactory {
             }
 
             public function has(string $id): bool {
-                if (isset($this->nameTypeMap[$id]) || in_array($id, $this->nonSharedServicesList)) {
+                if (isset($this->nameTypeMap[$id])) {
                     return true;
                 }
 
@@ -185,9 +179,7 @@ final class AurynContainerFactory implements ContainerFactory {
         $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
 
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            if ($serviceDefinition->isShared()) {
-                $injector->share($serviceDefinition->getType()->getName());
-            }
+            $injector->share($serviceDefinition->getType()->getName());
         }
 
         foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {

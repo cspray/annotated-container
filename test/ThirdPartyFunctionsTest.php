@@ -133,14 +133,4 @@ class ThirdPartyFunctionsTest extends TestCase {
         ], $containerDefinition->getServicePrepareDefinitions());
     }
 
-    public function testNonSharedService() {
-        $context = $this->getContext();
-        service($context, Fixtures::nonSharedServices()->fooImplementation(), isShared: false);
-
-        $containerDefinition = $context->getBuilder()->build();
-
-        $serviceDefinition = $this->getServiceDefinition($containerDefinition->getServiceDefinitions(), Fixtures::nonSharedServices()->fooImplementation()->getName());
-        $this->assertFalse($serviceDefinition->isShared());
-    }
-
 }

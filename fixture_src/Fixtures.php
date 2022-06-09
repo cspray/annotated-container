@@ -66,10 +66,6 @@ final class Fixtures {
         return new ThirdPartyServicesFixture();
     }
 
-    public static function nonSharedServices() : NonSharedServicesFixture {
-        return new NonSharedServicesFixture();
-    }
-
     public static function injectConstructorServices() : InjectConstructorServicesFixture {
         return new InjectConstructorServicesFixture();
     }

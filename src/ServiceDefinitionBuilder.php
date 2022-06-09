@@ -11,7 +11,6 @@ final class ServiceDefinitionBuilder {
     private bool $isAbstract;
     private array $profiles = [];
     private bool $isPrimary = false;
-    private bool $isShared = true;
 
     private function __construct() {}
 
@@ -42,29 +41,16 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
-    public function withShared() : self {
-        $instance = clone $this;
-        $instance->isShared = true;
-        return $instance;
-    }
-
-    public function withNotShared() : self {
-        $instance = clone $this;
-        $instance->isShared = false;
-        return $instance;
-    }
-
     public function build() : ServiceDefinition {
         $profiles = $this->profiles;
-        return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary, $this->isShared) implements ServiceDefinition {
+        return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary) implements ServiceDefinition {
 
             public function __construct(
                 private readonly ?string $name,
                 private readonly ObjectType $type,
                 private readonly bool $isAbstract,
                 private readonly array $profiles,
-                private readonly bool $isPrimary,
-                private readonly bool $isShared
+                private readonly bool $isPrimary
             ) {}
 
             public function getName() : ?string {
@@ -89,10 +75,6 @@ final class ServiceDefinitionBuilder {
 
             public function isAbstract() : bool {
                 return $this->isAbstract;
-            }
-
-            public function isShared() : bool {
-                return $this->isShared;
             }
 
             public function equals(ServiceDefinition $serviceDefinition): bool {

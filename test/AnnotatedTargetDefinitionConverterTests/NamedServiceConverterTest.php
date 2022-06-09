@@ -25,10 +25,6 @@ class NamedServiceConverterTest extends AnnotatedTargetDefinitionConverterTestCa
         $this->assertTrue($this->definition->isAbstract());
     }
 
-    public function testServiceIsShared() {
-        $this->assertTrue($this->definition->isShared());
-    }
-
     public function testServiceName() {
         $this->assertSame('foo', $this->definition->getName());
     }
