@@ -3,6 +3,8 @@
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Cspray\AnnotatedContainer\ActiveProfiles;
+use Cspray\AnnotatedContainer\AutowireableInvoker;
+use Cspray\AnnotatedContainer\AutowireableParameter;
 use DI\Container;
 
 // @codeCoverageIgnoreStart
@@ -42,7 +44,7 @@ class PhpDiContainerFactory implements ContainerFactory {
         $this->addParameterStore(new EnvironmentParameterStore());
     }
 
-    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface&AutowireableFactory&HasBackingContainer {
+    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface&AutowireableFactory&AutowireableInvoker&HasBackingContainer {
         $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? [];
         if (empty($activeProfiles)) {
             $activeProfiles[] = 'default';
@@ -167,7 +169,7 @@ class PhpDiContainerFactory implements ContainerFactory {
         $containerBuilder->addDefinitions($definitions);
         $containerBuilder->addDefinitions($servicePrepareDefinitions);
         $container = $containerBuilder->build();
-        return new class($container, $serviceTypes) implements ContainerInterface, AutowireableFactory, HasBackingContainer {
+        return new class($container, $serviceTypes) implements ContainerInterface, AutowireableFactory, AutowireableInvoker, HasBackingContainer {
 
             public function __construct(
                 private readonly Container $container,
@@ -177,14 +179,10 @@ class PhpDiContainerFactory implements ContainerFactory {
             }
 
             public function make(string $classType, AutowireableParameterSet $parameters = null) : object {
-                $params = [];
-                if (!is_null($parameters)) {
-                    /** @var AutowireableParameter $parameter */
-                    foreach ($parameters as $parameter) {
-                        $params[$parameter->getName()] = $parameter->isServiceIdentifier() ? get($parameter->getValue()->getName()) : $parameter->getValue();
-                    }
-                }
-                return $this->container->make($classType, $params);
+                return $this->container->make(
+                    $classType,
+                    $this->convertAutowireableParameterSet($parameters)
+                );
             }
 
             public function get(string $id) {
@@ -203,6 +201,24 @@ class PhpDiContainerFactory implements ContainerFactory {
 
             public function getBackingContainer() : Container {
                 return $this->container;
+            }
+
+            public function invoke(callable $callable, AutowireableParameterSet $parameters = null) : mixed {
+                return $this->container->call(
+                    $callable,
+                    $this->convertAutowireableParameterSet($parameters)
+                );
+            }
+
+            private function convertAutowireableParameterSet(AutowireableParameterSet $parameters = null) : array {
+                $params = [];
+                if (!is_null($parameters)) {
+                    /** @var AutowireableParameter $parameter */
+                    foreach ($parameters as $parameter) {
+                        $params[$parameter->getName()] = $parameter->isServiceIdentifier() ? get($parameter->getValue()->getName()) : $parameter->getValue();
+                    }
+                }
+                return $params;
             }
         };
     }

@@ -29,7 +29,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         );
     }
 
-    private function getContainer(string $dir, array $profiles = [], ParameterStore $parameterStore = null) : ContainerInterface&AutowireableFactory {
+    private function getContainer(string $dir, array $profiles = [], ParameterStore $parameterStore = null) : ContainerInterface&AutowireableFactory&AutowireableInvoker {
         $compiler = $this->getContainerDefinitionCompiler();
         $optionsBuilder = ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir);
         $containerDefinition = $compiler->compile($optionsBuilder->build());
@@ -356,6 +356,47 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $activeProfile = $container->get(ActiveProfiles::class);
 
         $this->assertTrue($activeProfile->isActive('foo'));
+    }
+
+    public function testInvokeWithImplicitAlias() : void {
+        $invoker = $this->getContainer(Fixtures::implicitAliasedServices()->getPath());
+        $state = new \stdClass();
+        $state->foo = null;
+        $callable = fn(AnnotatedContainerFixture\ImplicitAliasedServices\FooInterface $foo) => $state->foo = $foo;
+
+        $invoker->invoke($callable);
+
+        $this->assertInstanceOf(Fixtures::implicitAliasedServices()->fooImplementation()->getName(), $state->foo);
+    }
+
+    public function testInvokeWithAmbiguousAliasRespectsParameters() : void {
+        $invoker = $this->getContainer(Fixtures::ambiguousAliasedServices()->getPath());
+        $state = new \stdClass();
+        $state->foo = null;
+        $callable = fn(AnnotatedContainerFixture\AmbiguousAliasedServices\FooInterface $foo) => $state->foo = $foo;
+        $invoker->invoke($callable, autowiredParams(serviceParam('foo', Fixtures::ambiguousAliasedServices()->quxImplementation())));
+
+        $this->assertInstanceOf(Fixtures::ambiguousAliasedServices()->quxImplementation()->getName(), $state->foo);
+    }
+
+    public function testInvokeWithScalarParameter() : void {
+        $invoker = $this->getContainer(Fixtures::implicitAliasedServices()->getPath());
+        $state = new \stdClass();
+        $state->bar = null;
+        $callable = fn(AnnotatedContainerFixture\ImplicitAliasedServices\FooInterface $foo, string $bar) => $state->bar = $bar;
+
+        $invoker->invoke($callable, autowiredParams(rawParam('bar', 'foobaz')));
+
+        $this->assertSame('foobaz', $state->bar);
+    }
+
+    public function testInvokeReturnsCallableReturnValue() : void {
+        $invoker = $this->getContainer(Fixtures::implicitAliasedServices()->getPath());
+        $callable = fn() => 'returned from fn()';
+
+        $actual = $invoker->invoke($callable);
+
+        $this->assertSame('returned from fn()', $actual);
     }
 
 }
