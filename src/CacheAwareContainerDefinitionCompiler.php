@@ -57,6 +57,7 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
     }
 
     private function getCacheFile(array $dirs) : string {
+        sort($dirs);
         return sprintf(
             '%s/%s',
             $this->cacheDir,
