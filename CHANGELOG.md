@@ -7,18 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
-## [0.6.0](https://github.com/cspray/annotated-container/tree/v0.6.0) - 2022-06-10
+## [0.6.0](https://github.com/cspray/annotated-container/tree/v0.6.0) - 2022-06-25
 
 ### Added
 
 - Added ability to invoke a callable that's capable of recursively autowiring parameters called, `AutowireableInvoker`.
 - Added an implicitly shared service, `ActiveProfiles`, that provides information about what profiles were marked as active for the creation of this `Container`.
+- Added an `AnnotatedContainer` interface that defines the granular interfaces implemented by the Container returned from a `ContainerFactory`.
 
 ### Removed
 
-- Removed the ability to mark a `#[Service]` as shared or not. All services are shared by default, and you cannot "unshare" a service. This functionality has a lot of odd behavior around it and other methods should be used to gain this functionality.
+- Removed the ability to mark a `#[Service]` as shared or not. All services are shared by default, and you cannot "unshare" a service. This functionality has a lot of odd behavior around it and other mechanisms should be used to gain this functionality.
+
+### Changed
+
+- The return type of a `ContainerFactory::createContainer` is now an `AnnotatedContainer` instead of the previous type intersect. For userland code this should not require any changes, only `ContainerFactory` implementations should need to be changed.
 
 ### Fixed
+
+- Fixed a bug where a `TypeInteresect` could be passed to a ParameterStore resulting in a `TypeError`.
+- Fixed the way implicit profiles are handled within Service and Inject definitions.
 
 ## [0.5.0](https://github.com/cspray/annotated-container/tree/v.0.5.0) - 2022-06-04
 
