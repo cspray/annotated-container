@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+### Fixed
+
+- Fixed a bug where the `CacheAwareContainerDefinitionCompiler` would not recognize a similar set of directories that were provided in a different order.
+
 ## [0.6.0](https://github.com/cspray/annotated-container/tree/v0.6.0) - 2022-06-25
 
 ### Added

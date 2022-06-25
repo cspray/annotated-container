@@ -68,6 +68,32 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $this->assertJsonStringEqualsJsonString($serialized, $actual);
     }
 
+    public function testMultipleDirectoriesCachedRegardlessOfOrder() {
+        $implicitDir = Fixtures::implicitAliasedServices()->getPath();
+        $concreteDir = Fixtures::singleConcreteService()->getPath();
+        $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($concreteDir, $implicitDir)->build()
+        );
+        $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
+
+        vfsStream::newFile(md5($implicitDir . $concreteDir))->at($this->root)->setContent($serialized);
+
+        $mock = $this->getMockBuilder(ContainerDefinitionCompiler::class)->getMock();
+        $mock->expects($this->never())->method('compile');
+        $subject = new CacheAwareContainerDefinitionCompiler(
+            $mock,
+            $this->containerDefinitionSerializer,
+            'vfs://root'
+        );
+
+        $containerDefinition = $subject->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($concreteDir, $implicitDir)->build()
+        );
+        $actual = $this->containerDefinitionSerializer->serialize($containerDefinition);
+
+        $this->assertJsonStringEqualsJsonString($serialized, $actual);
+    }
+
     public function testFailingToWriteCacheFileThrowsException() {
         $dir = Fixtures::implicitAliasedServices()->getPath();
         $subject = new CacheAwareContainerDefinitionCompiler(
