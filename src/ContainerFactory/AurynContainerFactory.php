@@ -6,6 +6,7 @@ use Auryn\InjectionException;
 use Auryn\Injector;
 use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AliasDefinition;
+use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableFactory;
 use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
@@ -31,6 +32,9 @@ if (!class_exists(Injector::class)) {
 }
 // @codeCoverageIgnoreEnd
 
+/**
+ * A ContainerFactory that utilizes the rdlowrey/auryn Container as its backing implementation.
+ */
 final class AurynContainerFactory implements ContainerFactory {
 
     /**
@@ -75,7 +79,7 @@ final class AurynContainerFactory implements ContainerFactory {
      * @param ContainerFactoryOptions|null $containerFactoryOptions
      * @return ContainerInterface&AutowireableFactory&HasBackingContainer
      */
-    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface&AutowireableFactory&AutowireableInvoker&HasBackingContainer {
+    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
         // We need to keep a nameTypeMap because Auryn does not support arbitrarily named services out of the box
         $nameTypeMap = [];
@@ -110,12 +114,7 @@ final class AurynContainerFactory implements ContainerFactory {
             }
         };
 
-        /** @var ContainerInterface&AutowireableFactory&HasBackingContainer $injector */
-        $injector = new class($injector, $nameTypeMap, $activeProfiles) implements
-            ContainerInterface,
-            AutowireableFactory,
-            AutowireableInvoker,
-            HasBackingContainer {
+        return new class($injector, $nameTypeMap, $activeProfiles) implements AnnotatedContainer {
 
             public function __construct(
                 private readonly Injector $injector,
@@ -189,7 +188,6 @@ final class AurynContainerFactory implements ContainerFactory {
                 return $params;
             }
         };
-        return $injector;
     }
 
     private function createInjector(ContainerDefinition $containerDefinition, array $activeProfiles, array $nameTypeMap) : Injector {

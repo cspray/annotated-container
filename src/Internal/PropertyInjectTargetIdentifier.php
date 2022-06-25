@@ -5,6 +5,9 @@ namespace Cspray\AnnotatedContainer\Internal;
 use Cspray\AnnotatedContainer\InjectTargetIdentifier;
 use Cspray\Typiphy\ObjectType;
 
+/**
+ * @Internal
+ */
 final class PropertyInjectTargetIdentifier implements InjectTargetIdentifier {
     public function __construct(
         private readonly string $name,

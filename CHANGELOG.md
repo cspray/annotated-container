@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [0.6.0](https://github.com/cspray/annotated-container/tree/v0.6.0) - 2022-06-10
+
+### Added
+
+- Added ability to invoke a callable that's capable of recursively autowiring parameters called, `AutowireableInvoker`.
+- Added an implicitly shared service, `ActiveProfiles`, that provides information about what profiles were marked as active for the creation of this `Container`.
+
+### Removed
+
+- Removed the ability to mark a `#[Service]` as shared or not. All services are shared by default, and you cannot "unshare" a service. This functionality has a lot of odd behavior around it and other methods should be used to gain this functionality.
+
+### Fixed
+
 ## [0.5.0](https://github.com/cspray/annotated-container/tree/v.0.5.0) - 2022-06-04
 
 ### Added

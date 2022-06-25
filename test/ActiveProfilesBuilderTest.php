@@ -52,7 +52,7 @@ class ActiveProfilesBuilderTest extends TestCase {
     public function testAddAllIfDefaultProfileExplicitlyThrowsException() : void {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The \'default\' profile is already active and should not be added explicitly.');
-        ActiveProfilesBuilder::hasDefault()->addAllIf(['default'], fn() => false);
+        ActiveProfilesBuilder::hasDefault()->addAllIf(['default'], fn() => true);
     }
 
     public function testAddAllIfTrueSingleDuplicateProfileThrowsException() : void {

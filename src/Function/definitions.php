@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\Typiphy\ObjectType;
 use ReflectionClass;
 
-function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false, bool $isShared = true) : ServiceDefinition {
+function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false) : ServiceDefinition {
     $reflection = new ReflectionClass($type->getName());
     $methodArgs = [$type];
     $method = $reflection->isAbstract() || $reflection->isInterface() ? 'forAbstract' : 'forConcrete';

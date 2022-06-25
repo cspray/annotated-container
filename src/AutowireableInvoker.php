@@ -2,8 +2,18 @@
 
 namespace Cspray\AnnotatedContainer;
 
+/**
+ * Invoke a callable, autowiring any dependencies that it might have.
+ */
 interface AutowireableInvoker {
 
+    /**
+     *
+     *
+     * @param callable $callable
+     * @param AutowireableParameterSet|null $parameters
+     * @return mixed
+     */
     public function invoke(callable $callable, AutowireableParameterSet $parameters = null) : mixed;
 
 }
