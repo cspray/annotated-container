@@ -7,17 +7,22 @@ use Attribute;
 /**
  * Marks an interface or class that should be wired into the Injector as a shared object or alias.
  *
- * Please be sure to review the README's overview of the Service Attribute.
- *
  * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class Service {
 
+    /**
+     * @param string[] $profiles A list of profiles that must be active for this service to be included in the Container
+     * @param bool $primary Whether this service should be used as the concrete alias if multiple aliases are found
+     * @param string|null $name An arbitrary string passed to ContainerInterface::get to retrieve this service.
+     *                          Retrieval of a Service by its arbitrary name is in addition to retrieving it by the
+     *                          FQCN of the service. If $name is null then the service will only be retrievable by the
+     *                          FQCN.
+     */
     public function __construct(
         public array $profiles = [],
         public bool $primary = false,
-        public bool $shared = true,
         public ?string $name = null
     ) {}
 

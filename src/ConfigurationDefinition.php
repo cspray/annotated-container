@@ -6,6 +6,8 @@ use Cspray\Typiphy\ObjectType;
 
 /**
  * Defines a Configuration object.
+ *
+ * @see ConfigurationDefinitionBuilder
  */
 interface ConfigurationDefinition {
 

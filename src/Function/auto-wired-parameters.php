@@ -8,6 +8,13 @@ use Cspray\AnnotatedContainer\Exception\ParameterNotFoundException;
 use Cspray\Typiphy\ObjectType;
 use Traversable;
 
+/**
+ * Returns a set of AutowireableParameter that can be used when using the Container as an AutowireableFactory or an
+ * AutowireableInvoker.
+ *
+ * @param AutowireableParameter ...$parameters
+ * @return AutowireableParameterSet
+ */
 function autowiredParams(AutowireableParameter... $parameters) : AutowireableParameterSet {
     return new class(...$parameters) implements AutowireableParameterSet {
 
@@ -52,6 +59,15 @@ function autowiredParams(AutowireableParameter... $parameters) : AutowireablePar
     };
 }
 
+/**
+ * Specify a parameter on a method, by $name, to have a service injected from the Container; if the $objectType is an
+ * abstract service its concrete alias will be resolved and used.
+ *
+ * @param string $name
+ * @param ObjectType $objectType
+ * @return AutowireableParameter
+ * @throws InvalidParameterException
+ */
 function serviceParam(string $name, ObjectType $objectType) : AutowireableParameter {
     if (empty($name)) {
         throw new InvalidParameterException('A parameter name must have a non-empty value.');
@@ -77,6 +93,15 @@ function serviceParam(string $name, ObjectType $objectType) : AutowireableParame
     };
 }
 
+/**
+ * Inject a parameter on a method, by $name, to have a value injected directly; whatever is passed to $value will be
+ * passed to the parameter.
+ *
+ * @param string $name
+ * @param mixed $value
+ * @return AutowireableParameter
+ * @throws InvalidParameterException
+ */
 function rawParam(string $name, mixed $value) : AutowireableParameter {
     if (empty($name)) {
         throw new InvalidParameterException('A parameter name must have a non-empty value.');

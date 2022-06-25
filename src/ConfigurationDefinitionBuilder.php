@@ -4,6 +4,9 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\Typiphy\ObjectType;
 
+/**
+ * The preferred method for creating ConfigurationDefinition.
+ */
 final class ConfigurationDefinitionBuilder {
 
     private ObjectType $classType;

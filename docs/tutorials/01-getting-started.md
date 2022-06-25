@@ -1,6 +1,6 @@
 # Getting Started
 
-Thanks for choosing to learn more about AnnotatedContainer! In this document we'll show you how to get started with the library by expanding on the example from the README and go step-by-step what's going on. After that we'll give you some places to go next based on what you might be interested in learning.
+Thanks for choosing to learn more about Annotated Container! In this document we'll show you how to get started with the library by expanding on the example from the README and go step-by-step what's going on. After that we'll give you some places to go next based on what you might be interested in learning.
 
 Our requirements have some external code executed when a blob is stored or retrieved. We decide to introduce a new abstract and concrete Service that will emit blob storage events. Our existing Service will become dependent on this new Service. Let's start digging into some code!
 
@@ -94,7 +94,7 @@ class FilesystemStorage implements BlobStorage {
 }
 ```
 
-We also annotated 2 concrete classes, `BlobStorageEventEmitter` and `FilesystemStorage`, which are called _concrete services_. While it is not necessary for a concrete service to satisfy a contract from an abstract service it is expected that the AnnotatedContainer will often be used in this manner. Because there's only 1 concrete service for each abstract service we know, for example, when `ContainerInterface::get(BlobStorage::class)`is called you really want to get an instance of`FilesystemStorage`.
+We also annotated 2 concrete classes, `BlobStorageEventEmitter` and `FilesystemStorage`, which are called _concrete services_. While it is not necessary for a concrete service to satisfy a contract from an abstract service it is expected that the Annotated Container will often be used in this manner. Because there's only 1 concrete service for each abstract service we know, for example, when `ContainerInterface::get(BlobStorage::class)`is called you really want to get an instance of`FilesystemStorage`.
 
 When a concrete service is used to instantiate an abstract service it is referred to as an _alias_; an alias that is inferred from the static analysis of your codebase is considered _implicit_. It is possible for an abstract service to have multiple concrete services, and an alias can't be inferred. We'll talk about how to resolve those types of conflicts in a separate document.
 
@@ -132,18 +132,10 @@ In this document we learned some important concepts in AnnotatedContainer; abstr
 
 ## Next Steps
 
-If you want to learn more about the library itself and important concepts with a mix of code and explanation check out the rest of the `/docs/tutorials` directory!
-
-Are you curious about how to resolve multiple aliases and make sure the right concrete implementation is used? Check out`/docs/tutorials/02-alias-resolution-with-profiles.md` and `/docs/tutorials/03-alias-resolution-with-attributes.md`.
-
-Do you want to have more control of your object creation and have the Container call your Factory method? You can do just that, and all the details are in `/docs/tutorials/04-using-service-factories.md`.
-
-Is there some method you want to call after an object is constructed? You can do that and auto-wire Services for that method as well! Read how to do that at `/docs/tutorials/05-calling-post-construct-methods.md`.
-
-Do you need to have a Service that takes a scalar value into its constructor? We have you covered! Read over`/docs/tutorials/06-injecting-scalar-values.md` for more information.
-
----
-
-If you want to learn how to do something specific in a step-by-step guide with more code and less explanation check out the `/docs/how-tos` directory!
-
-Are you using a third-party library that you'd like to include as an abstract or concrete service but the code can't be annotated? No fear, we have you covered! Walk through the steps in `/docs/how-tos/01-how-to-use-third-party-services.md`for a practical example.
+- [Resolve Aliases with Multiple Profiles](./02-alias-resolution-with-profiles.md)
+- [Resolve Aliases with Attributes](./03-alias-resolution-with-attributes.md)
+- [Using Factory to Create Services](./04-using-service-factories.md)
+- [Invoking Methods Post-Construct](./05-calling-post-construct-methods.md)
+- [Injecting Non-Service Values](./06-injecting-scalar-values.md)
+- [Using Autowire Aware Factory](./08-autowire-aware-factory.md)
+- [Using Autowire Aware Invoker](./09-autowire-aware-invoker.md)

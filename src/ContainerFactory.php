@@ -12,9 +12,9 @@ interface ContainerFactory {
     /**
      * @param ContainerDefinition $containerDefinition
      * @param ContainerFactoryOptions|null $containerFactoryOptions
-     * @return ContainerInterface&AutowireableFactory&AutowireableInvoker&HasBackingContainer
+     * @return AnnotatedContainer
      */
-    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface&AutowireableFactory&AutowireableInvoker&HasBackingContainer;
+    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer;
 
     /**
      * Assign a custom ParameterStore this ContainerFactory to allow injecting arbitrary values.

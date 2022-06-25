@@ -7,7 +7,7 @@ use Cspray\Typiphy\ObjectType;
 /**
  * Defines a Service, a class or interface that should be shared or aliased on the wired Injector.
  *
- * @package Cspray\AnnotatedContainer
+ * @see ServiceDefinitionBuilder
  */
 interface ServiceDefinition {
 

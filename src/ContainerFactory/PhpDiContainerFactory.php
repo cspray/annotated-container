@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Cspray\AnnotatedContainer\ActiveProfiles;
+use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
 use DI\Container;
@@ -33,6 +34,9 @@ use function DI\autowire;
 use function DI\decorate;
 use function DI\get;
 
+/**
+ * A ContainerFactory that utilizes the php-di/php-di library.
+ */
 class PhpDiContainerFactory implements ContainerFactory {
 
     /**
@@ -44,7 +48,7 @@ class PhpDiContainerFactory implements ContainerFactory {
         $this->addParameterStore(new EnvironmentParameterStore());
     }
 
-    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : ContainerInterface&AutowireableFactory&AutowireableInvoker&HasBackingContainer {
+    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? [];
         if (empty($activeProfiles)) {
             $activeProfiles[] = 'default';
@@ -169,7 +173,7 @@ class PhpDiContainerFactory implements ContainerFactory {
         $containerBuilder->addDefinitions($definitions);
         $containerBuilder->addDefinitions($servicePrepareDefinitions);
         $container = $containerBuilder->build();
-        return new class($container, $serviceTypes) implements ContainerInterface, AutowireableFactory, AutowireableInvoker, HasBackingContainer {
+        return new class($container, $serviceTypes) implements AnnotatedContainer {
 
             public function __construct(
                 private readonly Container $container,
