@@ -17,7 +17,6 @@ use function Cspray\Typiphy\objectType;
  * @covers \Cspray\AnnotatedContainer\ContainerDefinitionBuilder
  * @covers \Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder
  * @covers \Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter
- * @covers \Cspray\AnnotatedContainer\StaticAnalysisAnnotatedTargetParser
  * @covers \Cspray\AnnotatedContainer\ServiceDefinitionBuilder
  * @covers \Cspray\AnnotatedContainer\ContainerFactoryOptionsBuilder
  * @covers \Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder

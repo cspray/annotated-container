@@ -45,7 +45,7 @@ class ServiceDefinitionBuilderTest extends TestCase {
     public function testBuildingTypeForAbstractWithNoProfilesSpecifiedIncludesDefault() {
         $serviceDefinition = ServiceDefinitionBuilder::forAbstract(objectType($this->getAbstractType()))->build();
 
-        $this->assertEmpty($serviceDefinition->getProfiles());
+        $this->assertSame(['default'], $serviceDefinition->getProfiles());
     }
 
     public function testBuildingTypeForConcreteHasCorrectServiceDefinitionType() {

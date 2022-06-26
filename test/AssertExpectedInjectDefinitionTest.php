@@ -13,7 +13,7 @@ use function Cspray\Typiphy\stringType;
 
 class AssertExpectedInjectDefinitionTest extends TestCase {
 
-    private function getArrayConstructorExpectedInject(array $profiles = [], string $store = null) : ExpectedInject {
+    private function getArrayConstructorExpectedInject(array $profiles = ['default'], string $store = null) : ExpectedInject {
         return ExpectedInject::forConstructParam(
             Fixtures::injectConstructorServices()->injectArrayService(),
             'values',
@@ -24,7 +24,7 @@ class AssertExpectedInjectDefinitionTest extends TestCase {
         );
     }
 
-    private function getStringPropertyExpectedInject(array $profiles = [], string $store = null) : ExpectedInject {
+    private function getStringPropertyExpectedInject(array $profiles = ['default'], string $store = null) : ExpectedInject {
         return ExpectedInject::forClassProperty(
             Fixtures::configurationServices()->myConfig(),
             'key',
@@ -161,7 +161,7 @@ class AssertExpectedInjectDefinitionTest extends TestCase {
 
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage(sprintf(
-            'Could not find an InjectDefinition for parameter \'values\' on method %s::__construct with no profiles.',
+            'Could not find an InjectDefinition for parameter \'values\' on method %s::__construct with profiles: \'default\'.',
             Fixtures::injectConstructorServices()->injectArrayService()
         ));
         $assertion->assert($this->getArrayConstructorExpectedInject(), $containerDefinition);
@@ -375,7 +375,7 @@ class AssertExpectedInjectDefinitionTest extends TestCase {
 
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage(sprintf(
-            'Could not find an InjectDefinition for property \'key\' on %s with no profiles.',
+            'Could not find an InjectDefinition for property \'key\' on %s with profiles: \'default\'.',
             Fixtures::configurationServices()->myConfig()
         ));
         $assertion->assert($this->getStringPropertyExpectedInject(), $containerDefinition);

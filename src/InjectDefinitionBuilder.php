@@ -82,7 +82,12 @@ final class InjectDefinitionBuilder {
             $targetIdentifier = new PropertyInjectTargetIdentifier($this->property, $this->service);
         }
 
-        return new class($targetIdentifier, $this->type, $this->value, $this->store, $this->profiles) implements InjectDefinition {
+        $profiles = $this->profiles;
+        if (empty($profiles)) {
+            $profiles[] = 'default';
+        }
+
+        return new class($targetIdentifier, $this->type, $this->value, $this->store, $profiles) implements InjectDefinition {
 
             public function __construct(
                 private readonly InjectTargetIdentifier $targetIdentifier,

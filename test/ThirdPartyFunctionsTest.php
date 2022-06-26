@@ -158,7 +158,7 @@ class ThirdPartyFunctionsTest extends TestCase {
         $this->assertSame('dessert', $inject->getTargetIdentifier()->getName());
         $this->assertSame(intType(), $inject->getType());
         $this->assertSame(42, $inject->getValue());
-        $this->assertEmpty($inject->getProfiles());
+        $this->assertSame(['default'], $inject->getProfiles());
         $this->assertNull($inject->getStoreName());
 
         $this->assertSame($actualInject, $inject);
@@ -232,7 +232,7 @@ class ThirdPartyFunctionsTest extends TestCase {
         $this->assertSame('key', $inject->getTargetIdentifier()->getName());
         $this->assertSame(stringType(), $inject->getType());
         $this->assertSame('my-api-key', $inject->getValue());
-        $this->assertEmpty($inject->getProfiles());
+        $this->assertSame(['default'], $inject->getProfiles());
         $this->assertNull($inject->getStoreName());
 
         $this->assertSame($actualInject, $inject);
