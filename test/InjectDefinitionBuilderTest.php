@@ -138,7 +138,7 @@ class InjectDefinitionBuilderTest extends TestCase {
             ->withValue('foobar')
             ->build();
 
-        $this->assertEmpty($injectDefinition->getProfiles());
+        $this->assertSame(['default'], $injectDefinition->getProfiles());
     }
 
     public function testValidMethodInjectDefinitionWithOneProfileGetProfiles() {

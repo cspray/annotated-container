@@ -43,6 +43,9 @@ final class ServiceDefinitionBuilder {
 
     public function build() : ServiceDefinition {
         $profiles = $this->profiles;
+        if (empty($profiles)) {
+            $profiles[] = 'default';
+        }
         return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary) implements ServiceDefinition {
 
             public function __construct(
