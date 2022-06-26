@@ -18,6 +18,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use function Cspray\Typiphy\objectType;
 
 abstract class ContainerFactoryTestCase extends TestCase {
+
     abstract protected function getContainerFactory() : ContainerFactory;
 
     abstract protected function getBackingContainerInstanceOf() : ObjectType;
@@ -229,9 +230,9 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
     public function profilesProvider() : array {
         return [
-            ['from-prod', ['prod']],
-            ['from-test', ['test']],
-            ['from-dev', ['dev']]
+            ['from-prod', ['default', 'prod']],
+            ['from-test', ['default', 'test']],
+            ['from-dev', ['default', 'dev']]
         ];
     }
 
@@ -397,6 +398,24 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $actual = $invoker->invoke($callable);
 
         $this->assertSame('returned from fn()', $actual);
+    }
+
+    public function testServiceProfileNotActiveNotShared() : void {
+        $container = $this->getContainer(Fixtures::profileResolvedServices()->getPath(), ['default', 'dev']);
+
+        $this->assertTrue($container->has(Fixtures::profileResolvedServices()->fooInterface()->getName()));
+        $this->assertTrue($container->has(Fixtures::profileResolvedServices()->devImplementation()->getName()));
+        $this->assertFalse($container->has(Fixtures::profileResolvedServices()->prodImplementation()->getName()));
+        $this->assertFalse($container->has(Fixtures::profileResolvedServices()->testImplementation()->getName()));
+    }
+
+    public function testNamedServiceProfileNotActiveNotShared() : void {
+        $container = $this->getContainer(Fixtures::namedProfileResolvedServices()->getPath(), ['default', 'prod']);
+
+        $this->assertTrue($container->has(Fixtures::namedProfileResolvedServices()->fooInterface()->getName()));
+        $this->assertTrue($container->has('prod-foo'));
+        $this->assertFalse($container->has('dev-foo'));
+        $this->assertFalse($container->has('test-foo'));
     }
 
 }
