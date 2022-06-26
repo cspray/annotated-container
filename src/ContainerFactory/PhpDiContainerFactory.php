@@ -72,12 +72,13 @@ class PhpDiContainerFactory implements ContainerFactory {
             };
         };
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            $serviceTypes[] = $serviceDefinition->getType()->getName();
-            if (!is_null($serviceDefinition->getName())) {
-                $serviceTypes[] = $serviceDefinition->getName();
+            if (empty(array_intersect($activeProfiles, $serviceDefinition->getProfiles()))) {
+                continue;
             }
+            $serviceTypes[] = $serviceDefinition->getType()->getName();
             $definitions[$serviceDefinition->getType()->getName()] = autowire();
             if (!is_null($serviceDefinition->getName())) {
+                $serviceTypes[] = $serviceDefinition->getName();
                 $definitions[$serviceDefinition->getName()] = get($serviceDefinition->getType()->getName());
             }
         }

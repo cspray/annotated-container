@@ -196,6 +196,9 @@ final class AurynContainerFactory implements ContainerFactory {
         $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
 
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
+            if (empty(array_intersect($activeProfiles, $serviceDefinition->getProfiles()))) {
+                continue;
+            }
             $injector->share($serviceDefinition->getType()->getName());
         }
 
