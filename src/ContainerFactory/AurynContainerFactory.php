@@ -81,23 +81,7 @@ final class AurynContainerFactory implements ContainerFactory {
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
-        // We need to keep a nameTypeMap because Auryn does not support arbitrarily named services out of the box
         $nameTypeMap = [];
-        // We need to keep a list of non-shared services because otherwise the Injector may not be aware of the service
-        // and would throw a NotFoundException when the service is retrieved when in reality Auryn would have no problem
-        // constructing this. The NotFoundException is thrown to correspond with the specs of the PSR-11 interface
-        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            if (!is_null($serviceDefinition->getName())) {
-                $nameTypeMap[$serviceDefinition->getName()] = $serviceDefinition->getType();
-            }
-        }
-
-        foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
-            if (!is_null($configurationDefinition->getName())) {
-                $nameTypeMap[$configurationDefinition->getName()] = $configurationDefinition->getClass();
-            }
-        }
-
         $injector = $this->createInjector($containerDefinition, $activeProfiles, $nameTypeMap);
         $activeProfiles = new class($activeProfiles) implements ActiveProfiles {
 
@@ -190,8 +174,10 @@ final class AurynContainerFactory implements ContainerFactory {
         };
     }
 
-    private function createInjector(ContainerDefinition $containerDefinition, array $activeProfiles, array $nameTypeMap) : Injector {
+    private function createInjector(ContainerDefinition $containerDefinition, array $activeProfiles, array &$nameTypeMap) : Injector {
         $injector = new Injector();
+        // We need to keep a nameTypeMap because Auryn does not support arbitrarily named services out of the box
+
         $servicePrepareDefinitions = $containerDefinition->getServicePrepareDefinitions();
         $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
 
@@ -200,10 +186,16 @@ final class AurynContainerFactory implements ContainerFactory {
                 continue;
             }
             $injector->share($serviceDefinition->getType()->getName());
+            if (!is_null($serviceDefinition->getName())) {
+                $nameTypeMap[$serviceDefinition->getName()] = $serviceDefinition->getType();
+            }
         }
 
         foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
             $injector->share($configurationDefinition->getClass()->getName());
+            if (!is_null($configurationDefinition->getName())) {
+                $nameTypeMap[$configurationDefinition->getName()] = $configurationDefinition->getClass();
+            }
             $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($containerDefinition, $configurationDefinition, $activeProfiles) {
                 $configReflection = (new \ReflectionClass($configurationDefinition->getClass()->getName()));
                 $configInstance = $configReflection->newInstanceWithoutConstructor();

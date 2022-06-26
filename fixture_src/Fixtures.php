@@ -118,4 +118,8 @@ final class Fixtures {
         return new InjectIntersectCustomStoreServicesFixture();
     }
 
+    public static function namedProfileResolvedServices() : NamedProfileResolvedServicesFixture {
+        return new NamedProfileResolvedServicesFixture();
+    }
+
 }

@@ -409,4 +409,13 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $this->assertFalse($container->has(Fixtures::profileResolvedServices()->testImplementation()->getName()));
     }
 
+    public function testNamedServiceProfileNotActiveNotShared() : void {
+        $container = $this->getContainer(Fixtures::namedProfileResolvedServices()->getPath(), ['default', 'prod']);
+
+        $this->assertTrue($container->has(Fixtures::namedProfileResolvedServices()->fooInterface()->getName()));
+        $this->assertTrue($container->has('prod-foo'));
+        $this->assertFalse($container->has('dev-foo'));
+        $this->assertFalse($container->has('test-foo'));
+    }
+
 }
