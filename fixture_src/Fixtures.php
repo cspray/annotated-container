@@ -122,4 +122,8 @@ final class Fixtures {
         return new NamedProfileResolvedServicesFixture();
     }
 
+    public static function injectServiceCollectorServices() : InjectServiceCollectorServicesFixture {
+        return new InjectServiceCollectorServicesFixture();
+    }
+
 }

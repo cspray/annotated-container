@@ -20,6 +20,7 @@ use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
 use Cspray\AnnotatedContainer\HasBackingContainer;
 use Cspray\AnnotatedContainer\ParameterStore;
+use Cspray\AnnotatedContainer\ServiceCollectorParameterStore;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -82,7 +83,8 @@ final class AurynContainerFactory implements ContainerFactory {
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
         $nameTypeMap = [];
-        $injector = $this->createInjector($containerDefinition, $activeProfiles, $nameTypeMap);
+        $serviceCollectorTypes = [];
+        $injector = $this->createInjector($containerDefinition, $activeProfiles, $nameTypeMap, $serviceCollectorTypes);
         $activeProfiles = new class($activeProfiles) implements ActiveProfiles {
 
             public function __construct(
@@ -98,7 +100,7 @@ final class AurynContainerFactory implements ContainerFactory {
             }
         };
 
-        return new class($injector, $nameTypeMap, $activeProfiles) implements AnnotatedContainer {
+        $container = new class($injector, $nameTypeMap, $activeProfiles) implements AnnotatedContainer {
 
             public function __construct(
                 private readonly Injector $injector,
@@ -172,9 +174,14 @@ final class AurynContainerFactory implements ContainerFactory {
                 return $params;
             }
         };
+
+        $serviceCollectorParameterStore = new ServiceCollectorParameterStore($container, $serviceCollectorTypes);
+        $this->addParameterStore($serviceCollectorParameterStore);
+
+        return $container;
     }
 
-    private function createInjector(ContainerDefinition $containerDefinition, array $activeProfiles, array &$nameTypeMap) : Injector {
+    private function createInjector(ContainerDefinition $containerDefinition, array $activeProfiles, array &$nameTypeMap, array &$serviceCollectorTypes) : Injector {
         $injector = new Injector();
         // We need to keep a nameTypeMap because Auryn does not support arbitrarily named services out of the box
 
@@ -188,6 +195,10 @@ final class AurynContainerFactory implements ContainerFactory {
             $injector->share($serviceDefinition->getType()->getName());
             if (!is_null($serviceDefinition->getName())) {
                 $nameTypeMap[$serviceDefinition->getName()] = $serviceDefinition->getType();
+            }
+
+            if ($serviceDefinition->isConcrete()) {
+                $serviceCollectorTypes[] = $serviceDefinition->getType()->getName();
             }
         }
 

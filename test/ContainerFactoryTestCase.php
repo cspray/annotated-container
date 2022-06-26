@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedContainerFixture\InjectServiceCollectorServices;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
@@ -416,6 +417,27 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $this->assertTrue($container->has('prod-foo'));
         $this->assertFalse($container->has('dev-foo'));
         $this->assertFalse($container->has('test-foo'));
+    }
+
+    public function testInjectServiceCollectorServices() : void {
+        $container = $this->getContainer(Fixtures::injectServiceCollectorServices()->getPath());
+
+        /** @var InjectServiceCollectorServices\FooInterfaceConsumer $consumer */
+        $consumer = $container->get(Fixtures::injectServiceCollectorServices()->fooConsumer()->getName());
+
+        $this->assertCount(3, $consumer->foos);
+        $this->assertContains(
+            $container->get(Fixtures::injectServiceCollectorServices()->barImplementation()->getName()),
+            $consumer->foos
+        );
+        $this->assertContains(
+            $container->get(Fixtures::injectServiceCollectorServices()->bazImplementation()->getName()),
+            $consumer->foos
+        );
+        $this->assertContains(
+            $container->get(Fixtures::injectServiceCollectorServices()->quxImplementation()->getName()),
+            $consumer->foos
+        );
     }
 
 }
