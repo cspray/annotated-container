@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
+use function Cspray\Typiphy\intType;
 use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
@@ -133,4 +134,151 @@ class ThirdPartyFunctionsTest extends TestCase {
         ], $containerDefinition->getServicePrepareDefinitions());
     }
 
+    public function testInjectMethodParam() {
+        $context = $this->getContext();
+        $actualInject = injectMethodParam(
+            $context,
+            Fixtures::injectConstructorServices()->injectFloatService(),
+            '__construct',
+            'dessert',
+            intType(),
+            42
+        );
+
+        $containerDefinition = $context->getBuilder()->build();
+
+        $injects = $containerDefinition->getInjectDefinitions();
+        $this->assertCount(1, $injects);
+
+        $inject = $injects[0];
+
+        $this->assertTrue($inject->getTargetIdentifier()->isMethodParameter());
+        $this->assertSame(Fixtures::injectConstructorServices()->injectFloatService(), $inject->getTargetIdentifier()->getClass());
+        $this->assertSame('__construct', $inject->getTargetIdentifier()->getMethodName());
+        $this->assertSame('dessert', $inject->getTargetIdentifier()->getName());
+        $this->assertSame(intType(), $inject->getType());
+        $this->assertSame(42, $inject->getValue());
+        $this->assertEmpty($inject->getProfiles());
+        $this->assertNull($inject->getStoreName());
+
+        $this->assertSame($actualInject, $inject);
+    }
+
+    public function testInjectMethodParamProfiles() {
+        $context = $this->getContext();
+        injectMethodParam(
+            $context,
+            Fixtures::injectConstructorServices()->injectFloatService(),
+            '__construct',
+            'dessert',
+            intType(),
+            42,
+            ['foo', 'bar', 'baz']
+        );
+
+        $containerDefinition = $context->getBuilder()->build();
+
+        $injects = $containerDefinition->getInjectDefinitions();
+        $this->assertCount(1, $injects);
+
+        $inject = $injects[0];
+
+        $this->assertTrue($inject->getTargetIdentifier()->isMethodParameter());
+        $this->assertSame(['foo', 'bar', 'baz'], $inject->getProfiles());
+    }
+
+    public function testInjectMethodParamStoreName() {
+        $context = $this->getContext();
+        injectMethodParam(
+            $context,
+            Fixtures::injectConstructorServices()->injectFloatService(),
+            '__construct',
+            'dessert',
+            intType(),
+            42,
+            from: 'store-name'
+        );
+
+        $containerDefinition = $context->getBuilder()->build();
+
+        $injects = $containerDefinition->getInjectDefinitions();
+        $this->assertCount(1, $injects);
+
+        $inject = $injects[0];
+
+        $this->assertTrue($inject->getTargetIdentifier()->isMethodParameter());
+        $this->assertSame('store-name', $inject->getStoreName());
+    }
+
+    public function testInjectProperty() {
+        $context = $this->getContext();
+        $actualInject = injectProperty(
+            $context,
+            Fixtures::configurationServices()->myConfig(),
+            'key',
+            stringType(),
+            'my-api-key'
+        );
+
+        $containerDefinition = $context->getBuilder()->build();
+
+        $injects = $containerDefinition->getInjectDefinitions();
+        $this->assertCount(1, $injects);
+
+        $inject = $injects[0];
+
+        $this->assertTrue($inject->getTargetIdentifier()->isClassProperty());
+        $this->assertSame(Fixtures::configurationServices()->myConfig(), $inject->getTargetIdentifier()->getClass());
+        $this->assertSame('key', $inject->getTargetIdentifier()->getName());
+        $this->assertSame(stringType(), $inject->getType());
+        $this->assertSame('my-api-key', $inject->getValue());
+        $this->assertEmpty($inject->getProfiles());
+        $this->assertNull($inject->getStoreName());
+
+        $this->assertSame($actualInject, $inject);
+    }
+
+    public function testInjectPropertyProfiles() {
+        $context = $this->getContext();
+        injectProperty(
+            $context,
+            Fixtures::configurationServices()->myConfig(),
+            'key',
+            stringType(),
+            'my-api-key',
+            ['qux', 'baz', 'bar']
+        );
+
+        $containerDefinition = $context->getBuilder()->build();
+
+        $injects = $containerDefinition->getInjectDefinitions();
+        $this->assertCount(1, $injects);
+
+        $inject = $injects[0];
+
+        $this->assertTrue($inject->getTargetIdentifier()->isClassProperty());
+        $this->assertSame(['qux', 'baz', 'bar'], $inject->getProfiles());
+    }
+
+    public function testInjectPropertyStoreName() {
+        $context = $this->getContext();
+        injectProperty(
+            $context,
+            Fixtures::configurationServices()->myConfig(),
+            'key',
+            stringType(),
+            'my-api-key',
+            from: 'the-store'
+        );
+
+        $containerDefinition = $context->getBuilder()->build();
+
+        $injects = $containerDefinition->getInjectDefinitions();
+        $this->assertCount(1, $injects);
+
+        $inject = $injects[0];
+
+        $this->assertTrue($inject->getTargetIdentifier()->isClassProperty());
+        $this->assertSame('the-store', $inject->getStoreName());
+    }
 }

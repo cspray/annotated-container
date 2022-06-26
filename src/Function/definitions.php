@@ -3,6 +3,9 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\Typiphy\ObjectType;
+use Cspray\Typiphy\Type;
+use Cspray\Typiphy\TypeIntersect;
+use Cspray\Typiphy\TypeUnion;
 use ReflectionClass;
 
 function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false) : ServiceDefinition {
@@ -44,4 +47,40 @@ function servicePrepare(ContainerDefinitionBuilderContext $context, ObjectType $
     $servicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($serviceDefinition, $method)->build();
     $context->setBuilder($context->getBuilder()->withServicePrepareDefinition($servicePrepareDefinition));
     return $servicePrepareDefinition;
+}
+
+function injectMethodParam(ContainerDefinitionBuilderContext $context, ObjectType $service, string $method, string $paramName, Type|TypeUnion|TypeIntersect $type, mixed $value, array $profiles = [], string $from = null) : InjectDefinition {
+    $injectDefinitionBuilder = InjectDefinitionBuilder::forService($service)
+        ->withMethod($method, $type, $paramName)
+        ->withValue($value);
+
+    if (!empty($profiles)) {
+        $injectDefinitionBuilder = $injectDefinitionBuilder->withProfiles(...$profiles);
+    }
+
+    if (isset($from)) {
+        $injectDefinitionBuilder = $injectDefinitionBuilder->withStore($from);
+    }
+
+    $injectDefinition = $injectDefinitionBuilder->build();
+    $context->setBuilder($context->getBuilder()->withInjectDefinition($injectDefinition));
+    return $injectDefinition;
+}
+
+function injectProperty(ContainerDefinitionBuilderContext $context, ObjectType $service, string $property, Type|TypeUnion|TypeIntersect $type, mixed $value, array $profiles = [], string $from = null) : InjectDefinition {
+    $injectDefinitionBuilder = InjectDefinitionBuilder::forService($service)
+        ->withProperty($type, $property)
+        ->withValue($value);
+
+    if (!empty($profiles)) {
+        $injectDefinitionBuilder = $injectDefinitionBuilder->withProfiles(...$profiles);
+    }
+
+    if (isset($from)) {
+        $injectDefinitionBuilder = $injectDefinitionBuilder->withStore($from);
+    }
+
+    $injectDefinition = $injectDefinitionBuilder->build();
+    $context->setBuilder($context->getBuilder()->withInjectDefinition($injectDefinition));
+    return $injectDefinition;
 }
