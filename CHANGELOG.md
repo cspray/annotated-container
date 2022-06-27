@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased Changes
+## [1.0.0](https://github.com/cspray/annotated-container/tree/v1.0.0) - 2022-06-26
+
+### Added
+
+- Added the missing `injectMethodParam` and `injectProperty` methods for the functional API equivalent of the `#[Inject]` Attribute.
 
 ### Fixed
 
 - Fixed a bug where the `CacheAwareContainerDefinitionCompiler` would not recognize a similar set of directories that were provided in a different order.
+- Fixed a bug where services with explicit profiles were always being shared as services although their profile might not be in the list of active profiles.
+- Fixed a bug where Inject and Service definitions were not properly including the implicit 'default' profile.
 
 ## [0.6.0](https://github.com/cspray/annotated-container/tree/v0.6.0) - 2022-06-25
 
