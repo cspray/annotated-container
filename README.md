@@ -29,10 +29,10 @@ composer require rdlowrey/auryn
 Uses the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) Injector.
 
 ```
-composer require php-di/php-di
+composer require php-di/php-di:v7.x-dev
 ```
 
-Uses the [php-di/php-di](https://github.com/php-di/php-di) Container.
+Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. At the moment this library only supports the necessary 8.1 features in a development branch.
 
 ## Quick Start
 
@@ -101,9 +101,6 @@ This library is thoroughly documented in-repo under the `/docs` directory. The d
 **How Tos** are where you'll go to get step-by-step guides on how to achieve specific functionality. These documents tend to be more code and less explanation. We assume you've gotten an understanding of the library and have questions on how to do something beyond the "normal" use cases. 
 
 **References** are where you can get into the real internal, technical workings of the library. List of APIs and more technically-explicit documentation can be found here. References may be a lot of code, a lot of explanation, or a split between the two depending on the context.
-
-> The documentation is still a work in progress and some sections may be missing or incomplete relative to the desired 
-> 1.0 functionality. Eventually this documentation will be provided in a website form.
 
 ## Roadmap
 
