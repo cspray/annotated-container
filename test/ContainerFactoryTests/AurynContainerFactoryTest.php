@@ -29,6 +29,7 @@ use function Cspray\Typiphy\objectType;
  * @covers \Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder
  * @covers \Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier
  * @covers \Cspray\AnnotatedContainer\Attribute\Configuration
+ * @covers \Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer
  * @covers ::\Cspray\AnnotatedContainer\containerFactory
  * @covers ::\Cspray\AnnotatedContainer\autowiredParams
  * @covers ::\Cspray\AnnotatedContainer\rawParam

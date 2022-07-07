@@ -2,8 +2,23 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use JsonSerializable;
+use Cspray\Typiphy\Internal\NamedType;
+use Cspray\Typiphy\Type;
+use Cspray\Typiphy\TypeIntersect;
+use Cspray\Typiphy\TypeUnion;
+use function Cspray\Typiphy\arrayType;
+use function Cspray\Typiphy\boolType;
+use function Cspray\Typiphy\callableType;
+use function Cspray\Typiphy\floatType;
+use function Cspray\Typiphy\intType;
+use function Cspray\Typiphy\iterableType;
+use function Cspray\Typiphy\mixedType;
+use function Cspray\Typiphy\nullType;
 use function Cspray\Typiphy\objectType;
+use function Cspray\Typiphy\stringType;
+use function Cspray\Typiphy\typeIntersect;
+use function Cspray\Typiphy\typeUnion;
+use function Cspray\Typiphy\voidType;
 
 /**
  * A ContainerDefinitionSerializer that will format a ContainerDefinition into a JSON string.
@@ -67,12 +82,26 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             ];
         }
 
+        $injectDefinitions = [];
+        foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
+            $injectDefinitions[] = [
+                'injectTargetType' => $injectDefinition->getTargetIdentifier()->getClass()->getName(),
+                'injectTargetMethod' => $injectDefinition->getTargetIdentifier()->getMethodName(),
+                'injectTargetName' => $injectDefinition->getTargetIdentifier()->getName(),
+                'type' => $injectDefinition->getType()->getName(),
+                'value' => $injectDefinition->getValue(),
+                'profiles' => $injectDefinition->getProfiles(),
+                'storeName' => $injectDefinition->getStoreName()
+            ];
+        }
+
         return json_encode([
             'compiledServiceDefinitions' => $compiledServiceDefinitions,
             'sharedServiceDefinitions' => $serviceDefinitions,
             'aliasDefinitions' => $aliasDefinitions,
             'servicePrepareDefinitions' => $servicePrepareDefinitions,
-            'serviceDelegateDefinitions' => $serviceDelegateDefinitions
+            'serviceDelegateDefinitions' => $serviceDelegateDefinitions,
+            'injectDefinitions' => $injectDefinitions
         ]);
     }
 
@@ -124,6 +153,34 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             );
         }
 
+        foreach ($data['injectDefinitions'] as $injectDefinition) {
+            $injectBuilder = InjectDefinitionBuilder::forService(objectType($injectDefinition['injectTargetType']));
+
+            $type = $this->convertStringToType($injectDefinition['type']);
+
+            if (is_null($injectDefinition['injectTargetMethod'])) {
+                $injectBuilder = $injectBuilder->withProperty(
+                    $type,
+                    $injectDefinition['injectTargetName']
+                );
+            } else {
+                $injectBuilder = $injectBuilder->withMethod(
+                    $injectDefinition['injectTargetMethod'],
+                    $type,
+                    $injectDefinition['injectTargetName']
+                );
+            }
+
+            $injectBuilder = $injectBuilder->withValue($injectDefinition['value'])
+                ->withProfiles(...$injectDefinition['profiles']);
+
+            if (!is_null($injectDefinition['storeName'])) {
+                $injectBuilder = $injectBuilder->withStore($injectDefinition['storeName']);
+            }
+
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectDefinition($injectBuilder->build());
+        }
+
         return $containerDefinitionBuilder->build();
     }
 
@@ -148,6 +205,38 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         }
 
         return $serviceDefinitionCacheMap[$serviceHash];
+    }
+
+    private function convertStringToType(string $rawType) : Type|TypeUnion|TypeIntersect {
+        if (str_contains($rawType, '|')) {
+            $types = [];
+            foreach (explode('|', $rawType) as $unionType) {
+                $types[] = $this->convertStringToType($unionType);
+            }
+            $type = typeUnion(...$types);
+        } else if (str_contains($rawType, '&')) {
+            $types = [];
+            foreach (explode('&', $rawType) as $intersectType) {
+                $types[] = $this->convertStringToType($intersectType);
+            }
+            $type = typeIntersect(...$types);
+        } else {
+            $type = match($rawType) {
+                'string' => stringType(),
+                'int' => intType(),
+                'float' => floatType(),
+                'bool' => boolType(),
+                'array' => arrayType(),
+                'mixed' => mixedType(),
+                'iterable' => iterableType(),
+                'null' => nullType(),
+                'void' => voidType(),
+                'callable' => callableType(),
+                default => objectType($rawType)
+            };
+        }
+
+        return $type;
     }
 
 
