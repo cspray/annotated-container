@@ -93,7 +93,7 @@ final class ContainerDefinitionBuilder {
                     if ($this->hasServiceDefinition($serviceDefinition)) {
                         throw new ContainerDefinitionMergeException(sprintf(
                             'The ContainerDefinition already has a ServiceDefinition for %s.',
-                            $serviceDefinition->getType()
+                            $serviceDefinition->getType()->getName()
                         ));
                     }
                     $merged->serviceDefinitions[] = $serviceDefinition;

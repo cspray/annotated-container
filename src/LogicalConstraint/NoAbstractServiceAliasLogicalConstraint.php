@@ -17,7 +17,7 @@ final class NoAbstractServiceAliasLogicalConstraint implements LogicalConstraint
                 if (!$this->doesServiceDefinitionHaveAlias($containerDefinition, $sharedServiceDefinition)) {
                     $collection->add(new LogicalConstraintViolation(sprintf(
                         'The abstract, %s, does not have an alias. Create a concrete class that implements this type and annotate it with a #[Service] Attribute.',
-                        $sharedServiceDefinition->getType()
+                        $sharedServiceDefinition->getType()->getName()
                     ), LogicalConstraintViolationType::Warning));
                 }
             }

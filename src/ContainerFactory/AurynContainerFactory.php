@@ -74,10 +74,6 @@ final class AurynContainerFactory implements ContainerFactory {
      * This limitation should be short-lived as the Auryn Injector is being migrated to a new organization and codebase.
      * Once that migration has been completed a new ContainerFactory using that implementation will be used and this
      * implementation will be deprecated.
-     *
-     * @param ContainerDefinition $containerDefinition
-     * @param ContainerFactoryOptions|null $containerFactoryOptions
-     * @return ContainerInterface&AutowireableFactory&HasBackingContainer
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
@@ -257,7 +253,7 @@ final class AurynContainerFactory implements ContainerFactory {
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             $type = $servicePrepareDefinition->getService();
             if (!in_array($type, $preparedTypes)) {
-                $injector->prepare($type, function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $type, $activeProfiles, $definitionMap) {
+                $injector->prepare($type->getName(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $type, $activeProfiles, $definitionMap) {
                     $methods = $this->mapTypesServicePrepares($type, $servicePrepareDefinitions);
                     foreach ($methods as $method) {
                         $params = $definitionMap[$type->getName()][$method] ?? [];

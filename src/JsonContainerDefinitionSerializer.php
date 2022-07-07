@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\Typiphy\Internal\NamedType;
+use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
@@ -217,7 +218,9 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         } else if (str_contains($rawType, '&')) {
             $types = [];
             foreach (explode('&', $rawType) as $intersectType) {
-                $types[] = $this->convertStringToType($intersectType);
+                $parsedType = $this->convertStringToType($intersectType);
+                assert($parsedType instanceof ObjectType);
+                $types[] = $parsedType;
             }
             $type = typeIntersect(...$types);
         } else {

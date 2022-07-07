@@ -13,9 +13,9 @@ use Cspray\Typiphy\TypeUnion;
 final class InjectDefinitionBuilder {
 
     private ObjectType $service;
-    private string $method;
-    private string $paramName;
-    private string $property;
+    private ?string $method;
+    private ?string $paramName;
+    private ?string $property;
     private Type|TypeUnion|TypeIntersect $type;
     private mixed $value;
     private bool $isValueCalled = false;

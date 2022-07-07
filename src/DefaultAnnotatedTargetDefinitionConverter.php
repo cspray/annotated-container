@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\Typiphy\Type;
+use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionUnionType;
 use function Cspray\Typiphy\arrayType;
@@ -95,7 +96,7 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             if ($paramType !== mixedType() && $targetReflection->getType()->allowsNull()) {
                 $paramType = typeUnion($paramType, nullType());
             }
-        } else {
+        } else if ($targetReflection->getType() instanceof ReflectionUnionType || $targetReflection->getType() instanceof ReflectionIntersectionType) {
             $types = [];
             foreach ($targetReflection->getType()->getTypes() as $type) {
                 $types[] = $this->convertReflectionNamedType($type);
@@ -132,7 +133,7 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             foreach ($target->getTargetReflection()->getType()->getTypes() as $reflectionType) {
                 $types[] = $this->convertReflectionNamedType($reflectionType);
             }
-            if ($target->getTargetReflection()->getType() instanceof \ReflectionIntersectionType) {
+            if ($target->getTargetReflection()->getType() instanceof ReflectionIntersectionType) {
                 $propType = typeIntersect(...$types);
             } else {
                 $propType = typeUnion(...$types);

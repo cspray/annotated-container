@@ -11,7 +11,7 @@ use Cspray\Typiphy\ObjectType;
 final class PropertyInjectTargetIdentifier implements InjectTargetIdentifier {
     public function __construct(
         private readonly string $name,
-        private readonly ?ObjectType $class
+        private readonly ObjectType $class
     ) {}
 
     public function isMethodParameter() : bool {
