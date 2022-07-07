@@ -4,7 +4,12 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
+use Cspray\Typiphy\TypeIntersect;
+use Cspray\Typiphy\TypeUnion;
 use PHPUnit\Framework\TestCase;
+use function Cspray\Typiphy\floatType;
+use function Cspray\Typiphy\intType;
+use function Cspray\Typiphy\stringType;
 
 class JsonContainerDefinitionSerializerTest extends TestCase {
 
@@ -171,6 +176,44 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ], $json['compiledServiceDefinitions']);
     }
 
+    public function testSerializeInjectDefinitionMethod() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::injectConstructorServices()->getPath())->build()
+        );
+
+        $json = json_decode($serializer->serialize($containerDefinition), true);
+        $this->assertArrayHasKey('injectDefinitions', $json);
+        $this->assertContains([
+            'injectTargetType' => Fixtures::injectConstructorServices()->injectStringService()->getName(),
+            'injectTargetMethod' => '__construct',
+            'injectTargetName' => 'val',
+            'type' => 'string',
+            'value' => 'foobar',
+            'profiles' => ['default'],
+            'storeName' => null
+        ], $json['injectDefinitions']);
+    }
+
+    public function testSerializeInjectDefinitionProperty() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::configurationServices()->getPath())->build()
+        );
+
+        $json = json_decode($serializer->serialize($containerDefinition), true);
+        $this->assertArrayHasKey('injectDefinitions', $json);
+        $this->assertContains([
+            'injectTargetType' => Fixtures::configurationServices()->myConfig()->getName(),
+            'injectTargetMethod' => null,
+            'injectTargetName' => 'key',
+            'type' => 'string',
+            'value' => 'my-api-key',
+            'profiles' => ['default'],
+            'storeName' => null
+        ], $json['injectDefinitions']);
+    }
+
     /** ======================================== Deserialization Testing ==============================================*/
 
     public function serializeDeserializeSerializeDirs() : array {
@@ -181,6 +224,7 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             [Fixtures::profileResolvedServices()->getPath()],
             [Fixtures::abstractClassAliasedService()->getPath()],
             [Fixtures::namedServices()->getPath()],
+            [Fixtures::injectConstructorServices()->getPath()]
         ];
     }
 
@@ -205,6 +249,69 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         );
     }
 
+    public function testDeserializeInjectWithCorrectTypeUnion() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::injectConstructorServices()->getPath())->build()
+        );
+
+        $serialized = $serializer->serialize($containerDefinition);
+        $subjectDefinition = $serializer->deserialize($serialized);
+
+        $injectDefinitions = $subjectDefinition->getInjectDefinitions();
+
+        /** @var InjectDefinition[] $typeUnionInjects */
+        $typeUnionInjects = array_values(
+            array_filter(
+                $injectDefinitions,
+                fn(InjectDefinition $injectDefinition) =>
+                    $injectDefinition->getTargetIdentifier()->getClass() === Fixtures::injectConstructorServices()->injectTypeUnionService()
+            )
+        );
+
+        $this->assertCount(1, $typeUnionInjects);
+        $this->assertInstanceOf(TypeUnion::class, $typeUnionInjects[0]->getType());
+
+        /** @var TypeUnion $type */
+        $type = $typeUnionInjects[0]->getType();
+
+        $this->assertSame([
+            stringType(),
+            intType(),
+            floatType()
+        ], $type->getTypes());
+    }
+
+    public function testDeserializeInjectWithCorrectTypeIntersect() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::injectIntersectCustomStoreServices()->getPath())->build()
+        );
+
+        $serialized = $serializer->serialize($containerDefinition);
+        $subjectDefinition = $serializer->deserialize($serialized);
+
+        $injectDefinitions = $subjectDefinition->getInjectDefinitions();
+
+        /** @var InjectDefinition[] $typeIntersectInjects */
+        $typeIntersectInjects = array_values(
+            array_filter(
+                $injectDefinitions,
+                fn(InjectDefinition $injectDefinition) =>
+                    $injectDefinition->getTargetIdentifier()->getClass() === Fixtures::injectIntersectCustomStoreServices()->intersectInjector()
+            )
+        );
+
+        $this->assertCount(1, $typeIntersectInjects);
+        $this->assertInstanceOf(TypeIntersect::class, $typeIntersectInjects[0]->getType());
+
+        $type = $typeIntersectInjects[0]->getType();
+
+        $this->assertSame([
+            Fixtures::injectIntersectCustomStoreServices()->fooInterface(),
+            Fixtures::injectIntersectCustomStoreServices()->barInterface()
+        ], $type->getTypes());
+    }
 
 }
 

@@ -5,8 +5,10 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
+use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
+use Cspray\Typiphy\Internal\NamedType;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
@@ -418,4 +420,49 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $this->assertFalse($container->has('test-foo'));
     }
 
+    public function deserializeContainerProvider() : array {
+        return [
+            [Fixtures::injectCustomStoreServices(), function(ContainerFactory $containerFactory, ContainerDefinition $deserialize) {
+                $store = $this->getMockBuilder(ParameterStore::class)->getMock();
+                $store->expects($this->once())
+                    ->method('getName')
+                    ->willReturn('test-store');
+
+                $store->expects($this->once())
+                    ->method('fetch')
+                    ->with($this->isInstanceOf(NamedType::class), 'key')
+                    ->willReturn('the store key value');
+                $containerFactory->addParameterStore($store);
+
+                $container = $containerFactory->createContainer($deserialize);
+                $service = $container->get(Fixtures::injectCustomStoreServices()->scalarInjector()->getName());
+
+                $this->assertSame('the store key value', $service->key);
+            }],
+            [Fixtures::injectConstructorServices(), function(ContainerFactory $containerFactory, ContainerDefinition $deserialize) {
+                $container = $containerFactory->createContainer($deserialize);
+
+                $service = $container->get(Fixtures::injectConstructorServices()->injectTypeUnionService()->getName());
+
+                $this->assertSame(4.20, $service->value);
+            }]
+        ];
+    }
+
+    /**
+     * @dataProvider deserializeContainerProvider
+     */
+    public function testDeserializingContainerWithInjectAllowsServiceCreation(Fixture $fixture, callable $assertions) {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->getContainerDefinitionCompiler()->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($fixture->getPath())->build()
+        );
+
+        $serialized = $serializer->serialize($containerDefinition);
+        $deserialize = $serializer->deserialize($serialized);
+
+        $containerFactory = $this->getContainerFactory();
+
+        $assertions($containerFactory, $deserialize);
+    }
 }
