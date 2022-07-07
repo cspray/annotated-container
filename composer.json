@@ -22,7 +22,8 @@
     "mikey179/vfsstream": "^1.6",
     "phpunit/phpunit": "^9.5",
     "php-di/php-di": "v7.x-dev",
-    "rdlowrey/auryn": "^1.4"
+    "rdlowrey/auryn": "^1.4",
+    "vimeo/psalm": "^4.24"
   },
   "autoload": {
     "psr-4": {

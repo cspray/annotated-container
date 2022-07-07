@@ -74,10 +74,6 @@ final class AurynContainerFactory implements ContainerFactory {
      * This limitation should be short-lived as the Auryn Injector is being migrated to a new organization and codebase.
      * Once that migration has been completed a new ContainerFactory using that implementation will be used and this
      * implementation will be deprecated.
-     *
-     * @param ContainerDefinition $containerDefinition
-     * @param ContainerFactoryOptions|null $containerFactoryOptions
-     * @return ContainerInterface&AutowireableFactory&HasBackingContainer
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
@@ -186,18 +182,22 @@ final class AurynContainerFactory implements ContainerFactory {
                 continue;
             }
             $injector->share($serviceDefinition->getType()->getName());
-            if (!is_null($serviceDefinition->getName())) {
-                $nameTypeMap[$serviceDefinition->getName()] = $serviceDefinition->getType();
+            $name = $serviceDefinition->getName();
+            if (!is_null($name)) {
+                $nameTypeMap[$name] = $serviceDefinition->getType();
             }
         }
 
         foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
             $injector->share($configurationDefinition->getClass()->getName());
-            if (!is_null($configurationDefinition->getName())) {
-                $nameTypeMap[$configurationDefinition->getName()] = $configurationDefinition->getClass();
+            $name = $configurationDefinition->getName();
+            if (!is_null($name)) {
+                $nameTypeMap[$name] = $configurationDefinition->getClass();
             }
             $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($containerDefinition, $configurationDefinition, $activeProfiles) {
-                $configReflection = (new \ReflectionClass($configurationDefinition->getClass()->getName()));
+                /** @var class-string $configurationClass */
+                $configurationClass = $configurationDefinition->getClass()->getName();
+                $configReflection = (new \ReflectionClass($configurationClass));
                 $configInstance = $configReflection->newInstanceWithoutConstructor();
                 foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
                     $injectProfiles = $injectDefinition->getProfiles();
@@ -209,8 +209,9 @@ final class AurynContainerFactory implements ContainerFactory {
 
                     $reflectionProperty = $configReflection->getProperty($injectDefinition->getTargetIdentifier()->getName());
                     $value = $injectDefinition->getValue();
-                    if (!is_null($injectDefinition->getStoreName())) {
-                        $value = $this->parameterStores[$injectDefinition->getStoreName()]->fetch($injectDefinition->getType(), $value);
+                    $storeName = $injectDefinition->getStoreName();
+                    if (!is_null($storeName)) {
+                        $value = $this->parameterStores[$storeName]->fetch($injectDefinition->getType(), $value);
                     }
                     $reflectionProperty->setValue($configInstance, $value);
                 }
@@ -229,7 +230,7 @@ final class AurynContainerFactory implements ContainerFactory {
                 } else {
                     /** @var AliasDefinition $typeAliasDefinition */
                     foreach ($typeAliasDefinitions as $typeAliasDefinition) {
-                        if ($this->getServiceDefinition($containerDefinition, $typeAliasDefinition->getConcreteService())->isPrimary()) {
+                        if ($this->getServiceDefinition($containerDefinition, $typeAliasDefinition->getConcreteService())?->isPrimary()) {
                             $aliasDefinition = $typeAliasDefinition;
                             break;
                         }
@@ -257,7 +258,7 @@ final class AurynContainerFactory implements ContainerFactory {
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             $type = $servicePrepareDefinition->getService();
             if (!in_array($type, $preparedTypes)) {
-                $injector->prepare($type, function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $type, $activeProfiles, $definitionMap) {
+                $injector->prepare($type->getName(), function(object $object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $type, $activeProfiles, $definitionMap) {
                     $methods = $this->mapTypesServicePrepares($type, $servicePrepareDefinitions);
                     foreach ($methods as $method) {
                         $params = $definitionMap[$type->getName()][$method] ?? [];
@@ -287,12 +288,16 @@ final class AurynContainerFactory implements ContainerFactory {
                 continue;
             }
 
+            $method = $injectDefinition->getTargetIdentifier()->getMethodName();
+            if (is_null($method)) {
+                continue;
+            }
+
             $serviceType = $injectDefinition->getTargetIdentifier()->getClass()->getName();
             if (!isset($definitionMap[$serviceType])) {
                 $definitionMap[$serviceType] = [];
             }
 
-            $method = $injectDefinition->getTargetIdentifier()->getMethodName();
             if (!isset($definitionMap[$serviceType][$method])) {
                 $definitionMap[$serviceType][$method] = [];
             }
@@ -306,12 +311,14 @@ final class AurynContainerFactory implements ContainerFactory {
             } else {
                 $key = ':' . $injectDefinition->getTargetIdentifier()->getName();
             }
-            if (!is_null($injectDefinition->getStoreName())) {
-                $parameterStore = $this->parameterStores[$injectDefinition->getStoreName()] ?? null;
+
+            $storeName = $injectDefinition->getStoreName();
+            if (!is_null($storeName)) {
+                $parameterStore = $this->parameterStores[$storeName] ?? null;
                 if (is_null($parameterStore)) {
                     throw new InvalidParameterException(sprintf(
                         'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
-                        $injectDefinition->getStoreName()
+                        $storeName
                     ));
                 }
                 $value = $parameterStore->fetch($injectDefinition->getType(), $value);

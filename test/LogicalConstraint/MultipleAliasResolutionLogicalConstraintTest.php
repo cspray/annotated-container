@@ -33,7 +33,7 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
         $this->assertCount(1, $violations);
-        $this->assertSame('Multiple aliases were found for ' . DummyApps\MultipleAliasResolution\FooInterface::class . '. This may be a fatal error at runtime.', $violations->get(0)->getMessage());
+        $this->assertSame('Multiple aliases were found for ' . Fixtures::ambiguousAliasedServices()->fooInterface()->getName() . '. This may be a fatal error at runtime.', $violations->get(0)->getMessage());
         $this->assertSame(LogicalConstraintViolationType::Notice, $violations->get(0)->getViolationType());
     }
 

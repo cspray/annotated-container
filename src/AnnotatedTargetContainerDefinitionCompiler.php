@@ -99,7 +99,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         });
         $abstractPrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
-            return $serviceDef->isAbstract();
+            return $serviceDef?->isAbstract() ?? false;
         });
 
         foreach ($abstractPrepareDefinitions as $abstractPrepareDefinition) {
@@ -162,8 +162,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     }
 
     private function addAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder) : ContainerDefinitionBuilder {
-        $abstractDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), fn($def) => $def->isAbstract());
-        $concreteDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), fn($def) => $def->isConcrete());
+        $abstractDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isAbstract());
+        $concreteDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isConcrete());
 
         foreach ($abstractDefinitions as $abstractDefinition) {
             foreach ($concreteDefinitions as $concreteDefinition) {

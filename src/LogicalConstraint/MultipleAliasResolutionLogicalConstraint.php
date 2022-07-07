@@ -21,7 +21,7 @@ final class MultipleAliasResolutionLogicalConstraint implements LogicalConstrain
             $aliasCount = $this->getAliasCount($containerDefinition, $serviceDefinition);
             if ($aliasCount > 1) {
                 $collection->add(new LogicalConstraintViolation(
-                    sprintf('Multiple aliases were found for %s. This may be a fatal error at runtime.', DummyApps\MultipleAliasResolution\FooInterface::class),
+                    sprintf('Multiple aliases were found for %s. This may be a fatal error at runtime.', $serviceDefinition->getType()->getName()),
                     LogicalConstraintViolationType::Notice
                 ));
             }

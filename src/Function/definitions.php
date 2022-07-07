@@ -9,7 +9,9 @@ use Cspray\Typiphy\TypeUnion;
 use ReflectionClass;
 
 function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false) : ServiceDefinition {
-    $reflection = new ReflectionClass($type->getName());
+    /** @psalm-var class-string $typeName */
+    $typeName = $type->getName();
+    $reflection = new ReflectionClass($typeName);
     $methodArgs = [$type];
     $method = $reflection->isAbstract() || $reflection->isInterface() ? 'forAbstract' : 'forConcrete';
     /** @var ServiceDefinitionBuilder $serviceDefinitionBuilder */

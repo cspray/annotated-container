@@ -5,7 +5,11 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
+use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
+use ReflectionClass;
+use ReflectionIntersectionType;
+use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionUnionType;
 use function Cspray\Typiphy\arrayType;
@@ -38,7 +42,9 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         $serviceType = objectType($target->getTargetReflection()->getName());
         /** @var Service $attribute */
         $attribute = $target->getAttributeInstance();
-        if ($target->getTargetReflection()->isInterface() || $target->getTargetReflection()->isAbstract()) {
+        $reflection = $target->getTargetReflection();
+        assert($reflection instanceof ReflectionClass);
+        if ($reflection->isInterface() || $reflection->isAbstract()) {
             $builder = ServiceDefinitionBuilder::forAbstract($serviceType);
         } else {
             $builder = ServiceDefinitionBuilder::forConcrete($serviceType, $attribute->primary);
@@ -54,14 +60,18 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
     }
 
     private function buildServiceDelegateDefinition(AnnotatedTarget $target) : ServiceDelegateDefinition {
-        $delegateType = $target->getTargetReflection()->getDeclaringClass()->getName();
-        $delegateMethod = $target->getTargetReflection()->getName();
+        $reflection = $target->getTargetReflection();
+        assert($reflection instanceof ReflectionMethod);
+        $delegateType = $reflection->getDeclaringClass()->getName();
+        $delegateMethod = $reflection->getName();
         return ServiceDelegateDefinitionBuilder::forService(objectType($target->getAttributeInstance()->service))->withDelegateMethod(objectType($delegateType), $delegateMethod)->build();
     }
 
     private function buildServicePrepareDefinition(AnnotatedTarget $target) : ServicePrepareDefinition {
-        $prepareType = $target->getTargetReflection()->getDeclaringClass()->getName();
-        $method = $target->getTargetReflection()->getName();
+        $reflection = $target->getTargetReflection();
+        assert($reflection instanceof ReflectionMethod);
+        $prepareType = $reflection->getDeclaringClass()->getName();
+        $method = $reflection->getName();
         return ServicePrepareDefinitionBuilder::forMethod(objectType($prepareType), $method)->build();
     }
 
@@ -82,9 +92,12 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
     }
 
     private function buildMethodInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
-        /** @var \ReflectionParameter $targetReflection */
         $targetReflection = $target->getTargetReflection();
-        $serviceType = objectType($targetReflection->getDeclaringClass()->getName());
+        assert($targetReflection instanceof \ReflectionParameter);
+        $declaringClass = $targetReflection->getDeclaringClass();
+        assert(!is_null($declaringClass));
+
+        $serviceType = objectType($declaringClass->getName());
         $method = $targetReflection->getDeclaringFunction()->getName();
         $param = $targetReflection->getName();
         if (is_null($targetReflection->getType())) {
@@ -95,17 +108,22 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             if ($paramType !== mixedType() && $targetReflection->getType()->allowsNull()) {
                 $paramType = typeUnion($paramType, nullType());
             }
-        } else {
+        } else if ($targetReflection->getType() instanceof ReflectionUnionType || $targetReflection->getType() instanceof ReflectionIntersectionType) {
             $types = [];
             foreach ($targetReflection->getType()->getTypes() as $type) {
+                assert($type instanceof ReflectionNamedType);
                 $types[] = $this->convertReflectionNamedType($type);
             }
             if ($targetReflection->getType() instanceof ReflectionUnionType) {
                 $paramType = typeUnion(...$types);
             } else {
+                /** @psalm-var list<ObjectType> $types */
                 $paramType = typeIntersect(...$types);
             }
+        } else {
+            throw new \Exception();
         }
+
         $builder = InjectDefinitionBuilder::forService($serviceType)
             ->withMethod($method, $paramType, $param)
             ->withValue($target->getAttributeInstance()->value);
@@ -124,19 +142,25 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
     }
 
     private function buildPropertyInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
-        $builder = InjectDefinitionBuilder::forService(objectType($target->getTargetReflection()->getDeclaringClass()->getName()));
-        if ($target->getTargetReflection()->getType() instanceof ReflectionNamedType) {
-            $propType = $this->convertReflectionNamedType($target->getTargetReflection()->getType());
-        } else {
+        $targetReflection = $target->getTargetReflection();
+        assert($targetReflection instanceof \ReflectionProperty);
+        $builder = InjectDefinitionBuilder::forService(objectType($targetReflection->getDeclaringClass()->getName()));
+        if ($targetReflection->getType() instanceof ReflectionNamedType) {
+            $propType = $this->convertReflectionNamedType($targetReflection->getType());
+        } else if ($targetReflection->getType() instanceof ReflectionIntersectionType || $targetReflection->getType() instanceof ReflectionUnionType) {
             $types = [];
-            foreach ($target->getTargetReflection()->getType()->getTypes() as $reflectionType) {
+            foreach ($targetReflection->getType()->getTypes() as $reflectionType) {
+                assert($reflectionType instanceof ReflectionNamedType);
                 $types[] = $this->convertReflectionNamedType($reflectionType);
             }
-            if ($target->getTargetReflection()->getType() instanceof \ReflectionIntersectionType) {
+            if ($targetReflection->getType() instanceof ReflectionIntersectionType) {
+                /** @psalm-var list<ObjectType> $types */
                 $propType = typeIntersect(...$types);
             } else {
                 $propType = typeUnion(...$types);
             }
+        } else {
+            throw new \Exception();
         }
         $builder = $builder->withProperty(
             $propType,

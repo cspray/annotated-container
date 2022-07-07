@@ -1,4 +1,4 @@
-name: 'Unit Tests'
+name: 'Unit Tests & Static Analysis'
 
 on:
   push:
@@ -7,18 +7,15 @@ on:
     branches: [ main ]
 
 jobs:
-  build-test:
+  continuous-integration:
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-      - name: Composer 8
-        uses: php-actions/composer@v5
-        with:
-          php_version: 8
-      - name: PHP 8 tests
+      - name: Composer
+        uses: php-actions/composer@v6
+      - name: Tests
         uses: php-actions/phpunit@v2
-        with:
-          version: 9
-          php_version: 8
+      - name: Static Analysis
+        run: "vendor/bin/psalm"

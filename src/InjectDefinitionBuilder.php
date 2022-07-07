@@ -13,9 +13,9 @@ use Cspray\Typiphy\TypeUnion;
 final class InjectDefinitionBuilder {
 
     private ObjectType $service;
-    private string $method;
-    private string $paramName;
-    private string $property;
+    private ?string $method;
+    private ?string $paramName;
+    private ?string $property;
     private Type|TypeUnion|TypeIntersect $type;
     private mixed $value;
     private bool $isValueCalled = false;
@@ -77,8 +77,10 @@ final class InjectDefinitionBuilder {
         }
 
         if (isset($this->method)) {
+            assert(isset($this->paramName));
             $targetIdentifier = new MethodParameterInjectTargetIdentifier($this->paramName, $this->method, $this->service);
         } else {
+            assert(isset($this->property));
             $targetIdentifier = new PropertyInjectTargetIdentifier($this->property, $this->service);
         }
 
