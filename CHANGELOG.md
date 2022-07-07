@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+### Added
+
+- Added vimeo/psalm to dev dependencies, along with running static analysis checks up to reporting level 2. Getting to reporting level 1 will take significantly more effort.
+
 ## [1.0.2](https://github.com/cspray/annotated-container/tree/v1.0.2) - 2022-07-06
 
 ### Fixed
