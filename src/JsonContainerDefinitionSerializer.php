@@ -160,7 +160,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
             if (is_null($injectDefinition['injectTargetMethod'])) {
                 $injectBuilder = $injectBuilder->withProperty(
-                    new NamedType($injectDefinition['type']),
+                    $type,
                     $injectDefinition['injectTargetName']
                 );
             } else {
