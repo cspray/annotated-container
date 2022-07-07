@@ -2,13 +2,10 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainerFixture\InjectConstructorServices\TypeUnionInjectService;
 use Cspray\Typiphy\Internal\NamedType;
-use Cspray\Typiphy\Internal\NamedTypeUnion;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
-use JsonSerializable;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\callableType;
@@ -22,7 +19,6 @@ use function Cspray\Typiphy\stringType;
 use function Cspray\Typiphy\typeIntersect;
 use function Cspray\Typiphy\typeUnion;
 use function Cspray\Typiphy\voidType;
-use function DI\string;
 
 /**
  * A ContainerDefinitionSerializer that will format a ContainerDefinition into a JSON string.
