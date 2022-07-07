@@ -13,12 +13,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Composer 8
-        uses: php-actions/composer@v5
+      - name: Composer
+        uses: php-actions/composer@v6
         with:
           php_version: 8
-      - name: PHP 8 tests
+      - name: Tests
         uses: php-actions/phpunit@v2
         with:
           version: 9
           php_version: 8
+      - name: Static Analysis
+        run: "vendor/bin/psalm"
