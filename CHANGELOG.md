@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased Changes
+
+## [1.0.2](https://github.com/cspray/annotated-container/tree/v1.0.2) - 2022-07-06
+
+### Fixed
+
+- Fixed an oversight where Service properties were not marked as readonly
+- Fixed a bug where caching a ContainerDefinition was not including the InjectDefinitions causing any Container to be created from the cached results to be invalid if an Inject Attribute is used.
+
 ## [1.0.1](https://github.com/cspray/annotated-container/tree/v1.0.1) - 2022-07-05
 
 ### Changed
