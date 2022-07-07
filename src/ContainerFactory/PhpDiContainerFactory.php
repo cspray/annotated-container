@@ -29,6 +29,7 @@ use Cspray\AnnotatedContainer\ParameterStore;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\Typiphy\ObjectType;
 use DI\ContainerBuilder;
+use DI\Definition\Helper\AutowireDefinitionHelper;
 use Psr\Container\ContainerInterface;
 use function DI\autowire;
 use function DI\decorate;
@@ -77,9 +78,10 @@ class PhpDiContainerFactory implements ContainerFactory {
             }
             $serviceTypes[] = $serviceDefinition->getType()->getName();
             $definitions[$serviceDefinition->getType()->getName()] = autowire();
-            if (!is_null($serviceDefinition->getName())) {
-                $serviceTypes[] = $serviceDefinition->getName();
-                $definitions[$serviceDefinition->getName()] = get($serviceDefinition->getType()->getName());
+            $name = $serviceDefinition->getName();
+            if (!is_null($name)) {
+                $serviceTypes[] = $name;
+                $definitions[$name] = get($serviceDefinition->getType()->getName());
             }
         }
 
@@ -101,7 +103,7 @@ class PhpDiContainerFactory implements ContainerFactory {
                 } else {
                     /** @var AliasDefinition $typeAliasDefinition */
                     foreach ($typeAliasDefinitions as $typeAliasDefinition) {
-                        if ($this->getServiceDefinition($containerDefinition, $typeAliasDefinition->getConcreteService())->isPrimary()) {
+                        if ($this->getServiceDefinition($containerDefinition, $typeAliasDefinition->getConcreteService())?->isPrimary()) {
                             $aliasDefinition = $typeAliasDefinition;
                             break;
                         }
@@ -110,7 +112,11 @@ class PhpDiContainerFactory implements ContainerFactory {
 
                 if (isset($aliasDefinition)) {
                     $abstractDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getAbstractService());
+                    assert(!is_null($abstractDefinition));
+
                     $abstractName = is_null($abstractDefinition->getName()) ? $abstractDefinition->getType()->getName() : $abstractDefinition->getName();
+                    assert(!is_null($abstractName));
+
                     $definitions[$abstractName] = autowire($aliasDefinition->getConcreteService()->getName());
                 }
             }
@@ -122,6 +128,7 @@ class PhpDiContainerFactory implements ContainerFactory {
             if (!is_null($configurationDefinition->getName())) {
                 $serviceTypes[] = $configurationDefinition->getName();
             }
+            assert(!is_null($configName));
             $definitions[$configName] = autowire($configurationDefinition->getClass()->getName());
         }
 
@@ -130,6 +137,7 @@ class PhpDiContainerFactory implements ContainerFactory {
             if (!isset($definitions[$service])) {
                 $definitions[$service] = autowire();
             }
+            assert($definitions[$service] instanceof AutowireDefinitionHelper);
             foreach ($methods as $methodName => $params) {
                 if ($methodName === '__construct') {
                     foreach ($params as $param => $value) {
@@ -144,6 +152,7 @@ class PhpDiContainerFactory implements ContainerFactory {
             if (!isset($definitions[$service])) {
                 $definitions[$service] = autowire();
             }
+            assert($definitions[$service] instanceof AutowireDefinitionHelper);
             foreach ($properties as $property => $value) {
                 $definitions[$service]->property($property, $value);
             }
@@ -247,6 +256,7 @@ class PhpDiContainerFactory implements ContainerFactory {
             if (!isset($map[$className])) {
                 $map[$className] = [];
             }
+            assert(!is_null($methodName));
 
             if (!isset($map[$className][$methodName])) {
                 $map[$className][$methodName] = [];

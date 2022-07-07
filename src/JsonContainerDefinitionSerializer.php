@@ -214,6 +214,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             foreach (explode('|', $rawType) as $unionType) {
                 $types[] = $this->convertStringToType($unionType);
             }
+            /** @psalm-var list<Type> $types */
             $type = typeUnion(...$types);
         } else if (str_contains($rawType, '&')) {
             $types = [];

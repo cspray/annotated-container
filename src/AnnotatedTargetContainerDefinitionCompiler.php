@@ -99,7 +99,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         });
         $abstractPrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
-            return $serviceDef->isAbstract();
+            return $serviceDef?->isAbstract() ?? false;
         });
 
         foreach ($abstractPrepareDefinitions as $abstractPrepareDefinition) {
