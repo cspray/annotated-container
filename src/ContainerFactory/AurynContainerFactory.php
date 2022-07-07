@@ -258,7 +258,7 @@ final class AurynContainerFactory implements ContainerFactory {
         foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
             $type = $servicePrepareDefinition->getService();
             if (!in_array($type, $preparedTypes)) {
-                $injector->prepare($type->getName(), function($object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $type, $activeProfiles, $definitionMap) {
+                $injector->prepare($type->getName(), function(object $object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $type, $activeProfiles, $definitionMap) {
                     $methods = $this->mapTypesServicePrepares($type, $servicePrepareDefinitions);
                     foreach ($methods as $method) {
                         $params = $definitionMap[$type->getName()][$method] ?? [];
@@ -297,12 +297,10 @@ final class AurynContainerFactory implements ContainerFactory {
             if (!isset($definitionMap[$serviceType])) {
                 $definitionMap[$serviceType] = [];
             }
-            assert(is_array($definitionMap[$serviceType]));
 
             if (!isset($definitionMap[$serviceType][$method])) {
                 $definitionMap[$serviceType][$method] = [];
             }
-            assert(is_array($definitionMap[$serviceType][$method]));
 
             $value = $injectDefinition->getValue();
             if ($injectDefinition->getType() instanceof ObjectType) {

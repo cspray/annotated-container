@@ -162,8 +162,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     }
 
     private function addAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder) : ContainerDefinitionBuilder {
-        $abstractDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), fn($def) => $def->isAbstract());
-        $concreteDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), fn($def) => $def->isConcrete());
+        $abstractDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isAbstract());
+        $concreteDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isConcrete());
 
         foreach ($abstractDefinitions as $abstractDefinition) {
             foreach ($concreteDefinitions as $concreteDefinition) {

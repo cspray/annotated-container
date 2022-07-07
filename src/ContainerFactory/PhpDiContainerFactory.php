@@ -160,7 +160,7 @@ class PhpDiContainerFactory implements ContainerFactory {
 
         foreach ($containerDefinition->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
             $serviceName = $serviceDelegateDefinition->getServiceType()->getName();
-            $definitions[$serviceName] = function(Container $container) use($serviceDelegateDefinition) {
+            $definitions[$serviceName] = function(Container $container) use($serviceDelegateDefinition) : mixed {
                 return $container->call([$serviceDelegateDefinition->getDelegateType()->getName(), $serviceDelegateDefinition->getDelegateMethod()]);
             };
         }
@@ -172,7 +172,7 @@ class PhpDiContainerFactory implements ContainerFactory {
                 $definitions[$service] = autowire();
             }
 
-            $servicePrepareDefinitions[$service] = decorate(function($service, Container $container) use($methodParams) {
+            $servicePrepareDefinitions[$service] = decorate(function(object $service, Container $container) use($methodParams) : object {
                 foreach ($methodParams as $method => $params) {
                     $container->call([$service, $method], $params);
                 }
@@ -335,7 +335,7 @@ class PhpDiContainerFactory implements ContainerFactory {
     private function getServiceDefinition(ContainerDefinition $containerDefinition, ObjectType $objectType) : ?ServiceDefinition {
         return array_reduce(
             $containerDefinition->getServiceDefinitions(),
-            fn($carry, $item) => $item->getType() === $objectType ? $item : $carry
+            fn($carry, $item) : ?ServiceDefinition => $item->getType() === $objectType ? $item : $carry
         );
     }
 
