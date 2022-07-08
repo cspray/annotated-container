@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
+use Cspray\Phinal\AllowInheritance;
 use DI\Container;
 
 // @codeCoverageIgnoreStart
@@ -38,7 +39,7 @@ use function DI\get;
 /**
  * A ContainerFactory that utilizes the php-di/php-di library.
  */
-class PhpDiContainerFactory implements ContainerFactory {
+final class PhpDiContainerFactory implements ContainerFactory {
 
     /**
      * @var ParameterStore[]

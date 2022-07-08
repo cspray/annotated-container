@@ -2,6 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
-class InvalidCacheException extends Exception {
+final class InvalidCacheException extends Exception {
 
 }

@@ -2,6 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
-class ContainerFactoryNotFoundException extends Exception {
+final class ContainerFactoryNotFoundException extends Exception {
 
 }

@@ -14,7 +14,7 @@ use UnitEnum;
  * give it a profile!
  */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
-class Inject {
+final class Inject {
 
     /**
      * Inject an explicit value into a constructor parameter, service prepare parameter, service delegate parameter, or

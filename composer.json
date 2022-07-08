@@ -23,7 +23,8 @@
     "phpunit/phpunit": "^9.5",
     "php-di/php-di": "v7.x-dev",
     "rdlowrey/auryn": "^1.4",
-    "vimeo/psalm": "^4.24"
+    "vimeo/psalm": "^4.24",
+    "cspray/phinal": "dev-main"
   },
   "autoload": {
     "psr-4": {
