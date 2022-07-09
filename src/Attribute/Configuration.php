@@ -11,7 +11,7 @@ use Attribute;
  * the Inject Attribute.
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class Configuration {
+final class Configuration {
 
     /**
      * @param string|null $name An arbitrary name that can be used to retrieve this Configuration with Container::get

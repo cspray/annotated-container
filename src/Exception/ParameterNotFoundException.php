@@ -2,6 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
-class ParameterNotFoundException extends Exception {
+final class ParameterNotFoundException extends Exception {
 
 }

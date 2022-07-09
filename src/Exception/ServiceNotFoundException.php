@@ -4,6 +4,6 @@ namespace Cspray\AnnotatedContainer\Exception;
 
 use Psr\Container\NotFoundExceptionInterface;
 
-class ServiceNotFoundException extends Exception implements NotFoundExceptionInterface {
+final class ServiceNotFoundException extends Exception implements NotFoundExceptionInterface {
 
 }

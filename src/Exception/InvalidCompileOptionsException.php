@@ -2,6 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
-class InvalidCompileOptionsException extends Exception {
+final class InvalidCompileOptionsException extends Exception {
 
 }

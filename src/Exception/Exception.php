@@ -4,6 +4,6 @@ namespace Cspray\AnnotatedContainer\Exception;
 
 use Exception as PhpException;
 
-class Exception extends PhpException {
+abstract class Exception extends PhpException {
 
 }

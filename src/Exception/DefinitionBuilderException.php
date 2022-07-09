@@ -2,6 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
-class DefinitionBuilderException extends Exception {
+final class DefinitionBuilderException extends Exception {
 
 }

@@ -7,17 +7,17 @@
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
     <projectFiles>
-        <directory name="src" />
+        <directory name="src"/>
         <ignoreFiles>
-            <directory name="vendor" />
+            <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
 
     <issueHandlers>
         <PropertyNotSetInConstructor>
             <errorLevel type="suppress">
-                <file name="src/*Builder.php" />
+                <file name="src/*Builder.php"/>
             </errorLevel>
         </PropertyNotSetInConstructor>
     </issueHandlers>
-</psalm>
+<plugins><pluginClass class="Cspray\Phinal\Plugin"/></plugins></psalm>

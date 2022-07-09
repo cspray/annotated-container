@@ -2,6 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
-class InvalidParameterException extends Exception {
+final class InvalidParameterException extends Exception {
 
 }
