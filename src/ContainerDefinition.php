@@ -19,6 +19,7 @@ interface ContainerDefinition {
      * @param ContainerDefinition $containerDefinition
      * @return ContainerDefinition
      * @throws ContainerDefinitionMergeException An exception that can be thrown if the given $containerDefinition can't be merged for some reason
+     * @deprecated This method is designated for removal in v2.0
      */
     public function merge(ContainerDefinition $containerDefinition) : ContainerDefinition;
 

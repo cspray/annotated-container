@@ -19,6 +19,13 @@
         <file name="src/*Builder.php"/>
       </errorLevel>
     </PropertyNotSetInConstructor>
+    <DeprecatedMethod>
+      <errorLevel type="suppress">
+        <!-- These methods are used in ContainerDefinition::merge which is still under tests -->
+        <referencedMethod name="Cspray\AnnotatedContainer\ServiceDefinition::equals" />
+        <referencedMethod name="Cspray\AnnotatedContainer\AliasDefinition::equals" />
+      </errorLevel>
+    </DeprecatedMethod>
   </issueHandlers>
   <plugins>
     <pluginClass class="Cspray\Phinal\Plugin"/>

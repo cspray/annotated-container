@@ -30,6 +30,7 @@ interface AliasDefinition {
      *
      * @param AliasDefinition $aliasDefinition
      * @return bool
+     * @deprecated This method is designated for removal in v2.0
      */
     public function equals(AliasDefinition $aliasDefinition) : bool;
 
