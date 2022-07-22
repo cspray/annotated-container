@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+
 /**
  * The preferred method for constructing ContainerDefinitionCompileOptions
  */
@@ -31,6 +33,7 @@ final class ContainerDefinitionCompileOptionsBuilder {
      * @param ContainerDefinitionBuilderContextConsumer $consumer
      * @return $this
      */
+    #[SingleEntrypointContainerDefinitionBuilderContextConsumer]
     public function withContainerDefinitionBuilderContextConsumer(ContainerDefinitionBuilderContextConsumer $consumer) : self {
         $instance = clone $this;
         $instance->consumer = $consumer;

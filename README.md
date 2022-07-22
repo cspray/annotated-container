@@ -36,6 +36,50 @@ Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. At the mom
 
 ## Quick Start
 
+Annotated Container ships with a built-in CLI tool to easily create a configuration detailing how to build your Container and a corresponding `Cspray\AnnotatedContainer\Bootstrap` implementation to create your Container using that configuration. It is highly recommended to utilize the CLI tool and configuration file when generating your Container.
+
+> The CLI tool offers extensive documentation detailing how to run commands and what options are available. If you're ever looking for more info run: `./vendor/bin/annotated-container help`
+
+The first step is to create the configuration. By default, the tooling will look at your `composer.json` to determine what directories to scan and create a directory that the ContainerDefinition can be cached in. Run the following command to complete this step. 
+
+```
+./vendor/bin/annotated-container init
+```
+
+The configuration file will be created in the root of your project named "annotated-container.xml". The cache directory will also be created in the root of your project named ".annotated-container-cache". Check out the command's help documentation for available options, including how to customize these values.
+
+Be sure to review the generated configuration! A "normal" Composer setup might result in a configuration that looks like the following. If there are any directories that should be scanned but aren't listed in `<source></source>` be sure to include them. Conversely, if there are directories included that _shouldn't_ be scanned be sure to remove them.
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+      <dir packagePrivate="true">tests</dir>
+    </source>
+  </scanDirectories>
+  <cacheDir>.annotated-container-cache</cacheDir>
+</annotatedContainer>
+```
+
+Now, bootstrap your Container in your app.
+
+```php
+<?php declare(strict_types=1);
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Cspray\AnnotatedContainer\Bootstrap;
+
+// Include other active profiles in this list
+// If the only active profile is default you can call this method without any arguments
+$profiles = ['default'];
+$container = (new Bootstrap())->bootstrapContainer($profiles);
+```
+
+## Detailed Setup Guide
+
 This is a short example to whet your appetite for learning more about AnnotatedContainer. Dependency resolution can be a complicated subject, and you should review the material in `/docs` if you plan on using the framework. Our example below is highly contrived but the rest of the documentation builds on top of it to show how AnnotatedContainer can help simplify dependency injection!
 
 In our example we've been given a task to store some blob data. How that data might get stored will change over time, and we should abstract that change from the rest of the system. We decide to introduce a new interface and an initial implementation that will store the data on a filesystem.

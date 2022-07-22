@@ -6,6 +6,10 @@ final class Fixtures {
 
     private function __construct() {}
 
+    public static function getRootPath() : string {
+        return __DIR__;
+    }
+
     public static function singleConcreteService() : SingleConcreteServiceFixture {
         return new SingleConcreteServiceFixture();
     }

@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+
 /**
  * Represents configurable details for the compilation of a ContainerDefinition.
  */
@@ -21,6 +23,7 @@ interface ContainerDefinitionCompileOptions {
      *
      * @return ContainerDefinitionBuilderContextConsumer|null
      */
+    #[SingleEntrypointContainerDefinitionBuilderContextConsumer]
     public function getContainerDefinitionBuilderContextConsumer() : ?ContainerDefinitionBuilderContextConsumer;
 
 }

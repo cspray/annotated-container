@@ -16,11 +16,21 @@ function compiler(string $cacheDir = null) : ContainerDefinitionCompiler {
     }
 }
 
-function containerFactory() : ContainerFactory {
-    if (class_exists(Injector::class)) {
-        return new AurynContainerFactory();
-    } else if (class_exists(Container::class)) {
-        return new PhpDiContainerFactory();
+function containerFactory(SupportedContainers $container = SupportedContainers::Default) : ContainerFactory {
+    if ($container === SupportedContainers::Auryn || ($container === SupportedContainers::Default) && class_exists(Injector::class)) {
+        static $auryn;
+        if (!isset($auryn)) {
+            $auryn = new AurynContainerFactory();
+        }
+
+        return $auryn;
+    } else if ($container === SupportedContainers::PhpDi || ($container === SupportedContainers::Default && class_exists(Container::class))) {
+        static $di;
+        if (!isset($di)) {
+            $di = new PhpDiContainerFactory();
+        }
+
+        return $di;
     } else {
         throw new ContainerFactoryNotFoundException('There is no backing Container library found. Please run "composer suggests" for supported containers.');
     }
