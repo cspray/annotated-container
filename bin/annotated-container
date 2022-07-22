@@ -12,7 +12,7 @@ use Cspray\AnnotatedContainer\RootDirectoryBootstrappingDirectoryResolver;
 
 $dir = dirname(__DIR__);
 if (!file_exists($dir . '/vendor/autoload.php')) {
-    $dir = dirname(__DIR__, 5);
+    $dir = dirname(__DIR__, 4);
 }
 
 require_once $dir . '/vendor/autoload.php';
