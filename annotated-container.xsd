@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+    xml:lang="en"
+    version="1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified"
+    targetNamespace="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <xs:annotation>
+    <xs:documentation>
+      This Schema defines how to configure Annotated Container to bootstrap itself.
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="annotatedContainer" type="annotatedContainerType">
+    <xs:annotation>
+      <xs:documentation>Root Element</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="annotatedContainerType">
+    <xs:all>
+      <xs:element name="scanDirectories" type="scanDirectoriesType" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>
+            Define locations that should be scanned for Attributes to create your ContainerDefinition.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+
+      <xs:element name="cacheDir" type="xs:token" minOccurs="0" maxOccurs="1"/>
+
+      <xs:element name="containerDefinitionBuilderContextConsumer" minOccurs="0" maxOccurs="1" type="xs:token" />
+
+      <xs:element name="parameterStores" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="fqcn" type="xs:token" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="scanDirectoriesType">
+    <xs:all>
+      <xs:element name="source" minOccurs="1" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="dir" type="sourceDirType"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="sourceDirType">
+    <xs:simpleContent>
+      <xs:extension base="xs:token">
+        <xs:attribute name="packagePrivate" type="xs:boolean" default="false" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+</xs:schema>

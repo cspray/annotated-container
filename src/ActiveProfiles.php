@@ -11,7 +11,7 @@ interface ActiveProfiles {
     /**
      * Returns a list of profiles that were marked as active.
      *
-     * @return string[]
+     * @return list<string>
      */
     public function getProfiles() : array;
 

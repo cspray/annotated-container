@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<architecturalDecisions xmlns="https://architectural-decision.cspray.io/schema/architectural-decision.xsd">
+  <architecturalDecision id="SingleEntrypointContainerDefinitionBuilderContextConsumer" attribute="Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer">
+    <date>2022-07-19</date>
+    <status>Accepted</status>
+    <contents><![CDATA[# Allow Single Entrypoint for ContainerDefinitionBuilderContextConsumer
+
+## Context
+
+A ContainerDefinitionBuilderContextConsumer is primarily intended to support adding third-party services that can't
+be annotated to a ContainerDefinition. It could be beneficial to attach multiple consumers so that complex third-party
+service setup does not have to happen entirely in 1 implementation.
+
+## Decision
+
+We explicitly only allow one ContainerDefinitionBuilderContextConsumer to be configured when compiling your
+ContainerDefinition.
+
+It would be technically possible, and even straightforward, to allow configuring multiple context consumers. However,
+doing so would have a significant cognitive overhead and, potentially, cause what services are used in a given
+situation to be vague or unclear. Specifically, third-party packages could provide a context consumer that overrides
+your definitions without you being fully aware of it.
+
+If you need to use multiple consumers or consumers implemented by third-parties then you're required to provide your
+own entrypoint and compose them together or explicitly define which third-party consumer you'd like to use. This way
+you know precisely what code is determining the services for your application.]]></contents>
+    <codeAnnotations>
+      <codeAnnotation>
+        <classMethod>
+          <class>Cspray\AnnotatedContainer\XmlBootstrappingConfiguration</class>
+          <method>getContainerDefinitionConsumer</method>
+        </classMethod>
+      </codeAnnotation>
+      <codeAnnotation>
+        <classMethod>
+          <class>Cspray\AnnotatedContainer\BootstrappingConfiguration</class>
+          <method>getContainerDefinitionConsumer</method>
+        </classMethod>
+      </codeAnnotation>
+      <codeAnnotation>
+        <classMethod>
+          <class>Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder</class>
+          <method>withContainerDefinitionBuilderContextConsumer</method>
+        </classMethod>
+      </codeAnnotation>
+      <codeAnnotation>
+        <classMethod>
+          <class>Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions</class>
+          <method>getContainerDefinitionBuilderContextConsumer</method>
+        </classMethod>
+      </codeAnnotation>
+    </codeAnnotations>
+    <meta/>
+  </architecturalDecision>
+</architecturalDecisions>

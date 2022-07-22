@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b64a9db05b0296e4c5102028dfc862f6",
+    "content-hash": "b34126cb71d43515a415a3048c722768",
     "packages": [
         {
             "name": "cspray/annotated-target",
@@ -55,6 +55,51 @@
                 "source": "https://github.com/cspray/annotated-target/tree/v0.1.1"
             },
             "time": "2022-06-08T12:22:51+00:00"
+        },
+        {
+            "name": "cspray/architectural-decision",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cspray/architectural-decision.git",
+                "reference": "290155604011471c0ccf81eb2e361d121a94e394"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cspray/architectural-decision/zipball/290155604011471c0ccf81eb2e361d121a94e394",
+                "reference": "290155604011471c0ccf81eb2e361d121a94e394",
+                "shasum": ""
+            },
+            "require": {
+                "cspray/annotated-target": "^0.1.1",
+                "ext-dom": "*",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "cspray/phinal": "^1.0",
+                "mikey179/vfsstream": "^1.6",
+                "phpunit/phpunit": "^9.5",
+                "vimeo/psalm": "^4.24"
+            },
+            "bin": [
+                "bin/architectural-decisions"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cspray\\ArchitecturalDecision\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A library to keep track of architectural decisions with PHP annotations.",
+            "support": {
+                "issues": "https://github.com/cspray/architectural-decision/issues",
+                "source": "https://github.com/cspray/architectural-decision/tree/1.0.0"
+            },
+            "time": "2022-07-20T23:34:58+00:00"
         },
         {
             "name": "cspray/typiphy",
@@ -707,7 +752,7 @@
             "description": "Enforce final on your classes!",
             "support": {
                 "issues": "https://github.com/cspray/phinal/issues",
-                "source": "https://github.com/cspray/phinal/tree/main"
+                "source": "https://github.com/cspray/phinal/tree/1.0.0"
             },
             "time": "2022-07-08T19:14:32+00:00"
         },
@@ -1364,12 +1409,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-DI/PHP-DI.git",
-                "reference": "8d355595a3d9c2f13a020efd478090b636b565fb"
+                "reference": "5458204ca22057863a4a972112e56785ae193362"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-DI/PHP-DI/zipball/8d355595a3d9c2f13a020efd478090b636b565fb",
-                "reference": "8d355595a3d9c2f13a020efd478090b636b565fb",
+                "url": "https://api.github.com/repos/PHP-DI/PHP-DI/zipball/5458204ca22057863a4a972112e56785ae193362",
+                "reference": "5458204ca22057863a4a972112e56785ae193362",
                 "shasum": ""
             },
             "require": {
@@ -1429,7 +1474,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-04-12T14:47:56+00:00"
+            "time": "2022-07-18T09:44:55+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -4173,13 +4218,15 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "php-di/php-di": 20,
-        "cspray/phinal": 20
+        "cspray/phinal": 20,
+        "php-di/php-di": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.1"
+        "php": "^8.1",
+        "ext-dom": "*",
+        "ext-libxml": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.2.0"

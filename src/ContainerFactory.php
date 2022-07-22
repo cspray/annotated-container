@@ -2,8 +2,6 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Psr\Container\ContainerInterface;
-
 /**
  * A factory that is responsible for turning a ContainerDefinition into a PSR ContainerInterface.
  */

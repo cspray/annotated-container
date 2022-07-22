@@ -6,18 +6,21 @@
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
-    <projectFiles>
-        <directory name="src"/>
-        <ignoreFiles>
-            <directory name="vendor"/>
-        </ignoreFiles>
-    </projectFiles>
+  <projectFiles>
+    <directory name="src"/>
+    <ignoreFiles>
+      <directory name="vendor"/>
+    </ignoreFiles>
+  </projectFiles>
 
-    <issueHandlers>
-        <PropertyNotSetInConstructor>
-            <errorLevel type="suppress">
-                <file name="src/*Builder.php"/>
-            </errorLevel>
-        </PropertyNotSetInConstructor>
-    </issueHandlers>
-<plugins><pluginClass class="Cspray\Phinal\Plugin"/></plugins></psalm>
+  <issueHandlers>
+    <PropertyNotSetInConstructor>
+      <errorLevel type="suppress">
+        <file name="src/*Builder.php"/>
+      </errorLevel>
+    </PropertyNotSetInConstructor>
+  </issueHandlers>
+  <plugins>
+    <pluginClass class="Cspray\Phinal\Plugin"/>
+  </plugins>
+</psalm>
