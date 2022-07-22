@@ -31,9 +31,17 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
      * @throws InvalidCompileOptionsException|InvalidAnnotationException
      */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
-        if (empty($containerDefinitionCompileOptions->getScanDirectories())) {
+        $scanDirs = $containerDefinitionCompileOptions->getScanDirectories();
+        if (empty($scanDirs)) {
             throw new InvalidCompileOptionsException(sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s must include at least 1 directory to scan, but none were provided.',
+                self::class
+            ));
+        }
+
+        if (count(array_unique($scanDirs)) !== count($scanDirs)) {
+            throw new InvalidCompileOptionsException(sprintf(
+                'The ContainerDefinitionCompileOptions passed to %s includes duplicate directories. Please pass a distinct set of directories to scan.',
                 self::class
             ));
         }
