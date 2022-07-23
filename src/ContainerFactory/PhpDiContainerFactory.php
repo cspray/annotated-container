@@ -6,6 +6,8 @@ use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
+use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
+use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
 use Cspray\Phinal\AllowInheritance;
 use DI\Container;
 
@@ -55,11 +57,20 @@ final class PhpDiContainerFactory implements ContainerFactory {
         if (empty($activeProfiles)) {
             $activeProfiles[] = 'default';
         }
+
+        try {
+            return $this->createDiContainer($containerDefinition, $activeProfiles);
+        } catch (InvalidDefinitionException $exception) {
+            throw new ContainerException($exception->getMessage(), previous: $exception);
+        }
+    }
+
+    private function createDiContainer(ContainerDefinition $containerDefinition, array $activeProfiles) : AnnotatedContainer {
         $containerBuilder = new ContainerBuilder();
         $definitions = [];
         // We have to maintain a set of known services to let our Container comply with PSR-11
         $serviceTypes = [AutowireableFactory::class, ActiveProfiles::class];
-        $definitions[ActiveProfiles::class] = function() use($activeProfiles) : ActiveProfiles {
+        $definitions[ActiveProfiles::class] = static function() use($activeProfiles) : ActiveProfiles {
             return new class($activeProfiles) implements ActiveProfiles {
 
                 public function __construct(private readonly array $profiles) {}
@@ -73,10 +84,9 @@ final class PhpDiContainerFactory implements ContainerFactory {
                 }
             };
         };
+
+        $containerDefinition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles);
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            if (empty(array_intersect($activeProfiles, $serviceDefinition->getProfiles()))) {
-                continue;
-            }
             $serviceTypes[] = $serviceDefinition->getType()->getName();
             $definitions[$serviceDefinition->getType()->getName()] = autowire();
             $name = $serviceDefinition->getName();
@@ -133,7 +143,7 @@ final class PhpDiContainerFactory implements ContainerFactory {
             $definitions[$configName] = autowire($configurationDefinition->getClass()->getName());
         }
 
-        $methodInjectMap = $this->mapMethodInjectDefinitions($containerDefinition, $activeProfiles);
+        $methodInjectMap = $this->mapMethodInjectDefinitions($containerDefinition);
         foreach ($methodInjectMap as $service => $methods) {
             if (!isset($definitions[$service])) {
                 $definitions[$service] = autowire();
@@ -148,7 +158,7 @@ final class PhpDiContainerFactory implements ContainerFactory {
             }
         }
 
-        $propertyInjectMap = $this->mapPropertyInjectDefinitions($containerDefinition, $activeProfiles);
+        $propertyInjectMap = $this->mapPropertyInjectDefinitions($containerDefinition);
         foreach ($propertyInjectMap as $service => $properties) {
             if (!isset($definitions[$service])) {
                 $definitions[$service] = autowire();
@@ -238,20 +248,13 @@ final class PhpDiContainerFactory implements ContainerFactory {
         };
     }
 
-    private function mapMethodInjectDefinitions(ContainerDefinition $containerDefinition, array $activeProfiles) : array {
+    private function mapMethodInjectDefinitions(ContainerDefinition $containerDefinition) : array {
         $map = [];
         foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
             if ($injectDefinition->getTargetIdentifier()->isClassProperty()) {
                 continue;
             }
 
-            $injectProfiles = $injectDefinition->getProfiles();
-            if (empty($injectProfiles)) {
-                $injectProfiles[] = 'default';
-            }
-            if (empty(array_intersect($activeProfiles, $injectProfiles))) {
-                continue;
-            }
             $className = $injectDefinition->getTargetIdentifier()->getClass()->getName();
             $methodName = $injectDefinition->getTargetIdentifier()->getMethodName();
             if (!isset($map[$className])) {
@@ -282,17 +285,10 @@ final class PhpDiContainerFactory implements ContainerFactory {
         return $map;
     }
 
-    private function mapPropertyInjectDefinitions(ContainerDefinition $containerDefinition, array $activeProfiles) : array {
+    private function mapPropertyInjectDefinitions(ContainerDefinition $containerDefinition) : array {
         $map = [];
         foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
             if ($injectDefinition->getTargetIdentifier()->isMethodParameter()) {
-                continue;
-            }
-            $injectProfiles = $injectDefinition->getProfiles();
-            if (empty($injectProfiles)) {
-                $injectProfiles[] = 'default';
-            }
-            if (empty(array_intersect($activeProfiles, $injectProfiles)) ) {
                 continue;
             }
 
@@ -340,7 +336,7 @@ final class PhpDiContainerFactory implements ContainerFactory {
         );
     }
 
-    private function mapTypesAliasDefinitions(ContainerDefinition $containerDefinition, ObjectType $serviceDefinition, array $aliasDefinitions, array $activeProfiles) : array {
+    private function mapTypesAliasDefinitions(ContainerDefinition $containerDefinition, ObjectType $serviceDefinition, array $aliasDefinitions) : array {
         $aliases = [];
         /** @var AliasDefinition $aliasDefinition */
         foreach ($aliasDefinitions as $aliasDefinition) {
@@ -353,10 +349,8 @@ final class PhpDiContainerFactory implements ContainerFactory {
             } else if (empty($concreteProfiles)) {
                 $concreteProfiles[] = 'default';
             }
-            foreach ($activeProfiles as $activeProfile) {
-                if (in_array($activeProfile, $concreteProfiles) && $aliasDefinition->getAbstractService() === $serviceDefinition) {
-                    $aliases[] = $aliasDefinition;
-                }
+            if ($aliasDefinition->getAbstractService() === $serviceDefinition) {
+                $aliases[] = $aliasDefinition;
             }
         }
         return $aliases;

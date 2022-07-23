@@ -145,7 +145,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
             )->build();
 
         $this->expectException(ContainerException::class);
-        $this->expectExceptionMessage('An AliasDefinition is defined with a concrete type ' . $concrete->getName() . ' that is not a registered #[Service].');
+        $this->expectExceptionMessage('An AliasDefinition has a concrete type, ' . $concrete->getName() . ', that is not a registered ServiceDefinition.');
         $this->getContainerFactory()->createContainer($containerDefinition);
     }
 
