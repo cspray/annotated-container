@@ -209,6 +209,7 @@ final class AurynContainerFactory implements ContainerFactory {
                 $nameTypeMap[$name] = $configurationDefinition->getClass();
             }
             $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($containerDefinition, $configurationDefinition) {
+                /** @var class-string $configurationClass */
                 $configurationClass = $configurationDefinition->getClass()->getName();
                 $configReflection = (new \ReflectionClass($configurationClass));
                 $configInstance = $configReflection->newInstanceWithoutConstructor();

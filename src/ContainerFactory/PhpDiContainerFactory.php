@@ -107,7 +107,7 @@ final class PhpDiContainerFactory implements ContainerFactory {
                 ));
             }
             if (!in_array($aliasDefinition->getAbstractService()->getName(), $aliasedTypes)) {
-                $typeAliasDefinitions = $this->mapTypesAliasDefinitions($containerDefinition, $aliasDefinition->getAbstractService(), $aliasDefinitions, $activeProfiles);
+                $typeAliasDefinitions = $this->mapTypesAliasDefinitions($containerDefinition, $aliasDefinition->getAbstractService(), $aliasDefinitions);
                 $aliasDefinition = null;
                 if (count($typeAliasDefinitions) === 1) {
                     $aliasDefinition = $typeAliasDefinitions[0];
