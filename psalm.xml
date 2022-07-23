@@ -24,6 +24,7 @@
         <!-- These methods are used in ContainerDefinition::merge which is still under tests -->
         <referencedMethod name="Cspray\AnnotatedContainer\ServiceDefinition::equals" />
         <referencedMethod name="Cspray\AnnotatedContainer\AliasDefinition::equals" />
+        <referencedMethod name="Cspray\AnnotatedContainer\ContainerDefinition::merge" />
       </errorLevel>
     </DeprecatedMethod>
   </issueHandlers>
