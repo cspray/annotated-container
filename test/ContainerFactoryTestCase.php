@@ -50,8 +50,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
     public function testCreateServiceNotHasThrowsException() {
         $container = $this->getContainer(Fixtures::nonAnnotatedServices()->getPath());
 
-        $this->expectException(NotFoundExceptionInterface::class);
-        $this->expectExceptionMessage('The service "' . Fixtures::nonAnnotatedServices()->nonAnnotatedService()->getName() . '" could not be found in this container.');
+        self::expectException(NotFoundExceptionInterface::class);
+        self::expectExceptionMessage('The service "' . Fixtures::nonAnnotatedServices()->nonAnnotatedService()->getName() . '" could not be found in this container.');
         $container->get(Fixtures::nonAnnotatedServices()->nonAnnotatedService()->getName());
     }
 
@@ -60,30 +60,30 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $container = $this->getContainer(Fixtures::singleConcreteService()->getPath());
         $subject = $container->get($class);
 
-        $this->assertInstanceOf($class, $subject);
+        self::assertInstanceOf($class, $subject);
     }
 
     public function testInterfaceServicePrepare() {
         $container = $this->getContainer(Fixtures::interfacePrepareServices()->getPath());
         $subject = $container->get(Fixtures::interfacePrepareServices()->fooInterface()->getName());
 
-        $this->assertInstanceOf(Fixtures::interfacePrepareServices()->fooImplementation()->getName(), $subject);
-        $this->assertEquals(1, $subject->getBarCounter());
+        self::assertInstanceOf(Fixtures::interfacePrepareServices()->fooImplementation()->getName(), $subject);
+        self::assertEquals(1, $subject->getBarCounter());
     }
 
     public function testServicePrepareInvokedOnContainer() {
         $container = $this->getContainer(Fixtures::injectPrepareServices()->getPath());
         $subject = $container->get(Fixtures::injectPrepareServices()->prepareInjector()->getName());
 
-        $this->assertInstanceOf(Fixtures::injectPrepareServices()->prepareInjector()->getName(), $subject);
-        $this->assertSame('foo', $subject->getVal());
-        $this->assertInstanceOf(Fixtures::injectPrepareServices()->barImplementation()->getName(), $subject->getService());
+        self::assertInstanceOf(Fixtures::injectPrepareServices()->prepareInjector()->getName(), $subject);
+        self::assertSame('foo', $subject->getVal());
+        self::assertInstanceOf(Fixtures::injectPrepareServices()->barImplementation()->getName(), $subject->getService());
     }
 
     public function testMultipleAliasResolutionNoMakeDefine() {
         $container = $this->getContainer(Fixtures::ambiguousAliasedServices()->getPath());
 
-        $this->expectException(ContainerExceptionInterface::class);
+        self::expectException(ContainerExceptionInterface::class);
         $container->get(Fixtures::ambiguousAliasedServices()->fooInterface()->getName());
     }
 
@@ -91,20 +91,20 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $container = $this->getContainer(Fixtures::delegatedService()->getPath());
         $service = $container->get(Fixtures::delegatedService()->serviceInterface()->getName());
 
-        $this->assertSame('From ServiceFactory From FooService', $service->getValue());
+        self::assertSame('From ServiceFactory From FooService', $service->getValue());
     }
 
     public function testHasServiceIfCompiled() {
         $container = $this->getContainer(Fixtures::singleConcreteService()->getPath());
 
-        $this->assertTrue($container->has(Fixtures::singleConcreteService()->fooImplementation()->getName()));
-        $this->assertFalse($container->has(Fixtures::ambiguousAliasedServices()->fooInterface()->getName()));
+        self::assertTrue($container->has(Fixtures::singleConcreteService()->fooImplementation()->getName()));
+        self::assertFalse($container->has(Fixtures::ambiguousAliasedServices()->fooInterface()->getName()));
     }
 
     public function testMultipleServicesWithPrimary() {
         $container = $this->getContainer(Fixtures::primaryAliasedServices()->getPath());
 
-        $this->assertInstanceOf(Fixtures::primaryAliasedServices()->fooImplementation()->getName(), $container->get(Fixtures::primaryAliasedServices()->fooInterface()->getName()));
+        self::assertInstanceOf(Fixtures::primaryAliasedServices()->fooImplementation()->getName(), $container->get(Fixtures::primaryAliasedServices()->fooInterface()->getName()));
     }
 
     public function testProfileResolvedServices() {
@@ -112,25 +112,25 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $instance = $container->get(Fixtures::profileResolvedServices()->fooInterface()->getName());
 
-        $this->assertNotNull($instance);
-        $this->assertInstanceOf(Fixtures::profileResolvedServices()->devImplementation()->getName(), $instance);
+        self::assertNotNull($instance);
+        self::assertInstanceOf(Fixtures::profileResolvedServices()->devImplementation()->getName(), $instance);
     }
 
     public function testCreateNamedService() {
         $container = $this->getContainer(Fixtures::namedServices()->getPath());
 
-        $this->assertTrue($container->has('foo'));
+        self::assertTrue($container->has('foo'));
 
         $instance = $container->get('foo');
 
-        $this->assertNotNull($instance);
-        $this->assertInstanceOf(Fixtures::namedServices()->fooImplementation()->getName(), $instance);
+        self::assertNotNull($instance);
+        self::assertInstanceOf(Fixtures::namedServices()->fooImplementation()->getName(), $instance);
     }
 
     public function testCreateInjectStringService() {
         $container = $this->getContainer(Fixtures::injectConstructorServices()->getPath());
 
-        $this->assertSame('foobar', $container->get(Fixtures::injectConstructorServices()->injectStringService()->getName())->val);
+        self::assertSame('foobar', $container->get(Fixtures::injectConstructorServices()->injectStringService()->getName())->val);
     }
 
     public function testConcreteAliasDefinitionDoesNotHaveServiceDefinition() {
@@ -144,8 +144,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
                 AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete = objectType($concreteService))->build()
             )->build();
 
-        $this->expectException(ContainerException::class);
-        $this->expectExceptionMessage('An AliasDefinition has a concrete type, ' . $concrete->getName() . ', that is not a registered ServiceDefinition.');
+        self::expectException(ContainerException::class);
+        self::expectExceptionMessage('An AliasDefinition has a concrete type, ' . $concrete->getName() . ', that is not a registered ServiceDefinition.');
         $this->getContainerFactory()->createContainer($containerDefinition);
     }
 
@@ -154,7 +154,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $subject = $container->get(Fixtures::multiplePrepareServices()->fooImplementation()->getName());
 
-        $this->assertSame('foobar', $subject->getProperty());
+        self::assertSame('foobar', $subject->getProperty());
     }
 
     public function testInjectServiceObjectMethodParam() {
@@ -162,14 +162,14 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $subject = $container->get(Fixtures::injectServiceConstructorServices()->serviceInjector()->getName());
 
-        $this->assertInstanceOf(Fixtures::injectServiceConstructorServices()->fooImplementation()->getName(), $subject->foo);
+        self::assertInstanceOf(Fixtures::injectServiceConstructorServices()->fooImplementation()->getName(), $subject->foo);
     }
 
     public function testInjectEnvMethodParam() {
         $container = $this->getContainer(Fixtures::injectConstructorServices()->getPath());
 
         $subject = $container->get(Fixtures::injectConstructorServices()->injectEnvService()->getName());
-        $this->assertSame(getenv('USER'), $subject->user);
+        self::assertSame(getenv('USER'), $subject->user);
     }
 
     public function testCreateArbitraryStorePresent() {
@@ -185,7 +185,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $container = $this->getContainer(Fixtures::injectCustomStoreServices()->getPath(), parameterStore: $parameterStore);
 
         $subject = $container->get(Fixtures::injectCustomStoreServices()->scalarInjector()->getName());
-        $this->assertSame('key_test_store', $subject->key);
+        self::assertSame('key_test_store', $subject->key);
     }
 
     public function testCreateArbitraryStoreWithUnionType() {
@@ -203,7 +203,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $container = $this->getContainer(Fixtures::injectUnionCustomStoreServices()->getPath(), parameterStore: $parameterStore);
         $subject = $container->get(Fixtures::injectUnionCustomStoreServices()->unionInjector()->getName());
 
-        $this->assertInstanceOf(Fixtures::injectUnionCustomStoreServices()->fooImplementation()->getName(), $subject->fooOrBar);
+        self::assertInstanceOf(Fixtures::injectUnionCustomStoreServices()->fooImplementation()->getName(), $subject->fooOrBar);
     }
 
     public function testCreateArbitraryStoreWithIntersectType() {
@@ -221,13 +221,19 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $container = $this->getContainer(Fixtures::injectIntersectCustomStoreServices()->getPath(), parameterStore: $parameterStore);
         $subject = $container->get(Fixtures::injectIntersectCustomStoreServices()->intersectInjector()->getName());
 
-        $this->assertInstanceOf(Fixtures::injectIntersectCustomStoreServices()->fooBarImplementation()->getName(), $subject->fooAndBar);
+        self::assertInstanceOf(Fixtures::injectIntersectCustomStoreServices()->fooBarImplementation()->getName(), $subject->fooAndBar);
     }
 
-    public function testCreateArbitraryStoreNotPresent() {
-        $this->expectException(InvalidParameterException::class);
-        $this->expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
+    public function testCreateArbitraryStoreOnServiceNotPresent() {
+        self::expectException(InvalidParameterException::class);
+        self::expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
         $this->getContainer(Fixtures::injectCustomStoreServices()->getPath());
+    }
+
+    public function testCreateArbitraryStoreOnConfigurationNotPresent() {
+        self::expectException(InvalidParameterException::class);
+        self::expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
+        $this->getContainer(Fixtures::configurationMissingStore()->getPath());
     }
 
     public function profilesProvider() : array {
@@ -245,13 +251,13 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $container = $this->getContainer(Fixtures::injectConstructorServices()->getPath(), $profiles);
         $subject = $container->get(Fixtures::injectConstructorServices()->injectProfilesStringService()->getName());
 
-        $this->assertSame($expected, $subject->val);
+        self::assertSame($expected, $subject->val);
     }
 
     public function testConfigurationSharedInstance() {
         $container = $this->getContainer(Fixtures::configurationServices()->getPath(), ['default', 'dev']);
 
-        $this->assertSame(
+        self::assertSame(
             $container->get(Fixtures::configurationServices()->myConfig()->getName()),
             $container->get(Fixtures::configurationServices()->myConfig()->getName())
         );
@@ -262,24 +268,24 @@ abstract class ContainerFactoryTestCase extends TestCase {
         /** @var AnnotatedContainerFixture\ConfigurationServices\MyConfig $subject */
         $subject = $container->get(Fixtures::configurationServices()->myConfig()->getName());
 
-        $this->assertSame('my-api-key', $subject->key);
-        $this->assertSame(1234, $subject->port);
-        $this->assertSame(getenv('USER'), $subject->user);
-        $this->assertTrue($subject->testMode);
+        self::assertSame('my-api-key', $subject->key);
+        self::assertSame(1234, $subject->port);
+        self::assertSame(getenv('USER'), $subject->user);
+        self::assertTrue($subject->testMode);
     }
 
     public function testNamedConfigurationInstanceOf() {
         $container = $this->getContainer(Fixtures::namedConfigurationServices()->getPath());
 
-        $this->assertInstanceOf(Fixtures::namedConfigurationServices()->myConfig()->getName(), $container->get('my-config'));
+        self::assertInstanceOf(Fixtures::namedConfigurationServices()->myConfig()->getName(), $container->get('my-config'));
     }
 
     public function testMakeAutowiredObject() {
         $container = $this->getContainer(Fixtures::autowireableFactoryServices()->getPath());
         $subject = $container->make(Fixtures::autowireableFactoryServices()->factoryCreatedService()->getName(), autowiredParams(rawParam('scalar', '802')));
 
-        $this->assertInstanceOf(Fixtures::autowireableFactoryServices()->fooImplementation()->getName(), $subject->foo);
-        $this->assertSame('802', $subject->scalar);
+        self::assertInstanceOf(Fixtures::autowireableFactoryServices()->fooImplementation()->getName(), $subject->foo);
+        self::assertSame('802', $subject->scalar);
     }
 
     public function testMakeAutowiredObjectReplaceServiceTarget() {
@@ -289,20 +295,20 @@ abstract class ContainerFactoryTestCase extends TestCase {
             serviceParam('foo', Fixtures::autowireableFactoryServices()->barImplementation())
         ));
 
-        $this->assertInstanceOf(Fixtures::autowireableFactoryServices()->barImplementation()->getName(), $subject->foo);
-        $this->assertSame('quarters', $subject->scalar);
+        self::assertInstanceOf(Fixtures::autowireableFactoryServices()->barImplementation()->getName(), $subject->foo);
+        self::assertSame('quarters', $subject->scalar);
     }
 
     public function testBackingContainerInstanceOf() {
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
-        $this->assertInstanceOf($this->getBackingContainerInstanceOf()->getName(), $this->getContainerFactory()->createContainer($containerDefinition)->getBackingContainer());
+        self::assertInstanceOf($this->getBackingContainerInstanceOf()->getName(), $this->getContainerFactory()->createContainer($containerDefinition)->getBackingContainer());
     }
 
     public function testGettingAutowireableFactory() {
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
         $container = $this->getContainerFactory()->createContainer($containerDefinition);
 
-        $this->assertSame($container, $container->get(AutowireableFactory::class));
+        self::assertSame($container, $container->get(AutowireableFactory::class));
     }
 
     public function testNamedServicesShared() : void {
@@ -311,7 +317,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $namedService = $container->get('bar');
         $typedService = $container->get(Fixtures::injectNamedServices()->barImplementation()->getName());
 
-        $this->assertSame($namedService, $typedService);
+        self::assertSame($namedService, $typedService);
     }
 
     public function testInjectingNamedServices() : void {
@@ -320,8 +326,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
         /** @var AnnotatedContainerFixture\InjectNamedServices\ServiceConsumer $service */
         $service = $container->get(Fixtures::injectNamedServices()->serviceConsumer()->getName());
 
-        $this->assertInstanceOf(Fixtures::injectNamedServices()->fooImplementation()->getName(), $service->foo);
-        $this->assertInstanceOf(Fixtures::injectNamedServices()->barImplementation()->getName(), $service->bar);
+        self::assertInstanceOf(Fixtures::injectNamedServices()->fooImplementation()->getName(), $service->foo);
+        self::assertInstanceOf(Fixtures::injectNamedServices()->barImplementation()->getName(), $service->bar);
     }
 
     public function testGettingActiveProfilesImplicitlyShared() : void {
@@ -330,8 +336,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $a = $container->get(ActiveProfiles::class);
         $b = $container->get(ActiveProfiles::class);
 
-        $this->assertInstanceOf(ActiveProfiles::class, $a);
-        $this->assertSame($a, $b);
+        self::assertInstanceOf(ActiveProfiles::class, $a);
+        self::assertSame($a, $b);
     }
 
     public function testGettingActiveProfilesHasCorrectList() : void {
@@ -340,7 +346,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         /** @var ActiveProfiles $activeProfile */
         $activeProfile = $container->get(ActiveProfiles::class);
 
-        $this->assertSame(['default', 'foo', 'bar'], $activeProfile->getProfiles());
+        self::assertSame(['default', 'foo', 'bar'], $activeProfile->getProfiles());
     }
 
     public function testIsActiveProfileNotListed() : void {
@@ -349,7 +355,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         /** @var ActiveProfiles $activeProfile */
         $activeProfile = $container->get(ActiveProfiles::class);
 
-        $this->assertFalse($activeProfile->isActive('baz'));
+        self::assertFalse($activeProfile->isActive('baz'));
     }
 
     public function testIsActiveProfileListed() : void {
@@ -358,7 +364,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         /** @var ActiveProfiles $activeProfile */
         $activeProfile = $container->get(ActiveProfiles::class);
 
-        $this->assertTrue($activeProfile->isActive('foo'));
+        self::assertTrue($activeProfile->isActive('foo'));
     }
 
     public function testInvokeWithImplicitAlias() : void {
@@ -369,7 +375,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $invoker->invoke($callable);
 
-        $this->assertInstanceOf(Fixtures::implicitAliasedServices()->fooImplementation()->getName(), $state->foo);
+        self::assertInstanceOf(Fixtures::implicitAliasedServices()->fooImplementation()->getName(), $state->foo);
     }
 
     public function testInvokeWithAmbiguousAliasRespectsParameters() : void {
@@ -379,7 +385,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $callable = fn(AnnotatedContainerFixture\AmbiguousAliasedServices\FooInterface $foo) => $state->foo = $foo;
         $invoker->invoke($callable, autowiredParams(serviceParam('foo', Fixtures::ambiguousAliasedServices()->quxImplementation())));
 
-        $this->assertInstanceOf(Fixtures::ambiguousAliasedServices()->quxImplementation()->getName(), $state->foo);
+        self::assertInstanceOf(Fixtures::ambiguousAliasedServices()->quxImplementation()->getName(), $state->foo);
     }
 
     public function testInvokeWithScalarParameter() : void {
@@ -390,7 +396,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $invoker->invoke($callable, autowiredParams(rawParam('bar', 'foobaz')));
 
-        $this->assertSame('foobaz', $state->bar);
+        self::assertSame('foobaz', $state->bar);
     }
 
     public function testInvokeReturnsCallableReturnValue() : void {
@@ -399,25 +405,25 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $actual = $invoker->invoke($callable);
 
-        $this->assertSame('returned from fn()', $actual);
+        self::assertSame('returned from fn()', $actual);
     }
 
     public function testServiceProfileNotActiveNotShared() : void {
         $container = $this->getContainer(Fixtures::profileResolvedServices()->getPath(), ['default', 'dev']);
 
-        $this->assertTrue($container->has(Fixtures::profileResolvedServices()->fooInterface()->getName()));
-        $this->assertTrue($container->has(Fixtures::profileResolvedServices()->devImplementation()->getName()));
-        $this->assertFalse($container->has(Fixtures::profileResolvedServices()->prodImplementation()->getName()));
-        $this->assertFalse($container->has(Fixtures::profileResolvedServices()->testImplementation()->getName()));
+        self::assertTrue($container->has(Fixtures::profileResolvedServices()->fooInterface()->getName()));
+        self::assertTrue($container->has(Fixtures::profileResolvedServices()->devImplementation()->getName()));
+        self::assertFalse($container->has(Fixtures::profileResolvedServices()->prodImplementation()->getName()));
+        self::assertFalse($container->has(Fixtures::profileResolvedServices()->testImplementation()->getName()));
     }
 
     public function testNamedServiceProfileNotActiveNotShared() : void {
         $container = $this->getContainer(Fixtures::namedProfileResolvedServices()->getPath(), ['default', 'prod']);
 
-        $this->assertTrue($container->has(Fixtures::namedProfileResolvedServices()->fooInterface()->getName()));
-        $this->assertTrue($container->has('prod-foo'));
-        $this->assertFalse($container->has('dev-foo'));
-        $this->assertFalse($container->has('test-foo'));
+        self::assertTrue($container->has(Fixtures::namedProfileResolvedServices()->fooInterface()->getName()));
+        self::assertTrue($container->has('prod-foo'));
+        self::assertFalse($container->has('dev-foo'));
+        self::assertFalse($container->has('test-foo'));
     }
 
     public function deserializeContainerProvider() : array {
@@ -437,14 +443,14 @@ abstract class ContainerFactoryTestCase extends TestCase {
                 $container = $containerFactory->createContainer($deserialize);
                 $service = $container->get(Fixtures::injectCustomStoreServices()->scalarInjector()->getName());
 
-                $this->assertSame('the store key value', $service->key);
+                self::assertSame('the store key value', $service->key);
             }],
             [Fixtures::injectConstructorServices(), function(ContainerFactory $containerFactory, ContainerDefinition $deserialize) {
                 $container = $containerFactory->createContainer($deserialize);
 
                 $service = $container->get(Fixtures::injectConstructorServices()->injectTypeUnionService()->getName());
 
-                $this->assertSame(4.20, $service->value);
+                self::assertSame(4.20, $service->value);
             }]
         ];
     }
