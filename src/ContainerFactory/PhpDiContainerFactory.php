@@ -3,11 +3,13 @@
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Cspray\AnnotatedContainer\ActiveProfiles;
+use Cspray\AnnotatedContainer\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
 use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
 use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
+use Cspray\AnnotatedContainer\StandardAliasDefinitionResolver;
 use Cspray\Phinal\AllowInheritance;
 use DI\Container;
 
@@ -48,8 +50,13 @@ final class PhpDiContainerFactory implements ContainerFactory {
      */
     private array $parameterStores = [];
 
-    public function __construct() {
+    private readonly AliasDefinitionResolver $aliasDefinitionResolver;
+
+    public function __construct(
+        AliasDefinitionResolver $aliasDefinitionResolver = null
+    ) {
         $this->addParameterStore(new EnvironmentParameterStore());
+        $this->aliasDefinitionResolver = $aliasDefinitionResolver ?? new StandardAliasDefinitionResolver();
     }
 
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
@@ -107,19 +114,9 @@ final class PhpDiContainerFactory implements ContainerFactory {
                 ));
             }
             if (!in_array($aliasDefinition->getAbstractService()->getName(), $aliasedTypes)) {
-                $typeAliasDefinitions = $this->mapTypesAliasDefinitions($containerDefinition, $aliasDefinition->getAbstractService(), $aliasDefinitions);
-                $aliasDefinition = null;
-                if (count($typeAliasDefinitions) === 1) {
-                    $aliasDefinition = $typeAliasDefinitions[0];
-                } else {
-                    /** @var AliasDefinition $typeAliasDefinition */
-                    foreach ($typeAliasDefinitions as $typeAliasDefinition) {
-                        if ($this->getServiceDefinition($containerDefinition, $typeAliasDefinition->getConcreteService())?->isPrimary()) {
-                            $aliasDefinition = $typeAliasDefinition;
-                            break;
-                        }
-                    }
-                }
+                $aliasDefinition = $this->aliasDefinitionResolver->resolveAlias(
+                    $containerDefinition, $aliasDefinition->getAbstractService()
+                )->getAliasDefinition();
 
                 if (isset($aliasDefinition)) {
                     $abstractDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getAbstractService());
@@ -334,26 +331,6 @@ final class PhpDiContainerFactory implements ContainerFactory {
             $containerDefinition->getServiceDefinitions(),
             fn($carry, $item) : ?ServiceDefinition => $item->getType() === $objectType ? $item : $carry
         );
-    }
-
-    private function mapTypesAliasDefinitions(ContainerDefinition $containerDefinition, ObjectType $serviceDefinition, array $aliasDefinitions) : array {
-        $aliases = [];
-        /** @var AliasDefinition $aliasDefinition */
-        foreach ($aliasDefinitions as $aliasDefinition) {
-            $concreteProfiles = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getConcreteService())?->getProfiles() ?? false;
-            if ($concreteProfiles === false) {
-                throw new ContainerException(sprintf(
-                    'An AliasDefinition is defined with a concrete type %s that is not a registered #[Service].',
-                    $aliasDefinition->getConcreteService()->getName()
-                ));
-            } else if (empty($concreteProfiles)) {
-                $concreteProfiles[] = 'default';
-            }
-            if ($aliasDefinition->getAbstractService() === $serviceDefinition) {
-                $aliases[] = $aliasDefinition;
-            }
-        }
-        return $aliases;
     }
 
     public function addParameterStore(ParameterStore $parameterStore) : void {

@@ -6,6 +6,7 @@ use Auryn\InjectionException;
 use Auryn\Injector;
 use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AliasDefinition;
+use Cspray\AnnotatedContainer\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableFactory;
 use Cspray\AnnotatedContainer\AutowireableInvoker;
@@ -24,6 +25,7 @@ use Cspray\AnnotatedContainer\ParameterStore;
 use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\StandardAliasDefinitionResolver;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\Typiphy\ObjectType;
 use Psr\Container\ContainerInterface;
@@ -44,11 +46,16 @@ final class AurynContainerFactory implements ContainerFactory {
      */
     private array $parameterStores = [];
 
-    public function __construct() {
+    private readonly AliasDefinitionResolver $aliasDefinitionResolver;
+
+    public function __construct(
+        AliasDefinitionResolver $aliasDefinitionResolver = null
+    ) {
         // Injecting environment variables is something we have supported since early versions.
         // We don't require adding this parameter store explicitly to continue providing this functionality
         // without the end-user having to change how they construct their ContainerFactory.
         $this->addParameterStore(new EnvironmentParameterStore());
+        $this->aliasDefinitionResolver = $aliasDefinitionResolver ?? new StandardAliasDefinitionResolver();
     }
 
     /**
@@ -231,23 +238,18 @@ final class AurynContainerFactory implements ContainerFactory {
             });
         }
 
+        // We need to keep track of which abstract types we have aliased
+        // It is possible that there are multiple alias definitions for the
+        // abstract service. In that case we only want to attempt a resolution
+        // one time. Attempting to resolve the abstract class many times over
+        // could have untindended consequences and is a waste of cycles
         $aliasedTypes = [];
         $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
             if (!in_array($aliasDefinition->getAbstractService(), $aliasedTypes)) {
-                $typeAliasDefinitions = $this->mapTypesAliasDefinitions($containerDefinition, $aliasDefinition->getAbstractService(), $aliasDefinitions);
-                $aliasDefinition = null;
-                if (count($typeAliasDefinitions) === 1) {
-                    $aliasDefinition = $typeAliasDefinitions[0];
-                } else {
-                    /** @var AliasDefinition $typeAliasDefinition */
-                    foreach ($typeAliasDefinitions as $typeAliasDefinition) {
-                        if ($this->getServiceDefinition($containerDefinition, $typeAliasDefinition->getConcreteService())?->isPrimary()) {
-                            $aliasDefinition = $typeAliasDefinition;
-                            break;
-                        }
-                    }
-                }
+                $aliasDefinition = $this->aliasDefinitionResolver->resolveAlias(
+                    $containerDefinition, $aliasDefinition->getAbstractService()
+                )->getAliasDefinition();
 
                 if (isset($aliasDefinition)) {
                     $injector->alias(
@@ -347,27 +349,6 @@ final class AurynContainerFactory implements ContainerFactory {
             }
         }
         return $methods;
-    }
-
-    private function mapTypesAliasDefinitions(ContainerDefinition $containerDefinition, ObjectType $serviceDefinition, array $aliasDefinitions) : array {
-        $aliases = [];
-        /** @var AliasDefinition $aliasDefinition */
-        foreach ($aliasDefinitions as $aliasDefinition) {
-            if ($aliasDefinition->getAbstractService() === $serviceDefinition) {
-                $aliases[] = $aliasDefinition;
-            }
-        }
-        return $aliases;
-    }
-
-    private function getServiceDefinition(ContainerDefinition $containerDefinition, ObjectType $objectType) : ?ServiceDefinition {
-        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            if ($serviceDefinition->getType() === $objectType) {
-                return $serviceDefinition;
-            }
-        }
-
-        return null;
     }
 
 }

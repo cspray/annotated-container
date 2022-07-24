@@ -19,6 +19,11 @@
         <file name="src/*Builder.php"/>
       </errorLevel>
     </PropertyNotSetInConstructor>
+    <DeprecatedClass>
+      <errorLevel type="suppress">
+        <referencedClass name="Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException" />
+      </errorLevel>
+    </DeprecatedClass>
     <DeprecatedMethod>
       <errorLevel type="suppress">
         <!-- These methods are used in ContainerDefinition::merge which is still under tests -->
