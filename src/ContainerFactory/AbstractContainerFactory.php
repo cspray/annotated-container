@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\ContainerDefinition;
@@ -42,6 +43,23 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     final protected function getParameterStore(string $storeName) : ?ParameterStore {
         return $this->parameterStores[$storeName] ?? null;
+    }
+
+    final protected function getActiveProfilesService(array $activeProfiles) : ActiveProfiles {
+        return new class($activeProfiles) implements ActiveProfiles {
+
+            public function __construct(
+                private readonly array $profiles
+            ) {}
+
+            public function getProfiles() : array {
+                return $this->profiles;
+            }
+
+            public function isActive(string $profile) : bool {
+                return in_array($profile, $this->profiles);
+            }
+        };
     }
 
 }

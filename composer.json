@@ -27,7 +27,9 @@
     "php-di/php-di": "v7.x-dev",
     "phpunit/phpunit": "^9.5",
     "rdlowrey/auryn": "^1.4",
-    "vimeo/psalm": "^4.24"
+    "vimeo/psalm": "^4.24",
+    "kelunik/fiber-local": "dev-main",
+    "amphp/injector": "dev-master"
   },
   "bin": ["bin/annotated-container"],
   "autoload": {
