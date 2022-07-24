@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.2.0](https://github.com/cspray/annotated-container/tree/v1.2.0)
+
+### Added
+
+- Added a `ProfileAwareContainerDefinition` that decorates a `ConatinerDefinition` and will only return entries that have an active profile.
+- Added `AliasDefinitionResolver` that can be used by ContainerFactory implementations and other parts of Annotated Container to determine the concrete alias assignable to an abstract service.
+- Added `AbstractContainerFactory` that de-duplicates some small aspects of implementing a ContainerFactory.
+- Added `AnnotatedContainerVersion` object to easily get access to what version of Annotated Container is installed.
+
+### Changed
+
+- Both the `AurynContainerFactory` and `PhpDiContainerFactory` extends new `AbstractContainerFactory`.
+
 ## [v1.1.0](https://github.com/cspray/annotated-container/tree/v1.1.0) - 2022-07-22
 
 ### Added
