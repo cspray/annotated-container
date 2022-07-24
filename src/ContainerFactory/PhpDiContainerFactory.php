@@ -19,23 +19,18 @@ if (!class_exists(Container::class)) {
 }
 // @codeCoverageIgnoreEnd
 
-use Cspray\AnnotatedContainer\AliasDefinition;
 use Cspray\AnnotatedContainer\AutowireableFactory;
 use Cspray\AnnotatedContainer\AutowireableParameterSet;
-use Cspray\AnnotatedContainer\HasBackingContainer;
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactoryOptions;
-use Cspray\AnnotatedContainer\EnvironmentParameterStore;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
-use Cspray\AnnotatedContainer\ParameterStore;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\Typiphy\ObjectType;
 use DI\ContainerBuilder;
 use DI\Definition\Helper\AutowireDefinitionHelper;
-use Psr\Container\ContainerInterface;
 use function DI\autowire;
 use function DI\decorate;
 use function DI\get;
@@ -43,21 +38,7 @@ use function DI\get;
 /**
  * A ContainerFactory that utilizes the php-di/php-di library.
  */
-final class PhpDiContainerFactory implements ContainerFactory {
-
-    /**
-     * @var ParameterStore[]
-     */
-    private array $parameterStores = [];
-
-    private readonly AliasDefinitionResolver $aliasDefinitionResolver;
-
-    public function __construct(
-        AliasDefinitionResolver $aliasDefinitionResolver = null
-    ) {
-        $this->addParameterStore(new EnvironmentParameterStore());
-        $this->aliasDefinitionResolver = $aliasDefinitionResolver ?? new StandardAliasDefinitionResolver();
-    }
+final class PhpDiContainerFactory extends AbstractContainerFactory implements ContainerFactory {
 
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? [];
@@ -266,14 +247,15 @@ final class PhpDiContainerFactory implements ContainerFactory {
             $injectStore = $injectDefinition->getStoreName();
             $value = $injectDefinition->getValue();
             if (!is_null($injectStore)) {
-                if (!isset($this->parameterStores[$injectStore])) {
+                $parameterStore = $this->getParameterStore($injectStore);
+                if (!isset($parameterStore)) {
                     throw new InvalidParameterException(sprintf(
                         'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
                         $injectStore
                     ));
                 }
 
-                $value = $this->parameterStores[$injectStore]->fetch($injectDefinition->getType(), $value);
+                $value = $parameterStore->fetch($injectDefinition->getType(), $value);
             }
 
             $param = $injectDefinition->getType() instanceof ObjectType ? get($injectDefinition->getValue()) : $value;
@@ -298,14 +280,15 @@ final class PhpDiContainerFactory implements ContainerFactory {
             $injectStore = $injectDefinition->getStoreName();
             $value = $injectDefinition->getValue();
             if (!is_null($injectStore)) {
-                if (!isset($this->parameterStores[$injectStore])) {
+                $parameterStore = $this->getParameterStore($injectStore);
+                if (!isset($parameterStore)) {
                     throw new InvalidParameterException(sprintf(
                         'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
                         $injectStore
                     ));
                 }
 
-                $value = $this->parameterStores[$injectStore]->fetch($injectDefinition->getType(), $value);
+                $value = $parameterStore->fetch($injectDefinition->getType(), $value);
             }
 
             $map[$className][$propertyName] = $value;
@@ -331,9 +314,5 @@ final class PhpDiContainerFactory implements ContainerFactory {
             $containerDefinition->getServiceDefinitions(),
             fn($carry, $item) : ?ServiceDefinition => $item->getType() === $objectType ? $item : $carry
         );
-    }
-
-    public function addParameterStore(ParameterStore $parameterStore) : void {
-        $this->parameterStores[$parameterStore->getName()] = $parameterStore;
     }
 }

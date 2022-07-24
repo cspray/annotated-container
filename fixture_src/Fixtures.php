@@ -126,4 +126,8 @@ final class Fixtures {
         return new NamedProfileResolvedServicesFixture();
     }
 
+    public static function configurationMissingStore() : ConfigurationMissingStoreFixture {
+        return new ConfigurationMissingStoreFixture();
+    }
+
 }

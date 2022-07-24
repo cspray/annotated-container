@@ -32,6 +32,7 @@ use function Cspray\Typiphy\objectType;
  * @covers \Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer
  * @covers \Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition
  * @covers \Cspray\AnnotatedContainer\StandardAliasDefinitionResolver
+ * @covers \Cspray\AnnotatedContainer\ContainerFactory\AbstractContainerFactory
  * @covers ::\Cspray\AnnotatedContainer\containerFactory
  * @covers ::\Cspray\AnnotatedContainer\autowiredParams
  * @covers ::\Cspray\AnnotatedContainer\rawParam

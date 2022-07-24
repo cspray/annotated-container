@@ -5,30 +5,20 @@ namespace Cspray\AnnotatedContainer\ContainerFactory;
 use Auryn\InjectionException;
 use Auryn\Injector;
 use Cspray\AnnotatedContainer\ActiveProfiles;
-use Cspray\AnnotatedContainer\AliasDefinition;
-use Cspray\AnnotatedContainer\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableFactory;
-use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
 use Cspray\AnnotatedContainer\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactoryOptions;
-use Cspray\AnnotatedContainer\EnvironmentParameterStore;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
-use Cspray\AnnotatedContainer\HasBackingContainer;
-use Cspray\AnnotatedContainer\ParameterStore;
 use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
-use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
-use Cspray\AnnotatedContainer\StandardAliasDefinitionResolver;
-use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\Typiphy\ObjectType;
-use Psr\Container\ContainerInterface;
 
 // @codeCoverageIgnoreStart
 if (!class_exists(Injector::class)) {
@@ -39,35 +29,7 @@ if (!class_exists(Injector::class)) {
 /**
  * A ContainerFactory that utilizes the rdlowrey/auryn Container as its backing implementation.
  */
-final class AurynContainerFactory implements ContainerFactory {
-
-    /**
-     * @var ParameterStore[]
-     */
-    private array $parameterStores = [];
-
-    private readonly AliasDefinitionResolver $aliasDefinitionResolver;
-
-    public function __construct(
-        AliasDefinitionResolver $aliasDefinitionResolver = null
-    ) {
-        // Injecting environment variables is something we have supported since early versions.
-        // We don't require adding this parameter store explicitly to continue providing this functionality
-        // without the end-user having to change how they construct their ContainerFactory.
-        $this->addParameterStore(new EnvironmentParameterStore());
-        $this->aliasDefinitionResolver = $aliasDefinitionResolver ?? new StandardAliasDefinitionResolver();
-    }
-
-    /**
-     * Add a custom ParameterStore, allowing you to Inject arbitrary values into your Services.
-     *
-     * @param ParameterStore $parameterStore
-     * @return void
-     * @see Inject
-     */
-    public function addParameterStore(ParameterStore $parameterStore): void {
-        $this->parameterStores[$parameterStore->getName()] = $parameterStore;
-    }
+final class AurynContainerFactory extends AbstractContainerFactory implements ContainerFactory {
 
     /**
      * Returns a PSR ContainerInterface that uses an Auryn\Injector to create services.
@@ -215,23 +177,36 @@ final class AurynContainerFactory implements ContainerFactory {
             if (!is_null($name)) {
                 $nameTypeMap[$name] = $configurationDefinition->getClass();
             }
-            $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($containerDefinition, $configurationDefinition) {
+            $injectPropertyMap = [];
+            foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
+                if ($injectDefinition->getTargetIdentifier()->isMethodParameter() ||
+                    $injectDefinition->getTargetIdentifier()->getClass() !== $configurationDefinition->getClass()) {
+                    continue;
+                }
+
+                $value = $injectDefinition->getValue();
+                $storeName = $injectDefinition->getStoreName();
+                if ($storeName !== null) {
+                    $store = $this->getParameterStore($storeName);
+                    if ($store === null) {
+                        throw new InvalidParameterException(sprintf(
+                            'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
+                            $storeName
+                        ));
+                    }
+                    $value = $store->fetch($injectDefinition->getType(), $value);
+                }
+
+                $injectPropertyMap[$injectDefinition->getTargetIdentifier()->getName()] = $value;
+            }
+
+            $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($injectPropertyMap, $configurationDefinition) {
                 /** @var class-string $configurationClass */
                 $configurationClass = $configurationDefinition->getClass()->getName();
                 $configReflection = (new \ReflectionClass($configurationClass));
                 $configInstance = $configReflection->newInstanceWithoutConstructor();
-                foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
-                    if ($injectDefinition->getTargetIdentifier()->isMethodParameter() ||
-                        $injectDefinition->getTargetIdentifier()->getClass() !== $configurationDefinition->getClass()) {
-                        continue;
-                    }
-
-                    $reflectionProperty = $configReflection->getProperty($injectDefinition->getTargetIdentifier()->getName());
-                    $value = $injectDefinition->getValue();
-                    $storeName = $injectDefinition->getStoreName();
-                    if (!is_null($storeName)) {
-                        $value = $this->parameterStores[$storeName]->fetch($injectDefinition->getType(), $value);
-                    }
+                foreach ($injectPropertyMap as $prop => $value) {
+                    $reflectionProperty = $configReflection->getProperty($prop);
                     $reflectionProperty->setValue($configInstance, $value);
                 }
                 return $configInstance;
@@ -326,7 +301,7 @@ final class AurynContainerFactory implements ContainerFactory {
 
             $storeName = $injectDefinition->getStoreName();
             if (!is_null($storeName)) {
-                $parameterStore = $this->parameterStores[$storeName] ?? null;
+                $parameterStore = $this->getParameterStore($storeName);
                 if (is_null($parameterStore)) {
                     throw new InvalidParameterException(sprintf(
                         'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
