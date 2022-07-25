@@ -54,22 +54,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles),
                 $nameTypeMap
             );
-            $activeProfiles = new class($activeProfiles) implements ActiveProfiles {
-
-                public function __construct(
-                    private readonly array $profiles
-                ) {}
-
-                public function getProfiles() : array {
-                    return $this->profiles;
-                }
-
-                public function isActive(string $profile) : bool {
-                    return in_array($profile, $this->profiles);
-                }
-            };
-
-            return $this->getAnnotatedContainer($injector, $nameTypeMap, $activeProfiles);
+            return $this->getAnnotatedContainer($injector, $nameTypeMap, $this->getActiveProfilesService($activeProfiles));
         } catch (InvalidDefinitionException $exception) {
             throw new ContainerException($exception->getMessage(), previous: $exception);
         }
