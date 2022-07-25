@@ -58,19 +58,8 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
         $definitions = [];
         // We have to maintain a set of known services to let our Container comply with PSR-11
         $serviceTypes = [AutowireableFactory::class, ActiveProfiles::class];
-        $definitions[ActiveProfiles::class] = static function() use($activeProfiles) : ActiveProfiles {
-            return new class($activeProfiles) implements ActiveProfiles {
-
-                public function __construct(private readonly array $profiles) {}
-
-                public function getProfiles() : array {
-                    return $this->profiles;
-                }
-
-                public function isActive(string $profile) : bool {
-                    return in_array($profile, $this->profiles);
-                }
-            };
+        $definitions[ActiveProfiles::class] = function() use($activeProfiles) : ActiveProfiles {
+            return $this->getActiveProfilesService($activeProfiles);
         };
 
         $containerDefinition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles);
