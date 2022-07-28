@@ -2,40 +2,65 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\ContainerFactory\AurynContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
+use Auryn\Injector;
+use Cspray\AnnotatedContainer\Helper\StubAnnotatedContainerListener;
+use Cspray\AnnotatedContainer\Internal\AfterContainerCreationAnnotatedContainerEvent;
+use Cspray\AnnotatedContainer\Internal\BeforeContainerCreationAnnotatedContainerEvent;
+use Cspray\AnnotatedContainerFixture\Fixtures;
+use DI\Container;
 use PHPUnit\Framework\TestCase;
+use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 
 class UserApiFunctionsTest extends TestCase {
+
+
+    protected function setUp() : void {
+        VirtualFilesystem::setup();
+    }
 
     public function testCompilerFunctionNoCache() {
         $compiler = compiler();
 
-        $this->assertInstanceOf(AnnotatedTargetContainerDefinitionCompiler::class, $compiler);
+        $containerDefinition = $compiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build()
+        );
+
+        self::assertCount(1, $containerDefinition->getServiceDefinitions());
     }
 
     public function testCompilerFunctionWithCache() {
-        $compiler = compiler(sys_get_temp_dir());
+        $compiler = compiler('vfs://root');
 
-        self::assertInstanceOf(CacheAwareContainerDefinitionCompiler::class, $compiler);
+        $containerDefinition = $compiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build()
+        );
+
+        self::assertCount(1, $containerDefinition->getServiceDefinitions());
+        self::assertFileExists('vfs://root/' . md5(Fixtures::singleConcreteService()->getPath()));
     }
 
     public function testContainerFactoryDefaultsToAuryn() {
-        $containerFactory = containerFactory();
+        $backingContainer = containerFactory()->createContainer(
+            ContainerDefinitionBuilder::newDefinition()->build()
+        )->getBackingContainer();
 
-        self::assertInstanceOf(AurynContainerFactory::class, $containerFactory);
+        self::assertInstanceOf(Injector::class, $backingContainer);
     }
 
     public function testContainerFactoryRespectsPassingAurynExplicitly() {
-        $containerFactory = containerFactory(SupportedContainers::Auryn);
+        $backingContainer = containerFactory(SupportedContainers::Auryn)->createContainer(
+            ContainerDefinitionBuilder::newDefinition()->build()
+        )->getBackingContainer();
 
-        self::assertInstanceOf(AurynContainerFactory::class, $containerFactory);
+        self::assertInstanceOf(Injector::class, $backingContainer);
     }
 
     public function testContainerFactoryRespectsGettingNonDefault() {
-        $containerFactory = containerFactory(SupportedContainers::PhpDi);
+        $backingContainer = containerFactory(SupportedContainers::PhpDi)->createContainer(
+            ContainerDefinitionBuilder::newDefinition()->build()
+        )->getBackingContainer();
 
-        self::assertInstanceOf(PhpDiContainerFactory::class, $containerFactory);
+        self::assertInstanceOf(Container::class, $backingContainer);
     }
 
     public function supportedContainerProvider() : array {
@@ -49,11 +74,32 @@ class UserApiFunctionsTest extends TestCase {
     /**
      * @dataProvider supportedContainerProvider
      */
-    public function testContainerFactoryReturnsSameInstance(SupportedContainers $container) {
+    public function testContainerFactoryReturnsSameInstance(SupportedContainers $container) : void {
         $a = containerFactory($container);
         $b = containerFactory($container);
 
         self::assertSame($a, $b);
+    }
+
+    public function testEventEmitterReturnsSameInstance() : void {
+        $a = eventEmitter();
+        $b = eventEmitter();
+
+        self::assertSame($a, $b);
+    }
+
+    /**
+     * @dataProvider supportedContainerProvider
+     */
+    public function testContainerFactoryEmitsEventsFromEmitter(SupportedContainers $supportedContainer) : void {
+        eventEmitter()->registerListener($listener = new StubAnnotatedContainerListener());
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
+        $container = containerFactory($supportedContainer)->createContainer($containerDefinition);
+
+        self::assertCount(2, $listener->getEvents());
+
+        self::assertInstanceOf(BeforeContainerCreationAnnotatedContainerEvent::class, $listener->getEvents()[0]);
+        self::assertInstanceOf(AfterContainerCreationAnnotatedContainerEvent::class, $listener->getEvents()[1]);
     }
 
 }
