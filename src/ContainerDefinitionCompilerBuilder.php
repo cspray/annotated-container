@@ -10,6 +10,7 @@ use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 final class ContainerDefinitionCompilerBuilder {
 
     private ?string $cacheDir = null;
+    private array $listeners = [];
 
     private function __construct() {}
 
@@ -41,12 +42,29 @@ final class ContainerDefinitionCompilerBuilder {
         return new self;
     }
 
+    public function withEventListener(AnnotatedContainerListener $listener) : self {
+        $instance = clone $this;
+        $instance->listeners[] = $listener;
+        return $instance;
+    }
+
     /**
      * Return the configured ContainerDefinitionCompiler
      *
      * @return ContainerDefinitionCompiler
      */
     public function build() : ContainerDefinitionCompiler {
+        $compiler = $this->getCacheAppropriateCompiler();
+
+        $emitter = eventEmitter();
+        foreach ($this->listeners as $listener) {
+            $emitter->registerListener($listener);
+        }
+
+        return new EventEmittingContainerDefinitionCompiler($compiler, $emitter);
+    }
+
+    private function getCacheAppropriateCompiler() : ContainerDefinitionCompiler {
         $phpParserCompiler = new AnnotatedTargetContainerDefinitionCompiler(
             new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()

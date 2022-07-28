@@ -18,20 +18,35 @@ function compiler(string $cacheDir = null) : ContainerDefinitionCompiler {
 
 function containerFactory(SupportedContainers $container = SupportedContainers::Default) : ContainerFactory {
     if ($container === SupportedContainers::Auryn || ($container === SupportedContainers::Default) && class_exists(Injector::class)) {
-        static $auryn;
-        if (!isset($auryn)) {
-            $auryn = new AurynContainerFactory();
+        static $auryn = null;
+        if ($auryn === null) {
+            $auryn = new EventEmittingContainerFactory(
+                new AurynContainerFactory(),
+                eventEmitter()
+            );
         }
 
         return $auryn;
     } else if ($container === SupportedContainers::PhpDi || ($container === SupportedContainers::Default && class_exists(Container::class))) {
-        static $di;
-        if (!isset($di)) {
-            $di = new PhpDiContainerFactory();
+        static $di = null;
+        if ($di === null) {
+            $di = new EventEmittingContainerFactory(
+                new PhpDiContainerFactory(),
+                eventEmitter()
+            );
         }
 
         return $di;
     } else {
         throw new ContainerFactoryNotFoundException('There is no backing Container library found. Please run "composer suggests" for supported containers.');
     }
+}
+
+function eventEmitter() : AnnotatedContainerEmitter {
+    static $emitter = null;
+    if ($emitter === null) {
+        $emitter = new StandardAnnotatedContainerEmitter();
+    }
+
+    return $emitter;
 }
