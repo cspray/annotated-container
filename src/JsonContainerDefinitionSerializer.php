@@ -56,6 +56,14 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             $serviceDefinitions[] = $key;
         }
 
+        $configurationDefinitions = [];
+        foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
+            $configurationDefinitions[] = [
+                'type' => $configurationDefinition->getClass()->getName(),
+                'name' => $configurationDefinition->getName()
+            ];
+        }
+
         $aliasDefinitions = [];
         foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
             $originalKey = md5($aliasDefinition->getAbstractService()->getName());
@@ -99,6 +107,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         return json_encode([
             'compiledServiceDefinitions' => $compiledServiceDefinitions,
             'sharedServiceDefinitions' => $serviceDefinitions,
+            'configurationDefinitions' => $configurationDefinitions,
             'aliasDefinitions' => $aliasDefinitions,
             'servicePrepareDefinitions' => $servicePrepareDefinitions,
             'serviceDelegateDefinitions' => $serviceDelegateDefinitions,
@@ -130,6 +139,16 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
         foreach ($data['sharedServiceDefinitions'] as $serviceHash) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinitions[$serviceHash]);
+        }
+
+        foreach ($data['configurationDefinitions'] as $configurationDefinition) {
+            $configurationDefinitionBuilder = ConfigurationDefinitionBuilder::forClass(objectType($configurationDefinition['type']));
+            if ($configurationDefinition['name'] !== null) {
+                $configurationDefinitionBuilder = $configurationDefinitionBuilder->withName($configurationDefinition['name']);
+            }
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withConfigurationDefinition(
+                $configurationDefinitionBuilder->build()
+            );
         }
 
         foreach ($data['aliasDefinitions'] as $aliasDefinition) {
