@@ -68,13 +68,6 @@ class ImplicitAliasedServicesTest extends AnnotatedTargetContainerDefinitionComp
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::implicitAliasedServices()->fooImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::implicitAliasedServices()->fooInterface(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooImplementation(), ['default'])],

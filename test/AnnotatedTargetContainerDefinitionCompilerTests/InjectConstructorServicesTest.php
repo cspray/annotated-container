@@ -209,22 +209,6 @@ class InjectConstructorServicesTest extends AnnotatedTargetContainerDefinitionCo
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectArrayService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectIntService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectBoolService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectFloatService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectStringService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectEnvService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectExplicitMixedService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectImplicitMixedService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectNullableStringService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectProfilesStringService(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectConstructorServices()->injectTypeUnionService(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectArrayService(), ['default'])],

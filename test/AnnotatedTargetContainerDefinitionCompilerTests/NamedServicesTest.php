@@ -74,13 +74,6 @@ class NamedServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCa
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::namedServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::namedServices()->fooImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::namedServices()->fooInterface(), ['default'])],

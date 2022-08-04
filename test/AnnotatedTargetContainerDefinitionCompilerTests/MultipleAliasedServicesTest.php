@@ -86,15 +86,6 @@ class MultipleAliasedServicesTest extends AnnotatedTargetContainerDefinitionComp
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::ambiguousAliasedServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::ambiguousAliasedServices()->barImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::ambiguousAliasedServices()->bazImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::ambiguousAliasedServices()->quxImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::ambiguousAliasedServices()->fooInterface(), ['default'])],

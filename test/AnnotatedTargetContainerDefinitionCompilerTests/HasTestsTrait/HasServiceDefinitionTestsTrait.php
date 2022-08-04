@@ -76,7 +76,7 @@ trait HasServiceDefinitionTestsTrait {
     }
 
     final public function testExpectedServiceIsSharedCount() : void {
-        $expected = count($this->serviceIsSharedProvider());
+        $expected = count($this->serviceTypeProvider());
 
         $this->assertSame(
             $expected, count($this->getSubject()->getServiceDefinitions()),

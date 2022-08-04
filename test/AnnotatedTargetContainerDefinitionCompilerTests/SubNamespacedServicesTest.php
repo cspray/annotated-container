@@ -96,17 +96,6 @@ class SubNamespacedServicesTest extends AnnotatedTargetContainerDefinitionCompil
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::subNamespacedServices()->barInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::subNamespacedServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::subNamespacedServices()->bazInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::subNamespacedServices()->barImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::subNamespacedServices()->bazImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::subNamespacedServices()->fooImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::subNamespacedServices()->barInterface(), ['default'])],

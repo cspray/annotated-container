@@ -130,4 +130,12 @@ final class Fixtures {
         return new ConfigurationMissingStoreFixture();
     }
 
+    public static function implicitServiceDelegateType() : ImplicitServiceDelegateTypeFixture {
+        return new ImplicitServiceDelegateTypeFixture();
+    }
+
+    public static function implicitServiceDelegateUnionType() : ImplicitServiceDelegateUnionTypeFixture {
+        return new ImplicitServiceDelegateUnionTypeFixture();
+    }
+
 }

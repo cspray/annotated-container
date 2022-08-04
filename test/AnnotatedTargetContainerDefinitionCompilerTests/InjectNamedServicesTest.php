@@ -105,15 +105,6 @@ class InjectNamedServicesTest extends AnnotatedTargetContainerDefinitionCompiler
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::injectNamedServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectNamedServices()->fooImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectNamedServices()->barImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectNamedServices()->serviceConsumer(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::injectNamedServices()->fooInterface(), ['default'])],

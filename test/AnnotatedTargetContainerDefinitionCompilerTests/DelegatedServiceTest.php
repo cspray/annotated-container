@@ -68,13 +68,6 @@ class DelegatedServiceTest extends AnnotatedTargetContainerDefinitionCompilerTes
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::delegatedService()->serviceInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::delegatedService()->fooService(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::delegatedService()->serviceInterface(), ['default'])],

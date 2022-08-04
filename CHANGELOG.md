@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added an event system for programmatic access to the ContainerDefinition and Container before and after each is created.
 
+### Changed
+
+- Updated the parsing of the #[ServiceDelegate] attribute to implicitly determine the service to create off of the method return type if no argument is passed to the Attribute.
+
 ## [v.1.2.1](https://github.com/cspray/annotated-container/tree/v1.2.1) - 2022-08-01
 
 ### Fixed
