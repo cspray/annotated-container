@@ -75,13 +75,6 @@ class InterfacePrepareServicesTest extends AnnotatedTargetContainerDefinitionCom
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::interfacePrepareServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::interfacePrepareServices()->fooImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::interfacePrepareServices()->fooInterface(), ['default'])],

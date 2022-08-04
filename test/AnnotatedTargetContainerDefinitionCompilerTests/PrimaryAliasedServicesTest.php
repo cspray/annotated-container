@@ -86,15 +86,6 @@ class PrimaryAliasedServicesTest extends AnnotatedTargetContainerDefinitionCompi
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::primaryAliasedServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::primaryAliasedServices()->fooImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::primaryAliasedServices()->barImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::primaryAliasedServices()->bazImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::primaryAliasedServices()->fooInterface(), ['default'])],

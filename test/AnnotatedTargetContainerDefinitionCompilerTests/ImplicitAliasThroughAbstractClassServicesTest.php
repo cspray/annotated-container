@@ -74,13 +74,6 @@ class ImplicitAliasThroughAbstractClassServicesTest extends AnnotatedTargetConta
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::implicitAliasThroughAbstractServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::implicitAliasThroughAbstractServices()->fooImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::implicitAliasThroughAbstractServices()->fooInterface(), ['default'])],

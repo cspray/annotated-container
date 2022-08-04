@@ -3,10 +3,13 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
+use Generator;
 use ReflectionClass;
 use ReflectionIntersectionType;
 use ReflectionMethod;
@@ -64,7 +67,60 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         assert($reflection instanceof ReflectionMethod);
         $delegateType = $reflection->getDeclaringClass()->getName();
         $delegateMethod = $reflection->getName();
-        return ServiceDelegateDefinitionBuilder::forService(objectType($target->getAttributeInstance()->service))->withDelegateMethod(objectType($delegateType), $delegateMethod)->build();
+        $attribute = $target->getAttributeInstance();
+        assert($attribute instanceof ServiceDelegate);
+
+        if ($attribute->service !== null) {
+            return ServiceDelegateDefinitionBuilder::forService(objectType($attribute->service))
+                ->withDelegateMethod(objectType($delegateType), $delegateMethod)
+                ->build();
+        } else {
+            $returnType = $reflection->getReturnType();
+            if ($returnType instanceof ReflectionIntersectionType) {
+                throw new InvalidAnnotationException(sprintf(
+                    'The #[ServiceDelegate] Attribute on %s::%s declares an unsupported intersection as a service type.',
+                    $delegateType,
+                    $delegateMethod
+                ));
+            } else if ($returnType instanceof ReflectionUnionType) {
+                throw new InvalidAnnotationException(sprintf(
+                    'The #[ServiceDelegate] Attribute on %s::%s declares an unsupported union as a service type.',
+                    $delegateType,
+                    $delegateMethod
+                ));
+            }
+
+            $validateServiceType = function(?string $serviceType) use($delegateType, $delegateMethod) : void {
+                if ($serviceType === null) {
+                    throw new InvalidAnnotationException(sprintf(
+                        'The #[ServiceDelegate] Attribute on %s::%s does not declare a service in the Attribute or as a return type of the method.',
+                        $delegateType,
+                        $delegateMethod
+                    ));
+                } else if (!class_exists($serviceType) && !interface_exists($serviceType)) {
+                    throw new InvalidAnnotationException(sprintf(
+                        'The #[ServiceDelegate] Attribute on %s::%s declares a scalar value as a service type.',
+                        $delegateType,
+                        $delegateMethod
+                    ));
+                }
+            };
+
+            if ($returnType instanceof ReflectionNamedType) {
+                $validateServiceType($returnType->getName());
+                return ServiceDelegateDefinitionBuilder::forService(objectType($returnType->getName()))
+                    ->withDelegateMethod(objectType($delegateType), $delegateMethod)
+                    ->build();
+            } else {
+                throw new InvalidAnnotationException(sprintf(
+                    'The #[ServiceDelegate] Attribute on %s::%s does not declare a service in the Attribute or as a return type of the method.',
+                    $delegateType,
+                    $delegateMethod
+                ));
+            }
+        }
+
+
     }
 
     private function buildServicePrepareDefinition(AnnotatedTarget $target) : ServicePrepareDefinition {

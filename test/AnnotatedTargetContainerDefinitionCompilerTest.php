@@ -29,20 +29,20 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testEmptyScanDirectoriesThrowsException() {
-        self::expectException(InvalidCompileOptionsException::class);
-        self::expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' must include at least 1 directory to scan, but none were provided.');
+        $this->expectException(InvalidCompileOptionsException::class);
+        $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' must include at least 1 directory to scan, but none were provided.');
         $this->runCompileDirectory([]);
     }
 
     public function testServicePrepareNotOnServiceThrowsException() {
-        self::expectException(InvalidAnnotationException::class);
-        self::expectExceptionMessage('The #[ServicePrepare] Attribute on ' . LogicalErrorApps\ServicePrepareNotService\FooImplementation::class . '::postConstruct is not on a type marked as a #[Service].');;
+        $this->expectException(InvalidAnnotationException::class);
+        $this->expectExceptionMessage('The #[ServicePrepare] Attribute on ' . LogicalErrorApps\ServicePrepareNotService\FooImplementation::class . '::postConstruct is not on a type marked as a #[Service].');;
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
     }
 
     public function testDuplicateScanDirectoriesThrowsException() {
-        self::expectException(InvalidCompileOptionsException::class);
-        self::expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' includes duplicate directories. Please pass a distinct set of directories to scan.');
+        $this->expectException(InvalidCompileOptionsException::class);
+        $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' includes duplicate directories. Please pass a distinct set of directories to scan.');
         $this->runCompileDirectory([
             Fixtures::singleConcreteService()->getPath(),
             Fixtures::ambiguousAliasedServices()->getPath(),
@@ -50,4 +50,39 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         ]);
     }
 
+    public function testImplicitServiceDelegateHasNoReturnType() {
+        $this->expectException(InvalidAnnotationException::class);
+        $this->expectExceptionMessage(
+            'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateNoType\FooFactory::class . '::create does not declare a service in the Attribute or as a return type of the method.'
+        );
+
+        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateNoType');
+    }
+
+    public function testImplicitServiceDelegateHasScalarReturnType() {
+        $this->expectException(InvalidAnnotationException::class);
+        $this->expectExceptionMessage(
+            'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateScalarType\FooFactory::class . '::create declares a scalar value as a service type.'
+        );
+
+        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateScalarType');
+    }
+
+    public function testImplicitServiceDelegateHasIntersectionReturnType() {
+        $this->expectException(InvalidAnnotationException::class);
+        $this->expectExceptionMessage(
+            'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateIntersectionType\FooFactory::class . '::create declares an unsupported intersection as a service type.'
+        );
+
+        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateIntersectionType');
+    }
+
+    public function testImplicitServiceDelegateHasUnionReturnType() {
+        $this->expectException(InvalidAnnotationException::class);
+        $this->expectExceptionMessage(
+            'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateUnionType\FooFactory::class . '::create declares an unsupported union as a service type.'
+        );
+
+        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
+    }
 }

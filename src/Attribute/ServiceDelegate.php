@@ -17,8 +17,9 @@ use Attribute;
 final class ServiceDelegate {
 
     /**
-     * @param string $service The FQCN of the service that should be created
+     * @param ?string $service The FQCN of the service that should be created, or null if return type of the attributed
+     *                         method should be used instead.
      */
-    public function __construct(public readonly string $service) {}
+    public function __construct(public readonly ?string $service = null) {}
 
 }

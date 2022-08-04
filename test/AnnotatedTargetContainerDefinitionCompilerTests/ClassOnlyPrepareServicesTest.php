@@ -75,13 +75,6 @@ class ClassOnlyPrepareServicesTest extends AnnotatedTargetContainerDefinitionCom
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::classOnlyPrepareServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::classOnlyPrepareServices()->fooImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::classOnlyPrepareServices()->fooInterface(), ['default'])],

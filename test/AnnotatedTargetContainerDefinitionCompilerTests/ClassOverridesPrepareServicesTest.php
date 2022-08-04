@@ -75,13 +75,6 @@ class ClassOverridesPrepareServicesTest extends AnnotatedTargetContainerDefiniti
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::classOverridesPrepareServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::classOverridesPrepareServices()->fooImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::classOverridesPrepareServices()->fooInterface(), ['default'])],

@@ -78,15 +78,6 @@ class ProfileResolvedServicesTest extends AnnotatedTargetContainerDefinitionComp
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::profileResolvedServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::profileResolvedServices()->devImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::profileResolvedServices()->testImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::profileResolvedServices()->prodImplementation(), true)],
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::profileResolvedServices()->fooInterface(), ['default'])],

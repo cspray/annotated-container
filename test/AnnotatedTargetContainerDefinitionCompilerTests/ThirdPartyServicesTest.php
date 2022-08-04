@@ -83,13 +83,6 @@ class ThirdPartyServicesTest extends AnnotatedTargetContainerDefinitionCompilerT
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::thirdPartyServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::thirdPartyServices()->fooImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::thirdPartyServices()->fooInterface(), ['default'])],

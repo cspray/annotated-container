@@ -1,71 +1,80 @@
-<?php declare(strict_types=1);
+<?php
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests;
 
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceDelegate;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceIsAbstract;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceIsConcrete;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceIsPrimary;
-use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceIsShared;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceName;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceProfiles;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceType;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoAliasDefinitionsTrait;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoConfigurationDefinitionsTrait;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoInjectDefinitionsTrait;
-use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasServiceDelegateDefinitionTestsTrait;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
-class NonAnnotatedServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class ImplicitServiceDelegateTypeTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
 
-    use HasServiceDefinitionTestsTrait;
+    use HasServiceDefinitionTestsTrait,
+        HasServiceDelegateDefinitionTestsTrait;
 
     use HasNoAliasDefinitionsTrait,
-        HasNoServiceDelegateDefinitionsTrait,
-        HasNoServicePrepareDefinitionsTrait,
         HasNoInjectDefinitionsTrait,
+        HasNoServicePrepareDefinitionsTrait,
         HasNoConfigurationDefinitionsTrait;
 
     protected function getFixtures() : array|Fixture {
-        return Fixtures::nonAnnotatedServices();
+        return Fixtures::implicitServiceDelegateType();
     }
 
     protected function serviceTypeProvider() : array {
         return [
-            [new ExpectedServiceType(Fixtures::nonAnnotatedServices()->annotatedService())]
+            [new ExpectedServiceType(Fixtures::implicitServiceDelegateType()->fooService())]
         ];
     }
 
     protected function serviceNameProvider() : array {
         return [
-            [new ExpectedServiceName(Fixtures::nonAnnotatedServices()->annotatedService(), null)]
+            [new ExpectedServiceName(Fixtures::implicitServiceDelegateType()->fooService(), null)]
         ];
     }
 
     protected function serviceIsPrimaryProvider() : array {
         return [
-            [new ExpectedServiceIsPrimary(Fixtures::nonAnnotatedServices()->annotatedService(), false)]
+            [new ExpectedServiceIsPrimary(Fixtures::implicitServiceDelegateType()->fooService(), false)]
         ];
     }
 
     protected function serviceIsConcreteProvider() : array {
         return [
-            [new ExpectedServiceIsConcrete(Fixtures::nonAnnotatedServices()->annotatedService(), true)]
+            [new ExpectedServiceIsConcrete(Fixtures::implicitServiceDelegateType()->fooService(), true)]
         ];
     }
 
     protected function serviceIsAbstractProvider() : array {
         return [
-            [new ExpectedServiceIsAbstract(Fixtures::nonAnnotatedServices()->annotatedService(), false)]
+            [new ExpectedServiceIsAbstract(Fixtures::implicitServiceDelegateType()->fooService(), false)]
         ];
     }
 
     protected function serviceProfilesProvider() : array {
         return [
-            [new ExpectedServiceProfiles(Fixtures::nonAnnotatedServices()->annotatedService(), ['default'])]
+            [new ExpectedServiceProfiles(Fixtures::implicitServiceDelegateType()->fooService(), ['default'])]
         ];
     }
 
+    protected function serviceDelegateProvider() : array {
+        return [
+            [new ExpectedServiceDelegate(
+                Fixtures::implicitServiceDelegateType()->fooService(),
+                Fixtures::implicitServiceDelegateType()->fooServiceFactory(),
+                'create'
+            )]
+        ];
+    }
 }

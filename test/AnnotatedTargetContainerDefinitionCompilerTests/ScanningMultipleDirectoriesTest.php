@@ -81,14 +81,6 @@ class ScanningMultipleDirectoriesTest extends AnnotatedTargetContainerDefinition
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::implicitAliasedServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::implicitAliasedServices()->fooImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::singleConcreteService()->fooImplementation(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::implicitAliasedServices()->fooInterface(), ['default'])],

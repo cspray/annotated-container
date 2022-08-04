@@ -122,16 +122,6 @@ class InjectPrepareServicesTest extends AnnotatedTargetContainerDefinitionCompil
         ];
     }
 
-    protected function serviceIsSharedProvider() : array {
-        return [
-            [new ExpectedServiceIsShared(Fixtures::injectPrepareServices()->fooInterface(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectPrepareServices()->fooImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectPrepareServices()->barImplementation(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectPrepareServices()->prepareInjector(), true)],
-            [new ExpectedServiceIsShared(Fixtures::injectPrepareServices()->serviceScalarUnionPrepareInjector(), true)]
-        ];
-    }
-
     protected function serviceProfilesProvider() : array {
         return [
             [new ExpectedServiceProfiles(Fixtures::injectPrepareServices()->fooInterface(), ['default'])],
