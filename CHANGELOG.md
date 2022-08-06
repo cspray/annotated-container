@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased Changes
+## [v1.3.0](https://github.com/cspray/annotated-container/tree/v1.3.0) - 2022-08-06
 
 ### Added 
 
@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated the parsing of the #[ServiceDelegate] attribute to implicitly determine the service to create off of the method return type if no argument is passed to the Attribute.
+
+### Fixed
+
+- Fixed an error where building a container from a cached definition was not respecting an enum or an array of enums as a value for `#[Inject]`.
 
 ## [v.1.2.1](https://github.com/cspray/annotated-container/tree/v1.2.1) - 2022-08-01
 

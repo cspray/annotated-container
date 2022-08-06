@@ -2,11 +2,13 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Internal\Objects;
 use Cspray\Typiphy\Internal\NamedType;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
+use ReflectionEnum;
 use UnitEnum;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
@@ -92,19 +94,34 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             ];
         }
 
+        $parseValue = function(mixed $value) use(&$parseValue) : mixed {
+            if (is_object($value) && Objects::isEnum($value::class)) {
+                $parsedValue = $value->name;
+            } else if (is_array($value)) {
+                $parsedValue = [];
+                foreach ($value as $val) {
+                    $rawType = is_object($val) ? $val::class : gettype($val);
+                    $parsedValue[] = [
+                        'type' => self::convertStringToType($rawType)->getName(),
+                        'value' => $parseValue($val)
+                    ];
+                }
+            } else {
+                $parsedValue = $value;
+            }
+
+            return $parsedValue;
+        };
+
         $injectDefinitions = [];
         foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
-            $value = $injectDefinition->getValue();
-            if (is_object($value) && (new \ReflectionClass($value))->isEnum()) {
-                $value = $value->name;
-            }
 
             $injectDefinitions[] = [
                 'injectTargetType' => $injectDefinition->getTargetIdentifier()->getClass()->getName(),
                 'injectTargetMethod' => $injectDefinition->getTargetIdentifier()->getMethodName(),
                 'injectTargetName' => $injectDefinition->getTargetIdentifier()->getName(),
                 'type' => $injectDefinition->getType()->getName(),
-                'value' => $value,
+                'value' => $parseValue($injectDefinition->getValue()),
                 'profiles' => $injectDefinition->getProfiles(),
                 'storeName' => $injectDefinition->getStoreName()
             ];
@@ -179,6 +196,23 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             );
         }
 
+        $parseValue = function(Type|TypeUnion|TypeIntersect $type, mixed $value) use(&$parseValue) : mixed {
+            if ($type instanceof ObjectType && Objects::isEnum($type)) {
+                $enumReflection = new ReflectionEnum($type->getName());
+                $parsedValue = $enumReflection->getCase($value)->getValue();
+            } else if (is_array($value)) {
+                $parsedValue = [];
+                foreach ($value as $val) {
+                    $type = self::convertStringToType($val['type']);
+                    $parsedValue[] = $parseValue($type, $val['value']);
+                }
+            } else {
+                $parsedValue = $value;
+            }
+
+            return $parsedValue;
+        };
+
         foreach ($data['injectDefinitions'] as $injectDefinition) {
             $injectBuilder = InjectDefinitionBuilder::forService(objectType($injectDefinition['injectTargetType']));
 
@@ -197,13 +231,8 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 );
             }
 
-            $value = $injectDefinition['value'];
-            if ($type instanceof ObjectType && is_a($type->getName(), UnitEnum::class, true)) {
-                $enumReflection = new \ReflectionEnum($type->getName());
-                $value = $enumReflection->getCase($value)->getValue();
-            }
 
-            $injectBuilder = $injectBuilder->withValue($value)
+            $injectBuilder = $injectBuilder->withValue($parseValue($type, $injectDefinition['value']))
                 ->withProfiles(...$injectDefinition['profiles']);
 
             if (!is_null($injectDefinition['storeName'])) {
