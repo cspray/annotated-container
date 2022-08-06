@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainerFixture\ConfigurationWithEnum\MyEnum;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use Cspray\Typiphy\TypeIntersect;
@@ -228,6 +229,25 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
         ], $json['configurationDefinitions']);
     }
 
+    public function testSerializeWithEnumInjectDefinitions() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::configurationWithEnum()->getPath())->build()
+        );
+
+        $json = json_decode($serializer->serialize($containerDefinition), true);
+        self::assertArrayHasKey('injectDefinitions', $json);
+        self::assertContains([
+            'injectTargetType' => Fixtures::configurationWithEnum()->configuration()->getName(),
+            'injectTargetMethod' => null,
+            'injectTargetName' => 'enum',
+            'type' => MyEnum::class,
+            'value' => 'Foo',
+            'profiles' => ['default'],
+            'storeName' => null
+        ], $json['injectDefinitions']);
+    }
+
     /** ======================================== Deserialization Testing ==============================================*/
 
     public function serializeDeserializeSerializeDirs() : array {
@@ -326,6 +346,21 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             Fixtures::injectIntersectCustomStoreServices()->fooInterface(),
             Fixtures::injectIntersectCustomStoreServices()->barInterface()
         ], $type->getTypes());
+    }
+
+    public function testDeserializeWithEnum() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::configurationWithEnum()->getPath())->build()
+        );
+
+        $serialized = $serializer->serialize($containerDefinition);
+        $subjectDefinition = $serializer->deserialize($serialized);
+
+        $injectDefinitions = $subjectDefinition->getInjectDefinitions();
+
+        self::assertCount(1, $injectDefinitions);
+        self::assertSame(MyEnum::Foo, $injectDefinitions[0]->getValue());
     }
 
 }

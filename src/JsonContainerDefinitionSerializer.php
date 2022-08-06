@@ -7,6 +7,7 @@ use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
+use UnitEnum;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\callableType;
@@ -93,12 +94,17 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $injectDefinitions = [];
         foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
+            $value = $injectDefinition->getValue();
+            if (is_object($value) && (new \ReflectionClass($value))->isEnum()) {
+                $value = $value->name;
+            }
+
             $injectDefinitions[] = [
                 'injectTargetType' => $injectDefinition->getTargetIdentifier()->getClass()->getName(),
                 'injectTargetMethod' => $injectDefinition->getTargetIdentifier()->getMethodName(),
                 'injectTargetName' => $injectDefinition->getTargetIdentifier()->getName(),
                 'type' => $injectDefinition->getType()->getName(),
-                'value' => $injectDefinition->getValue(),
+                'value' => $value,
                 'profiles' => $injectDefinition->getProfiles(),
                 'storeName' => $injectDefinition->getStoreName()
             ];
@@ -191,7 +197,13 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 );
             }
 
-            $injectBuilder = $injectBuilder->withValue($injectDefinition['value'])
+            $value = $injectDefinition['value'];
+            if ($type instanceof ObjectType && is_a($type->getName(), UnitEnum::class, true)) {
+                $enumReflection = new \ReflectionEnum($type->getName());
+                $value = $enumReflection->getCase($value)->getValue();
+            }
+
+            $injectBuilder = $injectBuilder->withValue($value)
                 ->withProfiles(...$injectDefinition['profiles']);
 
             if (!is_null($injectDefinition['storeName'])) {
