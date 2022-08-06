@@ -138,4 +138,8 @@ final class Fixtures {
         return new ImplicitServiceDelegateUnionTypeFixture();
     }
 
+    public static function configurationWithEnum() : ConfigurationWithEnumFixture {
+        return new ConfigurationWithEnumFixture();
+    }
+
 }
