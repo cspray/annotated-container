@@ -148,4 +148,8 @@ final class Fixtures {
         return new ConfigurationWithArrayEnumFixture();
     }
 
+    public static function configurationWithAssocArrayEnum() : ConfigurationWithAssocArrayEnumFixture {
+        return new ConfigurationWithAssocArrayEnumFixture();
+    }
+
 }

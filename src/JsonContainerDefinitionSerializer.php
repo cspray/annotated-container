@@ -99,9 +99,9 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 $parsedValue = $value->name;
             } else if (is_array($value)) {
                 $parsedValue = [];
-                foreach ($value as $val) {
+                foreach ($value as $key => $val) {
                     $rawType = is_object($val) ? $val::class : gettype($val);
-                    $parsedValue[] = [
+                    $parsedValue[$key] = [
                         'type' => self::convertStringToType($rawType)->getName(),
                         'value' => $parseValue($val)
                     ];
@@ -202,9 +202,9 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 $parsedValue = $enumReflection->getCase($value)->getValue();
             } else if (is_array($value)) {
                 $parsedValue = [];
-                foreach ($value as $val) {
+                foreach ($value as $key => $val) {
                     $type = self::convertStringToType($val['type']);
-                    $parsedValue[] = $parseValue($type, $val['value']);
+                    $parsedValue[$key] = $parseValue($type, $val['value']);
                 }
             } else {
                 $parsedValue = $value;

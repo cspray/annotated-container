@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum;
+use Cspray\AnnotatedContainerFixture\ConfigurationWithAssocArrayEnum;
 use Cspray\AnnotatedContainerFixture\ConfigurationWithEnum\MyEnum;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -405,6 +406,24 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
 
         self::assertCount(1, $injectDefinitions);
         self::assertSame([FooEnum::Bar, FooEnum::Qux], $injectDefinitions[0]->getValue());
+    }
+
+    public function testDeserializeWithAssocArrayEnum() {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::configurationWithAssocArrayEnum()->getPath())->build()
+        );
+
+        $serialized = $serializer->serialize($containerDefinition);
+        $subjectDefinition = $serializer->deserialize($serialized);
+
+        $injectDefinitions = $subjectDefinition->getInjectDefinitions();
+
+        self::assertCount(1, $injectDefinitions);
+        self::assertSame([
+            'b' => ConfigurationWithAssocArrayEnum\MyEnum::B,
+            'c' => ConfigurationWithAssocArrayEnum\MyEnum::C
+        ], $injectDefinitions[0]->getValue());
     }
 }
 
