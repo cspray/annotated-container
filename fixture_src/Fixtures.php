@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainerFixture;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
+
 final class Fixtures {
 
     private function __construct() {}
@@ -140,6 +142,14 @@ final class Fixtures {
 
     public static function configurationWithEnum() : ConfigurationWithEnumFixture {
         return new ConfigurationWithEnumFixture();
+    }
+
+    public static function configurationWithArrayEnum() : ConfigurationWithArrayEnumFixture {
+        return new ConfigurationWithArrayEnumFixture();
+    }
+
+    public static function configurationWithAssocArrayEnum() : ConfigurationWithAssocArrayEnumFixture {
+        return new ConfigurationWithAssocArrayEnumFixture();
     }
 
 }
