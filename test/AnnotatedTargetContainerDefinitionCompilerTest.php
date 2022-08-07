@@ -2,22 +2,33 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
+use Cspray\AnnotatedContainer\Attribute\Inject;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
     use ContainerDefinitionAssertionsTrait;
 
     private AnnotatedTargetContainerDefinitionCompiler $subject;
+    private TestLogger $logger;
 
     public function setUp() : void {
+        $this->logger = new TestLogger();
         $this->subject = new AnnotatedTargetContainerDefinitionCompiler(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter()
+            new DefaultAnnotatedTargetDefinitionConverter(),
+            $this->logger
         );
     }
 
@@ -84,5 +95,187 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         );
 
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
+    }
+
+    public function testLoggingScannedDirs() : void {
+        $this->runCompileDirectory([
+            $path1 = Fixtures::singleConcreteService()->getPath(),
+            $path2 = Fixtures::ambiguousAliasedServices()->getPath()
+        ]);
+
+        $expected = [
+            'message' => sprintf('Scanning directories: %s %s', $path1, $path2),
+            'context' => [
+                'sourcePaths' => [$path1, $path2]
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingServiceDefinition() : void {
+        $this->runCompileDirectory(Fixtures::singleConcreteService()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed ServiceDefinition from #[Service] Attribute on %s.',
+                Fixtures::singleConcreteService()->fooImplementation()->getName()
+            ),
+            'context' => [
+                'attribute' => Service::class,
+                'target' => [
+                    'class' => Fixtures::singleConcreteService()->fooImplementation()->getName(),
+                ],
+                'definition' => [
+                    'type' => ServiceDefinition::class,
+                    'serviceType' => Fixtures::singleConcreteService()->fooImplementation()->getName(),
+                    'name' => null,
+                    'profiles' => ['default'],
+                    'isPrimary' => false,
+                    'isConcrete' => true,
+                    'isAbstract' => false
+                ]
+            ]
+        ];
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingServiceDelegateTarget() : void {
+        $this->runCompileDirectory(Fixtures::delegatedService()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed ServiceDelegateDefinition from #[ServiceDelegate] Attribute on %s::%s.',
+                Fixtures::delegatedService()->serviceFactory()->getName(),
+                'createService'
+            ),
+            'context' => [
+                'attribute' => ServiceDelegate::class,
+                'target' => [
+                    'class' => Fixtures::delegatedService()->serviceFactory()->getName(),
+                    'method' => 'createService',
+                ],
+                'definition' => [
+                    'type' => ServiceDelegateDefinition::class,
+                    'serviceType' => Fixtures::delegatedService()->serviceInterface()->getName(),
+                    'delegateType' => Fixtures::delegatedService()->serviceFactory()->getName(),
+                    'delegateMethod' => 'createService'
+                ]
+            ]
+        ];
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingServicePrepareTarget() : void {
+        $this->runCompileDirectory(Fixtures::classOnlyPrepareServices()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed ServicePrepareDefinition from #[ServicePrepare] Attribute on %s::%s.',
+                Fixtures::classOnlyPrepareServices()->fooImplementation()->getName(),
+                'setBar'
+            ),
+            'context' => [
+                'attribute' => ServicePrepare::class,
+                'target' => [
+                    'class' => Fixtures::classOnlyPrepareServices()->fooImplementation()->getName(),
+                    'method' => 'setBar'
+                ],
+                'definition' => [
+                    'type' => ServicePrepareDefinition::class,
+                    'serviceType' => Fixtures::classOnlyPrepareServices()->fooImplementation()->getName(),
+                    'prepareMethod' => 'setBar'
+                ]
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingConfigurationTarget() : void {
+        $this->runCompileDirectory(Fixtures::configurationServices()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed ConfigurationDefinition from #[Configuration] Attribute on %s.',
+                Fixtures::configurationServices()->myConfig()->getName()
+            ),
+            'context' => [
+                'attribute' => Configuration::class,
+                'target' => [
+                    'class' => Fixtures::configurationServices()->myConfig()->getName(),
+                ],
+                'definition' => [
+                    'type' => ConfigurationDefinition::class,
+                    'configurationType' => Fixtures::configurationServices()->myConfig()->getName(),
+                    'name' => null
+                ]
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectMethodParameter() : void {
+        $this->runCompileDirectory(Fixtures::injectConstructorServices()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed InjectDefinition from #[Inject] Attribute on %s::%s(%s).',
+                Fixtures::injectConstructorServices()->injectStringService()->getName(),
+                '__construct',
+                'val'
+            ),
+            'context' => [
+                'attribute' => Inject::class,
+                'target' => [
+                    'class' => Fixtures::injectConstructorServices()->injectStringService()->getName(),
+                    'method' => '__construct',
+                    'parameter' => 'val'
+                ],
+                'definition' => [
+                    'type' => InjectDefinition::class,
+                    'serviceType' => Fixtures::injectConstructorServices()->injectStringService()->getName(),
+                    'method' => '__construct',
+                    'parameterType' => 'string',
+                    'parameter' => 'val',
+                    'value' => 'foobar',
+                    'store' => null,
+                    'profiles' => ['default']
+                ]
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectConfigurationProperty() : void {
+        $this->runCompileDirectory(Fixtures::configurationServices()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed InjectDefinition from #[Inject] Attribute on %s::%s.',
+                Fixtures::configurationServices()->myConfig()->getName(),
+                'user'
+            ),
+            'context' => [
+                'attribute' => Inject::class,
+                'target' => [
+                    'class' => Fixtures::configurationServices()->myConfig()->getName(),
+                    'property' => 'user'
+                ],
+                'definition' => [
+                    'type' => InjectDefinition::class,
+                    'serviceType' => Fixtures::configurationServices()->myConfig()->getName(),
+                    'property' => 'user',
+                    'propertyType' => 'string',
+                    'value' => 'USER',
+                    'store' => 'env',
+                    'profiles' => ['default']
+                ]
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
     }
 }

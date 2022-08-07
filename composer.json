@@ -19,7 +19,8 @@
     "cspray/architectural-decision": "^1.0",
     "cspray/typiphy": "^0.2",
     "nikic/php-parser": "^4.10",
-    "psr/container": "^2.0"
+    "psr/container": "^2.0",
+    "psr/log": "^2 || ^3"
   },
   "require-dev": {
     "cspray/phinal": "dev-main",

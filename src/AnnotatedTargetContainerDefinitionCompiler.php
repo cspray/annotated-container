@@ -2,12 +2,21 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
+use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedTarget\AnnotatedTargetParser;
 use Cspray\AnnotatedTarget\AnnotatedTargetParserOptionsBuilder;
 use Cspray\Typiphy\ObjectType;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use ReflectionClass;
+use ReflectionMethod;
+use ReflectionParameter;
+use ReflectionProperty;
 use stdClass;
 use function Cspray\Typiphy\objectType;
 
@@ -17,10 +26,15 @@ use function Cspray\Typiphy\objectType;
  */
 final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefinitionCompiler {
 
+    private readonly LoggerInterface $logger;
+
     public function __construct(
         private readonly AnnotatedTargetParser $annotatedTargetCompiler,
-        private readonly AnnotatedTargetDefinitionConverter $definitionConverter
-    ) {}
+        private readonly AnnotatedTargetDefinitionConverter $definitionConverter,
+        LoggerInterface $logger = null
+    ) {
+        $this->logger = $logger ?? new NullLogger();
+    }
 
     /**
      * Will parse source code, according to the passed $containerDefinitionCompileOptions, and construct a ContainerDefinition
@@ -63,20 +77,191 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $consumer->injectDefinitions = [];
         $consumer->configurationDefinitions = [];
         $attributeTypes = array_map(fn(AttributeType $attributeType) => objectType($attributeType->value), AttributeType::cases());
-        $options = AnnotatedTargetParserOptionsBuilder::scanDirectories(...$containerDefinitionCompileOptions->getScanDirectories())
+        $dirs = $containerDefinitionCompileOptions->getScanDirectories();
+        $options = AnnotatedTargetParserOptionsBuilder::scanDirectories(...$dirs)
             ->filterAttributes(...$attributeTypes)
             ->build();
+
+        $this->logger->info(
+            sprintf('Scanning directories: %s', implode(' ', $dirs)),
+            ['sourcePaths' => $dirs]
+        );
+
+        /** @var AnnotatedTarget $target */
         foreach ($this->annotatedTargetCompiler->parse($options) as $target) {
             $definition = $this->definitionConverter->convert($target);
-            match (true) {
-                $definition instanceof ServiceDefinition => $consumer->serviceDefinitions[] = $definition,
-                $definition instanceof ServicePrepareDefinition => $consumer->servicePrepareDefinitions[] = $definition,
-                $definition instanceof ServiceDelegateDefinition => $consumer->serviceDelegateDefinitions[] = $definition,
-                $definition instanceof InjectDefinition => $consumer->injectDefinitions[] = $definition,
-                $definition instanceof ConfigurationDefinition => $consumer->configurationDefinitions[] = $definition
-            };
+
+            if ($definition instanceof ServiceDefinition) {
+                $consumer->serviceDefinitions[] = $definition;
+                $this->logServiceDefinition($target, $definition);
+            } else if ($definition instanceof ServicePrepareDefinition) {
+                $consumer->servicePrepareDefinitions[] = $definition;
+                $this->logServicePrepareDefinition($target, $definition);
+            } else if ($definition instanceof ServiceDelegateDefinition) {
+                $consumer->serviceDelegateDefinitions[] = $definition;
+                $this->logServiceDelegateDefinition($target, $definition);
+            } else if ($definition instanceof InjectDefinition) {
+                $consumer->injectDefinitions[] = $definition;
+                if ($definition->getTargetIdentifier()->isMethodParameter()) {
+                    $this->logParameterInjectDefinition($target, $definition);
+                } else {
+                    $this->logPropertyInjectDefinition($target, $definition);
+                }
+            } else if ($definition instanceof ConfigurationDefinition) {
+                $consumer->configurationDefinitions[] = $definition;
+                $this->logConfigurationDefinition($target, $definition);
+            }
         }
         return $consumer;
+    }
+
+    private function logServiceDefinition(AnnotatedTarget $target, ServiceDefinition $definition) : void {
+        $this->logger->info(
+            sprintf('Parsed ServiceDefinition from #[Service] Attribute on %s.', $definition->getType()->getName()),
+            [
+                'attribute' => AttributeType::Service->value,
+                'target' => [
+                    'class' => $target->getTargetReflection()->getName()
+                ],
+                'definition' => [
+                    'type' => ServiceDefinition::class,
+                    'serviceType' => $definition->getType()->getName(),
+                    'name' => $definition->getName(),
+                    'profiles' => $definition->getProfiles(),
+                    'isPrimary' => $definition->isPrimary(),
+                    'isConcrete' => $definition->isConcrete(),
+                    'isAbstract' => $definition->isAbstract()
+                ]
+            ]
+        );
+    }
+
+    private function logServicePrepareDefinition(AnnotatedTarget $target, ServicePrepareDefinition $definition) : void {
+        $targetReflection = $target->getTargetReflection();
+        assert($targetReflection instanceof ReflectionMethod);
+        $this->logger->info(
+            sprintf('Parsed ServicePrepareDefinition from #[ServicePrepare] Attribute on %s::%s.', $definition->getService()->getName(), $definition->getMethod()),
+            [
+                'attribute' => AttributeType::ServicePrepare->value,
+                'target' => [
+                    'class' => $targetReflection->getDeclaringClass()->getName(),
+                    'method' => $targetReflection->getName()
+                ],
+                'definition' => [
+                    'type' => ServicePrepareDefinition::class,
+                    'serviceType' => $definition->getService()->getName(),
+                    'prepareMethod' => $definition->getMethod()
+                ]
+            ]
+        );
+    }
+
+    private function logServiceDelegateDefinition(AnnotatedTarget $target, ServiceDelegateDefinition $definition) : void {
+        $targetReflection = $target->getTargetReflection();
+        assert($targetReflection instanceof ReflectionMethod);
+        $this->logger->info(
+            sprintf(
+                'Parsed ServiceDelegateDefinition from #[ServiceDelegate] Attribute on %s::%s.',
+                $targetReflection->getDeclaringClass()->getName(),
+                $target->getTargetReflection()->getName()
+            ),
+            [
+                'attribute' => AttributeType::ServiceDelegate->value,
+                'target' => [
+                    'class' => $targetReflection->getDeclaringClass()->getName(),
+                    'method' => $target->getTargetReflection()->getName()
+                ],
+                'definition' => [
+                    'type' => ServiceDelegateDefinition::class,
+                    'serviceType' => $definition->getServiceType()->getName(),
+                    'delegateType' => $definition->getDelegateType()->getName(),
+                    'delegateMethod' => $definition->getDelegateMethod()
+                ]
+            ]
+        );
+    }
+
+    private function logParameterInjectDefinition(AnnotatedTarget $target, InjectDefinition $definition) : void {
+        $targetReflection = $target->getTargetReflection();
+        assert($targetReflection instanceof ReflectionParameter);
+        $declaringClass = $targetReflection->getDeclaringClass();
+        assert($declaringClass instanceof ReflectionClass);
+        $this->logger->info(
+            sprintf(
+                'Parsed InjectDefinition from #[Inject] Attribute on %s::%s(%s).',
+                $declaringClass->getName(),
+                $targetReflection->getDeclaringFunction()->getName(),
+                $targetReflection->getName()
+            ),
+            [
+                'attribute' => Inject::class,
+                'target' => [
+                    'class' => $declaringClass->getName(),
+                    'method' => $targetReflection->getDeclaringFunction()->getName(),
+                    'parameter' => $targetReflection->getName()
+                ],
+                'definition' => [
+                    'type' => InjectDefinition::class,
+                    'serviceType' => $definition->getTargetIdentifier()->getClass()->getName(),
+                    'method' => $definition->getTargetIdentifier()->getMethodName(),
+                    'parameterType' => $definition->getType()->getName(),
+                    'parameter' => $definition->getTargetIdentifier()->getName(),
+                    'value' => $definition->getValue(),
+                    'store' => $definition->getStoreName(),
+                    'profiles' => $definition->getProfiles()
+                ]
+            ]
+        );
+    }
+
+    private function logPropertyInjectDefinition(AnnotatedTarget $target, InjectDefinition $definition) : void {
+        $targetReflection = $target->getTargetReflection();
+        assert($targetReflection instanceof ReflectionProperty);
+        $this->logger->info(
+            sprintf(
+                'Parsed InjectDefinition from #[Inject] Attribute on %s::%s.',
+                $targetReflection->getDeclaringClass()->getName(),
+                $targetReflection->getName()
+            ),
+            [
+                'attribute' => Inject::class,
+                'target' => [
+                    'class' => $targetReflection->getDeclaringClass()->getName(),
+                    'property' => $targetReflection->getName()
+                ],
+                'definition' => [
+                    'type' => InjectDefinition::class,
+                    'serviceType' => $definition->getTargetIdentifier()->getClass()->getName(),
+                    'property' => $definition->getTargetIdentifier()->getName(),
+                    'propertyType' => $definition->getType()->getName(),
+                    'value' => $definition->getValue(),
+                    'store' => $definition->getStoreName(),
+                    'profiles' => $definition->getProfiles()
+                ]
+            ]
+        );
+    }
+
+    private function logConfigurationDefinition(AnnotatedTarget $target, ConfigurationDefinition $definition) : void {
+        $targetReflection = $target->getTargetReflection();
+        assert($targetReflection instanceof ReflectionClass);
+        $this->logger->info(
+            sprintf(
+                'Parsed ConfigurationDefinition from #[Configuration] Attribute on %s.',
+                Fixtures::configurationServices()->myConfig()->getName(),
+            ),
+            [
+                'attribute' => AttributeType::Configuration->value,
+                'target' => [
+                    'class' => $targetReflection->getName()
+                ],
+                'definition' => [
+                    'type' => ConfigurationDefinition::class,
+                    'configurationType' => $definition->getClass()->getName(),
+                    'name' => $definition->getName()
+                ]
+            ]
+        );
     }
 
     /**
