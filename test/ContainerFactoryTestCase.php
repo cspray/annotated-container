@@ -2,11 +2,15 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Helper\StubParameterStore;
+use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedContainerFixture\InjectEnumConstructorServices;
+use Cspray\AnnotatedContainerFixture\ConfigurationWithEnum;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use Cspray\Typiphy\Internal\NamedType;
 use Cspray\Typiphy\ObjectType;
@@ -15,8 +19,9 @@ use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use function Cspray\Typiphy\objectType;
 
 abstract class ContainerFactoryTestCase extends TestCase {
@@ -32,7 +37,12 @@ abstract class ContainerFactoryTestCase extends TestCase {
         );
     }
 
-    private function getContainer(string $dir, array $profiles = [], ParameterStore $parameterStore = null) : ContainerInterface&AutowireableFactory&AutowireableInvoker {
+    private function getContainer(
+        string $dir,
+        array $profiles = [],
+        ParameterStore $parameterStore = null,
+        LoggerInterface $logger = null
+    ) : AnnotatedContainer {
         $compiler = $this->getContainerDefinitionCompiler();
         $optionsBuilder = ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir);
         $containerDefinition = $compiler->compile($optionsBuilder->build());
@@ -41,8 +51,11 @@ abstract class ContainerFactoryTestCase extends TestCase {
             $containerOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles)->build();
         }
         $factory = $this->getContainerFactory();
-        if (!is_null($parameterStore)) {
+        if ($parameterStore !== null) {
             $factory->addParameterStore($parameterStore);
+        }
+        if ($logger !== null) {
+            $factory->setLogger($logger);
         }
         return $factory->createContainer($containerDefinition, $containerOptions);
     }
@@ -471,4 +484,365 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $assertions($containerFactory, $deserialize);
     }
+
+    public function testCreatingContainerWithActiveProfiles() : void {
+        $logger = new TestLogger();
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), profiles: ['default', 'foo', 'bar'], logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Creating AnnotatedContainer with %s backing implementation and "default, foo, bar" active profiles.',
+                $container->getBackingContainer()::class
+            ),
+            'context' => [
+                'backingImplementation' => $container->getBackingContainer()::class,
+                'activeProfiles' => ['default', 'foo', 'bar']
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingServiceShared() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::singleConcreteService()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf('Shared service %s.', Fixtures::singleConcreteService()->fooImplementation()->getName()),
+            'context' => [
+                'service' => Fixtures::singleConcreteService()->fooImplementation()->getName()
+            ]
+        ];
+
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingNamedService() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::namedServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf('Aliased name "foo" to service %s.', Fixtures::namedServices()->fooInterface()->getName()),
+            'context' => [
+                'service' => Fixtures::namedServices()->fooInterface()->getName(),
+                'name' => 'foo'
+            ]
+        ];
+
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingServiceDelegate() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::delegatedService()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Delegated construction of service %s to %s::%s.',
+                Fixtures::delegatedService()->serviceInterface()->getName(),
+                Fixtures::delegatedService()->serviceFactory()->getName(),
+                'createService'
+            ),
+            'context' => [
+                'service' => Fixtures::delegatedService()->serviceInterface()->getName(),
+                'delegatedType' => Fixtures::delegatedService()->serviceFactory()->getName(),
+                'delegatedMethod' => 'createService'
+            ]
+        ];
+
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingServicePrepare() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::interfacePrepareServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Preparing service %s with method %s.',
+                Fixtures::interfacePrepareServices()->fooInterface()->getName(),
+                'setBar'
+            ),
+            'context' => [
+                'service' => Fixtures::interfacePrepareServices()->fooInterface()->getName(),
+                'method' => 'setBar'
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingImplicitAliasService() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::implicitAliasedServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Alias resolution attempted for abstract service %s. Found concrete service %s, because SingleConcreteService.',
+                Fixtures::implicitAliasedServices()->fooInterface()->getName(),
+                Fixtures::implicitAliasedServices()->fooImplementation()->getName(),
+            ),
+            'context' => [
+                'abstractService' => Fixtures::implicitAliasedServices()->fooInterface()->getName(),
+                'concreteService' => Fixtures::implicitAliasedServices()->fooImplementation()->getName(),
+                'aliasingReason' => AliasResolutionReason::SingleConcreteService
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingServiceIsPrimary() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::primaryAliasedServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Alias resolution attempted for abstract service %s. Found concrete service %s, because ConcreteServiceIsPrimary.',
+                Fixtures::primaryAliasedServices()->fooInterface()->getName(),
+                Fixtures::primaryAliasedServices()->fooImplementation()->getName(),
+            ),
+            'context' => [
+                'abstractService' => Fixtures::primaryAliasedServices()->fooInterface()->getName(),
+                'concreteService' => Fixtures::primaryAliasedServices()->fooImplementation()->getName(),
+                'aliasingReason' => AliasResolutionReason::ConcreteServiceIsPrimary
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingAliasMultipleService() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::ambiguousAliasedServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Alias resolution attempted for abstract service %s. No concrete service found, because MultipleConcreteService.',
+                Fixtures::ambiguousAliasedServices()->fooInterface()->getName(),
+            ),
+            'context' => [
+                'abstractService' => Fixtures::ambiguousAliasedServices()->fooInterface()->getName(),
+                'concreteService' => null,
+                'aliasingReason' => AliasResolutionReason::MultipleConcreteService
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingConfiguration() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::configurationServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Shared configuration %s.',
+                Fixtures::configurationServices()->myConfig()->getName()
+            ),
+            'context' => [
+                'configuration' => Fixtures::configurationServices()->myConfig()->getName()
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingNamedConfiguration() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::namedConfigurationServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf('Aliased name "my-config" to configuration %s.', Fixtures::namedConfigurationServices()->myConfig()->getName()),
+            'context' => [
+                'configuration' => Fixtures::namedConfigurationServices()->myConfig()->getName(),
+                'name' => 'my-config'
+            ]
+        ];
+
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectNonServiceMethodParameterNotFromStore() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::injectConstructorServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting value "42" into %s::__construct($meaningOfLife).',
+                Fixtures::injectConstructorServices()->injectIntService()->getName()
+            ),
+            'context' => [
+                'service' => Fixtures::injectConstructorServices()->injectIntService()->getName(),
+                'method' => '__construct',
+                'parameter' => 'meaningOfLife',
+                'type' => 'int',
+                'value' => 42
+            ]
+        ];
+
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectNonServiceMethodParameterFromStore() : void {
+        $logger = new TestLogger();
+        $this->getContainer(
+            Fixtures::injectCustomStoreServices()->getPath(),
+            parameterStore: new StubParameterStore(),
+            logger: $logger
+        );
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting value from test-store ParameterStore for key "key" into %s::__construct($key).',
+                Fixtures::injectCustomStoreServices()->scalarInjector()->getName()
+            ),
+            'context' => [
+                'service' => Fixtures::injectCustomStoreServices()->scalarInjector()->getName(),
+                'method' => '__construct',
+                'parameter' => 'key',
+                'type' => 'string',
+                'value' => 'key',
+                'store' => 'test-store'
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectServiceMethodParameter() : void {
+        $logger = new TestLogger();
+        $this->getContainer(
+            Fixtures::injectServiceConstructorServices()->getPath(),
+            logger: $logger
+        );
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting service %s from Container into %s::__construct($foo).',
+                Fixtures::injectServiceConstructorServices()->fooImplementation()->getName(),
+                Fixtures::injectServiceConstructorServices()->serviceInjector()->getName(),
+
+            ),
+            'context' => [
+                'service' => Fixtures::injectServiceConstructorServices()->serviceInjector()->getName(),
+                'method' => '__construct',
+                'parameter' => 'foo',
+                'type' => Fixtures::injectServiceConstructorServices()->fooInterface()->getName(),
+                'value' => Fixtures::injectServiceConstructorServices()->fooImplementation()->getName(),
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectEnumValueMethodParameter() : void {
+        $logger = new TestLogger();
+        $this->getContainer(
+            Fixtures::injectEnumConstructorServices()->getPath(),
+            logger: $logger
+        );
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting enum "%s::%s" into %s::__construct($directions).',
+                InjectEnumConstructorServices\CardinalDirections::class,
+                'North',
+                Fixtures::injectEnumConstructorServices()->enumInjector()->getName()
+            ),
+            'context' => [
+                'service' => Fixtures::injectEnumConstructorServices()->enumInjector()->getName(),
+                'method' => '__construct',
+                'parameter' => 'directions',
+                'type' => InjectEnumConstructorServices\CardinalDirections::class,
+                'value' => InjectEnumConstructorServices\CardinalDirections::North
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectNonServiceNotFromStoreConfigurationProperty() : void {
+        $logger = new TestLogger();
+        $this->getContainer(
+            Fixtures::configurationServices()->getPath(),
+            logger: $logger
+        );
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting value "1234" into %s::port.',
+                Fixtures::configurationServices()->myConfig()->getName()
+            ),
+            'context' => [
+                'configuration' => Fixtures::configurationServices()->myConfig()->getName(),
+                'property' => 'port',
+                'type' => 'int',
+                'value' => 1234
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectEnumFromConfigurationProperty() : void {
+        $logger = new TestLogger();
+        $this->getContainer(
+            Fixtures::configurationWithEnum()->getPath(),
+            logger: $logger
+        );
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting enum "%s::Foo" into %s::enum.',
+                ConfigurationWithEnum\MyEnum::class,
+                Fixtures::configurationWithEnum()->configuration()->getName(),
+            ),
+            'context' => [
+                'configuration' => Fixtures::configurationWithEnum()->configuration()->getName(),
+                'property' => 'enum',
+                'type' => ConfigurationWithEnum\MyEnum::class,
+                'value' => ConfigurationWithEnum\MyEnum::Foo
+            ]
+        ];
+
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectValueFromStoreForConfigurationProperty() : void {
+        $logger = new TestLogger();
+        $this->getContainer(
+            Fixtures::configurationServices()->getPath(),
+            logger: $logger
+        );
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting value from env ParameterStore for key "USER" into %s::user.',
+                Fixtures::configurationServices()->myConfig()->getName()
+            ),
+            'context' => [
+                'configuration' => Fixtures::configurationServices()->myConfig()->getName(),
+                'property' => 'user',
+                'type' => 'string',
+                'value' => 'USER',
+                'store' => 'env'
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectServiceForConfigurationProperty() : void {
+        $logger = new TestLogger();
+        $this->getContainer(
+            Fixtures::configurationInjectServiceFixture()->getPath(),
+            logger: $logger
+        );
+        $expected = [
+            'message' => sprintf(
+                'Injecting service %s from Container into %s::foo.',
+                Fixtures::configurationInjectServiceFixture()->fooService()->getName(),
+                Fixtures::configurationInjectServiceFixture()->fooConfig()->getName(),
+
+            ),
+            'context' => [
+                'configuration' => Fixtures::configurationInjectServiceFixture()->fooConfig()->getName(),
+                'property' => 'foo',
+                'type' => Fixtures::configurationInjectServiceFixture()->fooService()->getName(),
+                'value' => Fixtures::configurationInjectServiceFixture()->fooService()->getName(),
+            ]
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
 }

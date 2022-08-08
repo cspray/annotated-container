@@ -2,10 +2,12 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Psr\Log\LoggerAwareInterface;
+
 /**
  * A factory that is responsible for turning a ContainerDefinition into a PSR ContainerInterface.
  */
-interface ContainerFactory {
+interface ContainerFactory extends LoggerAwareInterface {
 
     /**
      * @param ContainerDefinition $containerDefinition

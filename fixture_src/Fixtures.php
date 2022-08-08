@@ -152,4 +152,12 @@ final class Fixtures {
         return new ConfigurationWithAssocArrayEnumFixture();
     }
 
+    public static function injectEnumConstructorServices() : InjectEnumConstructorServicesFixture {
+        return new InjectEnumConstructorServicesFixture();
+    }
+
+    public static function configurationInjectServiceFixture() : ConfigurationInjectContainerServiceFixture {
+        return new ConfigurationInjectContainerServiceFixture();
+    }
+
 }

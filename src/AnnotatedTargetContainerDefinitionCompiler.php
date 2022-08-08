@@ -47,17 +47,21 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
         $scanDirs = $containerDefinitionCompileOptions->getScanDirectories();
         if (empty($scanDirs)) {
-            throw new InvalidCompileOptionsException(sprintf(
+            $message = sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s must include at least 1 directory to scan, but none were provided.',
                 self::class
-            ));
+            );
+            $this->logger->error($message);
+            throw new InvalidCompileOptionsException($message);
         }
 
         if (count(array_unique($scanDirs)) !== count($scanDirs)) {
-            throw new InvalidCompileOptionsException(sprintf(
+            $message = sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s includes duplicate directories. Please pass a distinct set of directories to scan.',
                 self::class
-            ));
+            );
+            $this->logger->error($message, ['sourcePaths' => $scanDirs]);
+            throw new InvalidCompileOptionsException($message);
         }
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
@@ -83,7 +87,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             ->build();
 
         $this->logger->info(
-            sprintf('Scanning directories: %s', implode(' ', $dirs)),
+            sprintf('Annotated Container compiling started. Scanning directories: %s', implode(' ', $dirs)),
             ['sourcePaths' => $dirs]
         );
 
@@ -282,11 +286,13 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $concretePrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
             if (is_null($serviceDef)) {
-                throw new InvalidAnnotationException(sprintf(
-                    'The #[ServicePrepare] Attribute on %s::%s is not on a type marked as a #[Service].',
+                $message = sprintf(
+                    'The class %s is not marked as a #[Service] but has a #[ServicePrepare] Attribute on the method "%s".',
                     $prepareDef->getService()->getName(),
                     $prepareDef->getMethod()
-                ));
+                );
+                $this->logger->error($message);
+                throw new InvalidAnnotationException($message);
             }
             return $serviceDef->isConcrete();
         });

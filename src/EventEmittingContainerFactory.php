@@ -4,6 +4,8 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Internal\AfterContainerCreationAnnotatedContainerEvent;
 use Cspray\AnnotatedContainer\Internal\BeforeContainerCreationAnnotatedContainerEvent;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 
 final class EventEmittingContainerFactory implements ContainerFactory {
 
@@ -21,5 +23,9 @@ final class EventEmittingContainerFactory implements ContainerFactory {
 
     public function addParameterStore(ParameterStore $parameterStore) : void {
         $this->factory->addParameterStore($parameterStore);
+    }
+
+    public function setLogger(LoggerInterface $logger) : void {
+        $this->factory->setLogger($logger);
     }
 }

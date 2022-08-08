@@ -10,6 +10,8 @@ use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Generator;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use ReflectionClass;
 use ReflectionIntersectionType;
 use ReflectionMethod;
@@ -30,6 +32,12 @@ use function Cspray\Typiphy\typeUnion;
  *
  */
 final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTargetDefinitionConverter {
+
+    private readonly LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger = null) {
+        $this->logger = $logger ?? new NullLogger();
+    }
 
     public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition {
         return match ($target->getAttributeReflection()->getName()) {
@@ -77,32 +85,40 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         } else {
             $returnType = $reflection->getReturnType();
             if ($returnType instanceof ReflectionIntersectionType) {
-                throw new InvalidAnnotationException(sprintf(
+                $message = sprintf(
                     'The #[ServiceDelegate] Attribute on %s::%s declares an unsupported intersection as a service type.',
                     $delegateType,
                     $delegateMethod
-                ));
+                );
+                $this->logger->error($message);
+                throw new InvalidAnnotationException($message);
             } else if ($returnType instanceof ReflectionUnionType) {
-                throw new InvalidAnnotationException(sprintf(
+                $message = sprintf(
                     'The #[ServiceDelegate] Attribute on %s::%s declares an unsupported union as a service type.',
                     $delegateType,
                     $delegateMethod
-                ));
+                );
+                $this->logger->error($message);
+                throw new InvalidAnnotationException($message);
             }
 
             $validateServiceType = function(?string $serviceType) use($delegateType, $delegateMethod) : void {
                 if ($serviceType === null) {
-                    throw new InvalidAnnotationException(sprintf(
+                    $message = sprintf(
                         'The #[ServiceDelegate] Attribute on %s::%s does not declare a service in the Attribute or as a return type of the method.',
                         $delegateType,
                         $delegateMethod
-                    ));
+                    );
+                    //$this->logger->error($message);
+                    throw new InvalidAnnotationException($message);
                 } else if (!class_exists($serviceType) && !interface_exists($serviceType)) {
-                    throw new InvalidAnnotationException(sprintf(
+                    $message = sprintf(
                         'The #[ServiceDelegate] Attribute on %s::%s declares a scalar value as a service type.',
                         $delegateType,
                         $delegateMethod
-                    ));
+                    );
+                    $this->logger->error($message);
+                    throw new InvalidAnnotationException($message);
                 }
             };
 
@@ -112,15 +128,15 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
                     ->withDelegateMethod(objectType($delegateType), $delegateMethod)
                     ->build();
             } else {
-                throw new InvalidAnnotationException(sprintf(
+                $message = sprintf(
                     'The #[ServiceDelegate] Attribute on %s::%s does not declare a service in the Attribute or as a return type of the method.',
                     $delegateType,
                     $delegateMethod
-                ));
+                );
+                $this->logger->error($message);
+                throw new InvalidAnnotationException($message);
             }
         }
-
-
     }
 
     private function buildServicePrepareDefinition(AnnotatedTarget $target) : ServicePrepareDefinition {

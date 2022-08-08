@@ -27,7 +27,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         $this->logger = new TestLogger();
         $this->subject = new AnnotatedTargetContainerDefinitionCompiler(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter(),
+            new DefaultAnnotatedTargetDefinitionConverter($this->logger),
             $this->logger
         );
     }
@@ -39,16 +39,50 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         return $this->subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dir)->build());
     }
 
-    public function testEmptyScanDirectoriesThrowsException() {
+    public function testEmptyScanDirectoriesThrowsException() : void {
         $this->expectException(InvalidCompileOptionsException::class);
         $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' must include at least 1 directory to scan, but none were provided.');
         $this->runCompileDirectory([]);
     }
 
+    public function testLogEmptyScanDirectories() : void {
+        try {
+            $this->runCompileDirectory([]);
+        } catch (InvalidCompileOptionsException $exception) {
+            // noop, we expect this
+        } finally {
+            $expected = [
+                'message' => 'The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' must include at least 1 directory to scan, but none were provided.',
+                'context' => []
+            ];
+            self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
+        }
+    }
+
     public function testServicePrepareNotOnServiceThrowsException() {
         $this->expectException(InvalidAnnotationException::class);
-        $this->expectExceptionMessage('The #[ServicePrepare] Attribute on ' . LogicalErrorApps\ServicePrepareNotService\FooImplementation::class . '::postConstruct is not on a type marked as a #[Service].');;
+        $this->expectExceptionMessage(sprintf(
+            'The class %s is not marked as a #[Service] but has a #[ServicePrepare] Attribute on the method "postConstruct".',
+            LogicalErrorApps\ServicePrepareNotService\FooImplementation::class
+        ));
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
+    }
+
+    public function testLogServicePrepareNotOnService() : void {
+        try {
+            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
+        }  catch (InvalidAnnotationException $exception) {
+            // noop, we expect this
+        } finally {
+            $expected = [
+                'message' => sprintf(
+                    'The class %s is not marked as a #[Service] but has a #[ServicePrepare] Attribute on the method "postConstruct".',
+                    LogicalErrorApps\ServicePrepareNotService\FooImplementation::class
+                ),
+                'context' => []
+            ];
+            self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
+        }
     }
 
     public function testDuplicateScanDirectoriesThrowsException() {
@@ -61,6 +95,30 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         ]);
     }
 
+    public function testLogScanDuplicateDirectories() : void {
+        try {
+            $this->runCompileDirectory([
+                Fixtures::singleConcreteService()->getPath(),
+                Fixtures::singleConcreteService()->getPath(),
+                Fixtures::configurationServices()->getPath()
+            ]);
+        } catch (InvalidCompileOptionsException $exception) {
+            // noop, we expect this
+        } finally {
+            $expected = [
+                'message' => 'The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' includes duplicate directories. Please pass a distinct set of directories to scan.',
+                'context' => [
+                    'sourcePaths' => [
+                        Fixtures::singleConcreteService()->getPath(),
+                        Fixtures::singleConcreteService()->getPath(),
+                        Fixtures::configurationServices()->getPath()
+                    ]
+                ]
+            ];
+            self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
+        }
+    }
+
     public function testImplicitServiceDelegateHasNoReturnType() {
         $this->expectException(InvalidAnnotationException::class);
         $this->expectExceptionMessage(
@@ -68,6 +126,20 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         );
 
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateNoType');
+    }
+
+    public function testLogImplicitServiceDelegateHasNoReturnType() : void {
+        try {
+            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateNoType');
+        }  catch (InvalidAnnotationException $exception) {
+            // noop, we expect this
+        } finally {
+            $expected = [
+                'message' => 'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateNoType\FooFactory::class . '::create does not declare a service in the Attribute or as a return type of the method.',
+                'context' => []
+            ];
+            self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
+        }
     }
 
     public function testImplicitServiceDelegateHasScalarReturnType() {
@@ -79,6 +151,20 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateScalarType');
     }
 
+    public function testLogImplicitServiceDelegateHasScalarReturnType() : void {
+        try {
+            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateScalarType');
+        } catch (InvalidAnnotationException $exception) {
+            // noop, we expect this
+        } finally {
+            $expected = [
+                'message' => 'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateScalarType\FooFactory::class . '::create declares a scalar value as a service type.',
+                'context' => []
+            ];
+            self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
+        }
+    }
+
     public function testImplicitServiceDelegateHasIntersectionReturnType() {
         $this->expectException(InvalidAnnotationException::class);
         $this->expectExceptionMessage(
@@ -86,6 +172,20 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         );
 
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateIntersectionType');
+    }
+
+    public function testLogImplicitServiceDelegateHasIntersectionReturnType() : void {
+        try {
+            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateIntersectionType');
+        } catch (InvalidAnnotationException $exception) {
+            // noop we expect this
+        } finally {
+            $expected = [
+                'message' => 'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateIntersectionType\FooFactory::class . '::create declares an unsupported intersection as a service type.',
+                'context' => []
+            ];
+            self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
+        }
     }
 
     public function testImplicitServiceDelegateHasUnionReturnType() {
@@ -97,6 +197,20 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
     }
 
+    public function testLogImplicitServiceDelegateHasUnionReturnType() {
+        try {
+            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
+        } catch (InvalidAnnotationException $exception) {
+            // noop, we expect this
+        } finally {
+            $expected = [
+                'message' => 'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateUnionType\FooFactory::class . '::create declares an unsupported union as a service type.',
+                'context' => []
+            ];
+            self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
+        }
+    }
+
     public function testLoggingScannedDirs() : void {
         $this->runCompileDirectory([
             $path1 = Fixtures::singleConcreteService()->getPath(),
@@ -104,7 +218,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         ]);
 
         $expected = [
-            'message' => sprintf('Scanning directories: %s %s', $path1, $path2),
+            'message' => sprintf('Annotated Container compiling started. Scanning directories: %s %s', $path1, $path2),
             'context' => [
                 'sourcePaths' => [$path1, $path2]
             ]

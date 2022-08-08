@@ -24,13 +24,6 @@ final class TestLogger extends AbstractLogger {
         ];
     }
 
-    /**
-     * @return array<string, array{message: string, context: array<array-key, mixed>}>
-     */
-    public function getLogs() : array {
-        return $this->logs;
-    }
-
     public function getLogsForLevel(string $level) : array {
         return $this->logs[$level] ?? [];
     }
