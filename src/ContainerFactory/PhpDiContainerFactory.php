@@ -43,6 +43,7 @@ use function DI\get;
 final class PhpDiContainerFactory extends AbstractContainerFactory implements ContainerFactory {
 
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
+        $this->setLoggerFromOptions($containerFactoryOptions);
         $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? [];
         if (empty($activeProfiles)) {
             $activeProfiles[] = 'default';

@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+use Psr\Log\LoggerInterface;
 
 /**
  * Represents configurable details for the compilation of a ContainerDefinition.
@@ -25,5 +26,13 @@ interface ContainerDefinitionCompileOptions {
      */
     #[SingleEntrypointContainerDefinitionBuilderContextConsumer]
     public function getContainerDefinitionBuilderContextConsumer() : ?ContainerDefinitionBuilderContextConsumer;
+
+    /**
+     * If a LoggerInterface is returned information about the compilation and container creation process will be logged
+     * to it.
+     *
+     * @return LoggerInterface|null
+     */
+    public function getLogger() : ?LoggerInterface;
 
 }

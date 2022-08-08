@@ -10,6 +10,7 @@ use Cspray\AnnotatedContainer\AliasResolutionReason;
 use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\EnvironmentParameterStore;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\ParameterStore;
@@ -58,6 +59,10 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     final public function setLogger(LoggerInterface $logger) : void {
         $this->logger = $logger;
+    }
+
+    final protected function setLoggerFromOptions(?ContainerFactoryOptions $options) : void {
+        $this->logger = $options?->getLogger() ?? new NullLogger();
     }
 
     final protected function getParameterStore(string $storeName) : ?ParameterStore {

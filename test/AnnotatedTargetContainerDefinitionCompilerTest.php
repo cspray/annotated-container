@@ -27,8 +27,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         $this->logger = new TestLogger();
         $this->subject = new AnnotatedTargetContainerDefinitionCompiler(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter($this->logger),
-            $this->logger
+            new DefaultAnnotatedTargetDefinitionConverter($this->logger)
         );
     }
 
@@ -36,7 +35,9 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         if (is_string($dir)) {
             $dir = [$dir];
         }
-        return $this->subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dir)->build());
+        $options = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dir)
+            ->withLogger($this->logger);
+        return $this->subject->compile($options->build());
     }
 
     public function testEmptyScanDirectoriesThrowsException() : void {

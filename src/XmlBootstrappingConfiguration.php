@@ -9,6 +9,7 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 
+use Psr\Log\LoggerInterface;
 use function libxml_use_internal_errors;
 
 final class XmlBootstrappingConfiguration implements BootstrappingConfiguration {
@@ -19,6 +20,10 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     private readonly array $directories;
     private readonly ?ContainerDefinitionBuilderContextConsumer $contextConsumer;
     private readonly ?string $cacheDir;
+
+    /**
+     * @var list<ParameterStore>
+     */
     private readonly array $parameterStores;
 
     public function __construct(
@@ -121,5 +126,9 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
 
     public function getCacheDirectory() : ?string {
         return $this->cacheDir;
+    }
+
+    public function getLogger() : ?LoggerInterface {
+        return null;
     }
 }

@@ -49,7 +49,8 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
      * implementation will be deprecated.
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
-        $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
+        $this->setLoggerFromOptions($containerFactoryOptions);
+        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
         $nameTypeMap = [];
         try {
             $this->logCreatingContainer(objectType(Injector::class), $activeProfiles);

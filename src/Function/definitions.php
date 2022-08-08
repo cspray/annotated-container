@@ -18,6 +18,7 @@ function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?
     if ($method === 'forConcrete') {
         $methodArgs[] = $isPrimary;
     }
+    /** @var ServiceDefinitionBuilder $serviceDefinitionBuilder */
     $serviceDefinitionBuilder = ServiceDefinitionBuilder::$method(...$methodArgs);
     if (isset($name)) {
         $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($name);

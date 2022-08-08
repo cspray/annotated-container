@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+use Psr\Log\LoggerInterface;
 
 interface BootstrappingConfiguration {
 
@@ -20,4 +21,6 @@ interface BootstrappingConfiguration {
      * @return list<ParameterStore>
      */
     public function getParameterStores() : array;
+
+    public function getLogger() : ?LoggerInterface;
 }

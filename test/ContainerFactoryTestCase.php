@@ -46,18 +46,21 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $compiler = $this->getContainerDefinitionCompiler();
         $optionsBuilder = ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir);
         $containerDefinition = $compiler->compile($optionsBuilder->build());
-        $containerOptions = null;
         if (!empty($profiles)) {
-            $containerOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles)->build();
+            $containerOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
+        } else {
+            $containerOptions = ContainerFactoryOptionsBuilder::forActiveProfiles('default');
         }
+
+        if ($logger !== null) {
+            $containerOptions = $containerOptions->withLogger($logger);
+        }
+
         $factory = $this->getContainerFactory();
         if ($parameterStore !== null) {
             $factory->addParameterStore($parameterStore);
         }
-        if ($logger !== null) {
-            $factory->setLogger($logger);
-        }
-        return $factory->createContainer($containerDefinition, $containerOptions);
+        return $factory->createContainer($containerDefinition, $containerOptions->build());
     }
 
     public function testCreateServiceNotHasThrowsException() {
@@ -485,7 +488,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $assertions($containerFactory, $deserialize);
     }
 
-    public function testCreatingContainerWithActiveProfiles() : void {
+    public function testLoggingCreatingContainerWithActiveProfiles() : void {
         $logger = new TestLogger();
         $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), profiles: ['default', 'foo', 'bar'], logger: $logger);
 

@@ -9,6 +9,9 @@ use InvalidArgumentException;
  */
 final class ActiveProfilesBuilder {
 
+    /**
+     * @var list<string>
+     */
     private array $profiles = [];
 
     private function __construct() {}
@@ -75,7 +78,7 @@ final class ActiveProfilesBuilder {
      * Will throw an exception if $decider returns true and any value in $profiles is the 'default' value or has already
      * been added.
      *
-     * @param array $profiles
+     * @param list<string> $profiles
      * @param callable $decider
      * @return $this
      */
@@ -90,7 +93,7 @@ final class ActiveProfilesBuilder {
     /**
      * Return an array of active profiles based on previous calls to the builder.
      *
-     * @return array
+     * @return list<string>
      */
     public function build() : array {
         return ['default', ...$this->profiles];

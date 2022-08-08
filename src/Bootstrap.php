@@ -2,12 +2,15 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Psr\Log\LoggerInterface;
+
 final class Bootstrap {
 
     private readonly BootstrappingDirectoryResolver $directoryResolver;
 
     public function __construct(
-        BootstrappingDirectoryResolver $directoryResolver = null
+        BootstrappingDirectoryResolver $directoryResolver = null,
+        LoggerInterface $logger = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->getDefaultDirectoryResolver();
     }

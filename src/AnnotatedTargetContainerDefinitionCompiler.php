@@ -10,6 +10,7 @@ use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedTarget\AnnotatedTargetParser;
 use Cspray\AnnotatedTarget\AnnotatedTargetParserOptionsBuilder;
+use Cspray\AnnotatedTarget\Exception\InvalidArgumentException;
 use Cspray\Typiphy\ObjectType;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -23,17 +24,21 @@ use function Cspray\Typiphy\objectType;
 /**
  * A ContainerDefinitionCompiler that utilizes the AnnotatedTarget concept by parsing given source code directories and
  * converting any found targets into the appropriate definition object.
+ *
+ * @psalm-type DefinitionsCollection = array{
+ *     serviceDefinitions: list<ServiceDefinition>,
+ *     servicePrepareDefinitions: list<ServicePrepareDefinition>,
+ *     serviceDelegateDefinitions: list<ServiceDelegateDefinition>,
+ *     injectDefinitions: list<InjectDefinition>,
+ *     configurationDefinitions: list<ConfigurationDefinition>
+ * }
  */
 final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefinitionCompiler {
-
-    private readonly LoggerInterface $logger;
 
     public function __construct(
         private readonly AnnotatedTargetParser $annotatedTargetCompiler,
         private readonly AnnotatedTargetDefinitionConverter $definitionConverter,
-        LoggerInterface $logger = null
     ) {
-        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
@@ -45,13 +50,15 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
      * @throws InvalidCompileOptionsException|InvalidAnnotationException
      */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
+        $logger = $containerDefinitionCompileOptions->getLogger() ?? new NullLogger();
+
         $scanDirs = $containerDefinitionCompileOptions->getScanDirectories();
         if (empty($scanDirs)) {
             $message = sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s must include at least 1 directory to scan, but none were provided.',
                 self::class
             );
-            $this->logger->error($message);
+            $logger->error($message);
             throw new InvalidCompileOptionsException($message);
         }
 
@@ -60,20 +67,29 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                 'The ContainerDefinitionCompileOptions passed to %s includes duplicate directories. Please pass a distinct set of directories to scan.',
                 self::class
             );
-            $this->logger->error($message, ['sourcePaths' => $scanDirs]);
+            $logger->error($message, ['sourcePaths' => $scanDirs]);
             throw new InvalidCompileOptionsException($message);
         }
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
-        $consumer = $this->parse($containerDefinitionCompileOptions);
-        $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer);
+        $consumer = $this->parse($containerDefinitionCompileOptions, $logger);
+        $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer, $logger);
         $containerDefinitionBuilder = $this->addThirdPartyServices($containerDefinitionCompileOptions, $containerDefinitionBuilder);
         $containerDefinitionBuilder = $this->addAliasDefinitions($containerDefinitionBuilder);
 
         return $containerDefinitionBuilder->build();
     }
 
-    private function parse(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : stdClass {
+    /**
+     * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
+     * @param LoggerInterface $logger
+     * @return DefinitionsCollection
+     * @throws InvalidArgumentException
+     */
+    private function parse(
+        ContainerDefinitionCompileOptions $containerDefinitionCompileOptions,
+        LoggerInterface $logger
+    ) : array {
         $consumer = new stdClass();
         $consumer->serviceDefinitions = [];
         $consumer->servicePrepareDefinitions = [];
@@ -86,7 +102,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             ->filterAttributes(...$attributeTypes)
             ->build();
 
-        $this->logger->info(
+        $logger->info(
             sprintf('Annotated Container compiling started. Scanning directories: %s', implode(' ', $dirs)),
             ['sourcePaths' => $dirs]
         );
@@ -97,30 +113,34 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
 
             if ($definition instanceof ServiceDefinition) {
                 $consumer->serviceDefinitions[] = $definition;
-                $this->logServiceDefinition($target, $definition);
+                $this->logServiceDefinition($target, $definition, $logger);
             } else if ($definition instanceof ServicePrepareDefinition) {
                 $consumer->servicePrepareDefinitions[] = $definition;
-                $this->logServicePrepareDefinition($target, $definition);
+                $this->logServicePrepareDefinition($target, $definition, $logger);
             } else if ($definition instanceof ServiceDelegateDefinition) {
                 $consumer->serviceDelegateDefinitions[] = $definition;
-                $this->logServiceDelegateDefinition($target, $definition);
+                $this->logServiceDelegateDefinition($target, $definition, $logger);
             } else if ($definition instanceof InjectDefinition) {
                 $consumer->injectDefinitions[] = $definition;
                 if ($definition->getTargetIdentifier()->isMethodParameter()) {
-                    $this->logParameterInjectDefinition($target, $definition);
+                    $this->logParameterInjectDefinition($target, $definition, $logger);
                 } else {
-                    $this->logPropertyInjectDefinition($target, $definition);
+                    $this->logPropertyInjectDefinition($target, $definition, $logger);
                 }
             } else if ($definition instanceof ConfigurationDefinition) {
                 $consumer->configurationDefinitions[] = $definition;
-                $this->logConfigurationDefinition($target, $definition);
+                $this->logConfigurationDefinition($target, $definition, $logger);
             }
         }
-        return $consumer;
+        return (array) $consumer;
     }
 
-    private function logServiceDefinition(AnnotatedTarget $target, ServiceDefinition $definition) : void {
-        $this->logger->info(
+    private function logServiceDefinition(
+        AnnotatedTarget $target,
+        ServiceDefinition $definition,
+        LoggerInterface $logger
+    ) : void {
+        $logger->info(
             sprintf('Parsed ServiceDefinition from #[Service] Attribute on %s.', $definition->getType()->getName()),
             [
                 'attribute' => AttributeType::Service->value,
@@ -140,10 +160,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         );
     }
 
-    private function logServicePrepareDefinition(AnnotatedTarget $target, ServicePrepareDefinition $definition) : void {
+    private function logServicePrepareDefinition(
+        AnnotatedTarget $target,
+        ServicePrepareDefinition $definition,
+        LoggerInterface $logger
+    ) : void {
         $targetReflection = $target->getTargetReflection();
         assert($targetReflection instanceof ReflectionMethod);
-        $this->logger->info(
+        $logger->info(
             sprintf('Parsed ServicePrepareDefinition from #[ServicePrepare] Attribute on %s::%s.', $definition->getService()->getName(), $definition->getMethod()),
             [
                 'attribute' => AttributeType::ServicePrepare->value,
@@ -160,10 +184,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         );
     }
 
-    private function logServiceDelegateDefinition(AnnotatedTarget $target, ServiceDelegateDefinition $definition) : void {
+    private function logServiceDelegateDefinition(
+        AnnotatedTarget $target,
+        ServiceDelegateDefinition $definition,
+        LoggerInterface $logger
+    ) : void {
         $targetReflection = $target->getTargetReflection();
         assert($targetReflection instanceof ReflectionMethod);
-        $this->logger->info(
+        $logger->info(
             sprintf(
                 'Parsed ServiceDelegateDefinition from #[ServiceDelegate] Attribute on %s::%s.',
                 $targetReflection->getDeclaringClass()->getName(),
@@ -185,12 +213,16 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         );
     }
 
-    private function logParameterInjectDefinition(AnnotatedTarget $target, InjectDefinition $definition) : void {
+    private function logParameterInjectDefinition(
+        AnnotatedTarget $target,
+        InjectDefinition $definition,
+        LoggerInterface $logger
+    ) : void {
         $targetReflection = $target->getTargetReflection();
         assert($targetReflection instanceof ReflectionParameter);
         $declaringClass = $targetReflection->getDeclaringClass();
         assert($declaringClass instanceof ReflectionClass);
-        $this->logger->info(
+        $logger->info(
             sprintf(
                 'Parsed InjectDefinition from #[Inject] Attribute on %s::%s(%s).',
                 $declaringClass->getName(),
@@ -218,10 +250,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         );
     }
 
-    private function logPropertyInjectDefinition(AnnotatedTarget $target, InjectDefinition $definition) : void {
+    private function logPropertyInjectDefinition(
+        AnnotatedTarget $target,
+        InjectDefinition $definition,
+        LoggerInterface $logger
+    ) : void {
         $targetReflection = $target->getTargetReflection();
         assert($targetReflection instanceof ReflectionProperty);
-        $this->logger->info(
+        $logger->info(
             sprintf(
                 'Parsed InjectDefinition from #[Inject] Attribute on %s::%s.',
                 $targetReflection->getDeclaringClass()->getName(),
@@ -246,10 +282,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         );
     }
 
-    private function logConfigurationDefinition(AnnotatedTarget $target, ConfigurationDefinition $definition) : void {
+    private function logConfigurationDefinition(
+        AnnotatedTarget $target,
+        ConfigurationDefinition $definition,
+        LoggerInterface $logger
+    ) : void {
         $targetReflection = $target->getTargetReflection();
         assert($targetReflection instanceof ReflectionClass);
-        $this->logger->info(
+        $logger->info(
             sprintf(
                 'Parsed ConfigurationDefinition from #[Configuration] Attribute on %s.',
                 Fixtures::configurationServices()->myConfig()->getName(),
@@ -270,20 +310,24 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
 
     /**
      * @param ContainerDefinitionBuilder $containerDefinitionBuilder
-     * @param object $consumer
+     * @param DefinitionsCollection $consumer
      * @return ContainerDefinitionBuilder
      * @throws InvalidAnnotationException
      */
-    private function addAnnotatedDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, object $consumer) : ContainerDefinitionBuilder {
-        foreach ($consumer->serviceDefinitions as $serviceDefinition) {
+    private function addAnnotatedDefinitions(
+        ContainerDefinitionBuilder $containerDefinitionBuilder,
+        array $consumer,
+        LoggerInterface $logger
+    ) : ContainerDefinitionBuilder {
+        foreach ($consumer['serviceDefinitions'] as $serviceDefinition) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinition);
         }
 
-        foreach ($consumer->serviceDelegateDefinitions as $serviceDelegateDefinition) {
+        foreach ($consumer['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition($serviceDelegateDefinition);
         }
 
-        $concretePrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
+        $concretePrepareDefinitions = array_filter($consumer['servicePrepareDefinitions'], function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder, $logger) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
             if (is_null($serviceDef)) {
                 $message = sprintf(
@@ -291,12 +335,12 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                     $prepareDef->getService()->getName(),
                     $prepareDef->getMethod()
                 );
-                $this->logger->error($message);
+                $logger->error($message);
                 throw new InvalidAnnotationException($message);
             }
             return $serviceDef->isConcrete();
         });
-        $abstractPrepareDefinitions = array_filter($consumer->servicePrepareDefinitions, function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
+        $abstractPrepareDefinitions = array_filter($consumer['servicePrepareDefinitions'], function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
             return $serviceDef?->isAbstract() ?? false;
         });
@@ -308,7 +352,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         foreach ($concretePrepareDefinitions as $concretePrepareDefinition) {
             $hasAbstractPrepare = false;
             foreach ($abstractPrepareDefinitions as $abstractPrepareDefinition) {
-                if (is_subclass_of($concretePrepareDefinition->getService()->getName(), $abstractPrepareDefinition->getService()->getName())) {
+                /** @var class-string $concreteServiceName */
+                $concreteServiceName = $concretePrepareDefinition->getService()->getName();
+                /** @var class-string $abstractServiceName */
+                $abstractServiceName = $abstractPrepareDefinition->getService()->getName();
+                if (is_subclass_of($concreteServiceName, $abstractServiceName)) {
                     $hasAbstractPrepare = true;
                     break;
                 }
@@ -318,11 +366,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             }
         }
 
-        foreach ($consumer->injectDefinitions as $injectDefinition) {
+        foreach ($consumer['injectDefinitions'] as $injectDefinition) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectDefinition($injectDefinition);
         }
 
-        foreach ($consumer->configurationDefinitions as $configurationDefinition) {
+        foreach ($consumer['configurationDefinitions'] as $configurationDefinition) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withConfigurationDefinition($configurationDefinition);
         }
 
