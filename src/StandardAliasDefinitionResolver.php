@@ -11,38 +11,42 @@ final class StandardAliasDefinitionResolver implements AliasDefinitionResolver {
         ContainerDefinition $containerDefinition,
         ObjectType $abstractService
     ) : AliasDefinitionResolution {
-
-        $aliases = [];
-        foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
-            if ($aliasDefinition->getAbstractService()->getName() === $abstractService->getName()) {
-                $aliases[] = $aliasDefinition;
-            }
-        }
-
-        if (count($aliases) === 1) {
-            $definition = $aliases[0];
-            $reason = AliasResolutionReason::SingleConcreteService;
-        } else if (count($aliases) > 1) {
+        if ($this->isServiceDelegate($containerDefinition, $abstractService)) {
             $definition = null;
-            $reason = AliasResolutionReason::MultipleConcreteService;
-            $primaryAlias = null;
-            foreach ($aliases as $alias) {
-                $concreteDefinition = $this->getServiceDefinition($containerDefinition, $alias->getConcreteService());
-                if ($primaryAlias === null && $concreteDefinition?->isPrimary()) {
-                    $primaryAlias = $alias;
-                } else if ($primaryAlias !== null && $concreteDefinition?->isPrimary()) {
-                    $primaryAlias = null;
-                    break;
+            $reason = AliasResolutionReason::ServiceIsDelegated;
+        } else {
+            $aliases = [];
+            foreach ($containerDefinition->getAliasDefinitions() as $aliasDefinition) {
+                if ($aliasDefinition->getAbstractService()->getName() === $abstractService->getName()) {
+                    $aliases[] = $aliasDefinition;
                 }
             }
 
-            if ($primaryAlias !== null) {
-                $definition = $primaryAlias;
-                $reason = AliasResolutionReason::ConcreteServiceIsPrimary;
+            if (count($aliases) === 1) {
+                $definition = $aliases[0];
+                $reason = AliasResolutionReason::SingleConcreteService;
+            } else if (count($aliases) > 1) {
+                $definition = null;
+                $reason = AliasResolutionReason::MultipleConcreteService;
+                $primaryAlias = null;
+                foreach ($aliases as $alias) {
+                    $concreteDefinition = $this->getServiceDefinition($containerDefinition, $alias->getConcreteService());
+                    if ($primaryAlias === null && $concreteDefinition?->isPrimary()) {
+                        $primaryAlias = $alias;
+                    } else if ($primaryAlias !== null && $concreteDefinition?->isPrimary()) {
+                        $primaryAlias = null;
+                        break;
+                    }
+                }
+
+                if ($primaryAlias !== null) {
+                    $definition = $primaryAlias;
+                    $reason = AliasResolutionReason::ConcreteServiceIsPrimary;
+                }
+            } else {
+                $definition = null;
+                $reason = AliasResolutionReason::NoConcreteService;
             }
-        } else {
-            $definition = null;
-            $reason = AliasResolutionReason::NoConcreteService;
         }
 
         return new class($reason, $definition) implements AliasDefinitionResolution {
@@ -70,5 +74,15 @@ final class StandardAliasDefinitionResolver implements AliasDefinitionResolver {
         }
 
         return null;
+    }
+
+    private function isServiceDelegate(ContainerDefinition $containerDefinition, ObjectType $service) : bool {
+        foreach ($containerDefinition->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
+            if ($serviceDelegateDefinition->getServiceType()->getName() === $service->getName()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -105,4 +105,32 @@ final class StandardAliasDefinitionResolverTest extends TestCase {
         self::assertSame($aliasDefinition, $resolution->getAliasDefinition());
     }
 
+    public function testDelegatedAbstractServiceHasNoAlias() : void {
+        $subject = new StandardAliasDefinitionResolver();
+
+        $abstract = ServiceDefinitionBuilder::forAbstract(
+            Fixtures::delegatedService()->serviceInterface()
+        )->build();
+        $concrete = ServiceDefinitionBuilder::forConcrete(
+            Fixtures::delegatedService()->fooService()
+        )->build();
+        $alias = AliasDefinitionBuilder::forAbstract($abstract->getType())->withConcrete($concrete->getType())->build();
+        $delegate = ServiceDelegateDefinitionBuilder::forService($abstract->getType())
+            ->withDelegateMethod(
+                Fixtures::delegatedService()->serviceFactory(),
+                'createService'
+            )->build();
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()
+            ->withServiceDefinition($abstract)
+            ->withServiceDefinition($concrete)
+            ->withAliasDefinition($alias)
+            ->withServiceDelegateDefinition($delegate)
+            ->build();
+
+        $resolution = $subject->resolveAlias($containerDefinition, $abstract->getType());
+
+        self::assertNull($resolution->getAliasDefinition());
+        self::assertSame(AliasResolutionReason::ServiceIsDelegated, $resolution->getAliasResolutionReason());
+    }
+
 }
