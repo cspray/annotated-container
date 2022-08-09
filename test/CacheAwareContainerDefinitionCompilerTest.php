@@ -4,11 +4,13 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
 use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
+use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LogLevel;
 
 class CacheAwareContainerDefinitionCompilerTest extends TestCase {
 
@@ -112,5 +114,36 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build());
     }
 
+    public function testFileDoesExistLogsOutput() {
+        $dir = Fixtures::implicitAliasedServices()->getPath();
+        $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)
+                ->build()
+        );
+        $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
+
+        vfsStream::newFile(md5($dir))->at($this->root)->setContent($serialized);
+
+        $mock = $this->getMockBuilder(ContainerDefinitionCompiler::class)->getMock();
+        $mock->expects($this->never())->method('compile');
+        $subject = new CacheAwareContainerDefinitionCompiler(
+            $mock,
+            $this->containerDefinitionSerializer,
+            'vfs://root'
+        );
+
+        $logger = new TestLogger();
+        $subject->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)
+                ->withLogger($logger)
+                ->build()
+        );
+
+        $expected = [
+            'message' => 'Skipping Annotated Container compiling. Using cached definition from vfs://root/' . md5($dir) . '.',
+            'context' => []
+        ];
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
 
 }

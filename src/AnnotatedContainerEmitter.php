@@ -2,7 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
-interface AnnotatedContainerEmitter {
+use Psr\Log\LoggerAwareInterface;
+
+interface AnnotatedContainerEmitter extends LoggerAwareInterface {
 
     public function registerListener(AnnotatedContainerListener $listener) : void;
 

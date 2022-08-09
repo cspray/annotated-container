@@ -45,6 +45,13 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
         $cacheFile = $this->getCacheFile($containerDefinitionCompileOptions->getScanDirectories());
         if (is_file($cacheFile)) {
             $containerDefinition = $this->containerDefinitionSerializer->deserialize(file_get_contents($cacheFile));
+            $logger = $containerDefinitionCompileOptions->getLogger();
+            if ($logger !== null) {
+                $logger->info(sprintf(
+                    'Skipping Annotated Container compiling. Using cached definition from %s.',
+                    $cacheFile
+                ));
+            }
         } else {
             $containerDefinition = $this->containerDefinitionCompiler->compile($containerDefinitionCompileOptions);
             $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
