@@ -425,6 +425,21 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'c' => ConfigurationWithAssocArrayEnum\MyEnum::C
         ], $injectDefinitions[0]->getValue());
     }
+
+    public function testDeserializeConfigurationWithName() : void {
+        $serializer = new JsonContainerDefinitionSerializer();
+        $containerDefinition = $this->containerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::namedConfigurationServices()->getPath())->build()
+        );
+
+        $serialized = $serializer->serialize($containerDefinition);
+        $subjectDefinition = $serializer->deserialize($serialized);
+
+        $configurations = $subjectDefinition->getConfigurationDefinitions();
+
+        self::assertCount(1, $configurations);
+        self::assertSame('my-config', $configurations[0]->getName());
+    }
 }
 
 

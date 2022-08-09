@@ -343,7 +343,19 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinition);
         }
 
+        /** @var ServiceDelegateDefinition $serviceDelegateDefinition */
         foreach ($consumer['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
+            $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $serviceDelegateDefinition->getServiceType());
+            if ($serviceDef === null) {
+                throw new InvalidAnnotationException(
+                    sprintf(
+                        'The #[ServiceDelegate] Attribute on %s::%s declares a type, %s, that is not a service.',
+                        $serviceDelegateDefinition->getDelegateType()->getName(),
+                        $serviceDelegateDefinition->getDelegateMethod(),
+                        $serviceDelegateDefinition->getServiceType()->getName()
+                    )
+                );
+            }
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition($serviceDelegateDefinition);
         }
 

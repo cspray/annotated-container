@@ -7,7 +7,7 @@ use Psr\Log\LoggerAwareInterface;
 /**
  * A factory that is responsible for turning a ContainerDefinition into a PSR ContainerInterface.
  */
-interface ContainerFactory extends LoggerAwareInterface {
+interface ContainerFactory {
 
     /**
      * @param ContainerDefinition $containerDefinition

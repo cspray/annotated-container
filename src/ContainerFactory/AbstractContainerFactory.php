@@ -57,10 +57,6 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         $this->parameterStores[$parameterStore->getName()] = $parameterStore;
     }
 
-    final public function setLogger(LoggerInterface $logger) : void {
-        $this->logger = $logger;
-    }
-
     final protected function setLoggerFromOptions(?ContainerFactoryOptions $options) : void {
         $this->logger = $options?->getLogger() ?? new NullLogger();
     }

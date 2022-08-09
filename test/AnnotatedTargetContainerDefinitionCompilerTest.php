@@ -470,4 +470,16 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             $logs[count($logs) - 1]
         );
     }
+
+    public function testImplementServiceDelegateNotServiceThrowsException() : void {
+        $message = sprintf(
+            'The #[ServiceDelegate] Attribute on %s::create declares a type, %s, that is not a service.',
+            LogicalErrorApps\ServiceDelegateNotService\ServiceFactory::class,
+            LogicalErrorApps\ServiceDelegateNotService\FooService::class
+        );
+        self::expectException(InvalidAnnotationException::class);
+        self::expectExceptionMessage($message);
+
+        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServiceDelegateNotService');
+    }
 }
