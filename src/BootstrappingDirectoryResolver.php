@@ -10,4 +10,6 @@ interface BootstrappingDirectoryResolver {
 
     public function getCachePath(string $subPath) : string;
 
+    public function getLogPath(string $subPath) : string;
+
 }

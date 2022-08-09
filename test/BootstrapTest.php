@@ -188,4 +188,31 @@ XML;
         );
     }
 
+    public function testBootstrapWithLogging() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+    <logging>
+      <file>annotated-container.log</file>
+    </logging>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($xml)
+            ->at($this->vfs);
+
+        (new Bootstrap(directoryResolver: $directoryResolver))->bootstrapContainer();
+
+        self::assertFileExists('vfs://root/annotated-container.log');
+        self::assertStringContainsString('Annotated Container compiling started.', file_get_contents('vfs://root/annotated-container.log'));
+    }
+
 }

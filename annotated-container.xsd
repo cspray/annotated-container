@@ -31,11 +31,9 @@
       </xs:element>
 
       <xs:element name="cacheDir" type="xs:token" minOccurs="0" maxOccurs="1"/>
-
       <xs:element name="containerDefinitionBuilderContextConsumer" type="xs:token" minOccurs="0" maxOccurs="1" />
-
       <xs:element name="parameterStores" type="parameterStoresType" minOccurs="0" maxOccurs="1" />
-
+      <xs:element name="logging" type="loggingType" minOccurs="0" maxOccurs="1" />
     </xs:all>
   </xs:complexType>
 
@@ -63,6 +61,19 @@
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
       <xs:element name="fqcn" type="xs:token" />
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="loggingType">
+    <xs:all>
+      <xs:element name="file" type="xs:token" minOccurs="0" maxOccurs="1" />
+      <xs:element name="stdout" type="stdoutType" minOccurs="0" maxOccurs="1" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="stdoutType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string" />
+    </xs:simpleContent>
   </xs:complexType>
 
 </xs:schema>

@@ -76,7 +76,7 @@ SHELL;
             throw ConfigurationNotFound::fromMissingFile($configName);
         }
 
-        $config = new XmlBootstrappingConfiguration($configPath);
+        $config = new XmlBootstrappingConfiguration($configPath, $this->directoryResolver);
         $cacheDir = $config->getCacheDirectory();
         if (!isset($cacheDir)) {
             throw CacheDirConfigurationNotFound::fromCacheCommand();

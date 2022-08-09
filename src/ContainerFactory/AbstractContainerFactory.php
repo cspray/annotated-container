@@ -348,4 +348,31 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         }
     }
 
+    /**
+     * @param ContainerDefinition $definition
+     * @param list<string> $profiles
+     * @return void
+     */
+    final protected function logServicesNotMatchingProfiles(
+        ContainerDefinition $definition,
+        array $profiles
+    ) {
+        foreach ($definition->getServiceDefinitions() as $serviceDefinition) {
+            if (count(array_intersect($profiles, $serviceDefinition->getProfiles())) >= 1) {
+                continue;
+            }
+
+            $this->logger->info(
+                sprintf(
+                    'Not considering %s as shared service because profiles do not match.',
+                    $serviceDefinition->getType()->getName()
+                ),
+                [
+                    'service' => $serviceDefinition->getType()->getName(),
+                    'profiles' => $serviceDefinition->getProfiles()
+                ]
+            );
+        }
+    }
+
 }

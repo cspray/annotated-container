@@ -44,13 +44,11 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $this->setLoggerFromOptions($containerFactoryOptions);
-        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? [];
-        if (empty($activeProfiles)) {
-            $activeProfiles[] = 'default';
-        }
+        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
 
         try {
             $this->logCreatingContainer(objectType(Container::class), $activeProfiles);
+            $this->logServicesNotMatchingProfiles($containerDefinition, $activeProfiles);
             return $this->createDiContainer($containerDefinition, $activeProfiles);
         } catch (InvalidDefinitionException $exception) {
             throw new ContainerException($exception->getMessage(), previous: $exception);

@@ -848,4 +848,37 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
     }
 
+    public function testLoggingSkippingServicesBecauseProfileMismatch() : void {
+        $logger = new TestLogger();
+        $this->getContainer(
+            Fixtures::profileResolvedServices()->getPath(),
+            profiles: ['default', 'dev'],
+            logger: $logger
+        );
+
+        $expectedTest = [
+            'message' => sprintf(
+                'Not considering %s as shared service because profiles do not match.',
+                Fixtures::profileResolvedServices()->testImplementation()->getName()
+            ),
+            'context' => [
+                'service' => Fixtures::profileResolvedServices()->testImplementation()->getName(),
+                'profiles' => ['test']
+            ]
+        ];
+        $expectedProd = [
+            'message' => sprintf(
+                'Not considering %s as shared service because profiles do not match.',
+                Fixtures::profileResolvedServices()->prodImplementation()->getName()
+            ),
+            'context' => [
+                'service' => Fixtures::profileResolvedServices()->prodImplementation()->getName(),
+                'profiles' => ['prod']
+            ]
+        ];
+
+        self::assertContains($expectedTest, $logger->getLogsForLevel(LogLevel::INFO));
+        self::assertContains($expectedProd, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
 }

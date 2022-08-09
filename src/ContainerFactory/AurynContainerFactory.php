@@ -51,9 +51,14 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $this->setLoggerFromOptions($containerFactoryOptions);
         $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
+
         $nameTypeMap = [];
         try {
             $this->logCreatingContainer(objectType(Injector::class), $activeProfiles);
+            $this->logServicesNotMatchingProfiles(
+                $containerDefinition,
+                $activeProfiles
+            );
             $injector = $this->createInjector(
                 new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles),
                 $nameTypeMap

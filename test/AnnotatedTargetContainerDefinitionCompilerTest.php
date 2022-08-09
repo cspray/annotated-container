@@ -9,11 +9,11 @@ use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedContainer\Helper\StubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
@@ -31,12 +31,20 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         );
     }
 
-    private function runCompileDirectory(array|string $dir) : ContainerDefinition {
+    private function runCompileDirectory(
+        array|string $dir,
+        ContainerDefinitionBuilderContextConsumer $consumer = null
+    ) : ContainerDefinition {
         if (is_string($dir)) {
             $dir = [$dir];
         }
         $options = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dir)
             ->withLogger($this->logger);
+
+        if ($consumer !== null) {
+            $options = $options->withContainerDefinitionBuilderContextConsumer($consumer);
+        }
+
         return $this->subject->compile($options->build());
     }
 
@@ -392,5 +400,74 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         ];
 
         self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingAddAliasDefinitions() : void {
+        $this->runCompileDirectory(Fixtures::implicitAliasedServices()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Added alias for abstract service %s to concrete service %s.',
+                Fixtures::implicitAliasedServices()->fooInterface()->getName(),
+                Fixtures::implicitAliasedServices()->fooImplementation()->getName()
+            ),
+            'context' => [
+                'abstractService' => Fixtures::implicitAliasedServices()->fooInterface()->getName(),
+                'concreteService' => Fixtures::implicitAliasedServices()->fooImplementation()->getName()
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingNoThirdPartyServices() : void {
+        $this->runCompileDirectory(Fixtures::singleConcreteService()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'No %s was provided.',
+                ContainerDefinitionBuilderContextConsumer::class
+            ),
+            'context' => []
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingThirdPartyServices() : void {
+        $this->runCompileDirectory(
+            Fixtures::singleConcreteService()->getPath(),
+            new StubContextConsumer()
+        );
+
+        $expected = [
+            'message' => sprintf(
+                'Added services from %s to ContainerDefinition.',
+                StubContextConsumer::class
+            ),
+            'context' => [
+                'containerDefinitionBuilderConsumer' => StubContextConsumer::class
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLastLoggingMessageIsCompilingFinished() : void {
+        $this->runCompileDirectory(
+            Fixtures::singleConcreteService()->getPath(),
+        );
+
+        $expected = [
+            'message' => 'Annotated Container compiling finished.',
+            'context' => []
+        ];
+
+        $logs = $this->logger->getLogsForLevel(LogLevel::INFO);
+
+        self::assertEquals(
+            $expected,
+            $logs[count($logs) - 1]
+        );
     }
 }

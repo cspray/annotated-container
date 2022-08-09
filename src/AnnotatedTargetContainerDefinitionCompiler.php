@@ -74,8 +74,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
         $consumer = $this->parse($containerDefinitionCompileOptions, $logger);
         $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer, $logger);
-        $containerDefinitionBuilder = $this->addThirdPartyServices($containerDefinitionCompileOptions, $containerDefinitionBuilder);
-        $containerDefinitionBuilder = $this->addAliasDefinitions($containerDefinitionBuilder);
+        $containerDefinitionBuilder = $this->addThirdPartyServices(
+            $containerDefinitionCompileOptions,
+            $containerDefinitionBuilder,
+            $logger
+        );
+        $containerDefinitionBuilder = $this->addAliasDefinitions($containerDefinitionBuilder, $logger);
+
+        $logger->info('Annotated Container compiling finished.');
 
         return $containerDefinitionBuilder->build();
     }
@@ -308,6 +314,20 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         );
     }
 
+    private function logAliasDefinition(AliasDefinition $aliasDefinition, LoggerInterface $logger) : void {
+        $logger->info(
+            sprintf(
+                'Added alias for abstract service %s to concrete service %s.',
+                $aliasDefinition->getAbstractService()->getName(),
+                $aliasDefinition->getConcreteService()->getName()
+            ),
+            [
+                'abstractService' => $aliasDefinition->getAbstractService()->getName(),
+                'concreteService' => $aliasDefinition->getConcreteService()->getName()
+            ]
+        );
+    }
+
     /**
      * @param ContainerDefinitionBuilder $containerDefinitionBuilder
      * @param DefinitionsCollection $consumer
@@ -386,38 +406,53 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         return null;
     }
 
-    private function addThirdPartyServices(ContainerDefinitionCompileOptions $compileOptions, ContainerDefinitionBuilder $builder) : ContainerDefinitionBuilder {
-        $context = new class($builder) implements ContainerDefinitionBuilderContext {
-            public function __construct(private ContainerDefinitionBuilder $builder) {
-            }
-
-            public function getBuilder() : ContainerDefinitionBuilder {
-                return $this->builder;
-            }
-
-            public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) : void {
-                $this->builder = $containerDefinitionBuilder;
-            }
-        };
-
+    private function addThirdPartyServices(
+        ContainerDefinitionCompileOptions $compileOptions,
+        ContainerDefinitionBuilder $builder,
+        LoggerInterface $logger
+    ) : ContainerDefinitionBuilder {
         $contextConsumer = $compileOptions->getContainerDefinitionBuilderContextConsumer();
-        if (!is_null($contextConsumer)) {
-            $contextConsumer->consume($context);
-        }
+        if ($contextConsumer !== null) {
+            $context = new class($builder) implements ContainerDefinitionBuilderContext {
+                public function __construct(private ContainerDefinitionBuilder $builder) {
+                }
 
-        return $context->getBuilder();
+                public function getBuilder() : ContainerDefinitionBuilder {
+                    return $this->builder;
+                }
+
+                public function setBuilder(ContainerDefinitionBuilder $containerDefinitionBuilder) : void {
+                    $this->builder = $containerDefinitionBuilder;
+                }
+            };
+            $contextConsumer->consume($context);
+            $logger->info(
+                sprintf('Added services from %s to ContainerDefinition.', $contextConsumer::class),
+                [
+                    'containerDefinitionBuilderConsumer' => $contextConsumer::class
+                ]
+            );
+            return $context->getBuilder();
+        } else {
+            $logger->info(
+                sprintf('No %s was provided.', ContainerDefinitionBuilderContextConsumer::class)
+            );
+            return $builder;
+        }
     }
 
-    private function addAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder) : ContainerDefinitionBuilder {
+    private function addAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, LoggerInterface $logger) : ContainerDefinitionBuilder {
         $abstractDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isAbstract());
         $concreteDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isConcrete());
 
         foreach ($abstractDefinitions as $abstractDefinition) {
             foreach ($concreteDefinitions as $concreteDefinition) {
                 if (is_subclass_of($concreteDefinition->getType()->getName(), $abstractDefinition->getType()->getName())) {
-                    $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition(
-                        AliasDefinitionBuilder::forAbstract($abstractDefinition->getType())->withConcrete($concreteDefinition->getType())->build()
-                    );
+                    $aliasDefinition = AliasDefinitionBuilder::forAbstract($abstractDefinition->getType())
+                        ->withConcrete($concreteDefinition->getType())
+                        ->build();
+                    $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition($aliasDefinition);
+                    $this->logAliasDefinition($aliasDefinition, $logger);
                 }
             }
         }
