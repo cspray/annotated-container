@@ -4,11 +4,16 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrappingConfigurationException;
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Internal\CompositeLogger;
+use Cspray\AnnotatedContainer\Internal\FileLogger;
+use Cspray\AnnotatedContainer\Internal\StdoutLogger;
+use DateTimeImmutable;
 use DOMDocument;
 use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 
+use Psr\Log\LoggerInterface;
 use function libxml_use_internal_errors;
 
 final class XmlBootstrappingConfiguration implements BootstrappingConfiguration {
@@ -19,10 +24,16 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     private readonly array $directories;
     private readonly ?ContainerDefinitionBuilderContextConsumer $contextConsumer;
     private readonly ?string $cacheDir;
+    private readonly ?LoggerInterface $logger;
+
+    /**
+     * @var list<ParameterStore>
+     */
     private readonly array $parameterStores;
 
     public function __construct(
         private readonly string $xmlFile,
+        private readonly BootstrappingDirectoryResolver $directoryResolver,
         private readonly ?ParameterStoreFactory $parameterStoreFactory = null,
         private readonly ?ContainerDefinitionBuilderContextConsumerFactory $consumerFactory = null
     ) {
@@ -93,10 +104,32 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 $cache = $cacheDirNodes[0]->textContent;
             }
 
+            $loggingFileNodes = $xpath->query('/ac:annotatedContainer/ac:logging/ac:file/text()');
+            $loggingStdoutNodes = $xpath->query('/ac:annotatedContainer/ac:logging/ac:stdout');
+            $logger = null;
+
+            $hasLoggingFile = $loggingFileNodes instanceof DOMNodeList && count($loggingFileNodes) === 1;
+            $hasStdoutFile = $loggingStdoutNodes instanceof DOMNodeList && count($loggingStdoutNodes) === 1;
+
+            $dateTimeProvider = fn() : DateTimeImmutable => new DateTimeImmutable();
+
+            if ($hasLoggingFile && $hasStdoutFile) {
+                $loggingFilePath = $this->directoryResolver->getLogPath($loggingFileNodes[0]->nodeValue);
+                $fileLogger = new FileLogger($dateTimeProvider, $loggingFilePath);
+                $stdoutLogger = new StdoutLogger($dateTimeProvider);
+                $logger = new CompositeLogger($fileLogger, $stdoutLogger);
+            } else if ($hasLoggingFile) {
+                $loggingFilePath = $this->directoryResolver->getLogPath($loggingFileNodes[0]->nodeValue);
+                $logger = new FileLogger($dateTimeProvider, $loggingFilePath);
+            } else if ($hasStdoutFile) {
+                $logger = new StdoutLogger($dateTimeProvider);
+            }
+
             $this->directories = $scanDirectories;
             $this->contextConsumer = $contextConsumer;
             $this->cacheDir = $cache;
             $this->parameterStores = $parameterStores;
+            $this->logger = $logger;
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors(false);
@@ -121,5 +154,9 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
 
     public function getCacheDirectory() : ?string {
         return $this->cacheDir;
+    }
+
+    public function getLogger() : ?LoggerInterface {
+        return $this->logger;
     }
 }

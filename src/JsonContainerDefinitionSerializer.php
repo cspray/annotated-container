@@ -3,13 +3,14 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Internal\Objects;
-use Cspray\Typiphy\Internal\NamedType;
+use Cspray\AnnotatedContainer\Internal\SerializerInjectValueParser;
+use Cspray\AnnotatedContainer\Internal\SerializerServiceDefinitionCache;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
+use phpDocumentor\Reflection\DocBlock\Serializer;
 use ReflectionEnum;
-use UnitEnum;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\callableType;
@@ -26,8 +27,39 @@ use function Cspray\Typiphy\voidType;
 
 /**
  * A ContainerDefinitionSerializer that will format a ContainerDefinition into a JSON string.
+ *
+ * @psalm-type JsonSerializedServiceDefinition = array{
+ *     name: ?string,
+ *     type: string,
+ *     profiles: list<string>,
+ *     isAbstract: bool,
+ *     isConcrete: bool
+ * }
+ * @psalm-type JsonSerializedContainerDefinitionArray = array{
+ *     compiledServiceDefinitions: array<string, JsonSerializedServiceDefinition>,
+ *     sharedServiceDefinitions: list<string>,
+ *     configurationDefinitions: list<array{type: string, name: ?string}>,
+ *     aliasDefinitions: list<array{original: string, alias: string}>,
+ *     servicePrepareDefinitions: list<array{type: string, method: string}>,
+ *     serviceDelegateDefinitions: list<array{delegateType: string, delegateMethod: string, serviceType: string}>,
+ *     injectDefinitions: list<array{
+ *         injectTargetType: string,
+ *         injectTargetMethod: ?string,
+ *         injectTargetName: string,
+ *         type: string,
+ *         value: mixed,
+ *         profiles: list<string>,
+ *         storeName: ?string
+ *     }>
+ * }
  */
 final class JsonContainerDefinitionSerializer implements ContainerDefinitionSerializer {
+
+    private readonly SerializerInjectValueParser $parser;
+
+    public function __construct() {
+        $this->parser = new SerializerInjectValueParser();
+    }
 
     /**
      * Returns a JSON object that specifies the various definitions that make up this ContainerDefinition.
@@ -41,7 +73,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
      */
     public function serialize(ContainerDefinition $containerDefinition) : string {
         $compiledServiceDefinitions = [];
-        $addCompiledServiceDefinition = function(string $key, ServiceDefinition $serviceDefinition) use(&$compiledServiceDefinitions, &$addCompiledServiceDefinition) : void {
+        $addCompiledServiceDefinition = function(string $key, ServiceDefinition $serviceDefinition) use(&$compiledServiceDefinitions) : void {
             if (!isset($compiledServiceDefinitions[$key])) {
                 $compiledServiceDefinitions[$key] = [
                     'name' => is_null($serviceDefinition->getName()) ? null : $serviceDefinition->getName(),
@@ -102,7 +134,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
                 foreach ($value as $key => $val) {
                     $rawType = is_object($val) ? $val::class : gettype($val);
                     $parsedValue[$key] = [
-                        'type' => self::convertStringToType($rawType)->getName(),
+                        'type' => $this->parser->convertStringToType($rawType)->getName(),
                         'value' => $parseValue($val)
                     ];
                 }
@@ -115,7 +147,6 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
 
         $injectDefinitions = [];
         foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
-
             $injectDefinitions[] = [
                 'injectTargetType' => $injectDefinition->getTargetIdentifier()->getClass()->getName(),
                 'injectTargetMethod' => $injectDefinition->getTargetIdentifier()->getMethodName(),
@@ -146,22 +177,32 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
      * @throws Exception\DefinitionBuilderException
      */
     public function deserialize(string $serializedDefinition) : ContainerDefinition {
+        /** @var JsonSerializedContainerDefinitionArray $data */
         $data = json_decode($serializedDefinition, true);
 
-        $serviceDefinitions = [];
+        $serviceDefinitions = new SerializerServiceDefinitionCache();
         foreach ($data['compiledServiceDefinitions'] as $serviceHash => $compiledServiceDefinition) {
             // getDeserializeServiceDefinition is a recursive function that could result in multiple service definitions
             // being added with one call if the passed type implements or extends a service that hasn't been parsed yet
             // checking to see if the hash has already been added will prevent already added values from being added
             // multiple times
-            if (!isset($serviceDefinitions[$serviceHash])) {
-                $serviceDefinitions[$serviceHash] = $this->getDeserializeServiceDefinition($data['compiledServiceDefinitions'], $serviceDefinitions, $compiledServiceDefinition['type']);
+            if (!$serviceDefinitions->has($serviceHash)) {
+                $serviceDefinitions->add(
+                    $serviceHash,
+                    $this->getDeserializeServiceDefinition(
+                        $data['compiledServiceDefinitions'],
+                        $serviceDefinitions,
+                        $compiledServiceDefinition['type']
+                    )
+                );
             }
         }
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
         foreach ($data['sharedServiceDefinitions'] as $serviceHash) {
-            $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinitions[$serviceHash]);
+            $service = $serviceDefinitions->get($serviceHash);
+            assert($service !== null);
+            $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($service);
         }
 
         foreach ($data['configurationDefinitions'] as $configurationDefinition) {
@@ -175,20 +216,29 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         }
 
         foreach ($data['aliasDefinitions'] as $aliasDefinition) {
+            $abstractService = $serviceDefinitions->get($aliasDefinition['original']);
+            assert($abstractService !== null);
+            $concreteService = $serviceDefinitions->get($aliasDefinition['alias']);
+            assert($concreteService !== null);
+
             $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition(
-                AliasDefinitionBuilder::forAbstract($serviceDefinitions[$aliasDefinition['original']]->getType())->withConcrete($serviceDefinitions[$aliasDefinition['alias']]->getType())->build()
+                AliasDefinitionBuilder::forAbstract($abstractService->getType())
+                    ->withConcrete($concreteService->getType())
+                    ->build()
             );
         }
 
         foreach ($data['servicePrepareDefinitions'] as $servicePrepareDefinition) {
-            $service = $serviceDefinitions[md5($servicePrepareDefinition['type'])];
+            $service = $serviceDefinitions->get(md5($servicePrepareDefinition['type']));
+            assert($service !== null);
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServicePrepareDefinition(
                 ServicePrepareDefinitionBuilder::forMethod($service->getType(), $servicePrepareDefinition['method'])->build()
             );
         }
 
         foreach ($data['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
-            $service = $serviceDefinitions[md5($serviceDelegateDefinition['serviceType'])];
+            $service = $serviceDefinitions->get(md5($serviceDelegateDefinition['serviceType']));
+            assert($service !== null);
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition(
                 ServiceDelegateDefinitionBuilder::forService($service->getType())
                     ->withDelegateMethod(objectType($serviceDelegateDefinition['delegateType']), $serviceDelegateDefinition['delegateMethod'])
@@ -196,27 +246,10 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             );
         }
 
-        $parseValue = function(Type|TypeUnion|TypeIntersect $type, mixed $value) use(&$parseValue) : mixed {
-            if ($type instanceof ObjectType && Objects::isEnum($type)) {
-                $enumReflection = new ReflectionEnum($type->getName());
-                $parsedValue = $enumReflection->getCase($value)->getValue();
-            } else if (is_array($value)) {
-                $parsedValue = [];
-                foreach ($value as $key => $val) {
-                    $type = self::convertStringToType($val['type']);
-                    $parsedValue[$key] = $parseValue($type, $val['value']);
-                }
-            } else {
-                $parsedValue = $value;
-            }
-
-            return $parsedValue;
-        };
-
         foreach ($data['injectDefinitions'] as $injectDefinition) {
             $injectBuilder = InjectDefinitionBuilder::forService(objectType($injectDefinition['injectTargetType']));
 
-            $type = $this->convertStringToType($injectDefinition['type']);
+            $type = $this->parser->convertStringToType($injectDefinition['type']);
 
             if (is_null($injectDefinition['injectTargetMethod'])) {
                 $injectBuilder = $injectBuilder->withProperty(
@@ -232,7 +265,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             }
 
 
-            $injectBuilder = $injectBuilder->withValue($parseValue($type, $injectDefinition['value']))
+            $injectBuilder = $injectBuilder->withValue($this->parser->parse($type, $injectDefinition['value']))
                 ->withProfiles(...$injectDefinition['profiles']);
 
             if (!is_null($injectDefinition['storeName'])) {
@@ -245,9 +278,15 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
         return $containerDefinitionBuilder->build();
     }
 
-    private function getDeserializeServiceDefinition(array $compiledServiceDefinitions, array &$serviceDefinitionCacheMap, string $type) : ServiceDefinition {
+    /**
+     * @param array<string, JsonSerializedServiceDefinition> $compiledServiceDefinitions
+     * @param SerializerServiceDefinitionCache $cache
+     * @param string $type
+     * @return ServiceDefinition
+     */
+    private function getDeserializeServiceDefinition(array $compiledServiceDefinitions, SerializerServiceDefinitionCache $cache, string $type) : ServiceDefinition {
         $serviceHash = md5($type);
-        if (!isset($serviceDefinitionCacheMap[$serviceHash])) {
+        if (!$cache->has($serviceHash)) {
             $compiledServiceDefinition = $compiledServiceDefinitions[$serviceHash];
             if ($compiledServiceDefinition['isAbstract']) {
                 $factoryMethod = 'forAbstract';
@@ -258,50 +297,19 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
             $serviceDefinitionBuilder = ServiceDefinitionBuilder::$factoryMethod(objectType($type));
             $serviceDefinitionBuilder = $serviceDefinitionBuilder->withProfiles($compiledServiceDefinition['profiles']);
 
-            if (!is_null($compiledServiceDefinition['name'])) {
+            if ($compiledServiceDefinition['name'] !== null) {
                 $serviceDefinitionBuilder = $serviceDefinitionBuilder->withName($compiledServiceDefinition['name']);
             }
 
-            $serviceDefinitionCacheMap[$serviceHash] = $serviceDefinitionBuilder->build();
+            $service = $serviceDefinitionBuilder->build();
+            $cache->add($serviceHash, $service);
         }
 
-        return $serviceDefinitionCacheMap[$serviceHash];
+        $service = $cache->get($serviceHash);
+        assert($service !== null);
+        return $service;
     }
 
-    private function convertStringToType(string $rawType) : Type|TypeUnion|TypeIntersect {
-        if (str_contains($rawType, '|')) {
-            $types = [];
-            foreach (explode('|', $rawType) as $unionType) {
-                $types[] = $this->convertStringToType($unionType);
-            }
-            /** @psalm-var list<Type> $types */
-            $type = typeUnion(...$types);
-        } else if (str_contains($rawType, '&')) {
-            $types = [];
-            foreach (explode('&', $rawType) as $intersectType) {
-                $parsedType = $this->convertStringToType($intersectType);
-                assert($parsedType instanceof ObjectType);
-                $types[] = $parsedType;
-            }
-            $type = typeIntersect(...$types);
-        } else {
-            $type = match($rawType) {
-                'string' => stringType(),
-                'int' => intType(),
-                'float' => floatType(),
-                'bool' => boolType(),
-                'array' => arrayType(),
-                'mixed' => mixedType(),
-                'iterable' => iterableType(),
-                'null' => nullType(),
-                'void' => voidType(),
-                'callable' => callableType(),
-                default => objectType($rawType)
-            };
-        }
-
-        return $type;
-    }
 
 
 }

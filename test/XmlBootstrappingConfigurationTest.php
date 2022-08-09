@@ -4,9 +4,13 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrappingConfigurationException;
 use Cspray\AnnotatedContainer\Helper\AdditionalStubContextConsumer;
+use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumerWithDependencies;
 use Cspray\AnnotatedContainer\Helper\StubParameterStore;
+use Cspray\AnnotatedContainer\Internal\CompositeLogger;
+use Cspray\AnnotatedContainer\Internal\FileLogger;
+use Cspray\AnnotatedContainer\Internal\StdoutLogger;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
@@ -36,7 +40,10 @@ XML;
         self::expectExceptionMessage(
             'Configuration file vfs://root/annotated-container.xml does not validate against the appropriate schema.'
         );
-        new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
     }
 
     public function testValidXmlReturnsScanDirectories() : void {
@@ -55,7 +62,10 @@ XML;
         VirtualFilesystem::newFile('annotated-container.xml')
             ->withContent($goodXml)
             ->at($this->vfs);
-        $configuration = new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        $configuration = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
 
         self::assertSame(
             ['src', 'test/helper', 'lib'],
@@ -81,7 +91,10 @@ XML;
             ->withContent($goodXml)
             ->at($this->vfs);
 
-        $configuration = new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        $configuration = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
         self::assertInstanceOf(
             StubContextConsumer::class,
             $configuration->getContainerDefinitionConsumer()
@@ -112,7 +125,10 @@ XML;
             'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . ContainerDefinitionBuilderContextConsumer::class
         );
 
-        new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
     }
 
     public function testContainerContextConsumersNotImplementCorrectInterface() : void {
@@ -139,7 +155,10 @@ XML;
             'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . ContainerDefinitionBuilderContextConsumer::class
         );
 
-        new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
     }
 
     public function testContainerContextConsumersEmptyIfNoneDefined() : void {
@@ -158,7 +177,10 @@ XML;
             ->withContent($goodXml)
             ->at($this->vfs);
 
-        $config = new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
 
         self::assertNull($config->getContainerDefinitionConsumer());
     }
@@ -179,7 +201,10 @@ XML;
             ->withContent($goodXml)
             ->at($this->vfs);
 
-        $config = new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
         self::assertNull($config->getCacheDirectory());
     }
 
@@ -200,7 +225,10 @@ XML;
             ->withContent($goodXml)
             ->at($this->vfs);
 
-        $config = new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
         self::assertSame('cache', $config->getCacheDirectory());
     }
 
@@ -223,7 +251,10 @@ XML;
             ->withContent($goodXml)
             ->at($this->vfs);
 
-        $config = new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
 
         self::assertCount(1, $config->getParameterStores());
         self::assertContainsOnlyInstancesOf(StubParameterStore::class, $config->getParameterStores());
@@ -252,7 +283,10 @@ XML;
         self::expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
-        new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
     }
 
     public function testParameterStoreContainsNotParameterStoreThrowsException() : void {
@@ -278,7 +312,10 @@ XML;
         self::expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
-        new XmlBootstrappingConfiguration('vfs://root/annotated-container.xml');
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
     }
 
     public function testParameterStoreFactoryPresentRespected() : void {
@@ -313,6 +350,7 @@ XML;
 
         $config = new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver(),
             $parameterStoreFactory
         );
 
@@ -336,7 +374,6 @@ XML;
 XML;
 
         $consumerFactory = new class implements ContainerDefinitionBuilderContextConsumerFactory {
-
             public function createConsumer(string $identifier) : ContainerDefinitionBuilderContextConsumer {
                 return new $identifier(Fixtures::thirdPartyServices()->fooInterface());
             }
@@ -348,9 +385,108 @@ XML;
 
         $config = new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver(),
             consumerFactory: $consumerFactory
         );
 
         self::assertInstanceOf(StubContextConsumerWithDependencies::class, $config->getContainerDefinitionConsumer());
+    }
+
+    public function testLoggingFileConfigurationReturnsCorrectLogger() : void {
+        $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <logging>
+    <file>logs/annotated-container.log</file>
+  </logging>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newDirectory('logs')->at($this->vfs);
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($xml)
+            ->at($this->vfs);
+
+        self::assertFileDoesNotExist('vfs://root/logs/annotated-container.log');
+
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+
+        self::assertInstanceOf(FileLogger::class, $config->getLogger());
+        self::assertFileExists('vfs://root/logs/annotated-container.log');
+    }
+
+    public function testLoggingFileConfigurationReturnsCorrectStdoutLogger() : void {
+        $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <logging>
+    <stdout />
+  </logging>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newDirectory('logs')->at($this->vfs);
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($xml)
+            ->at($this->vfs);
+
+        self::assertFileDoesNotExist('vfs://root/logs/annotated-container.log');
+
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+
+        self::assertInstanceOf(StdoutLogger::class, $config->getLogger());
+        self::assertFileDoesNotExist('vfs://root/logs/annotated-container.log');
+    }
+
+    public function testLoggingFileAndStdoutConfigurationReturnsCorrectLogger() : void {
+        $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <logging>
+    <file>logs/annotated-container.log</file>
+    <stdout />
+  </logging>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newDirectory('logs')->at($this->vfs);
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($xml)
+            ->at($this->vfs);
+
+        self::assertFileDoesNotExist('vfs://root/logs/annotated-container.log');
+
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+        $logger = $config->getLogger();
+
+        self::assertInstanceOf(CompositeLogger::class, $logger);
+        self::assertCount(2, $logger->getLoggers());
+
+        self::assertInstanceOf(FileLogger::class, $logger->getLoggers()[0]);
+        self::assertInstanceOf(StdoutLogger::class, $logger->getLoggers()[1]);
     }
 }

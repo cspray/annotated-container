@@ -12,6 +12,9 @@ use Traversable;
  */
 final class LogicalConstraintViolationCollection implements Countable, IteratorAggregate {
 
+    /**
+     * @var list<LogicalConstraintViolation>
+     */
     private array $constraintViolations = [];
 
     /**
@@ -36,6 +39,9 @@ final class LogicalConstraintViolationCollection implements Countable, IteratorA
         return $this->constraintViolations[$index] ?? null;
     }
 
+    /**
+     * @return Traversable<int, LogicalConstraintViolation>
+     */
     public function getIterator() : Traversable {
         return new ArrayIterator($this->constraintViolations);
     }

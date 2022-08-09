@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * A set of options used by a ContainerFactory when creating your Container.
  *
@@ -15,5 +17,7 @@ interface ContainerFactoryOptions {
      * @return string[]
      */
     public function getActiveProfiles() : array;
+
+    public function getLogger() : ?LoggerInterface;
 
 }

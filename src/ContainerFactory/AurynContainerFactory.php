@@ -19,6 +19,8 @@ use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
 use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
 use Cspray\Typiphy\ObjectType;
+use UnitEnum;
+use function Cspray\Typiphy\objectType;
 
 // @codeCoverageIgnoreStart
 if (!class_exists(Injector::class)) {
@@ -47,9 +49,16 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
      * implementation will be deprecated.
      */
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
-        $activeProfiles = is_null($containerFactoryOptions) ? ['default'] : $containerFactoryOptions->getActiveProfiles();
+        $this->setLoggerFromOptions($containerFactoryOptions);
+        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
+
         $nameTypeMap = [];
         try {
+            $this->logCreatingContainer(objectType(Injector::class), $activeProfiles);
+            $this->logServicesNotMatchingProfiles(
+                $containerDefinition,
+                $activeProfiles
+            );
             $injector = $this->createInjector(
                 new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles),
                 $nameTypeMap
@@ -143,24 +152,27 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
 
     private function createInjector(ContainerDefinition $containerDefinition, array &$nameTypeMap) : Injector {
         $injector = new Injector();
-        // We need to keep a nameTypeMap because Auryn does not support arbitrarily named services out of the box
 
         $servicePrepareDefinitions = $containerDefinition->getServicePrepareDefinitions();
         $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
 
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             $injector->share($serviceDefinition->getType()->getName());
+            $this->logServiceShared($serviceDefinition);
             $name = $serviceDefinition->getName();
             if (!is_null($name)) {
                 $nameTypeMap[$name] = $serviceDefinition->getType();
+                $this->logServiceNamed($serviceDefinition);
             }
         }
 
         foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
             $injector->share($configurationDefinition->getClass()->getName());
+            $this->logConfigurationShared($configurationDefinition);
             $name = $configurationDefinition->getName();
             if (!is_null($name)) {
                 $nameTypeMap[$name] = $configurationDefinition->getClass();
+                $this->logConfigurationNamed($configurationDefinition);
             }
             $injectPropertyMap = [];
             foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
@@ -168,6 +180,8 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                     $injectDefinition->getTargetIdentifier()->getClass() !== $configurationDefinition->getClass()) {
                     continue;
                 }
+
+                $this->logInjectingProperty($injectDefinition);
 
                 $value = $injectDefinition->getValue();
                 $storeName = $injectDefinition->getStoreName();
@@ -183,6 +197,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 }
 
                 $injectPropertyMap[$injectDefinition->getTargetIdentifier()->getName()] = $value;
+
             }
 
             $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($injectPropertyMap, $configurationDefinition) {
@@ -207,10 +222,12 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
         $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
             if (!in_array($aliasDefinition->getAbstractService(), $aliasedTypes)) {
-                $aliasDefinition = $this->aliasDefinitionResolver->resolveAlias(
+                $resolution = $this->aliasDefinitionResolver->resolveAlias(
                     $containerDefinition, $aliasDefinition->getAbstractService()
-                )->getAliasDefinition();
+                );
+                $this->logAliasingService($resolution, $aliasDefinition->getAbstractService());
 
+                $aliasDefinition = $resolution->getAliasDefinition();
                 if (isset($aliasDefinition)) {
                     $injector->alias(
                         $aliasDefinition->getAbstractService()->getName(),
@@ -242,6 +259,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                         }
                     }
                 );
+                $this->logServicePrepare($servicePrepareDefinition);
                 $preparedTypes[] = $type;
             }
         }
@@ -252,6 +270,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 $serviceDelegateDefinition->getServiceType()->getName(),
                 [$serviceDelegateDefinition->getDelegateType()->getName(), $serviceDelegateDefinition->getDelegateMethod()]
             );
+            $this->logServiceDelegate($serviceDelegateDefinition);
         }
 
         return $injector;
@@ -275,7 +294,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
             }
 
             $value = $injectDefinition->getValue();
-            if ($injectDefinition->getType() instanceof ObjectType) {
+            if ($injectDefinition->getType() instanceof ObjectType && !is_a($injectDefinition->getType()->getName(), UnitEnum::class, true)) {
                 $key = $injectDefinition->getTargetIdentifier()->getName();
                 if (isset($nameTypeMap[$value])) {
                     $value = $nameTypeMap[$value]->getName();
@@ -296,6 +315,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 $value = $parameterStore->fetch($injectDefinition->getType(), $value);
             }
             $definitionMap[$serviceType][$method][$key] = $value;
+            $this->logInjectingMethodParameter($injectDefinition);
         }
         return $definitionMap;
     }

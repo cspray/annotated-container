@@ -31,6 +31,8 @@ use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\Typiphy\ObjectType;
 use DI\ContainerBuilder;
 use DI\Definition\Helper\AutowireDefinitionHelper;
+use UnitEnum;
+use function Cspray\Typiphy\objectType;
 use function DI\autowire;
 use function DI\decorate;
 use function DI\get;
@@ -41,12 +43,12 @@ use function DI\get;
 final class PhpDiContainerFactory extends AbstractContainerFactory implements ContainerFactory {
 
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
-        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? [];
-        if (empty($activeProfiles)) {
-            $activeProfiles[] = 'default';
-        }
+        $this->setLoggerFromOptions($containerFactoryOptions);
+        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
 
         try {
+            $this->logCreatingContainer(objectType(Container::class), $activeProfiles);
+            $this->logServicesNotMatchingProfiles($containerDefinition, $activeProfiles);
             return $this->createDiContainer($containerDefinition, $activeProfiles);
         } catch (InvalidDefinitionException $exception) {
             throw new ContainerException($exception->getMessage(), previous: $exception);
@@ -66,10 +68,12 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
         foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
             $serviceTypes[] = $serviceDefinition->getType()->getName();
             $definitions[$serviceDefinition->getType()->getName()] = autowire();
+            $this->logServiceShared($serviceDefinition);
             $name = $serviceDefinition->getName();
             if (!is_null($name)) {
                 $serviceTypes[] = $name;
                 $definitions[$name] = get($serviceDefinition->getType()->getName());
+                $this->logServiceNamed($serviceDefinition);
             }
         }
 
@@ -84,11 +88,13 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
                 ));
             }
             if (!in_array($aliasDefinition->getAbstractService()->getName(), $aliasedTypes)) {
-                $aliasDefinition = $this->aliasDefinitionResolver->resolveAlias(
+                $resolution = $this->aliasDefinitionResolver->resolveAlias(
                     $containerDefinition, $aliasDefinition->getAbstractService()
-                )->getAliasDefinition();
+                );
+                $this->logAliasingService($resolution, $aliasDefinition->getAbstractService());
 
-                if (isset($aliasDefinition)) {
+                $aliasDefinition = $resolution->getAliasDefinition();
+                if ($aliasDefinition !== null) {
                     $abstractDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getAbstractService());
                     assert(!is_null($abstractDefinition));
 
@@ -103,8 +109,10 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
         foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
             $configName = is_null($configurationDefinition->getName()) ? $configurationDefinition->getClass()->getName() : $configurationDefinition->getName();
             $serviceTypes[] = $configurationDefinition->getClass()->getName();
+            $this->logConfigurationShared($configurationDefinition);
             if (!is_null($configurationDefinition->getName())) {
                 $serviceTypes[] = $configurationDefinition->getName();
+                $this->logConfigurationNamed($configurationDefinition);
             }
             assert(!is_null($configName));
             $definitions[$configName] = autowire($configurationDefinition->getClass()->getName());
@@ -116,6 +124,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
                 $definitions[$service] = autowire();
             }
             assert($definitions[$service] instanceof AutowireDefinitionHelper);
+            // This covers constructor injection, setting injection for service prepare methods happens with service prepare configuration
             foreach ($methods as $methodName => $params) {
                 if ($methodName === '__construct') {
                     foreach ($params as $param => $value) {
@@ -141,6 +150,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             $definitions[$serviceName] = function(Container $container) use($serviceDelegateDefinition) : mixed {
                 return $container->call([$serviceDelegateDefinition->getDelegateType()->getName(), $serviceDelegateDefinition->getDelegateMethod()]);
             };
+            $this->logServiceDelegate($serviceDelegateDefinition);
         }
 
         $servicePrepareDefinitions = [];
@@ -247,8 +257,11 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
                 $value = $parameterStore->fetch($injectDefinition->getType(), $value);
             }
 
-            $param = $injectDefinition->getType() instanceof ObjectType ? get($injectDefinition->getValue()) : $value;
+            $param = $injectDefinition->getType() instanceof ObjectType && !is_a($injectDefinition->getType()->getName(), UnitEnum::class, true)
+                ? get($injectDefinition->getValue())
+                : $value;
             $map[$className][$methodName][$injectDefinition->getTargetIdentifier()->getName()] = $param;
+            $this->logInjectingMethodParameter($injectDefinition);
         }
         return $map;
     }
@@ -281,6 +294,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             }
 
             $map[$className][$propertyName] = $value;
+            $this->logInjectingProperty($injectDefinition);
         }
         return $map;
     }
@@ -293,6 +307,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             }
 
             $map[$servicePrepareDefinition->getService()->getName()][$servicePrepareDefinition->getMethod()] = $methodInjectMap[$servicePrepareDefinition->getService()->getName()][$servicePrepareDefinition->getMethod()] ?? [];
+            $this->logServicePrepare($servicePrepareDefinition);
         }
 
         return $map;

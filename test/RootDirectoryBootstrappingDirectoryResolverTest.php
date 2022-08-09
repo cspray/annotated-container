@@ -33,4 +33,13 @@ final class RootDirectoryBootstrappingDirectoryResolverTest extends TestCase {
         );
     }
 
+    public function testLogPath() : void {
+        $subject = new RootDirectoryBootstrappingDirectoryResolver('/root/path');
+
+        self::assertSame(
+            '/root/path/ac.log',
+            $subject->getLogPath('ac.log')
+        );
+    }
+
 }

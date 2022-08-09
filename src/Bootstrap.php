@@ -2,12 +2,15 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Psr\Log\LoggerInterface;
+
 final class Bootstrap {
 
     private readonly BootstrappingDirectoryResolver $directoryResolver;
 
     public function __construct(
-        BootstrappingDirectoryResolver $directoryResolver = null
+        BootstrappingDirectoryResolver $directoryResolver = null,
+        LoggerInterface $logger = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->getDefaultDirectoryResolver();
     }
@@ -23,7 +26,7 @@ final class Bootstrap {
         string $configurationFile = 'annotated-container.xml'
     ) : AnnotatedContainer {
         $configFile = $this->directoryResolver->getConfigurationPath($configurationFile);
-        $configuration = new XmlBootstrappingConfiguration($configFile);
+        $configuration = new XmlBootstrappingConfiguration($configFile, $this->directoryResolver);
 
         $scanPaths = [];
         foreach ($configuration->getScanDirectories() as $scanDirectory) {
@@ -31,13 +34,18 @@ final class Bootstrap {
         }
         $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanPaths);
         $containerDefinitionConsumer = $configuration->getContainerDefinitionConsumer();
-        if (isset($containerDefinitionConsumer)) {
+        if ($containerDefinitionConsumer !== null) {
             $compileOptions = $compileOptions->withContainerDefinitionBuilderContextConsumer($containerDefinitionConsumer);
+        }
+
+        $logger = $configuration->getLogger();
+        if ($logger !== null) {
+            $compileOptions = $compileOptions->withLogger($logger);
         }
 
         $cacheDir = null;
         $configuredCacheDir = $configuration->getCacheDirectory();
-        if (isset($configuredCacheDir)) {
+        if ($configuredCacheDir !== null) {
             $cacheDir = $this->directoryResolver->getCachePath($configuredCacheDir);
         }
         $containerDefinition = compiler($cacheDir)->compile($compileOptions->build());

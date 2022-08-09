@@ -13,6 +13,10 @@ final class EventEmittingContainerFactory implements ContainerFactory {
     ) {}
 
     public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
+        $logger = $containerFactoryOptions?->getLogger();
+        if ($logger !== null) {
+            $this->emitter->setLogger($logger);
+        }
         $this->emitter->trigger(new BeforeContainerCreationAnnotatedContainerEvent($containerDefinition));
         $container = $this->factory->createContainer($containerDefinition, $containerFactoryOptions);
         $this->emitter->trigger(new AfterContainerCreationAnnotatedContainerEvent($container));
@@ -22,4 +26,5 @@ final class EventEmittingContainerFactory implements ContainerFactory {
     public function addParameterStore(ParameterStore $parameterStore) : void {
         $this->factory->addParameterStore($parameterStore);
     }
+
 }

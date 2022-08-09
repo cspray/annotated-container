@@ -23,4 +23,7 @@ final class FixtureBootstrappingDirectoryResolver implements BootstrappingDirect
         return sprintf('vfs://root/%s', $subPath);
     }
 
+    public function getLogPath(string $subPath) : string {
+        return sprintf('vfs://root/%s', $subPath);
+    }
 }

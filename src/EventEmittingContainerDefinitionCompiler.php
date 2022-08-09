@@ -13,6 +13,10 @@ final class EventEmittingContainerDefinitionCompiler implements ContainerDefinit
     ) {}
 
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
+        $logger = $containerDefinitionCompileOptions->getLogger();
+        if ($logger !== null) {
+            $this->emitter->setLogger($logger);
+        }
         $this->emitter->trigger(new BeforeCompileAnnotatedContainerEvent());
         $containerDefinition = $this->compiler->compile($containerDefinitionCompileOptions);
         $this->emitter->trigger(new AfterCompileAnnotatedContainerEvent($containerDefinition));
