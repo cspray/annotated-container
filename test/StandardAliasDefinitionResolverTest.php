@@ -133,4 +133,36 @@ final class StandardAliasDefinitionResolverTest extends TestCase {
         self::assertSame(AliasResolutionReason::ServiceIsDelegated, $resolution->getAliasResolutionReason());
     }
 
+    public function testMultiplePrimaryServiceIsNull() : void {
+        $subject = new StandardAliasDefinitionResolver();
+
+        $abstract = ServiceDefinitionBuilder::forAbstract(
+            Fixtures::ambiguousAliasedServices()->fooInterface()
+        )->build();
+        $one = ServiceDefinitionBuilder::forConcrete(
+            Fixtures::ambiguousAliasedServices()->barImplementation(), true
+        )->build();
+        $two = ServiceDefinitionBuilder::forConcrete(
+            Fixtures::ambiguousAliasedServices()->bazImplementation(), true
+        )->build();
+        $oneAlias = AliasDefinitionBuilder::forAbstract($abstract->getType())
+            ->withConcrete($one->getType())
+            ->build();
+        $twoAlias = AliasDefinitionBuilder::forAbstract($abstract->getType())
+            ->withConcrete($two->getType())
+            ->build();
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()
+            ->withServiceDefinition($abstract)
+            ->withServiceDefinition($one)
+            ->withServiceDefinition($two)
+            ->withAliasDefinition($oneAlias)
+            ->withAliasDefinition($twoAlias)
+            ->build();
+
+        $resolution = $subject->resolveAlias($containerDefinition, $abstract->getType());
+
+        self::assertNull($resolution->getAliasDefinition());
+        self::assertSame(AliasResolutionReason::MultiplePrimaryService, $resolution->getAliasResolutionReason());
+    }
+
 }

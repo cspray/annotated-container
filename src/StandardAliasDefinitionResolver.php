@@ -27,21 +27,21 @@ final class StandardAliasDefinitionResolver implements AliasDefinitionResolver {
                 $reason = AliasResolutionReason::SingleConcreteService;
             } else if (count($aliases) > 1) {
                 $definition = null;
-                $reason = AliasResolutionReason::MultipleConcreteService;
-                $primaryAlias = null;
+                $primaryAliases = [];
                 foreach ($aliases as $alias) {
                     $concreteDefinition = $this->getServiceDefinition($containerDefinition, $alias->getConcreteService());
-                    if ($primaryAlias === null && $concreteDefinition?->isPrimary()) {
-                        $primaryAlias = $alias;
-                    } else if ($primaryAlias !== null && $concreteDefinition?->isPrimary()) {
-                        $primaryAlias = null;
-                        break;
+                    if ($concreteDefinition?->isPrimary()) {
+                        $primaryAliases[] = $alias;
                     }
                 }
 
-                if ($primaryAlias !== null) {
-                    $definition = $primaryAlias;
+                if (count($primaryAliases) === 1) {
+                    $definition = $primaryAliases[0];
                     $reason = AliasResolutionReason::ConcreteServiceIsPrimary;
+                } else if (count($primaryAliases) === 0) {
+                    $reason = AliasResolutionReason::MultipleConcreteService;
+                } else {
+                    $reason = AliasResolutionReason::MultiplePrimaryService;
                 }
             } else {
                 $definition = null;

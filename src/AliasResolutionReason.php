@@ -8,4 +8,5 @@ enum AliasResolutionReason {
     case MultipleConcreteService;
     case ConcreteServiceIsPrimary;
     case ServiceIsDelegated;
+    case MultiplePrimaryService;
 }
