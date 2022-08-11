@@ -41,9 +41,9 @@ final class Inject implements InjectAttribute {
      * @param string[] $profiles A list of active profiles that this Inject Attribute will applicable for.
      */
     public function __construct(
-        private readonly string|int|float|bool|array|UnitEnum|null $value,
-        private readonly ?string $from = null,
-        private readonly array $profiles = []
+        public readonly string|int|float|bool|array|UnitEnum|null $value,
+        public readonly ?string $from = null,
+        public readonly array $profiles = []
     ) {}
 
     public function getValue() : string|int|float|bool|array|UnitEnum|null {
