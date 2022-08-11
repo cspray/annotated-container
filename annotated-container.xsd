@@ -67,6 +67,7 @@
     <xs:all>
       <xs:element name="file" type="xs:token" minOccurs="0" maxOccurs="1" />
       <xs:element name="stdout" type="stdoutType" minOccurs="0" maxOccurs="1" />
+      <xs:element name="exclude" type="excludeType" minOccurs="0" maxOccurs="1" />
     </xs:all>
   </xs:complexType>
 
@@ -74,6 +75,12 @@
     <xs:simpleContent>
       <xs:extension base="xs:string" />
     </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="excludeType">
+    <xs:sequence>
+      <xs:element name="profile" type="xs:token" minOccurs="1" maxOccurs="unbounded" />
+    </xs:sequence>
   </xs:complexType>
 
 </xs:schema>

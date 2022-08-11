@@ -489,4 +489,40 @@ XML;
         self::assertInstanceOf(FileLogger::class, $logger->getLoggers()[0]);
         self::assertInstanceOf(StdoutLogger::class, $logger->getLoggers()[1]);
     }
+
+    public function testLoggingFileAndStdoutConfigurationReturnsCorrectExcludedLoggingProfiles() : void {
+        $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <logging>
+    <file>logs/annotated-container.log</file>
+    <stdout />
+    <exclude>
+      <profile>foo</profile>
+      <profile>bar</profile>
+      <profile>baz</profile>
+    </exclude>
+  </logging>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newDirectory('logs')->at($this->vfs);
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($xml)
+            ->at($this->vfs);
+
+        self::assertFileDoesNotExist('vfs://root/logs/annotated-container.log');
+
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+
+        self::assertSame(['foo', 'bar', 'baz'], $config->getLoggingExcludedProfiles());
+    }
 }

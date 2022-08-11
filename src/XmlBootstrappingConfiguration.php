@@ -25,6 +25,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     private readonly ?ContainerDefinitionBuilderContextConsumer $contextConsumer;
     private readonly ?string $cacheDir;
     private readonly ?LoggerInterface $logger;
+    private readonly array $excludedProfiles;
 
     /**
      * @var list<ParameterStore>
@@ -125,11 +126,21 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 $logger = new StdoutLogger($dateTimeProvider);
             }
 
+            $excludedProfilesNodes = $xpath->query('/ac:annotatedContainer/ac:logging/ac:exclude/ac:profile/text()');
+            $excludedProfiles = [];
+
+            if ($excludedProfilesNodes instanceof DOMNodeList) {
+                foreach ($excludedProfilesNodes as $node) {
+                    $excludedProfiles[] = $node->nodeValue;
+                }
+            }
+
             $this->directories = $scanDirectories;
             $this->contextConsumer = $contextConsumer;
             $this->cacheDir = $cache;
             $this->parameterStores = $parameterStores;
             $this->logger = $logger;
+            $this->excludedProfiles = $excludedProfiles;
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors(false);
@@ -158,5 +169,9 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
 
     public function getLogger() : ?LoggerInterface {
         return $this->logger;
+    }
+
+    public function getLoggingExcludedProfiles() : array {
+        return $this->excludedProfiles;
     }
 }
