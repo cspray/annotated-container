@@ -2,11 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Brick\VarExporter\VarExporter;
 use Cspray\AnnotatedContainer\ActiveProfiles;
-use Cspray\AnnotatedContainer\AliasDefinition;
 use Cspray\AnnotatedContainer\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\AliasDefinitionResolver;
-use Cspray\AnnotatedContainer\AliasResolutionReason;
 use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerFactory;
@@ -18,7 +17,6 @@ use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\StandardAliasDefinitionResolver;
-use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\Typiphy\ObjectType;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -239,7 +237,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
                 $this->logger->info(
                     sprintf(
                         'Injecting value "%s" into %s::%s($%s).',
-                        var_export($inject->getValue(), true),
+                        VarExporter::export($inject->getValue(), VarExporter::INLINE_ARRAY),
                         $inject->getTargetIdentifier()->getClass()->getName(),
                         $methodName,
                         $inject->getTargetIdentifier()->getName()
@@ -282,7 +280,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
                 $this->logger->info(
                     sprintf(
                         'Injecting enum "%s" into %s::%s.',
-                        var_export($inject->getValue(), true),
+                        VarExporter::export($inject->getValue()),
                         $inject->getTargetIdentifier()->getClass()->getName(),
                         $inject->getTargetIdentifier()->getName()
                     ),
@@ -312,7 +310,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
                 $this->logger->info(
                     sprintf(
                         'Injecting value "%s" into %s::%s.',
-                        var_export($inject->getValue(), true),
+                        VarExporter::export($inject->getValue(), VarExporter::INLINE_ARRAY),
                         $inject->getTargetIdentifier()->getClass()->getName(),
                         $inject->getTargetIdentifier()->getName()
                     ),

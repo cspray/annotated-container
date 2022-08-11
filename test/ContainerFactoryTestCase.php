@@ -881,4 +881,47 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertContains($expectedProd, $logger->getLogsForLevel(LogLevel::INFO));
     }
 
+    public function testLoggingInjectMethodArrayNotMultiline() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::injectConstructorServices()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting value "[\'dependency\', \'injection\', \'rocks\']" into %s::__construct($values).',
+                Fixtures::injectConstructorServices()->injectArrayService()->getName()
+            ),
+            'context' => [
+                'service' => Fixtures::injectConstructorServices()->injectArrayService()->getName(),
+                'method' => '__construct',
+                'parameter' => 'values',
+                'type' => 'array',
+                'value' => ['dependency', 'injection', 'rocks']
+            ]
+        ];
+
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectPropertyArrayNotMultiline() : void {
+        $logger = new TestLogger();
+        $this->getContainer(Fixtures::configurationWithArrayEnum()->getPath(), logger: $logger);
+
+        $expected = [
+            'message' => sprintf(
+                'Injecting value "[%s, %s]" into %s::cases.',
+                var_export(AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::Bar, true),
+                var_export(AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::Qux, true),
+                Fixtures::configurationWithArrayEnum()->myConfiguration()->getName()
+            ),
+            'context' => [
+                'configuration' => Fixtures::configurationWithArrayEnum()->myConfiguration()->getName(),
+                'property' => 'cases',
+                'type' => 'array',
+                'value' => [AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::Bar, AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::Qux]
+            ]
+        ];
+
+        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
 }

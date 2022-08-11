@@ -20,7 +20,8 @@
     "cspray/typiphy": "^0.2",
     "nikic/php-parser": "^4.10",
     "psr/container": "^2.0",
-    "psr/log": "^2 || ^3"
+    "psr/log": "^2 || ^3",
+    "brick/varexporter": "^0.3.7"
   },
   "require-dev": {
     "cspray/phinal": "dev-main",
