@@ -259,7 +259,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                     'method' => $definition->getTargetIdentifier()->getMethodName(),
                     'parameterType' => $definition->getType()->getName(),
                     'parameter' => $definition->getTargetIdentifier()->getName(),
-                    'value' => $definition->getValue(),
+                    'value' => $this->convertValueToJsonifiable($definition->getValue()),
                     'store' => $definition->getStoreName(),
                     'profiles' => $definition->getProfiles()
                 ]
@@ -274,6 +274,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     ) : void {
         $targetReflection = $target->getTargetReflection();
         assert($targetReflection instanceof ReflectionProperty);
+
+
         $logger->info(
             sprintf(
                 'Parsed InjectDefinition from #[%s] Attribute on %s::%s.',
@@ -292,12 +294,26 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                     'serviceType' => $definition->getTargetIdentifier()->getClass()->getName(),
                     'property' => $definition->getTargetIdentifier()->getName(),
                     'propertyType' => $definition->getType()->getName(),
-                    'value' => $definition->getValue(),
+                    'value' => $this->convertValueToJsonifiable($definition->getValue()),
                     'store' => $definition->getStoreName(),
                     'profiles' => $definition->getProfiles()
                 ]
             ]
         );
+    }
+
+    private function convertValueToJsonifiable(mixed $value) : mixed {
+        $convertedValue = $value;
+        if ($value instanceof \UnitEnum) {
+            $convertedValue = sprintf('%s::%s', $value::class, $value->name);
+        } else if (is_array($value)) {
+            $convertedValue = [];
+            foreach ($value as $k => $v) {
+               $convertedValue[$k] = $this->convertValueToJsonifiable($v);
+            }
+        }
+
+        return $convertedValue;
     }
 
     private function logConfigurationDefinition(
