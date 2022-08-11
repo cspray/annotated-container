@@ -11,6 +11,7 @@ use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
+use Cspray\AnnotatedContainerFixture\CustomServiceAttribute\Repository;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
@@ -71,7 +72,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     public function testServicePrepareNotOnServiceThrowsException() {
         $this->expectException(InvalidAnnotationException::class);
         $this->expectExceptionMessage(sprintf(
-            'The class %s is not marked as a #[Service] but has a #[ServicePrepare] Attribute on the method "postConstruct".',
+            'Service preparation defined on %s::postConstruct, but that class is not a service.',
             LogicalErrorApps\ServicePrepareNotService\FooImplementation::class
         ));
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
@@ -85,7 +86,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         } finally {
             $expected = [
                 'message' => sprintf(
-                    'The class %s is not marked as a #[Service] but has a #[ServicePrepare] Attribute on the method "postConstruct".',
+                    'Service preparation defined on %s::postConstruct, but that class is not a service.',
                     LogicalErrorApps\ServicePrepareNotService\FooImplementation::class
                 ),
                 'context' => []
@@ -247,7 +248,8 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Parsed ServiceDefinition from #[Service] Attribute on %s.',
+                'Parsed ServiceDefinition from #[%s] Attribute on %s.',
+                Service::class,
                 Fixtures::singleConcreteService()->fooImplementation()->getName()
             ),
             'context' => [
@@ -274,7 +276,8 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Parsed ServiceDelegateDefinition from #[ServiceDelegate] Attribute on %s::%s.',
+                'Parsed ServiceDelegateDefinition from #[%s] Attribute on %s::%s.',
+                ServiceDelegate::class,
                 Fixtures::delegatedService()->serviceFactory()->getName(),
                 'createService'
             ),
@@ -300,9 +303,9 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Parsed ServicePrepareDefinition from #[ServicePrepare] Attribute on %s::%s.',
+                'Parsed ServicePrepareDefinition from #[%s] Attribute on %s::setBar.',
+                ServicePrepare::class,
                 Fixtures::classOnlyPrepareServices()->fooImplementation()->getName(),
-                'setBar'
             ),
             'context' => [
                 'attribute' => ServicePrepare::class,
@@ -326,7 +329,8 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Parsed ConfigurationDefinition from #[Configuration] Attribute on %s.',
+                'Parsed ConfigurationDefinition from #[%s] Attribute on %s.',
+                Configuration::class,
                 Fixtures::configurationServices()->myConfig()->getName()
             ),
             'context' => [
@@ -350,7 +354,8 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Parsed InjectDefinition from #[Inject] Attribute on %s::%s(%s).',
+                'Parsed InjectDefinition from #[%s] Attribute on %s::%s(%s).',
+                Inject::class,
                 Fixtures::injectConstructorServices()->injectStringService()->getName(),
                 '__construct',
                 'val'
@@ -383,7 +388,8 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Parsed InjectDefinition from #[Inject] Attribute on %s::%s.',
+                'Parsed InjectDefinition from #[%s] Attribute on %s::%s.',
+                Inject::class,
                 Fixtures::configurationServices()->myConfig()->getName(),
                 'user'
             ),
@@ -479,7 +485,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
     public function testServiceDelegateNotServiceThrowsException() : void {
         $message = sprintf(
-            'The #[ServiceDelegate] Attribute on %s::create declares a type, %s, that is not a service.',
+            'Service delegation defined on %s::create declares a type, %s, that is not a service.',
             LogicalErrorApps\ServiceDelegateNotService\ServiceFactory::class,
             LogicalErrorApps\ServiceDelegateNotService\FooService::class
         );
@@ -487,5 +493,34 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         self::expectExceptionMessage($message);
 
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServiceDelegateNotService');
+    }
+
+    public function testLogCustomAttribute() : void {
+
+        $this->runCompileDirectory(Fixtures::customServiceAttribute()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed ServiceDefinition from #[%s] Attribute on %s.',
+                Repository::class,
+                Fixtures::customServiceAttribute()->myRepo()->getName()
+            ),
+            'context' => [
+                'attribute' => Repository::class,
+                'target' => [
+                    'class' => Fixtures::customServiceAttribute()->myRepo()->getName(),
+                ],
+                'definition' => [
+                    'type' => ServiceDefinition::class,
+                    'serviceType' => Fixtures::customServiceAttribute()->myRepo()->getName(),
+                    'name' => null,
+                    'profiles' => ['test'],
+                    'isPrimary' => false,
+                    'isConcrete' => true,
+                    'isAbstract' => false
+                ]
+            ]
+        ];
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
     }
 }

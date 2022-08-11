@@ -148,7 +148,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         LoggerInterface $logger
     ) : void {
         $logger->info(
-            sprintf('Parsed ServiceDefinition from #[Service] Attribute on %s.', $definition->getType()->getName()),
+            sprintf(
+                'Parsed ServiceDefinition from #[%s] Attribute on %s.',
+                $target->getAttributeReflection()->getName(),
+                $definition->getType()->getName()
+            ),
             [
                 'attribute' => $target->getAttributeReflection()->getName(),
                 'target' => [
@@ -175,7 +179,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $targetReflection = $target->getTargetReflection();
         assert($targetReflection instanceof ReflectionMethod);
         $logger->info(
-            sprintf('Parsed ServicePrepareDefinition from #[ServicePrepare] Attribute on %s::%s.', $definition->getService()->getName(), $definition->getMethod()),
+            sprintf(
+                'Parsed ServicePrepareDefinition from #[%s] Attribute on %s::%s.',
+                $target->getAttributeReflection()->getName(),
+                $definition->getService()->getName(), $definition->getMethod()
+            ),
             [
                 'attribute' => $target->getAttributeReflection()->getName(),
                 'target' => [
@@ -200,7 +208,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         assert($targetReflection instanceof ReflectionMethod);
         $logger->info(
             sprintf(
-                'Parsed ServiceDelegateDefinition from #[ServiceDelegate] Attribute on %s::%s.',
+                'Parsed ServiceDelegateDefinition from #[%s] Attribute on %s::%s.',
+                $target->getAttributeReflection()->getName(),
                 $targetReflection->getDeclaringClass()->getName(),
                 $target->getTargetReflection()->getName()
             ),
@@ -231,7 +240,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         assert($declaringClass instanceof ReflectionClass);
         $logger->info(
             sprintf(
-                'Parsed InjectDefinition from #[Inject] Attribute on %s::%s(%s).',
+                'Parsed InjectDefinition from #[%s] Attribute on %s::%s(%s).',
+                $target->getAttributeReflection()->getName(),
                 $declaringClass->getName(),
                 $targetReflection->getDeclaringFunction()->getName(),
                 $targetReflection->getName()
@@ -266,7 +276,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         assert($targetReflection instanceof ReflectionProperty);
         $logger->info(
             sprintf(
-                'Parsed InjectDefinition from #[Inject] Attribute on %s::%s.',
+                'Parsed InjectDefinition from #[%s] Attribute on %s::%s.',
+                $target->getAttributeReflection()->getName(),
                 $targetReflection->getDeclaringClass()->getName(),
                 $targetReflection->getName()
             ),
@@ -298,7 +309,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         assert($targetReflection instanceof ReflectionClass);
         $logger->info(
             sprintf(
-                'Parsed ConfigurationDefinition from #[Configuration] Attribute on %s.',
+                'Parsed ConfigurationDefinition from #[%s] Attribute on %s.',
+                $target->getAttributeReflection()->getName(),
                 $targetReflection->getName()
             ),
             [
@@ -350,7 +362,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             if ($serviceDef === null) {
                 throw new InvalidAnnotationException(
                     sprintf(
-                        'The #[ServiceDelegate] Attribute on %s::%s declares a type, %s, that is not a service.',
+                        'Service delegation defined on %s::%s declares a type, %s, that is not a service.',
                         $serviceDelegateDefinition->getDelegateType()->getName(),
                         $serviceDelegateDefinition->getDelegateMethod(),
                         $serviceDelegateDefinition->getServiceType()->getName()
@@ -364,7 +376,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
             if (is_null($serviceDef)) {
                 $message = sprintf(
-                    'The class %s is not marked as a #[Service] but has a #[ServicePrepare] Attribute on the method "%s".',
+                    'Service preparation defined on %s::%s, but that class is not a service.',
                     $prepareDef->getService()->getName(),
                     $prepareDef->getMethod()
                 );
