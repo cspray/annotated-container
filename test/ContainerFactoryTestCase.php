@@ -494,7 +494,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Creating AnnotatedContainer with %s backing implementation and "default, foo, bar" active profiles.',
+                'Started wiring AnnotatedContainer with %s backing implementation and "default, foo, bar" active profiles.',
                 $container->getBackingContainer()::class
             ),
             'context' => [
@@ -502,7 +502,25 @@ abstract class ContainerFactoryTestCase extends TestCase {
                 'activeProfiles' => ['default', 'foo', 'bar']
             ]
         ];
-        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+
+        $logs = $logger->getLogsForLevel(LogLevel::INFO);
+        self::assertSame($expected, $logs[0]);
+    }
+
+    public function testLoggingCreatingContainerFinished() : void {
+        $logger = new TestLogger();
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), profiles: ['default', 'foo', 'bar'], logger: $logger);
+
+        $expected = [
+            'message' => 'Finished wiring AnnotatedContainer.',
+            'context' => [
+                'backingImplementation' => $container->getBackingContainer()::class,
+                'activeProfiles' => ['default', 'foo', 'bar']
+            ]
+        ];
+
+        $logs = $logger->getLogsForLevel(LogLevel::INFO);
+        self::assertSame($expected, $logs[count($logs) - 1]);
     }
 
     public function testLoggingServiceShared() : void {

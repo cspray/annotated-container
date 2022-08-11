@@ -83,10 +83,20 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     final protected function logCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {
         $this->logger->info(
             sprintf(
-                'Creating AnnotatedContainer with %s backing implementation and "%s" active profiles.',
+                'Started wiring AnnotatedContainer with %s backing implementation and "%s" active profiles.',
                 $backingImplementation->getName(),
                 implode(', ', $activeProfiles)
             ),
+            [
+                'backingImplementation' => $backingImplementation->getName(),
+                'activeProfiles' => $activeProfiles
+            ]
+        );
+    }
+
+    final protected function logFinishedCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {
+        $this->logger->info(
+            'Finished wiring AnnotatedContainer.',
             [
                 'backingImplementation' => $backingImplementation->getName(),
                 'activeProfiles' => $activeProfiles
