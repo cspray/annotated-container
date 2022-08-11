@@ -11,6 +11,8 @@ use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
+use Cspray\AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum;
+use Cspray\AnnotatedContainerFixture\ConfigurationWithEnum\MyEnum;
 use Cspray\AnnotatedContainerFixture\CustomServiceAttribute\Repository;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -521,6 +523,66 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
                 ]
             ]
         ];
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectConfigurationPropertyEnum() : void {
+        $this->runCompileDirectory(Fixtures::configurationWithEnum()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed InjectDefinition from #[%s] Attribute on %s::enum.',
+                Inject::class,
+                Fixtures::configurationWithEnum()->configuration()->getName(),
+            ),
+            'context' => [
+                'attribute' => Inject::class,
+                'target' => [
+                    'class' => Fixtures::configurationWithEnum()->configuration()->getName(),
+                    'property' => 'enum'
+                ],
+                'definition' => [
+                    'type' => InjectDefinition::class,
+                    'serviceType' => Fixtures::configurationWithEnum()->configuration()->getName(),
+                    'property' => 'enum',
+                    'propertyType' => MyEnum::class,
+                    'value' => MyEnum::class . '::Foo',
+                    'store' => null,
+                    'profiles' => ['default']
+                ]
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingInjectArrayConfigurationPropertyEnum() : void {
+        $this->runCompileDirectory(Fixtures::configurationWithArrayEnum()->getPath());
+
+        $expected = [
+            'message' => sprintf(
+                'Parsed InjectDefinition from #[%s] Attribute on %s::cases.',
+                Inject::class,
+                Fixtures::configurationWithArrayEnum()->myConfiguration()->getName(),
+            ),
+            'context' => [
+                'attribute' => Inject::class,
+                'target' => [
+                    'class' => Fixtures::configurationWithArrayEnum()->myConfiguration()->getName(),
+                    'property' => 'cases'
+                ],
+                'definition' => [
+                    'type' => InjectDefinition::class,
+                    'serviceType' => Fixtures::configurationWithArrayEnum()->myConfiguration()->getName(),
+                    'property' => 'cases',
+                    'propertyType' => 'array',
+                    'value' => [FooEnum::class . '::Bar', FooEnum::class . '::Qux'],
+                    'store' => null,
+                    'profiles' => ['default']
+                ]
+            ]
+        ];
+
         self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
     }
 }
