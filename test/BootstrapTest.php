@@ -209,10 +209,18 @@ XML;
             ->withContent($xml)
             ->at($this->vfs);
 
-        (new Bootstrap(directoryResolver: $directoryResolver))->bootstrapContainer();
+        $container = (new Bootstrap(directoryResolver: $directoryResolver))->bootstrapContainer();
 
         self::assertFileExists('vfs://root/annotated-container.log');
-        self::assertStringContainsString('Annotated Container compiling started.', file_get_contents('vfs://root/annotated-container.log'));
+        $logContents = file_get_contents('vfs://root/annotated-container.log');
+        self::assertStringContainsString('Annotated Container compiling started.', $logContents);
+        self::assertStringContainsString(
+            sprintf(
+                'Creating AnnotatedContainer with %s backing implementation and "default" active profiles.',
+                $container->getBackingContainer()::class,
+            ),
+            $logContents
+        );
     }
 
 }

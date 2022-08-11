@@ -84,7 +84,10 @@ $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DI
     ->withContainerDefinitionBuilderContextConsumer(new CallableContainerDefinitionBuilderContextConsumer(function($context) {
         service($context, $loggerType = objectType(LoggerInterface::class));
         serviceDelegate($context, $loggerType, objectType(MonologLoggerFactory::class), 'createLogger');
-        servicePrepare();
+        servicePrepare(
+            objectType(LoggerAwareInterface::class),
+            'setLogger'
+        );
     }))
     ->build();
 

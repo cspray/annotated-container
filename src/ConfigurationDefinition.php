@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\ConfigurationCannotBeAssignedProfiles;
 use Cspray\Typiphy\ObjectType;
 
 /**
@@ -9,6 +10,7 @@ use Cspray\Typiphy\ObjectType;
  *
  * @see ConfigurationDefinitionBuilder
  */
+#[ConfigurationCannotBeAssignedProfiles]
 interface ConfigurationDefinition {
 
     /**
