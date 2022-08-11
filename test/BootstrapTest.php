@@ -223,4 +223,33 @@ XML;
         );
     }
 
+    public function testBootstrapWithLoggingProfileExcluded() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+    <logging>
+      <file>annotated-container.log</file>
+      <exclude><profile>test</profile></exclude>
+    </logging>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($xml)
+            ->at($this->vfs);
+
+        (new Bootstrap(directoryResolver: $directoryResolver))->bootstrapContainer(['default', 'test']);
+
+        self::assertFileExists('vfs://root/annotated-container.log');
+        $logContents = file_get_contents('vfs://root/annotated-container.log');
+        self::assertSame('', $logContents);
+    }
+
 }

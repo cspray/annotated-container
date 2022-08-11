@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v.1.4.0](https://github.com/cspray/annotated-container/tree/v1.4.0) - 2022-08-10
+## [v.1.4.0](https://github.com/cspray/annotated-container/tree/v1.4.0) - 2022-08-11
 
 ### Added
 
 - Added extensive logging to all compiler and container factory operations.
+- Added ability to define a stdout or file logger when using the Bootstrap functionality.
+- Added ability to define a set of profiles that should be excluded from logging when using the Bootstrap functionality.
 
 ### Fixed
 

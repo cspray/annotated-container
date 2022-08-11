@@ -35,8 +35,9 @@ final class Bootstrap {
             $compileOptions = $compileOptions->withContainerDefinitionBuilderContextConsumer($containerDefinitionConsumer);
         }
 
+        $profilesAllowLogging = count(array_intersect($profiles, $configuration->getLoggingExcludedProfiles())) === 0;
         $logger = $configuration->getLogger();
-        if ($logger !== null) {
+        if ($logger !== null && $profilesAllowLogging) {
             $compileOptions = $compileOptions->withLogger($logger);
         }
 
@@ -54,7 +55,7 @@ final class Bootstrap {
         }
 
         $logger = $configuration->getLogger();
-        if ($logger !== null) {
+        if ($logger !== null && $profilesAllowLogging) {
             $factoryOptions = $factoryOptions->withLogger($logger);
         }
 
