@@ -20,7 +20,7 @@ final class ServiceDelegate implements ServiceDelegateAttribute {
      * @param ?string $service The FQCN of the service that should be created, or null if return type of the attributed
      *                         method should be used instead.
      */
-    public function __construct(private readonly ?string $service = null) {}
+    public function __construct(public readonly ?string $service = null) {}
 
     public function getService() : ?string {
         return $this->service;
