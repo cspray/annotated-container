@@ -89,8 +89,13 @@ SHELL;
 
         $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanDirs);
         $containerDefinitionConsumer = $config->getContainerDefinitionConsumer();
-        if (isset($containerDefinitionConsumer)) {
+        if ($containerDefinitionConsumer !== null) {
             $compileOptions = $compileOptions->withContainerDefinitionBuilderContextConsumer($containerDefinitionConsumer);
+        }
+
+        $logger = $config->getLogger();
+        if ($logger !== null) {
+            $compileOptions = $compileOptions->withLogger($logger);
         }
 
         compiler($cacheDir)->compile($compileOptions->build());
