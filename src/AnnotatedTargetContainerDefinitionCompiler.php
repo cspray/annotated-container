@@ -73,12 +73,12 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
         $consumer = $this->parse($containerDefinitionCompileOptions, $logger);
-        $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer, $logger);
         $containerDefinitionBuilder = $this->addThirdPartyServices(
             $containerDefinitionCompileOptions,
             $containerDefinitionBuilder,
             $logger
         );
+        $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer, $logger);
         $containerDefinitionBuilder = $this->addAliasDefinitions($containerDefinitionBuilder, $logger);
 
         $logger->info('Annotated Container compiling finished.');
