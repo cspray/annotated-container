@@ -14,12 +14,15 @@ use Attribute;
  * AutowireableInvoker interface will then be utilized to actually invoke the method that creates your service.
  */
 #[Attribute(Attribute::TARGET_METHOD)]
-final class ServiceDelegate {
+final class ServiceDelegate implements ServiceDelegateAttribute {
 
     /**
      * @param ?string $service The FQCN of the service that should be created, or null if return type of the attributed
      *                         method should be used instead.
      */
-    public function __construct(public readonly ?string $service = null) {}
+    public function __construct(private readonly ?string $service = null) {}
 
+    public function getService() : ?string {
+        return $this->service;
+    }
 }

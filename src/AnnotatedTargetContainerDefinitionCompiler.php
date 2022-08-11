@@ -150,7 +150,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $logger->info(
             sprintf('Parsed ServiceDefinition from #[Service] Attribute on %s.', $definition->getType()->getName()),
             [
-                'attribute' => AttributeType::Service->value,
+                'attribute' => $target->getAttributeReflection()->getName(),
                 'target' => [
                     'class' => $target->getTargetReflection()->getName()
                 ],
@@ -177,7 +177,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $logger->info(
             sprintf('Parsed ServicePrepareDefinition from #[ServicePrepare] Attribute on %s::%s.', $definition->getService()->getName(), $definition->getMethod()),
             [
-                'attribute' => AttributeType::ServicePrepare->value,
+                'attribute' => $target->getAttributeReflection()->getName(),
                 'target' => [
                     'class' => $targetReflection->getDeclaringClass()->getName(),
                     'method' => $targetReflection->getName()
@@ -205,7 +205,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                 $target->getTargetReflection()->getName()
             ),
             [
-                'attribute' => AttributeType::ServiceDelegate->value,
+                'attribute' => $target->getAttributeReflection()->getName(),
                 'target' => [
                     'class' => $targetReflection->getDeclaringClass()->getName(),
                     'method' => $target->getTargetReflection()->getName()
@@ -237,7 +237,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                 $targetReflection->getName()
             ),
             [
-                'attribute' => Inject::class,
+                'attribute' => $target->getAttributeReflection()->getName(),
                 'target' => [
                     'class' => $declaringClass->getName(),
                     'method' => $targetReflection->getDeclaringFunction()->getName(),
@@ -271,7 +271,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                 $targetReflection->getName()
             ),
             [
-                'attribute' => Inject::class,
+                'attribute' => $target->getAttributeReflection()->getName(),
                 'target' => [
                     'class' => $targetReflection->getDeclaringClass()->getName(),
                     'property' => $targetReflection->getName()
@@ -302,7 +302,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                 $targetReflection->getName()
             ),
             [
-                'attribute' => AttributeType::Configuration->value,
+                'attribute' => $target->getAttributeReflection()->getName(),
                 'target' => [
                     'class' => $targetReflection->getName()
                 ],

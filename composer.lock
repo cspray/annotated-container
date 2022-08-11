@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3ec28d720f3d709a40db7128dd6e5d14",
+    "content-hash": "dd146d15bac983faca523b19c81d955a",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -57,16 +57,16 @@
         },
         {
             "name": "cspray/annotated-target",
-            "version": "v0.1.1",
+            "version": "v0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-target.git",
-                "reference": "03d99ecfbd27b3ea434b92719fdbe4eb4b0173bb"
+                "reference": "190be08f71bfcfceec7af3a7ca9860962ab9bc5f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-target/zipball/03d99ecfbd27b3ea434b92719fdbe4eb4b0173bb",
-                "reference": "03d99ecfbd27b3ea434b92719fdbe4eb4b0173bb",
+                "url": "https://api.github.com/repos/cspray/annotated-target/zipball/190be08f71bfcfceec7af3a7ca9860962ab9bc5f",
+                "reference": "190be08f71bfcfceec7af3a7ca9860962ab9bc5f",
                 "shasum": ""
             },
             "require": {
@@ -101,26 +101,26 @@
             "description": "A PHP 8 library for statically parsing Attributes using PHP-Parser.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-target/issues",
-                "source": "https://github.com/cspray/annotated-target/tree/v0.1.1"
+                "source": "https://github.com/cspray/annotated-target/tree/v0.2.0"
             },
-            "time": "2022-06-08T12:22:51+00:00"
+            "time": "2022-08-11T13:27:59+00:00"
         },
         {
             "name": "cspray/architectural-decision",
-            "version": "1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/architectural-decision.git",
-                "reference": "290155604011471c0ccf81eb2e361d121a94e394"
+                "reference": "a8bb504a06cebfde2d8235a6ac1204baf8a08bf0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/architectural-decision/zipball/290155604011471c0ccf81eb2e361d121a94e394",
-                "reference": "290155604011471c0ccf81eb2e361d121a94e394",
+                "url": "https://api.github.com/repos/cspray/architectural-decision/zipball/a8bb504a06cebfde2d8235a6ac1204baf8a08bf0",
+                "reference": "a8bb504a06cebfde2d8235a6ac1204baf8a08bf0",
                 "shasum": ""
             },
             "require": {
-                "cspray/annotated-target": "^0.1.1",
+                "cspray/annotated-target": "^0.2",
                 "ext-dom": "*",
                 "php": "^8.1"
             },
@@ -146,9 +146,9 @@
             "description": "A library to keep track of architectural decisions with PHP annotations.",
             "support": {
                 "issues": "https://github.com/cspray/architectural-decision/issues",
-                "source": "https://github.com/cspray/architectural-decision/tree/1.0.0"
+                "source": "https://github.com/cspray/architectural-decision/tree/v1.1.0"
             },
-            "time": "2022-07-20T23:34:58+00:00"
+            "time": "2022-08-11T13:32:57+00:00"
         },
         {
             "name": "cspray/typiphy",
