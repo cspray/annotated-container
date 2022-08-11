@@ -216,7 +216,7 @@ XML;
         self::assertStringContainsString('Annotated Container compiling started.', $logContents);
         self::assertStringContainsString(
             sprintf(
-                'Creating AnnotatedContainer with %s backing implementation and "default" active profiles.',
+                'Started wiring AnnotatedContainer with %s backing implementation and "default" active profiles.',
                 $container->getBackingContainer()::class,
             ),
             $logContents

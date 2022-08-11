@@ -63,6 +63,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles),
                 $nameTypeMap
             );
+            $this->logFinishedCreatingContainer(objectType(Injector::class), $activeProfiles);
             return $this->getAnnotatedContainer($injector, $nameTypeMap, $this->getActiveProfilesService($activeProfiles));
         } catch (InvalidDefinitionException $exception) {
             throw new ContainerException($exception->getMessage(), previous: $exception);

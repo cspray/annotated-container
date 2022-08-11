@@ -220,20 +220,26 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         }
     }
 
-    public function testLoggingScannedDirs() : void {
+    public function testLoggingCompileLifecycleStarted() : void {
         $this->runCompileDirectory([
             $path1 = Fixtures::singleConcreteService()->getPath(),
             $path2 = Fixtures::ambiguousAliasedServices()->getPath()
         ]);
 
-        $expected = [
-            'message' => sprintf('Annotated Container compiling started. Scanning directories: %s %s', $path1, $path2),
+        $expected1 = [
+            'message' => sprintf('Annotated Container compiling started.'),
+            'context' => []
+        ];
+        $expected2 = [
+            'message' => sprintf('Scanning directories for Attributes: %s %s.', $path1, $path2),
             'context' => [
                 'sourcePaths' => [$path1, $path2]
             ]
         ];
 
-        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+        $logs = $this->logger->getLogsForLevel(LogLevel::INFO);
+        self::assertSame($expected1, $logs[0]);
+        self::assertSame($expected2, $logs[1]);
     }
 
     public function testLoggingServiceDefinition() : void {

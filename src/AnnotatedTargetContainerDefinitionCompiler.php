@@ -108,8 +108,9 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             ->filterAttributes(...$attributeTypes)
             ->build();
 
+        $logger->info('Annotated Container compiling started.');
         $logger->info(
-            sprintf('Annotated Container compiling started. Scanning directories: %s', implode(' ', $dirs)),
+            sprintf('Scanning directories for Attributes: %s.', implode(' ', $dirs)),
             ['sourcePaths' => $dirs]
         );
 
