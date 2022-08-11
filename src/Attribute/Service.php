@@ -21,9 +21,9 @@ final class Service implements ServiceAttribute {
      *                          FQCN.
      */
     public function __construct(
-        private readonly array $profiles = [],
-        private readonly bool $primary = false,
-        private readonly ?string $name = null
+        public readonly array $profiles = [],
+        public readonly bool $primary = false,
+        public readonly ?string $name = null
     ) {}
 
     public function getProfiles() : array {
