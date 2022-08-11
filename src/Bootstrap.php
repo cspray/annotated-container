@@ -2,15 +2,12 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Psr\Log\LoggerInterface;
-
 final class Bootstrap {
 
     private readonly BootstrappingDirectoryResolver $directoryResolver;
 
     public function __construct(
-        BootstrappingDirectoryResolver $directoryResolver = null,
-        LoggerInterface $logger = null
+        BootstrappingDirectoryResolver $directoryResolver = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->getDefaultDirectoryResolver();
     }
@@ -50,13 +47,18 @@ final class Bootstrap {
         }
         $containerDefinition = compiler($cacheDir)->compile($compileOptions->build());
 
-        $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles)->build();
+        $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
 
         foreach ($configuration->getParameterStores() as $parameterStore) {
             containerFactory()->addParameterStore($parameterStore);
         }
 
-        return containerFactory()->createContainer($containerDefinition, $factoryOptions);
+        $logger = $configuration->getLogger();
+        if ($logger !== null) {
+            $factoryOptions = $factoryOptions->withLogger($logger);
+        }
+
+        return containerFactory()->createContainer($containerDefinition, $factoryOptions->build());
     }
 
     private function getDefaultDirectoryResolver() : BootstrappingDirectoryResolver {

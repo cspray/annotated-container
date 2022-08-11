@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Exception\InvalidAliasException;
 use Cspray\Typiphy\ObjectType;
 
 final class StandardAliasDefinitionResolver implements AliasDefinitionResolver {

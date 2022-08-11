@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Attribute;
 
 use Attribute;
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\ConfigurationCannotBeAssignedProfiles;
 
 /**
  * An Attribute that defines a class as being a Configuration object.
@@ -10,6 +11,7 @@ use Attribute;
  * A Configuration object is expected to consist primarily of public readonly properties that have been annotated with
  * the Inject Attribute.
  */
+#[ConfigurationCannotBeAssignedProfiles]
 #[Attribute(Attribute::TARGET_CLASS)]
 final class Configuration {
 
