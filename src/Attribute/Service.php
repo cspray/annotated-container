@@ -10,7 +10,7 @@ use Attribute;
  * @package Cspray\AnnotatedContainer\Attribute
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-final class Service {
+final class Service implements ServiceAttribute {
 
     /**
      * @param string[] $profiles A list of profiles that must be active for this service to be included in the Container
@@ -26,4 +26,15 @@ final class Service {
         public readonly ?string $name = null
     ) {}
 
+    public function getProfiles() : array {
+        return $this->profiles;
+    }
+
+    public function isPrimary() : bool {
+        return $this->primary;
+    }
+
+    public function getName() : ?string {
+        return $this->name;
+    }
 }

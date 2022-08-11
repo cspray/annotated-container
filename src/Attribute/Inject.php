@@ -14,7 +14,7 @@ use UnitEnum;
  * give it a profile!
  */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
-final class Inject {
+final class Inject implements InjectAttribute {
 
     /**
      * Inject an explicit value into a constructor parameter, service prepare parameter, service delegate parameter, or
@@ -46,4 +46,15 @@ final class Inject {
         public readonly array $profiles = []
     ) {}
 
+    public function getValue() : string|int|float|bool|array|UnitEnum|null {
+        return $this->value;
+    }
+
+    public function getProfiles() : array {
+        return $this->profiles;
+    }
+
+    public function getFrom() : ?string {
+        return $this->from;
+    }
 }

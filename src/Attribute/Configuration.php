@@ -13,7 +13,7 @@ use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\ConfigurationCannotBe
  */
 #[ConfigurationCannotBeAssignedProfiles]
 #[Attribute(Attribute::TARGET_CLASS)]
-final class Configuration {
+final class Configuration implements ConfigurationAttribute {
 
     /**
      * @param string|null $name An arbitrary name that can be used to retrieve this Configuration with Container::get
@@ -22,5 +22,9 @@ final class Configuration {
     public function __construct(
         public readonly ?string $name = null
     ) {}
+
+    public function getName() : ?string {
+        return $this->name;
+    }
 
 }

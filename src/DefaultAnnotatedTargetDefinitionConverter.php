@@ -2,8 +2,13 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute;
+use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServiceAttribute;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegateAttribute;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepareAttribute;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
@@ -40,13 +45,20 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
     }
 
     public function convert(AnnotatedTarget $target) : ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition {
-        return match ($target->getAttributeReflection()->getName()) {
-            AttributeType::Service->value => $this->buildServiceDefinition($target),
-            AttributeType::ServiceDelegate->value => $this->buildServiceDelegateDefinition($target),
-            AttributeType::ServicePrepare->value => $this->buildServicePrepareDefinition($target),
-            AttributeType::Inject->value => $this->buildInjectDefinition($target),
-            AttributeType::Configuration->value => $this->buildConfigurationDefinition($target)
-        };
+        $attrInstance = $target->getAttributeInstance();
+        if ($attrInstance instanceof ServiceAttribute) {
+            return $this->buildServiceDefinition($target);
+        } else if ($attrInstance instanceof ConfigurationAttribute) {
+            return $this->buildConfigurationDefinition($target);
+        } else if ($attrInstance instanceof InjectAttribute) {
+            return $this->buildInjectDefinition($target);
+        } else if ($attrInstance instanceof ServiceDelegateAttribute) {
+            return $this->buildServiceDelegateDefinition($target);
+        } else if ($attrInstance instanceof ServicePrepareAttribute) {
+            return $this->buildServicePrepareDefinition($target);
+        } else {
+            throw new \RuntimeException();
+        }
     }
 
     private function buildServiceDefinition(AnnotatedTarget $target) : ServiceDefinition {
@@ -58,13 +70,13 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         if ($reflection->isInterface() || $reflection->isAbstract()) {
             $builder = ServiceDefinitionBuilder::forAbstract($serviceType);
         } else {
-            $builder = ServiceDefinitionBuilder::forConcrete($serviceType, $attribute->primary);
+            $builder = ServiceDefinitionBuilder::forConcrete($serviceType, $attribute->isPrimary());
         }
 
-        $profiles = empty($attribute->profiles) ? ['default'] : $attribute->profiles;
+        $profiles = empty($attribute->getProfiles()) ? ['default'] : $attribute->getProfiles();
         $builder = $builder->withProfiles($profiles);
-        if ($attribute->name !== null) {
-            $builder = $builder->withName($attribute->name);
+        if ($attribute->getName() !== null) {
+            $builder = $builder->withName($attribute->getName());
         }
 
         return $builder->build();
@@ -76,10 +88,11 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         $delegateType = $reflection->getDeclaringClass()->getName();
         $delegateMethod = $reflection->getName();
         $attribute = $target->getAttributeInstance();
-        assert($attribute instanceof ServiceDelegate);
+        assert($attribute instanceof ServiceDelegateAttribute);
 
-        if ($attribute->service !== null) {
-            return ServiceDelegateDefinitionBuilder::forService(objectType($attribute->service))
+        $service = $attribute->getService();
+        if ($service !== null) {
+            return ServiceDelegateDefinitionBuilder::forService(objectType($service))
                 ->withDelegateMethod(objectType($delegateType), $delegateMethod)
                 ->build();
         } else {
@@ -137,8 +150,11 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
 
     private function buildConfigurationDefinition(AnnotatedTarget $target) : ConfigurationDefinition {
         $builder = ConfigurationDefinitionBuilder::forClass(objectType($target->getTargetReflection()->getName()));
-        if (!is_null($target->getAttributeInstance()->name)) {
-            $builder = $builder->withName($target->getAttributeInstance()->name);
+        $attributeInstance = $target->getAttributeInstance();
+        assert($attributeInstance instanceof ConfigurationAttribute);
+        $name = $attributeInstance->getName();
+        if ($name !== null) {
+            $builder = $builder->withName($name);
         }
         return $builder->build();
     }
@@ -183,16 +199,19 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         }
 
         assert(isset($paramType));
+        $attributeInstance = $target->getAttributeInstance();
+        assert($attributeInstance instanceof InjectAttribute);
         $builder = InjectDefinitionBuilder::forService($serviceType)
             ->withMethod($method, $paramType, $param)
-            ->withValue($target->getAttributeInstance()->value);
+            ->withValue($attributeInstance->getValue());
 
-        if (isset($target->getAttributeInstance()->from)) {
-            $builder = $builder->withStore($target->getAttributeInstance()->from);
+        $from = $attributeInstance->getFrom();
+        if ($from !== null) {
+            $builder = $builder->withStore($from);
         }
 
-        $profiles = $target->getAttributeInstance()->profiles;
-        if (empty($profiles)) {
+        $profiles = $attributeInstance->getProfiles();
+        if (count($profiles) === 0) {
             $profiles[] = 'default';
         }
 
@@ -225,13 +244,16 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             $propType,
             $target->getTargetReflection()->getName()
         );
-        $builder = $builder->withValue($target->getAttributeInstance()->value);
-        if (isset($target->getAttributeInstance()->from)) {
-            $builder = $builder->withStore($target->getAttributeInstance()->from);
+        $attributeInstance = $target->getAttributeInstance();
+        assert($attributeInstance instanceof InjectAttribute);
+        $builder = $builder->withValue($attributeInstance->getValue());
+        $from = $attributeInstance->getFrom();
+        if ($from !== null) {
+            $builder = $builder->withStore($from);
         }
 
-        $profiles = $target->getAttributeInstance()->profiles;
-        if (empty($profiles)) {
+        $profiles = $attributeInstance->getProfiles();
+        if (count($profiles) === 0) {
             $profiles[] = 'default';
         }
 

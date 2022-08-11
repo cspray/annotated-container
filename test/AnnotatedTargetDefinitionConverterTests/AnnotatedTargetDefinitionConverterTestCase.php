@@ -45,7 +45,7 @@ abstract class AnnotatedTargetDefinitionConverterTestCase extends TestCase {
             }
 
             public function getAttributeReflection() : ReflectionAttribute {
-                return $this->reflection->getAttributes($this->attributeType->value)[$this->attributeIndex];
+                return $this->reflection->getAttributes($this->attributeType->value, ReflectionAttribute::IS_INSTANCEOF)[$this->attributeIndex];
             }
 
             public function getAttributeInstance(): Service|ServicePrepare|ServiceDelegate|Configuration|Inject {

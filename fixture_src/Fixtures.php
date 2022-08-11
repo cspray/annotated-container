@@ -164,4 +164,8 @@ final class Fixtures {
         return new ThirdPartyDelegatedServicesFixture();
     }
 
+    public static function customServiceAttribute() : CustomServiceAttributeFixture {
+        return new CustomServiceAttributeFixture();
+    }
+
 }
