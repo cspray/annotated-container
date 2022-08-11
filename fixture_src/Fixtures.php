@@ -160,4 +160,8 @@ final class Fixtures {
         return new ConfigurationInjectContainerServiceFixture();
     }
 
+    public static function thirdPartyDelegatedServices() : ThirdPartyDelegatedServicesFixture {
+        return new ThirdPartyDelegatedServicesFixture();
+    }
+
 }
