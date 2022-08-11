@@ -298,7 +298,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $logger->info(
             sprintf(
                 'Parsed ConfigurationDefinition from #[Configuration] Attribute on %s.',
-                Fixtures::configurationServices()->myConfig()->getName(),
+                $targetReflection->getName()
             ),
             [
                 'attribute' => AttributeType::Configuration->value,
