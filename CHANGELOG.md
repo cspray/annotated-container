@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased Changes
+
+## [v1.5.2](https://github.com/cspray/annoated-container/tree/v1.5.2) - 2022-08-13
+
+### Added
+
+- Added a `ServiceGatherListener` that encapsulates gathering a collection of services from the Container matching a given type. One of the primary use cases is to prepare a service that needs a collection of other services. For example, adding Controllers to a HTTP Routing system.
+
 ## [v1.5.1](https://github.com/cspray/annotated-container/tree/v1.5.1) - 2022-08-13
 
 ### Fixed
