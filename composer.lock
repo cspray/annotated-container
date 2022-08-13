@@ -57,16 +57,16 @@
         },
         {
             "name": "cspray/annotated-target",
-            "version": "v0.2.0",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-target.git",
-                "reference": "190be08f71bfcfceec7af3a7ca9860962ab9bc5f"
+                "reference": "8d1a59725df30a43f27bbdb973c0f714a8eb44f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-target/zipball/190be08f71bfcfceec7af3a7ca9860962ab9bc5f",
-                "reference": "190be08f71bfcfceec7af3a7ca9860962ab9bc5f",
+                "url": "https://api.github.com/repos/cspray/annotated-target/zipball/8d1a59725df30a43f27bbdb973c0f714a8eb44f5",
+                "reference": "8d1a59725df30a43f27bbdb973c0f714a8eb44f5",
                 "shasum": ""
             },
             "require": {
@@ -101,9 +101,9 @@
             "description": "A PHP 8 library for statically parsing Attributes using PHP-Parser.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-target/issues",
-                "source": "https://github.com/cspray/annotated-target/tree/v0.2.0"
+                "source": "https://github.com/cspray/annotated-target/tree/v0.2.1"
             },
-            "time": "2022-08-11T13:27:59+00:00"
+            "time": "2022-08-12T14:01:47+00:00"
         },
         {
             "name": "cspray/architectural-decision",

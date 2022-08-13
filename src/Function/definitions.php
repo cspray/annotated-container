@@ -46,8 +46,8 @@ function serviceDelegate(ContainerDefinitionBuilderContext $context, ObjectType 
     return $serviceDelegateDefinition;
 }
 
-function servicePrepare(ContainerDefinitionBuilderContext $context, ObjectType $serviceDefinition, string $method) : ServicePrepareDefinition {
-    $servicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($serviceDefinition, $method)->build();
+function servicePrepare(ContainerDefinitionBuilderContext $context, ObjectType $service, string $method) : ServicePrepareDefinition {
+    $servicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($service, $method)->build();
     $context->setBuilder($context->getBuilder()->withServicePrepareDefinition($servicePrepareDefinition));
     return $servicePrepareDefinition;
 }

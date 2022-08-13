@@ -2,14 +2,25 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Psr\Log\LoggerInterface;
+
 final class Bootstrap {
 
     private readonly BootstrappingDirectoryResolver $directoryResolver;
+    private readonly ?LoggerInterface $logger;
+    private readonly ?ParameterStoreFactory $parameterStoreFactory;
+    private readonly ?ContainerDefinitionBuilderContextConsumerFactory $containerDefinitionBuilderContextConsumerFactory;
 
     public function __construct(
-        BootstrappingDirectoryResolver $directoryResolver = null
+        BootstrappingDirectoryResolver $directoryResolver = null,
+        LoggerInterface $logger = null,
+        ParameterStoreFactory $parameterStoreFactory = null,
+        ContainerDefinitionBuilderContextConsumerFactory $containerDefinitionBuilderContextConsumerFactory = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->getDefaultDirectoryResolver();
+        $this->logger = $logger;
+        $this->parameterStoreFactory = $parameterStoreFactory;
+        $this->containerDefinitionBuilderContextConsumerFactory = $containerDefinitionBuilderContextConsumerFactory;
     }
 
     /**
@@ -23,7 +34,12 @@ final class Bootstrap {
         string $configurationFile = 'annotated-container.xml'
     ) : AnnotatedContainer {
         $configFile = $this->directoryResolver->getConfigurationPath($configurationFile);
-        $configuration = new XmlBootstrappingConfiguration($configFile, $this->directoryResolver);
+        $configuration = new XmlBootstrappingConfiguration(
+            $configFile,
+            $this->directoryResolver,
+            $this->parameterStoreFactory,
+            $this->containerDefinitionBuilderContextConsumerFactory
+        );
 
         $scanPaths = [];
         foreach ($configuration->getScanDirectories() as $scanDirectory) {
@@ -36,7 +52,7 @@ final class Bootstrap {
         }
 
         $profilesAllowLogging = count(array_intersect($profiles, $configuration->getLoggingExcludedProfiles())) === 0;
-        $logger = $configuration->getLogger();
+        $logger = $this->logger ?? $configuration->getLogger();
         if ($logger !== null && $profilesAllowLogging) {
             $compileOptions = $compileOptions->withLogger($logger);
         }
@@ -54,7 +70,6 @@ final class Bootstrap {
             containerFactory()->addParameterStore($parameterStore);
         }
 
-        $logger = $configuration->getLogger();
         if ($logger !== null && $profilesAllowLogging) {
             $factoryOptions = $factoryOptions->withLogger($logger);
         }
