@@ -289,7 +289,8 @@ class JsonContainerDefinitionSerializerTest extends TestCase {
             'abstractClassAliasedService' => [Fixtures::abstractClassAliasedService()->getPath()],
             'namedServices' => [Fixtures::namedServices()->getPath()],
             'injectConstructorServices' => [Fixtures::injectConstructorServices()->getPath()],
-            'configurationServices' => [Fixtures::configurationServices()->getPath()]
+            'configurationServices' => [Fixtures::configurationServices()->getPath()],
+            'injectArrayOfNumbers' => [Fixtures::injectListOfScalarsFixture()->getPath()]
         ];
     }
 

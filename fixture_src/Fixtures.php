@@ -168,4 +168,8 @@ final class Fixtures {
         return new CustomServiceAttributeFixture();
     }
 
+    public static function injectListOfScalarsFixture() : InjectListOfScalarsFixture {
+        return new InjectListOfScalarsFixture();
+    }
+
 }
