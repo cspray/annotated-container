@@ -62,13 +62,13 @@ final class SerializerInjectValueParser {
         } else {
             $type = match($rawType) {
                 'string' => stringType(),
-                'int' => intType(),
-                'float' => floatType(),
-                'bool' => boolType(),
+                'int', 'integer' => intType(),
+                'float', 'double' => floatType(),
+                'bool', 'boolean' => boolType(),
                 'array' => arrayType(),
                 'mixed' => mixedType(),
                 'iterable' => iterableType(),
-                'null' => nullType(),
+                'null', 'NULL' => nullType(),
                 'void' => voidType(),
                 'callable' => callableType(),
                 default => objectType($rawType)
