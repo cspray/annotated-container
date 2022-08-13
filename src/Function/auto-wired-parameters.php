@@ -64,15 +64,15 @@ function autowiredParams(AutowireableParameter... $parameters) : AutowireablePar
  * abstract service its concrete alias will be resolved and used.
  *
  * @param string $name
- * @param ObjectType $objectType
+ * @param ObjectType $service
  * @return AutowireableParameter
  * @throws InvalidParameterException
  */
-function serviceParam(string $name, ObjectType $objectType) : AutowireableParameter {
+function serviceParam(string $name, ObjectType $service) : AutowireableParameter {
     if (empty($name)) {
         throw new InvalidParameterException('A parameter name must have a non-empty value.');
     }
-    return new class($name, $objectType) implements AutowireableParameter {
+    return new class($name, $service) implements AutowireableParameter {
 
         public function __construct(
             private readonly string $name,
