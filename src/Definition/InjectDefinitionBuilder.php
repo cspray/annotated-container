@@ -1,6 +1,6 @@
 <?php
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Definition;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier;
