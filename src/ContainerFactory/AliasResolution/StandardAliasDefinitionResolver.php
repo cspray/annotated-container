@@ -1,7 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\ContainerFactory\AliasResolution;
 
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\AliasDefinition;
+use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\Typiphy\ObjectType;
 
 final class StandardAliasDefinitionResolver implements AliasDefinitionResolver {

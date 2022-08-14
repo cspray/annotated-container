@@ -16,6 +16,11 @@ use Cspray\AnnotatedContainer\ContainerFactory\EventEmittingContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStoreFactory;
 
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasResolutionReason;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\StandardAliasDefinitionResolver;
+
 use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
@@ -55,6 +60,11 @@ class_alias(EnvironmentParameterStore::class, 'Cspray\AnnotatedContainer\Environ
 class_alias(EventEmittingContainerFactory::class, 'Cspray\AnnotatedContainer\EventEmittingContainerFactory');
 class_alias(ParameterStore::class, 'Cspray\AnnotatedContainer\ParameterStore');
 class_alias(ParameterStoreFactory::class, 'Cspray\AnnotatedContainer\ParameterStoreFactory');
+
+class_alias(AliasDefinitionResolution::class, 'Cspray\AnnotatedContainer\AliasDefinitionResolution');
+class_alias(AliasDefinitionResolver::class, 'Cspray\AnnotatedContainer\AliasDefinitionResolver');
+class_alias(AliasResolutionReason::class, 'Cspray\AnnotatedContainer\AliasResolutionReason');
+class_alias(StandardAliasDefinitionResolver::class, 'Cspray\AnnotatedContainer\StandardAliasDefinitionResolver');
 
 class_alias(AliasDefinition::class, 'Cspray\AnnotatedContainer\AliasDefinition');
 class_alias(AliasDefinitionBuilder::class, 'Cspray\AnnotatedContainer\AliasDefinitionBuilder');
