@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Event;
 
 enum AnnotatedContainerLifecycle {
     case BeforeCompile;

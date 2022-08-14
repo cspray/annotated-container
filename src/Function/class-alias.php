@@ -17,6 +17,14 @@ use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinitionBuilder;
 
+use Cspray\AnnotatedContainer\Event\AnnotatedContainerEmitter;
+use Cspray\AnnotatedContainer\Event\AnnotatedContainerEvent;
+use Cspray\AnnotatedContainer\Event\AnnotatedContainerLifecycle;
+use Cspray\AnnotatedContainer\Event\AnnotatedContainerListener;
+use Cspray\AnnotatedContainer\Event\ServiceGatheringListener;
+use Cspray\AnnotatedContainer\Event\StandardAnnotatedContainerEmitter;
+
+
 class_alias(AliasDefinition::class, 'Cspray\AnnotatedContainer\AliasDefinition');
 class_alias(AliasDefinitionBuilder::class, 'Cspray\AnnotatedContainer\AliasDefinitionBuilder');
 class_alias(ConfigurationDefinition::class, 'Cspray\AnnotatedContainer\ConfigurationDefinition');
@@ -33,3 +41,10 @@ class_alias(ServiceDelegateDefinition::class, 'Cspray\AnnotatedContainer\Service
 class_alias(ServiceDelegateDefinitionBuilder::class, 'Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder');
 class_alias(ServicePrepareDefinition::class, 'Cspray\AnnotatedContainer\ServicePrepareDefinition');
 class_alias(ServicePrepareDefinitionBuilder::class, 'Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder');
+
+class_alias(AnnotatedContainerEmitter::class, 'Cspray\AnnotatedContainer\AnnotatedContainerEmitter');
+class_alias(AnnotatedContainerEvent::class, 'Cspray\AnnotatedContainer\AnnotatedContainerEvent');
+class_alias(AnnotatedContainerLifecycle::class, 'Cspray\AnnotatedContainer\AnnotatedContainerLifecycle');
+class_alias(AnnotatedContainerListener::class, 'Cspray\AnnotatedContainer\AnnotatedContainerListener');
+class_alias(ServiceGatheringListener::class, 'Cspray\AnnotatedContainer\ServiceGatheringListener');
+class_alias(StandardAnnotatedContainerEmitter::class, 'Cspray\AnnotatedContainer\StandardAnnotatedContainerEmitter');

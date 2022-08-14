@@ -1,7 +1,9 @@
 <?php
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Event;
 
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\Typiphy\ObjectType;
 
 abstract class ServiceGatheringListener implements AnnotatedContainerListener {

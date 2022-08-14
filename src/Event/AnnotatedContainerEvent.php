@@ -1,6 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Event;
+
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\AnnotatedContainer;
 
 interface AnnotatedContainerEvent {
 
