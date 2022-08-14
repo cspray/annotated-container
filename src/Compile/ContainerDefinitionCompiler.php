@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 

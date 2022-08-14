@@ -1,8 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
 use Psr\Log\LoggerInterface;
 
 /**

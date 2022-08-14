@@ -1,12 +1,23 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\Attribute\Inject;
+use Cspray\AnnotatedContainer\AliasDefinition;
+use Cspray\AnnotatedContainer\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainer\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\InjectDefinition;
+use Cspray\AnnotatedContainer\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedTarget\AnnotatedTargetParser;
 use Cspray\AnnotatedTarget\AnnotatedTargetParserOptionsBuilder;
@@ -56,7 +67,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         if (empty($scanDirs)) {
             $message = sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s must include at least 1 directory to scan, but none were provided.',
-                self::class
+                'Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler'
             );
             $logger->error($message);
             throw new InvalidCompileOptionsException($message);
@@ -65,7 +76,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         if (count(array_unique($scanDirs)) !== count($scanDirs)) {
             $message = sprintf(
                 'The ContainerDefinitionCompileOptions passed to %s includes duplicate directories. Please pass a distinct set of directories to scan.',
-                self::class
+                'Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler'
             );
             $logger->error($message, ['sourcePaths' => $scanDirs]);
             throw new InvalidCompileOptionsException($message);

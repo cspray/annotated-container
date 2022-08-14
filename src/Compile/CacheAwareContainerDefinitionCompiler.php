@@ -1,8 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions;
+use Cspray\AnnotatedContainer\ContainerDefinitionSerializer;
+use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
+use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 
 /**
  * A ContainerDefinitionCompiler decorator that allows for a ContainerDefinition to be serialized and cached to the
@@ -37,8 +42,8 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
      *
      * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
-     * @throws Exception\InvalidAnnotationException
-     * @throws Exception\InvalidCompileOptionsException
+     * @throws InvalidAnnotationException
+     * @throws InvalidCompileOptionsException
      * @throws InvalidCacheException
      */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions): ContainerDefinition {

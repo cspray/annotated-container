@@ -1,5 +1,13 @@
 <?php
 
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptions;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompilerBuilder;
+use Cspray\AnnotatedContainer\Compile\EventEmittingContainerDefinitionCompiler;
+
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
@@ -31,6 +39,14 @@ use Cspray\AnnotatedContainer\Event\AnnotatedContainerLifecycle;
 use Cspray\AnnotatedContainer\Event\AnnotatedContainerListener;
 use Cspray\AnnotatedContainer\Event\ServiceGatheringListener;
 use Cspray\AnnotatedContainer\Event\StandardAnnotatedContainerEmitter;
+
+class_alias(AnnotatedTargetContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler');
+class_alias(CacheAwareContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\CacheAwareContainerDefinitionCompiler');
+class_alias(ContainerDefinitionCompileOptions::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions');
+class_alias(ContainerDefinitionCompileOptionsBuilder::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder');
+class_alias(ContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompiler');
+class_alias(ContainerDefinitionCompilerBuilder::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder');
+class_alias(EventEmittingContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\EventEmittingContainerDefinitionCompiler');
 
 class_alias(ContainerFactory::class, 'Cspray\AnnotatedContainer\ContainerFactory');
 class_alias(ContainerFactoryOptions::class, 'Cspray\AnnotatedContainer\ContainerFactoryOptions');

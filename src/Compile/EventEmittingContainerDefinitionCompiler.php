@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
+use Cspray\AnnotatedContainer\AnnotatedContainerEmitter;
+use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\Internal\AfterCompileAnnotatedContainerEvent;
 use Cspray\AnnotatedContainer\Internal\BeforeCompileAnnotatedContainerEvent;
 

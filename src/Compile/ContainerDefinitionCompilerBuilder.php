@@ -1,8 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
+use Cspray\AnnotatedContainer\AnnotatedContainerListener;
+use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
+use function Cspray\AnnotatedContainer\eventEmitter;
 
 /**
  * A convenience builder to allow easily getting a ContainerDefinitionCompiler instance.
