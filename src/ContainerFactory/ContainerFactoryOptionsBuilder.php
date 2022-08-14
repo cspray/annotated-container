@@ -1,7 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Cspray\AnnotatedContainer\ContainerFactoryOptions;
 use Psr\Log\LoggerInterface;
 
 final class ContainerFactoryOptionsBuilder {

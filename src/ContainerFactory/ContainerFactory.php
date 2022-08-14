@@ -1,8 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\ContainerFactory;
 
-use Psr\Log\LoggerAwareInterface;
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\ContainerFactoryOptions;
+use Cspray\AnnotatedContainer\AnnotatedContainer;
+use Cspray\AnnotatedContainer\ParameterStore;
 
 /**
  * A factory that is responsible for turning a ContainerDefinition into a PSR ContainerInterface.

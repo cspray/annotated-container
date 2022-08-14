@@ -1,7 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Cspray\AnnotatedContainer\AnnotatedContainer;
+use Cspray\AnnotatedContainer\AnnotatedContainerEmitter;
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\ParameterStore;
 use Cspray\AnnotatedContainer\Internal\AfterContainerCreationAnnotatedContainerEvent;
 use Cspray\AnnotatedContainer\Internal\BeforeContainerCreationAnnotatedContainerEvent;
 

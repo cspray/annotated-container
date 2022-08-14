@@ -1,5 +1,13 @@
 <?php
 
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptions;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
+use Cspray\AnnotatedContainer\ContainerFactory\EnvironmentParameterStore;
+use Cspray\AnnotatedContainer\ContainerFactory\EventEmittingContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStoreFactory;
+
 use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
@@ -24,6 +32,13 @@ use Cspray\AnnotatedContainer\Event\AnnotatedContainerListener;
 use Cspray\AnnotatedContainer\Event\ServiceGatheringListener;
 use Cspray\AnnotatedContainer\Event\StandardAnnotatedContainerEmitter;
 
+class_alias(ContainerFactory::class, 'Cspray\AnnotatedContainer\ContainerFactory');
+class_alias(ContainerFactoryOptions::class, 'Cspray\AnnotatedContainer\ContainerFactoryOptions');
+class_alias(ContainerFactoryOptionsBuilder::class, 'Cspray\AnnotatedContainer\ContainerFactoryOptionsBuilder');
+class_alias(EnvironmentParameterStore::class, 'Cspray\AnnotatedContainer\EnvironmentParameterStore');
+class_alias(EventEmittingContainerFactory::class, 'Cspray\AnnotatedContainer\EventEmittingContainerFactory');
+class_alias(ParameterStore::class, 'Cspray\AnnotatedContainer\ParameterStore');
+class_alias(ParameterStoreFactory::class, 'Cspray\AnnotatedContainer\ParameterStoreFactory');
 
 class_alias(AliasDefinition::class, 'Cspray\AnnotatedContainer\AliasDefinition');
 class_alias(AliasDefinitionBuilder::class, 'Cspray\AnnotatedContainer\AliasDefinitionBuilder');

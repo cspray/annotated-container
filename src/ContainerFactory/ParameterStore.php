@@ -1,6 +1,6 @@
 <?php
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
