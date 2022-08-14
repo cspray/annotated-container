@@ -2,6 +2,10 @@
 
 use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\CallableContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumerFactory;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptions;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
@@ -47,6 +51,10 @@ use Cspray\AnnotatedContainer\Event\StandardAnnotatedContainerEmitter;
 
 class_alias(AnnotatedTargetContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler');
 class_alias(CacheAwareContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\CacheAwareContainerDefinitionCompiler');
+class_alias(CallableContainerDefinitionBuilderContextConsumer::class, 'Cspray\AnnotatedContainer\CallableContainerDefinitionBuilderContextConsumer');
+class_alias(ContainerDefinitionBuilderContext::class, 'Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext');
+class_alias(ContainerDefinitionBuilderContextConsumer::class, 'Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer');
+class_alias(ContainerDefinitionBuilderContextConsumerFactory::class, 'Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumerFactory');
 class_alias(ContainerDefinitionCompileOptions::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions');
 class_alias(ContainerDefinitionCompileOptionsBuilder::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder');
 class_alias(ContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompiler');

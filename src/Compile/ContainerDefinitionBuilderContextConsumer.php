@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
 /**
  * An interface that allows for making modifications to the ContainerDefinitionBuilder before the resultant

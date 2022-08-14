@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
+
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
 
 /**
  * An object that allows the functional API for creating definition instances to work with the immutable

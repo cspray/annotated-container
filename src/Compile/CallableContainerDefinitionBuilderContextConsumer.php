@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
 /**
  * A ContainerDefinitionBuilderContextConsumer that allows you to pass in an anonymous function or some other callable
