@@ -6,7 +6,7 @@ use UnitEnum;
 
 interface InjectAttribute {
 
-    public function getValue() : string|int|float|bool|array|UnitEnum|null;
+    public function getValue() : mixed;
 
     public function getProfiles() : array;
 
