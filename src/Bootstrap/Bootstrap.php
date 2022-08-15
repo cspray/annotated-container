@@ -89,7 +89,7 @@ final class Bootstrap {
     private function getDefaultDirectoryResolver() : BootstrappingDirectoryResolver {
         $rootDir = dirname(__DIR__);
         if (!file_exists($rootDir . '/vendor/autoload.php')) {
-            $rootDir = dirname(__DIR__, 4);
+            $rootDir = dirname(__DIR__, 5);
         }
 
         return new RootDirectoryBootstrappingDirectoryResolver($rootDir);
