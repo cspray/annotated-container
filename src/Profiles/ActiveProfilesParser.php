@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Profiles;
 
 /**
  * An implementation that can be used to parse a string into an array of active profiles.

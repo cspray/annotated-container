@@ -16,7 +16,6 @@
   <issueHandlers>
     <PropertyNotSetInConstructor>
       <errorLevel type="suppress">
-        <file name="src/*Builder.php" />
         <file name="src/ContainerFactory/*Builder.php" />
         <file name="src/Definition/*Builder.php"/>
       </errorLevel>

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Profiles;
 
 /**
  * An ActiveProfilesParser that will take a comma-separated string and turn it into a list of active profiles.
