@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Serializer;
+
+use Cspray\AnnotatedContainer\ContainerDefinition;
 
 /**
  * Allow for turning a ContainerDefinition into a format that can be persisted and later turned back into a

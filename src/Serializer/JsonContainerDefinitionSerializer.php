@@ -1,29 +1,21 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Serializer;
 
+use Cspray\AnnotatedContainer\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder;
+use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\Internal\Objects;
 use Cspray\AnnotatedContainer\Internal\SerializerInjectValueParser;
 use Cspray\AnnotatedContainer\Internal\SerializerServiceDefinitionCache;
-use Cspray\Typiphy\ObjectType;
-use Cspray\Typiphy\Type;
-use Cspray\Typiphy\TypeIntersect;
-use Cspray\Typiphy\TypeUnion;
-use phpDocumentor\Reflection\DocBlock\Serializer;
-use ReflectionEnum;
-use function Cspray\Typiphy\arrayType;
-use function Cspray\Typiphy\boolType;
-use function Cspray\Typiphy\callableType;
-use function Cspray\Typiphy\floatType;
-use function Cspray\Typiphy\intType;
-use function Cspray\Typiphy\iterableType;
-use function Cspray\Typiphy\mixedType;
-use function Cspray\Typiphy\nullType;
+use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainer\ServiceDefinitionBuilder;
+use Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder;
+use Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder;
 use function Cspray\Typiphy\objectType;
-use function Cspray\Typiphy\stringType;
-use function Cspray\Typiphy\typeIntersect;
-use function Cspray\Typiphy\typeUnion;
-use function Cspray\Typiphy\voidType;
 
 /**
  * A ContainerDefinitionSerializer that will format a ContainerDefinition into a JSON string.
@@ -174,7 +166,7 @@ final class JsonContainerDefinitionSerializer implements ContainerDefinitionSeri
      *
      * @param string $serializedDefinition
      * @return ContainerDefinition
-     * @throws Exception\DefinitionBuilderException
+     * @throws DefinitionBuilderException
      */
     public function deserialize(string $serializedDefinition) : ContainerDefinition {
         /** @var JsonSerializedContainerDefinitionArray $data */

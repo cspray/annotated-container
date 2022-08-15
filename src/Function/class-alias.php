@@ -55,6 +55,9 @@ use Cspray\AnnotatedContainer\Event\AnnotatedContainerListener;
 use Cspray\AnnotatedContainer\Event\ServiceGatheringListener;
 use Cspray\AnnotatedContainer\Event\StandardAnnotatedContainerEmitter;
 
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
+use Cspray\AnnotatedContainer\Serializer\JsonContainerDefinitionSerializer;
+
 class_alias(Bootstrap::class, 'Cspray\AnnotatedContainer\Bootstrap');
 class_alias(BootstrappingConfiguration::class, 'Cspray\AnnotatedContainer\BootstrappingConfiguration');
 class_alias(BootstrappingDirectoryResolver::class, 'Cspray\AnnotatedContainer\BootstrappingDirectoryResolver');
@@ -109,3 +112,6 @@ class_alias(AnnotatedContainerLifecycle::class, 'Cspray\AnnotatedContainer\Annot
 class_alias(AnnotatedContainerListener::class, 'Cspray\AnnotatedContainer\AnnotatedContainerListener');
 class_alias(ServiceGatheringListener::class, 'Cspray\AnnotatedContainer\ServiceGatheringListener');
 class_alias(StandardAnnotatedContainerEmitter::class, 'Cspray\AnnotatedContainer\StandardAnnotatedContainerEmitter');
+
+class_alias(ContainerDefinitionSerializer::class, 'Cspray\AnnotatedContainer\ContainerDefinitionSerializer');
+class_alias(JsonContainerDefinitionSerializer::class, 'Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer');
