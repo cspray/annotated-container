@@ -1,6 +1,6 @@
 <?php
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Bootstrap;
 
 interface BootstrappingDirectoryResolver {
 

@@ -1,8 +1,18 @@
 <?php
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Bootstrap;
 
+use Cspray\AnnotatedContainer\AnnotatedContainer;
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumerFactory;
+use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\ContainerFactoryOptionsBuilder;
+use Cspray\AnnotatedContainer\Exception\ContainerFactoryNotFoundException;
+use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
+use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedContainer\ParameterStoreFactory;
 use Psr\Log\LoggerInterface;
+use function Cspray\AnnotatedContainer\compiler;
+use function Cspray\AnnotatedContainer\containerFactory;
 
 final class Bootstrap {
 
@@ -24,10 +34,9 @@ final class Bootstrap {
     }
 
     /**
-     * @throws Exception\ContainerFactoryNotFoundException
-     * @throws Exception\InvalidCompileOptionsException
-     * @throws Exception\InvalidAnnotationException
-     * @throws Exception\InvalidBootstrappingConfigurationException
+     * @throws ContainerFactoryNotFoundException
+     * @throws InvalidCompileOptionsException
+     * @throws InvalidAnnotationException
      */
     public function bootstrapContainer(
         array $profiles = ['default'],

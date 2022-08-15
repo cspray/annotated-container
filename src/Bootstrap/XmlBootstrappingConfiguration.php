@@ -1,12 +1,16 @@
 <?php
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Bootstrap;
 
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumerFactory;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrappingConfigurationException;
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\Internal\CompositeLogger;
 use Cspray\AnnotatedContainer\Internal\FileLogger;
 use Cspray\AnnotatedContainer\Internal\StdoutLogger;
+use Cspray\AnnotatedContainer\ParameterStore;
+use Cspray\AnnotatedContainer\ParameterStoreFactory;
 use DateTimeImmutable;
 use DOMDocument;
 use DOMNode;
@@ -39,7 +43,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         private readonly ?ContainerDefinitionBuilderContextConsumerFactory $consumerFactory = null
     ) {
         try{
-            $schemaFile = dirname(__DIR__) . '/annotated-container.xsd';
+            $schemaFile = dirname(__DIR__, 2) . '/annotated-container.xsd';
             $dom = new DOMDocument();
             $dom->load($this->xmlFile);
             libxml_use_internal_errors(true);

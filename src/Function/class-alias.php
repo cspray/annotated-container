@@ -1,5 +1,11 @@
 <?php
 
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\RootDirectoryBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
+
 use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Compile\CallableContainerDefinitionBuilderContextConsumer;
@@ -48,6 +54,12 @@ use Cspray\AnnotatedContainer\Event\AnnotatedContainerLifecycle;
 use Cspray\AnnotatedContainer\Event\AnnotatedContainerListener;
 use Cspray\AnnotatedContainer\Event\ServiceGatheringListener;
 use Cspray\AnnotatedContainer\Event\StandardAnnotatedContainerEmitter;
+
+class_alias(Bootstrap::class, 'Cspray\AnnotatedContainer\Bootstrap');
+class_alias(BootstrappingConfiguration::class, 'Cspray\AnnotatedContainer\BootstrappingConfiguration');
+class_alias(BootstrappingDirectoryResolver::class, 'Cspray\AnnotatedContainer\BootstrappingDirectoryResolver');
+class_alias(RootDirectoryBootstrappingDirectoryResolver::class, 'Cspray\AnnotatedContainer\RootDirectoryBootstrappingDirectoryResolver');
+class_alias(XmlBootstrappingConfiguration::class, 'Cspray\AnnotatedContainer\XmlBootstrappingConfiguration');
 
 class_alias(AnnotatedTargetContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler');
 class_alias(CacheAwareContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\CacheAwareContainerDefinitionCompiler');
