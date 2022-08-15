@@ -17,7 +17,8 @@
   <issueHandlers>
     <PropertyNotSetInConstructor>
       <errorLevel type="suppress">
-        <file name="src/*Builder.php"/>
+        <file name="src/ContainerFactory/*Builder.php" />
+        <file name="src/Definition/*Builder.php"/>
       </errorLevel>
     </PropertyNotSetInConstructor>
     <DeprecatedClass>
@@ -28,9 +29,9 @@
     <DeprecatedMethod>
       <errorLevel type="suppress">
         <!-- These methods are used in ContainerDefinition::merge which is still under tests -->
-        <referencedMethod name="Cspray\AnnotatedContainer\ServiceDefinition::equals" />
-        <referencedMethod name="Cspray\AnnotatedContainer\AliasDefinition::equals" />
-        <referencedMethod name="Cspray\AnnotatedContainer\ContainerDefinition::merge" />
+        <referencedMethod name="Cspray\AnnotatedContainer\Definition\ServiceDefinition::equals" />
+        <referencedMethod name="Cspray\AnnotatedContainer\Definition\AliasDefinition::equals" />
+        <referencedMethod name="Cspray\AnnotatedContainer\Definition\ContainerDefinition::merge" />
       </errorLevel>
     </DeprecatedMethod>
   </issueHandlers>
