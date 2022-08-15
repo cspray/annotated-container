@@ -9,25 +9,6 @@ use function Cspray\Typiphy\stringType;
 
 class ProfilesAwareContainerDefinitionTest extends TestCase {
 
-    public function testMergeDelegatedToInjectedContainerDefinition() : void {
-        $mockContainerDefinition = $this->getMockBuilder(ContainerDefinition::class)->getMock();
-        $mergeContainerDefinition = $this->getMockBuilder(ContainerDefinition::class)->getMock();
-        $mergedContainerDefinition = $this->getMockBuilder(ContainerDefinition::class)->getMock();
-
-        $mockContainerDefinition->expects($this->once())
-            ->method('merge')
-            ->with($mergeContainerDefinition)
-            ->willReturn($mergedContainerDefinition);
-
-        $mergedContainerDefinition->expects($this->never())->method('merge');
-        $mergedContainerDefinition->expects($this->never())->method('merge');
-
-        $subject = new ProfilesAwareContainerDefinition($mockContainerDefinition, ['default']);
-        $result = $subject->merge($mergeContainerDefinition);
-
-        self::assertSame($mergedContainerDefinition, $result);
-    }
-
     public function testGetServiceDefinitionsOnlyReturnThoseMatchingProfiles() : void {
         $serviceDefinition1 = ServiceDefinitionBuilder::forConcrete(Fixtures::singleConcreteService()->fooImplementation())
             ->withProfiles(['foo'])
