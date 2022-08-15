@@ -1,7 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
+use Cspray\AnnotatedContainer\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\InjectDefinition;
+use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\ServicePrepareDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 
 /**

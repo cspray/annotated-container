@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Autowire;
+
+use Cspray\AnnotatedContainer\AutowireableParameterSet;
 
 /**
  * An interface that allows recursively autowiring object construction for classes that have not been annotated as a

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Compile;
 
 use Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute;
 use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
@@ -9,8 +9,18 @@ use Cspray\AnnotatedContainer\Attribute\ServiceAttribute;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegateAttribute;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepareAttribute;
+use Cspray\AnnotatedContainer\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
+use Cspray\AnnotatedContainer\InjectDefinition;
+use Cspray\AnnotatedContainer\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
+use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainer\ServiceDefinitionBuilder;
+use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder;
+use Cspray\AnnotatedContainer\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;

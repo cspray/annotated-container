@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Autowire;
 
 /**
  * An object that represents a parameter that should be injected into a method parameter when using the AutowireableFactory

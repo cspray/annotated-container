@@ -1,5 +1,10 @@
 <?php
 
+use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
+use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
@@ -7,6 +12,7 @@ use Cspray\AnnotatedContainer\Bootstrap\RootDirectoryBootstrappingDirectoryResol
 use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
 
 use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Compile\CallableContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
@@ -16,6 +22,7 @@ use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptions;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompilerBuilder;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Compile\EventEmittingContainerDefinitionCompiler;
 
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
@@ -63,6 +70,11 @@ use Cspray\AnnotatedContainer\Profiles\CsvActiveProfilesParser;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Serializer\JsonContainerDefinitionSerializer;
 
+class_alias(AutowireableFactory::class, 'Cspray\AnnotatedContainer\AutowireableFactory');
+class_alias(AutowireableInvoker::class, 'Cspray\AnnotatedContainer\AutowireableInvoker');
+class_alias(AutowireableParameter::class, 'Cspray\AnnotatedContainer\AutowireableParameter');
+class_alias(AutowireableParameterSet::class, 'Cspray\AnnotatedContainer\AutowireableParameterSet');
+
 class_alias(Bootstrap::class, 'Cspray\AnnotatedContainer\Bootstrap');
 class_alias(BootstrappingConfiguration::class, 'Cspray\AnnotatedContainer\BootstrappingConfiguration');
 class_alias(BootstrappingDirectoryResolver::class, 'Cspray\AnnotatedContainer\BootstrappingDirectoryResolver');
@@ -70,6 +82,7 @@ class_alias(RootDirectoryBootstrappingDirectoryResolver::class, 'Cspray\Annotate
 class_alias(XmlBootstrappingConfiguration::class, 'Cspray\AnnotatedContainer\XmlBootstrappingConfiguration');
 
 class_alias(AnnotatedTargetContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler');
+class_alias(AnnotatedTargetDefinitionConverter::class, 'Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverter');
 class_alias(CacheAwareContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\CacheAwareContainerDefinitionCompiler');
 class_alias(CallableContainerDefinitionBuilderContextConsumer::class, 'Cspray\AnnotatedContainer\CallableContainerDefinitionBuilderContextConsumer');
 class_alias(ContainerDefinitionBuilderContext::class, 'Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext');
@@ -79,6 +92,7 @@ class_alias(ContainerDefinitionCompileOptions::class, 'Cspray\AnnotatedContainer
 class_alias(ContainerDefinitionCompileOptionsBuilder::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder');
 class_alias(ContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompiler');
 class_alias(ContainerDefinitionCompilerBuilder::class, 'Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder');
+class_alias(DefaultAnnotatedTargetDefinitionConverter::class, 'Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter');
 class_alias(EventEmittingContainerDefinitionCompiler::class, 'Cspray\AnnotatedContainer\EventEmittingContainerDefinitionCompiler');
 
 class_alias(ContainerFactory::class, 'Cspray\AnnotatedContainer\ContainerFactory');
