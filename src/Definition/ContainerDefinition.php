@@ -2,8 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
-use Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException;
-
 /**
  * The heart of the AnnotatedContainer; the ContainerDefinition, an object which defines how a Container should be
  * configured.
@@ -11,17 +9,6 @@ use Cspray\AnnotatedContainer\Exception\ContainerDefinitionMergeException;
  * @see ContainerDefinitionBuilder
  */
 interface ContainerDefinition {
-
-    /**
-     * An immutable method that will return new ContainerDefinition that has the contents of this ContainerDefinition and
-     * the passed $containerDefinition.
-     *
-     * @param ContainerDefinition $containerDefinition
-     * @return ContainerDefinition
-     * @throws ContainerDefinitionMergeException An exception that can be thrown if the given $containerDefinition can't be merged for some reason
-     * @deprecated This method is designated for removal in v2.0
-     */
-    public function merge(ContainerDefinition $containerDefinition) : ContainerDefinition;
 
     /**
      * Return a set of ServiceDefinitions that this Container is aware of.

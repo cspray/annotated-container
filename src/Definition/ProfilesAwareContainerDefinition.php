@@ -12,10 +12,6 @@ final class ProfilesAwareContainerDefinition implements ContainerDefinition {
         private readonly array $activeProfiles
     ) {}
 
-    public function merge(ContainerDefinition $containerDefinition) : ContainerDefinition {
-        return $this->containerDefinition->merge($containerDefinition);
-    }
-
     public function getServiceDefinitions() : array {
         $filtered = [];
         foreach ($this->containerDefinition->getServiceDefinitions() as $serviceDefinition) {
