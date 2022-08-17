@@ -34,6 +34,7 @@ final class Bootstrap {
     }
 
     /**
+     * @param list<string> $profiles
      * @throws ContainerFactoryNotFoundException
      * @throws InvalidCompileOptionsException
      * @throws InvalidAnnotationException

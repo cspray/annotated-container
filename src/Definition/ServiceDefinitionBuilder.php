@@ -9,6 +9,9 @@ final class ServiceDefinitionBuilder {
     private ?string $name = null;
     private ObjectType $type;
     private bool $isAbstract;
+    /**
+     * @var list<string>
+     */
     private array $profiles = [];
     private bool $isPrimary = false;
 
@@ -35,6 +38,10 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * @param list<string> $profiles
+     * @return $this
+     */
     public function withProfiles(array $profiles) : self {
         $instance = clone $this;
         $instance->profiles = $profiles;
@@ -48,10 +55,20 @@ final class ServiceDefinitionBuilder {
         }
         return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary) implements ServiceDefinition {
 
+            /**
+             * @param string|null $name
+             * @param ObjectType $type
+             * @param bool $isAbstract
+             * @param list<string> $profiles
+             * @param bool $isPrimary
+             */
             public function __construct(
                 private readonly ?string $name,
                 private readonly ObjectType $type,
                 private readonly bool $isAbstract,
+                /**
+                 * @var list<string> $profiles
+                 */
                 private readonly array $profiles,
                 private readonly bool $isPrimary
             ) {}
@@ -64,6 +81,9 @@ final class ServiceDefinitionBuilder {
                 return $this->type;
             }
 
+            /**
+             * @return list<string>
+             */
             public function getProfiles() : array {
                 return $this->profiles;
             }
@@ -78,10 +98,6 @@ final class ServiceDefinitionBuilder {
 
             public function isAbstract() : bool {
                 return $this->isAbstract;
-            }
-
-            public function equals(ServiceDefinition $serviceDefinition): bool {
-                return $serviceDefinition->getType() === $this->getType();
             }
         };
     }

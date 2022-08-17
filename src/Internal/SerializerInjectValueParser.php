@@ -29,6 +29,7 @@ final class SerializerInjectValueParser {
     public function parse(Type|TypeUnion|TypeIntersect $type, mixed $value) : mixed {
         if ($type instanceof ObjectType && Objects::isEnum($type)) {
             $enumReflection = new ReflectionEnum($type->getName());
+            assert(is_string($value));
             $parsedValue = $enumReflection->getCase($value)->getValue();
         } else if (is_array($value)) {
             $parsedValue = [];

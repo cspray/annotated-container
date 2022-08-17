@@ -26,6 +26,7 @@ function containerFactory(SupportedContainers $container = SupportedContainers::
             );
         }
 
+        assert($auryn instanceof ContainerFactory);
         return $auryn;
     } else if ($container === SupportedContainers::PhpDi || ($container === SupportedContainers::Default && class_exists(Container::class))) {
         static $di = null;
@@ -36,6 +37,7 @@ function containerFactory(SupportedContainers $container = SupportedContainers::
             );
         }
 
+        assert($di instanceof ContainerFactory);
         return $di;
     } else {
         throw new ContainerFactoryNotFoundException('There is no backing Container library found. Please run "composer suggests" for supported containers.');

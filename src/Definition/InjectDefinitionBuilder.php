@@ -19,6 +19,9 @@ final class InjectDefinitionBuilder {
     private Type|TypeUnion|TypeIntersect $type;
     private mixed $value;
     private bool $isValueCalled = false;
+    /**
+     * @var list<string>
+     */
     private array $profiles = [];
     private ?string $store = null;
 
@@ -91,6 +94,13 @@ final class InjectDefinitionBuilder {
 
         return new class($targetIdentifier, $this->type, $this->value, $this->store, $profiles) implements InjectDefinition {
 
+            /**
+             * @param InjectTargetIdentifier $targetIdentifier
+             * @param Type|TypeUnion|TypeIntersect $type
+             * @param mixed $annotationValue
+             * @param string|null $store
+             * @param list<string> $profiles
+             */
             public function __construct(
                 private readonly InjectTargetIdentifier $targetIdentifier,
                 private readonly Type|TypeUnion|TypeIntersect $type,
