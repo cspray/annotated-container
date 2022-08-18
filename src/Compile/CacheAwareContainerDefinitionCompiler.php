@@ -50,20 +50,23 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
         $cacheFile = $this->getCacheFile($containerDefinitionCompileOptions->getScanDirectories());
         if (is_file($cacheFile)) {
             $containerDefinition = $this->containerDefinitionSerializer->deserialize(file_get_contents($cacheFile));
-            $logger = $containerDefinitionCompileOptions->getLogger();
-            if ($logger !== null) {
-                $logger->info(sprintf(
-                    'Skipping Annotated Container compiling. Using cached definition from %s.',
-                    $cacheFile
-                ));
+            if ($containerDefinition instanceof ContainerDefinition) {
+                $logger = $containerDefinitionCompileOptions->getLogger();
+                if ($logger !== null) {
+                    $logger->info(sprintf(
+                        'Skipping Annotated Container compiling. Using cached definition from %s.',
+                        $cacheFile
+                    ));
+                }
+                return $containerDefinition;
             }
-        } else {
-            $containerDefinition = $this->containerDefinitionCompiler->compile($containerDefinitionCompileOptions);
-            $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
-            $contentWritten = @file_put_contents($cacheFile, $serialized);
-            if (!$contentWritten) {
-                throw new InvalidCacheException(sprintf('The cache directory, %s, could not be written to. Please ensure it exists and is writeable.', $this->cacheDir));
-            }
+        }
+
+        $containerDefinition = $this->containerDefinitionCompiler->compile($containerDefinitionCompileOptions);
+        $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
+        $contentWritten = @file_put_contents($cacheFile, $serialized);
+        if (!$contentWritten) {
+            throw new InvalidCacheException(sprintf('The cache directory, %s, could not be written to. Please ensure it exists and is writeable.', $this->cacheDir));
         }
         return $containerDefinition;
     }
