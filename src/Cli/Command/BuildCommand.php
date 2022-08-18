@@ -9,8 +9,14 @@ use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Input;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\XmlBootstrappingConfiguration;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use function Cspray\AnnotatedContainer\compiler;
 
 final class BuildCommand implements Command {
@@ -101,10 +107,22 @@ SHELL;
             $compileOptions = $compileOptions->withLogger($logger);
         }
 
-        compiler($cacheDir)->compile($compileOptions->build());
+        $this->getCompiler($cacheDir)->compile($compileOptions->build());
 
         $output->stdout->write('<fg:green>Successfully built and cached your Container!</fg:green>');
 
         return 0;
+    }
+
+    private function getCompiler(?string $cacheDir) : ContainerDefinitionCompiler {
+        $compiler = new AnnotatedTargetContainerDefinitionCompiler(
+            new PhpParserAnnotatedTargetParser(),
+            new DefaultAnnotatedTargetDefinitionConverter()
+        );
+        if ($cacheDir !== null) {
+            $compiler = new CacheAwareContainerDefinitionCompiler($compiler, new ContainerDefinitionSerializer(), $cacheDir);
+        }
+
+        return $compiler;
     }
 }

@@ -39,8 +39,7 @@
     "files": [
       "src/Function/auto-wired-parameters.php",
       "src/Function/class-alias.php",
-      "src/Function/definitions.php",
-      "src/Function/user-api.php"
+      "src/Function/definitions.php"
     ]
   },
   "autoload-dev": {
