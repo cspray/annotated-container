@@ -34,7 +34,6 @@ use function Cspray\Typiphy\objectType;
  * @covers \Cspray\AnnotatedContainer\StandardAliasDefinitionResolver
  * @covers \Cspray\AnnotatedContainer\ContainerFactory\AbstractContainerFactory
  * @covers \Cspray\AnnotatedContainer\Internal\SerializerInjectValueParser
- * @covers \Cspray\AnnotatedContainer\Internal\SerializerServiceDefinitionCache
  * @covers \Cspray\AnnotatedContainer\AnnotatedContainerVersion
  * @covers ::\Cspray\AnnotatedContainer\autowiredParams
  * @covers ::\Cspray\AnnotatedContainer\rawParam

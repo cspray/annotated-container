@@ -59,10 +59,6 @@ final class AliasDefinitionBuilder {
             public function getConcreteService() : ObjectType {
                 return $this->concreteService;
             }
-
-            public function equals(AliasDefinition $aliasDefinition): bool {
-                return $this->abstractService === $aliasDefinition->getAbstractService() && $this->concreteService === $aliasDefinition->getConcreteService();
-            }
         };
     }
 
