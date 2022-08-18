@@ -2,16 +2,21 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\CacheAwareContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Cli\Exception\CacheDirConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidBuild;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Helper\InMemoryOutput;
 use Cspray\AnnotatedContainer\Helper\StubInput;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
@@ -240,7 +245,14 @@ XML;
         $expectedKey = md5(Fixtures::thirdPartyServices()->getPath());
         self::assertFileExists('vfs://root/.annotated-container-cache/' . $expectedKey);
 
-        $containerDefinition = compiler('vfs://root/.annotated-container-cache')->compile(
+        $containerDefinition = (new CacheAwareContainerDefinitionCompiler(
+            new AnnotatedTargetContainerDefinitionCompiler(
+                new PhpParserAnnotatedTargetParser(),
+                new DefaultAnnotatedTargetDefinitionConverter(),
+            ),
+            new ContainerDefinitionSerializer(),
+            'vfs://root/.annotated-container-cache'
+        ))->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::thirdPartyServices()->getPath())->build()
         );
 

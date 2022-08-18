@@ -30,7 +30,6 @@ use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerFactory\EnvironmentParameterStore;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStoreFactory;
-use Cspray\AnnotatedContainer\ContainerFactory\SupportedContainers;
 
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
@@ -89,7 +88,6 @@ class_alias(ContainerFactoryOptionsBuilder::class, 'Cspray\AnnotatedContainer\Co
 class_alias(EnvironmentParameterStore::class, 'Cspray\AnnotatedContainer\EnvironmentParameterStore');
 class_alias(ParameterStore::class, 'Cspray\AnnotatedContainer\ParameterStore');
 class_alias(ParameterStoreFactory::class, 'Cspray\AnnotatedContainer\ParameterStoreFactory');
-class_alias(SupportedContainers::class, 'Cspray\AnnotatedContainer\SupportedContainers');
 
 class_alias(AliasDefinitionResolution::class, 'Cspray\AnnotatedContainer\AliasDefinitionResolution');
 class_alias(AliasDefinitionResolver::class, 'Cspray\AnnotatedContainer\AliasDefinitionResolver');

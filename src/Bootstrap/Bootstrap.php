@@ -2,17 +2,26 @@
 
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
+use Auryn\Injector;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
+use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\CacheAwareContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumerFactory;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\ContainerFactory\AurynContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactoryOptionsBuilder;
+use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Exception\ContainerFactoryNotFoundException;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\AnnotatedContainer\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
+use DI\Container;
 use Psr\Log\LoggerInterface;
-use function Cspray\AnnotatedContainer\compiler;
-use function Cspray\AnnotatedContainer\containerFactory;
 
 final class Bootstrap {
 
@@ -85,7 +94,7 @@ final class Bootstrap {
             $observer->beforeCompilation();
         }
 
-        $containerDefinition = compiler($cacheDir)->compile($compileOptions->build());
+        $containerDefinition = $this->getCompiler($cacheDir)->compile($compileOptions->build());
 
         foreach ($this->observers as $observer) {
             $observer->afterCompilation($containerDefinition);
@@ -93,8 +102,10 @@ final class Bootstrap {
 
         $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
 
+        $containerFactory = $this->getContainerFactory();
+
         foreach ($configuration->getParameterStores() as $parameterStore) {
-            containerFactory()->addParameterStore($parameterStore);
+            $containerFactory->addParameterStore($parameterStore);
         }
 
         if ($logger !== null && $profilesAllowLogging) {
@@ -104,7 +115,7 @@ final class Bootstrap {
         foreach ($this->observers as $observer) {
             $observer->beforeContainerCreation($containerDefinition);
         }
-        $container = containerFactory()->createContainer($containerDefinition, $factoryOptions->build());
+        $container = $containerFactory->createContainer($containerDefinition, $factoryOptions->build());
         foreach ($this->observers as $observer) {
             $observer->afterContainerCreation($containerDefinition, $container);
         }
@@ -118,6 +129,29 @@ final class Bootstrap {
         }
 
         return new RootDirectoryBootstrappingDirectoryResolver($rootDir);
+    }
+
+    private function getContainerFactory() : ContainerFactory {
+        if (class_exists(Injector::class)) {
+            return new AurynContainerFactory();
+
+        } else if (class_exists(Container::class)) {
+            return new PhpDiContainerFactory();
+        } else {
+            throw new ContainerFactoryNotFoundException('There is no backing Container library found. Please run "composer suggests" for supported containers.');
+        }
+    }
+
+    private function getCompiler(?string $cacheDir) : ContainerDefinitionCompiler {
+        $compiler = new AnnotatedTargetContainerDefinitionCompiler(
+            new PhpParserAnnotatedTargetParser(),
+            new DefaultAnnotatedTargetDefinitionConverter()
+        );
+        if ($cacheDir !== null) {
+            $compiler = new CacheAwareContainerDefinitionCompiler($compiler, new ContainerDefinitionSerializer(), $cacheDir);
+        }
+
+        return $compiler;
     }
 
 }
