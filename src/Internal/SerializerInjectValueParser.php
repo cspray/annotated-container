@@ -26,24 +26,6 @@ use function Cspray\Typiphy\voidType;
  */
 final class SerializerInjectValueParser {
 
-    public function parse(Type|TypeUnion|TypeIntersect $type, mixed $value) : mixed {
-        if ($type instanceof ObjectType && Objects::isEnum($type)) {
-            $enumReflection = new ReflectionEnum($type->getName());
-            assert(is_string($value));
-            $parsedValue = $enumReflection->getCase($value)->getValue();
-        } else if (is_array($value)) {
-            $parsedValue = [];
-            foreach ($value as $key => $val) {
-                $type = $this->convertStringToType($val['type']);
-                $parsedValue[$key] = $this->parse($type, $val['value']);
-            }
-        } else {
-            $parsedValue = $value;
-        }
-
-        return $parsedValue;
-    }
-
     public function convertStringToType(string $rawType) : Type|TypeUnion|TypeIntersect {
         if (str_contains($rawType, '|')) {
             $types = [];

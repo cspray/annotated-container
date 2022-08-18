@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Helper\StubBootstrapObserver;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumerWithDependencies;
 use Cspray\AnnotatedContainer\Helper\StubParameterStoreWithDependencies;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
@@ -360,6 +361,70 @@ XML;
         $service = $container->get(Fixtures::injectCustomStoreServices()->scalarInjector()->getName());
 
         self::assertSame('ac-ackey', $service->key);
+    }
+
+    public function testBootstrapObserverInvokedCorrectOrder() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+
+        $bootstrap->addObserver($subject = new StubBootstrapObserver());
+
+        $bootstrap->bootstrapContainer();
+
+        self::assertCount(4, $subject->getInvokedMethods());
+        self::assertSame([
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'beforeCompilation')],
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'afterCompilation')],
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'beforeContainerCreation')],
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'afterContainerCreation')]
+        ], $subject->getInvokedMethods());
+    }
+
+    public function testBootstrapMultipleObservers() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+
+        $bootstrap->addObserver($one = new StubBootstrapObserver());
+        $bootstrap->addObserver($two = new StubBootstrapObserver());
+        $bootstrap->addObserver($three = new StubBootstrapObserver());
+
+        $bootstrap->bootstrapContainer();
+
+        self::assertCount(4, $one->getInvokedMethods());
+        self::assertCount(4, $two->getInvokedMethods());
+        self::assertCount(4, $three->getInvokedMethods());
     }
 
 }

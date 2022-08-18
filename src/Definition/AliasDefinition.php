@@ -25,13 +25,4 @@ interface AliasDefinition {
      */
     public function getConcreteService() : ObjectType;
 
-    /**
-     * Returns whether the given $aliasDefinition has matching abstract and concrete services.
-     *
-     * @param AliasDefinition $aliasDefinition
-     * @return bool
-     * @deprecated This method is designated for removal in v2.0
-     */
-    public function equals(AliasDefinition $aliasDefinition) : bool;
-
 }
