@@ -4,7 +4,7 @@ namespace Cspray\AnnotatedContainer\Compile;
 
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions;
-use Cspray\AnnotatedContainer\ContainerDefinitionSerializer;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
 use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
 use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;

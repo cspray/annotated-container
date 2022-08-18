@@ -69,7 +69,6 @@ use Cspray\AnnotatedContainer\Profiles\ActiveProfilesParser;
 use Cspray\AnnotatedContainer\Profiles\CsvActiveProfilesParser;
 
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
-use Cspray\AnnotatedContainer\Serializer\JsonContainerDefinitionSerializer;
 
 class_alias(AutowireableFactory::class, 'Cspray\AnnotatedContainer\AutowireableFactory');
 class_alias(AutowireableInvoker::class, 'Cspray\AnnotatedContainer\AutowireableInvoker');
@@ -138,6 +137,3 @@ class_alias(ActiveProfiles::class, 'Cspray\AnnotatedContainer\ActiveProfiles');
 class_alias(ActiveProfilesBuilder::class, 'Cspray\AnnotatedContainer\ActiveProfilesBuilder');
 class_alias(ActiveProfilesParser::class, 'Cspray\AnnotatedContainer\ActiveProfilesParser');
 class_alias(CsvActiveProfilesParser::class, 'Cspray\AnnotatedContainer\CsvActiveProfilesParser');
-
-class_alias(ContainerDefinitionSerializer::class, 'Cspray\AnnotatedContainer\ContainerDefinitionSerializer');
-class_alias(JsonContainerDefinitionSerializer::class, 'Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer');

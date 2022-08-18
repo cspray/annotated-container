@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -25,7 +25,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
                 new PhpParserAnnotatedTargetParser(),
                 new DefaultAnnotatedTargetDefinitionConverter()
             ),
-            $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
+            $this->containerDefinitionSerializer = new ContainerDefinitionSerializer(),
             'vfs://root'
         );
         $this->root = vfsStream::setup();
@@ -42,7 +42,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $expected = $this->containerDefinitionSerializer->serialize($containerDefinition);
         $actual = $this->root->getChild('root/' . md5($dir))->getContent();
 
-        $this->assertJsonStringEqualsJsonString($expected, $actual);
+        $this->assertSame($expected, $actual);
     }
 
     public function testFileDoesExistDoesNotCallCompiler() {
@@ -67,7 +67,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         );
         $actual = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
-        $this->assertJsonStringEqualsJsonString($serialized, $actual);
+        $this->assertSame($serialized, $actual);
     }
 
     public function testMultipleDirectoriesCachedRegardlessOfOrder() {
@@ -93,7 +93,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         );
         $actual = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
-        $this->assertJsonStringEqualsJsonString($serialized, $actual);
+        $this->assertSame($serialized, $actual);
     }
 
     public function testFailingToWriteCacheFileThrowsException() {
@@ -103,7 +103,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
                 new PhpParserAnnotatedTargetParser(),
                 new DefaultAnnotatedTargetDefinitionConverter()
             ),
-            $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
+            $this->containerDefinitionSerializer,
             'vfs://cache'
         );
 
