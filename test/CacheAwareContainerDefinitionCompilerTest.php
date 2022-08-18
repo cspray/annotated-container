@@ -146,4 +146,60 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
     }
 
+    public function testCacheFileVersionMismatchRecompiles() : void {
+        $dir = Fixtures::singleConcreteService()->getPath();
+        $oldXml = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="0.1">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\SingleConcreteService\FooImplementation</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Concrete</concreteOrAbstract>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions/>
+  <servicePrepareDefinitions/>
+  <serviceDelegateDefinitions/>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        vfsStream::newFile(md5($dir))->at($this->root)->setContent($oldXml);
+
+        $this->cacheAwareContainerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
+        );
+
+        $version = AnnotatedContainerVersion::getVersion();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\SingleConcreteService\FooImplementation</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Concrete</concreteOrAbstract>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions/>
+  <servicePrepareDefinitions/>
+  <serviceDelegateDefinitions/>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        self::assertStringEqualsFile('vfs://root/' . md5($dir), $expected);
+    }
+
 }

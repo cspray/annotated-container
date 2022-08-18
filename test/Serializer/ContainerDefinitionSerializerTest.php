@@ -1460,4 +1460,34 @@ XML;
         self::assertSame('my-config', $configurationDefinition->getName());
     }
 
+    public function testDeserializeWithMismatchedVersionReturnsNull() : void {
+        $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="not-up-to-date">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\SingleConcreteService\FooImplementation</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Concrete</concreteOrAbstract>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions/>
+  <servicePrepareDefinitions/>
+  <serviceDelegateDefinitions/>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        $subject = new ContainerDefinitionSerializer();
+
+        $actual = $subject->deserialize($xml);
+
+        self::assertNull($actual);
+    }
+
 }
