@@ -8,6 +8,9 @@ use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\Exception\ContainerFactoryNotFoundException;
 use DI\Container;
 
+/**
+ * @deprecated This class is designated to be removed in 2.0
+ */
 function compiler(string $cacheDir = null) : ContainerDefinitionCompiler {
     if (is_null($cacheDir)) {
         return ContainerDefinitionCompilerBuilder::withoutCache()->build();
@@ -16,6 +19,9 @@ function compiler(string $cacheDir = null) : ContainerDefinitionCompiler {
     }
 }
 
+/**
+ * @deprecated This class is designated to be removed in 2.0
+ */
 function containerFactory(SupportedContainers $container = SupportedContainers::Default) : ContainerFactory {
     if ($container === SupportedContainers::Auryn || ($container === SupportedContainers::Default) && class_exists(Injector::class)) {
         static $auryn = null;
@@ -42,6 +48,9 @@ function containerFactory(SupportedContainers $container = SupportedContainers::
     }
 }
 
+/**
+ * @deprecated This class is designated to be removed in 2.0
+ */
 function eventEmitter() : AnnotatedContainerEmitter {
     static $emitter = null;
     if ($emitter === null) {

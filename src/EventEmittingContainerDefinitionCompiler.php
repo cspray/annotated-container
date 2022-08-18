@@ -5,6 +5,9 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Internal\AfterCompileAnnotatedContainerEvent;
 use Cspray\AnnotatedContainer\Internal\BeforeCompileAnnotatedContainerEvent;
 
+/**
+ * @deprecated This class is designated to be removed in 2.0
+ */
 final class EventEmittingContainerDefinitionCompiler implements ContainerDefinitionCompiler {
 
     public function __construct(

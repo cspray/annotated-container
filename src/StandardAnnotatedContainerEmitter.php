@@ -5,6 +5,9 @@ namespace Cspray\AnnotatedContainer;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
+/**
+ * @deprecated This class is designated to be removed in 2.0
+ */
 final class StandardAnnotatedContainerEmitter implements AnnotatedContainerEmitter {
 
     /**
