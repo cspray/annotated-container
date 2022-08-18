@@ -20,10 +20,7 @@ function containerFactory(SupportedContainers $container = SupportedContainers::
     if ($container === SupportedContainers::Auryn || ($container === SupportedContainers::Default) && class_exists(Injector::class)) {
         static $auryn = null;
         if ($auryn === null) {
-            $auryn = new EventEmittingContainerFactory(
-                new AurynContainerFactory(),
-                eventEmitter()
-            );
+            $auryn = new AurynContainerFactory();
         }
 
         assert($auryn instanceof ContainerFactory);
@@ -31,10 +28,7 @@ function containerFactory(SupportedContainers $container = SupportedContainers::
     } else if ($container === SupportedContainers::PhpDi || ($container === SupportedContainers::Default && class_exists(Container::class))) {
         static $di = null;
         if ($di === null) {
-            $di = new EventEmittingContainerFactory(
-                new PhpDiContainerFactory(),
-                eventEmitter()
-            );
+            $di = new PhpDiContainerFactory();
         }
 
         assert($di instanceof ContainerFactory);
@@ -42,13 +36,4 @@ function containerFactory(SupportedContainers $container = SupportedContainers::
     } else {
         throw new ContainerFactoryNotFoundException('There is no backing Container library found. Please run "composer suggests" for supported containers.');
     }
-}
-
-function eventEmitter() : AnnotatedContainerEmitter {
-    static $emitter = null;
-    if ($emitter === null) {
-        $emitter = new StandardAnnotatedContainerEmitter();
-    }
-
-    return $emitter;
 }

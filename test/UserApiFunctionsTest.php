@@ -81,25 +81,4 @@ class UserApiFunctionsTest extends TestCase {
         self::assertSame($a, $b);
     }
 
-    public function testEventEmitterReturnsSameInstance() : void {
-        $a = eventEmitter();
-        $b = eventEmitter();
-
-        self::assertSame($a, $b);
-    }
-
-    /**
-     * @dataProvider supportedContainerProvider
-     */
-    public function testContainerFactoryEmitsEventsFromEmitter(SupportedContainers $supportedContainer) : void {
-        eventEmitter()->registerListener($listener = new StubAnnotatedContainerListener());
-        $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
-        $container = containerFactory($supportedContainer)->createContainer($containerDefinition);
-
-        self::assertCount(2, $listener->getEvents());
-
-        self::assertInstanceOf(BeforeContainerCreationAnnotatedContainerEvent::class, $listener->getEvents()[0]);
-        self::assertInstanceOf(AfterContainerCreationAnnotatedContainerEvent::class, $listener->getEvents()[1]);
-    }
-
 }
