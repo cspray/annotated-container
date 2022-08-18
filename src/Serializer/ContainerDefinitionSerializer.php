@@ -288,7 +288,7 @@ final class ContainerDefinitionSerializer {
         );
     }
 
-    private function addClassPropertyInjectDefinitionToDom(DOMElement $root, InjectDefinition $injectDefinition) {
+    private function addClassPropertyInjectDefinitionToDom(DOMElement $root, InjectDefinition $injectDefinition) : void {
         $dom = $root->ownerDocument;
         assert($dom instanceof DOMDocument);
 
