@@ -305,12 +305,17 @@ final class ContainerDefinitionSerializer {
         );
     }
 
-    public function deserialize(string $serializedDefinition) : ContainerDefinition {
+    public function deserialize(string $serializedDefinition) : ?ContainerDefinition {
         $dom = new DOMDocument(encoding: 'UTF-8');
         $dom->loadXML($serializedDefinition);
 
         $xpath = new DOMXPath($dom);
         $xpath->registerNamespace('cd', self::XML_SCHEMA);
+
+        $version = (string) $xpath->query('/cd:annotatedContainerDefinition/@version')[0]?->nodeValue;
+        if ($version !== AnnotatedContainerVersion::getVersion()) {
+            return null;
+        }
 
         $builder = ContainerDefinitionBuilder::newDefinition();
 
