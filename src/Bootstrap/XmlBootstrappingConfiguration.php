@@ -57,7 +57,6 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             $xpath->registerNamespace('ac', 'https://annotated-container.cspray.io/schema/annotated-container.xsd');
             $scanDirectoriesNodes = $xpath->query('/ac:annotatedContainer/ac:scanDirectories/ac:source/ac:dir');
             $scanDirectories = [];
-            /** @var DOMNode $scanDirectory */
             foreach ($scanDirectoriesNodes as $scanDirectory) {
                 $scanDirectories[] = $scanDirectory->textContent;
             }

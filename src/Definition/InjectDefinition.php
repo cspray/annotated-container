@@ -39,7 +39,7 @@ interface InjectDefinition {
     /**
      * A list of profiles that have to be active for this InjectDefinition to be valid.
      *
-     * @return string[]
+     * @return list<string>
      */
     public function getProfiles() : array;
 

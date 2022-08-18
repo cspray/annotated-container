@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Helper\StubParameterStore;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
@@ -22,6 +23,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use TheSeer\Tokenizer\XMLSerializer;
 use function Cspray\Typiphy\objectType;
 
 abstract class ContainerFactoryTestCase extends TestCase {
@@ -475,7 +477,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
      * @dataProvider deserializeContainerProvider
      */
     public function testDeserializingContainerWithInjectAllowsServiceCreation(Fixture $fixture, callable $assertions) {
-        $serializer = new JsonContainerDefinitionSerializer();
+        $serializer = new ContainerDefinitionSerializer();
         $containerDefinition = $this->getContainerDefinitionCompiler()->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories($fixture->getPath())->build()
         );

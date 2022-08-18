@@ -8,6 +8,15 @@ use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
 use ReflectionClass;
 
+/**
+ * @param ContainerDefinitionBuilderContext $context
+ * @param ObjectType $type
+ * @param string|null $name
+ * @param list<string> $profiles
+ * @param bool $isPrimary
+ * @return ServiceDefinition
+ * @throws \ReflectionException
+ */
 function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false) : ServiceDefinition {
     /** @psalm-var class-string $typeName */
     $typeName = $type->getName();

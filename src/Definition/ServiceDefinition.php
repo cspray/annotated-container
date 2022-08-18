@@ -29,7 +29,7 @@ interface ServiceDefinition {
      * A ServiceDefinition MUST have at least 1 profile; if a profile is not explicitly set for a given Service it should
      * be given the 'default' profile.
      *
-     * @return array
+     * @return list<string>
      */
     public function getProfiles() : array;
 
