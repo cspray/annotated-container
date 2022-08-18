@@ -29,12 +29,13 @@ use function Cspray\Typiphy\objectType;
  * @covers \Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder
  * @covers \Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier
  * @covers \Cspray\AnnotatedContainer\Attribute\Configuration
- * @covers \Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer
+ * @covers \Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer
  * @covers \Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition
  * @covers \Cspray\AnnotatedContainer\StandardAliasDefinitionResolver
  * @covers \Cspray\AnnotatedContainer\ContainerFactory\AbstractContainerFactory
  * @covers \Cspray\AnnotatedContainer\Internal\SerializerInjectValueParser
  * @covers \Cspray\AnnotatedContainer\Internal\SerializerServiceDefinitionCache
+ * @covers \Cspray\AnnotatedContainer\AnnotatedContainerVersion
  * @covers ::\Cspray\AnnotatedContainer\containerFactory
  * @covers ::\Cspray\AnnotatedContainer\autowiredParams
  * @covers ::\Cspray\AnnotatedContainer\rawParam

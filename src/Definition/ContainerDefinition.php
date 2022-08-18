@@ -13,7 +13,7 @@ interface ContainerDefinition {
     /**
      * Return a set of ServiceDefinitions that this Container is aware of.
      *
-     * @return ServiceDefinition[]
+     * @return list<ServiceDefinition>
      */
     public function getServiceDefinitions() : array;
 
@@ -27,7 +27,7 @@ interface ContainerDefinition {
      * concrete services that could satisfy an abstract service. It is the responsibility of the ContainerFactory
      * or a LogicalConstraintValidator to recognize multiple aliases are possible and take the appropriate steps.
      *
-     * @return AliasDefinition[]
+     * @return list<AliasDefinition>
      */
     public function getAliasDefinitions() : array;
 
@@ -35,14 +35,14 @@ interface ContainerDefinition {
      * Returns a set of ServicePrepareDefinition that determine which service methods will be automatically invoked
      * after service construction.
      *
-     * @return ServicePrepareDefinition[]
+     * @return list<ServicePrepareDefinition>
      */
     public function getServicePrepareDefinitions() : array;
 
     /**
      * Returns a set of ServiceDelegateDefinition that determine which services require factories to be constructed.
      *
-     * @return ServiceDelegateDefinition[]
+     * @return list<ServiceDelegateDefinition>
      */
     public function getServiceDelegateDefinitions() : array;
 
@@ -50,7 +50,7 @@ interface ContainerDefinition {
      * Returns a set of InjectDefinition that determine what values are injected into methods or properties that
      * cannot be reliably autowired.
      *
-     * @return InjectDefinition[]
+     * @return list<InjectDefinition>
      */
     public function getInjectDefinitions() : array;
 
@@ -58,7 +58,7 @@ interface ContainerDefinition {
      * Returns a set of ConfigurationDefinition that determine what Configuration instances are available in the
      * container.
      *
-     * @return ConfigurationDefinition[]
+     * @return list<ConfigurationDefinition>
      */
     public function getConfigurationDefinitions() : array;
 

@@ -8,13 +8,33 @@ namespace Cspray\AnnotatedContainer\Definition;
 final class ContainerDefinitionBuilder {
 
     /**
-     * @var ServiceDefinition[]
+     * @var list<ServiceDefinition>
      */
     private array $serviceDefinitions = [];
+
+    /**
+     * @var list<AliasDefinition>
+     */
     private array $aliasDefinitions = [];
+
+    /**
+     * @var list<ServicePrepareDefinition>
+     */
     private array $servicePrepareDefinitions = [];
+
+    /**
+     * @var list<InjectDefinition>
+     */
     private array $injectDefinitions = [];
+
+    /**
+     * @var list<ServiceDelegateDefinition>
+     */
     private array $serviceDelegateDefinitions = [];
+
+    /**
+     * @var list<ConfigurationDefinition>
+     */
     private array $configurationDefinitions = [];
 
     private function __construct() {}
@@ -62,6 +82,9 @@ final class ContainerDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * @return list<ServiceDefinition>
+     */
     public function getServiceDefinitions() : array {
         return $this->serviceDefinitions;
     }
@@ -76,6 +99,14 @@ final class ContainerDefinitionBuilder {
             $this->configurationDefinitions
         ) implements ContainerDefinition {
 
+            /**
+             * @param list<ServiceDefinition> $serviceDefinitions
+             * @param list<AliasDefinition> $aliasDefinitions
+             * @param list<ServicePrepareDefinition> $servicePrepareDefinitions
+             * @param list<InjectDefinition> $injectDefinitions
+             * @param list<ServiceDelegateDefinition> $serviceDelegateDefinitions
+             * @param list<ConfigurationDefinition> $configurationDefinitions
+             */
             public function __construct(
                 private readonly array $serviceDefinitions,
                 private readonly array $aliasDefinitions,

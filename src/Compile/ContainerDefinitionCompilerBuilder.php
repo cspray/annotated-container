@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer\Compile;
 use Cspray\AnnotatedContainer\AnnotatedContainerListener;
 use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\JsonContainerDefinitionSerializer;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use function Cspray\AnnotatedContainer\eventEmitter;
 
@@ -78,7 +79,7 @@ final class ContainerDefinitionCompilerBuilder {
         }
         return new CacheAwareContainerDefinitionCompiler(
             $phpParserCompiler,
-            new JsonContainerDefinitionSerializer(),
+            new ContainerDefinitionSerializer(),
             $this->cacheDir
         );
     }

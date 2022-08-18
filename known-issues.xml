@@ -1,30 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="4.26.0@6998fabb2bf528b65777bf9941920888d23c03ac">
-  <file src="src/Attribute/Service.php">
-    <MixedReturnTypeCoercion occurrences="2">
-      <code>$this-&gt;profiles</code>
-      <code>array</code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="src/Bootstrap/Bootstrap.php">
-    <MixedArgument occurrences="1">
-      <code>$profiles</code>
-    </MixedArgument>
-  </file>
-  <file src="src/Bootstrap/XmlBootstrappingConfiguration.php">
-    <UnnecessaryVarAnnotation occurrences="1">
-      <code>DOMNode</code>
-    </UnnecessaryVarAnnotation>
-  </file>
   <file src="src/Cli/Command/BuildCommand.php">
-    <MixedArgument occurrences="1">
-      <code>$configName</code>
-    </MixedArgument>
     <MixedArrayAccess occurrences="1">
-      <code>$composer['extra']</code>
+      <code>$composer['extra']['annotatedContainer']['configFile']</code>
     </MixedArrayAccess>
-    <MixedAssignment occurrences="2">
-      <code>$composer</code>
+    <MixedAssignment occurrences="1">
       <code>$configName</code>
     </MixedAssignment>
   </file>
@@ -62,45 +42,12 @@
     </MixedAssignment>
   </file>
   <file src="src/Cli/InputParser.php">
-    <MixedArgument occurrences="6">
-      <code>$arg</code>
-      <code>$arg</code>
-      <code>$arg</code>
-      <code>$arg</code>
-      <code>$arg</code>
+    <ArgumentTypeCoercion occurrences="1">
+      <code>$arguments</code>
+    </ArgumentTypeCoercion>
+    <MixedArgument occurrences="1">
       <code>$options</code>
     </MixedArgument>
-    <MixedArrayAccess occurrences="3">
-      <code>$options[$opt]</code>
-      <code>$options[$opt]</code>
-      <code>$options[$opt]</code>
-    </MixedArrayAccess>
-    <MixedArrayAssignment occurrences="2">
-      <code>$options[$opt]</code>
-      <code>$val[]</code>
-    </MixedArrayAssignment>
-    <MixedAssignment occurrences="3">
-      <code>$arg</code>
-      <code>$arguments[]</code>
-      <code>$val</code>
-    </MixedAssignment>
-    <MixedInferredReturnType occurrences="2">
-      <code>array|string|bool</code>
-      <code>array|string|bool|null</code>
-    </MixedInferredReturnType>
-    <MixedOperand occurrences="1">
-      <code>$arg</code>
-    </MixedOperand>
-    <MixedReturnStatement occurrences="2">
-      <code>$this-&gt;options[$opt]</code>
-      <code>$this-&gt;options[$opt] ?? null</code>
-    </MixedReturnStatement>
-    <MixedReturnTypeCoercion occurrences="4">
-      <code>$this-&gt;args</code>
-      <code>$this-&gt;options</code>
-      <code>array</code>
-      <code>array</code>
-    </MixedReturnTypeCoercion>
   </file>
   <file src="src/Cli/TerminalOutput.php">
     <MixedArgument occurrences="2">
@@ -109,50 +56,17 @@
     </MixedArgument>
   </file>
   <file src="src/Compile/AnnotatedTargetContainerDefinitionCompiler.php">
-    <MixedArgument occurrences="5">
-      <code>$abstractDefinition-&gt;getType()</code>
+    <ArgumentTypeCoercion occurrences="1">
       <code>$abstractDefinition-&gt;getType()-&gt;getName()</code>
-      <code>$concreteDefinition-&gt;getType()</code>
-      <code>$concreteDefinition-&gt;getType()-&gt;getName()</code>
+    </ArgumentTypeCoercion>
+    <MixedArgument occurrences="1">
       <code>$dirs</code>
     </MixedArgument>
-    <MixedAssignment occurrences="6">
-      <code>$abstractDefinition</code>
-      <code>$concreteDefinition</code>
+    <MixedAssignment occurrences="3">
       <code>$convertedValue</code>
       <code>$convertedValue[$k]</code>
-      <code>$serviceDefinition</code>
       <code>$v</code>
     </MixedAssignment>
-    <MixedInferredReturnType occurrences="3">
-      <code>?ServiceDefinition</code>
-      <code>bool</code>
-      <code>bool</code>
-    </MixedInferredReturnType>
-    <MixedMethodCall occurrences="9">
-      <code>getName</code>
-      <code>getName</code>
-      <code>getType</code>
-      <code>getType</code>
-      <code>getType</code>
-      <code>getType</code>
-      <code>getType</code>
-      <code>isAbstract</code>
-      <code>isConcrete</code>
-    </MixedMethodCall>
-    <MixedReturnStatement occurrences="3">
-      <code>$def-&gt;isAbstract()</code>
-      <code>$def-&gt;isConcrete()</code>
-      <code>$serviceDefinition</code>
-    </MixedReturnStatement>
-    <MixedReturnTypeCoercion occurrences="2">
-      <code>(array) $consumer</code>
-      <code>DefinitionsCollection</code>
-    </MixedReturnTypeCoercion>
-    <UnnecessaryVarAnnotation occurrences="2">
-      <code>ServiceDelegateDefinition</code>
-      <code>ServicePrepareDefinition</code>
-    </UnnecessaryVarAnnotation>
   </file>
   <file src="src/Compile/ContainerDefinitionCompilerBuilder.php">
     <MixedArgument occurrences="1">
@@ -170,36 +84,6 @@
       <code>$propType</code>
     </MixedArgument>
   </file>
-  <file src="src/Definition/ContainerDefinitionBuilder.php">
-    <MixedArgument occurrences="2">
-      <code>$storedDefinition</code>
-      <code>$storedDefinition</code>
-    </MixedArgument>
-    <MixedAssignment occurrences="2">
-      <code>$storedDefinition</code>
-      <code>$storedDefinition</code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion occurrences="12">
-      <code>$this-&gt;aliasDefinitions</code>
-      <code>$this-&gt;configurationDefinitions</code>
-      <code>$this-&gt;injectDefinitions</code>
-      <code>$this-&gt;serviceDefinitions</code>
-      <code>$this-&gt;serviceDelegateDefinitions</code>
-      <code>$this-&gt;servicePrepareDefinitions</code>
-      <code>array</code>
-      <code>array</code>
-      <code>array</code>
-      <code>array</code>
-      <code>array</code>
-      <code>array</code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="src/Definition/InjectDefinitionBuilder.php">
-    <MixedReturnTypeCoercion occurrences="2">
-      <code>$this-&gt;profiles</code>
-      <code>array</code>
-    </MixedReturnTypeCoercion>
-  </file>
   <file src="src/Function/definitions.php">
     <MixedArgument occurrences="2">
       <code>$profiles</code>
@@ -207,25 +91,16 @@
     </MixedArgument>
   </file>
   <file src="src/Function/user-api.php">
-    <MixedInferredReturnType occurrences="2">
+    <MixedInferredReturnType occurrences="1">
       <code>AnnotatedContainerEmitter</code>
-      <code>ContainerFactory</code>
     </MixedInferredReturnType>
-    <MixedReturnStatement occurrences="3">
-      <code>$auryn</code>
-      <code>$di</code>
+    <MixedReturnStatement occurrences="1">
       <code>$emitter</code>
     </MixedReturnStatement>
   </file>
-  <file src="src/Internal/FileLogger.php">
-    <MixedArgument occurrences="1">
-      <code>$level</code>
-    </MixedArgument>
-  </file>
   <file src="src/Internal/SerializerInjectValueParser.php">
-    <MixedArgument occurrences="2">
+    <MixedArgument occurrences="1">
       <code>$val['type']</code>
-      <code>$value</code>
     </MixedArgument>
     <MixedArrayAccess occurrences="2">
       <code>$val['type']</code>
@@ -237,23 +112,22 @@
       <code>$val</code>
     </MixedAssignment>
   </file>
-  <file src="src/Internal/StdoutLogger.php">
-    <MixedArgument occurrences="1">
-      <code>$level</code>
-    </MixedArgument>
-  </file>
-  <file src="src/Serializer/JsonContainerDefinitionSerializer.php">
-    <MixedArrayAssignment occurrences="1">
-      <code>$compiledServiceDefinitions[$key]</code>
-    </MixedArrayAssignment>
-    <MixedAssignment occurrences="3">
-      <code>$parsedValue</code>
-      <code>$parsedValue</code>
-      <code>$val</code>
+  <file src="src/Serializer/ContainerDefinitionSerializer.php">
+    <ArgumentTypeCoercion occurrences="1">
+      <code>$serializedDefinition</code>
+    </ArgumentTypeCoercion>
+    <InvalidArgument occurrences="1">
+      <code>$serviceProfiles</code>
+    </InvalidArgument>
+    <MixedAssignment occurrences="2">
+      <code>$isPrimary</code>
+      <code>$value</code>
     </MixedAssignment>
-    <MixedFunctionCall occurrences="2">
-      <code>$parseValue($injectDefinition-&gt;getValue())</code>
-      <code>$parseValue($val)</code>
-    </MixedFunctionCall>
+    <PossiblyNullArgument occurrences="1">
+      <code>$injectProfiles</code>
+    </PossiblyNullArgument>
+    <UndefinedPropertyFetch occurrences="1">
+      <code>$xpath-&gt;query('@isPrimary', $serviceDefinition)[0]?-&gt;value</code>
+    </UndefinedPropertyFetch>
   </file>
 </files>

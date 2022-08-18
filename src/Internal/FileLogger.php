@@ -44,7 +44,7 @@ final class FileLogger extends AbstractLogger {
         $contents = sprintf(
             $format,
             ($this->dateTimeProvider)()->format(DateTime::ATOM),
-            strtoupper($level),
+            strtoupper((string) $level),
             (string) $message,
             json_encode((object) $context)
         );

@@ -150,7 +150,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                 $this->logConfigurationDefinition($target, $definition, $logger);
             }
         }
-        return (array) $consumer;
+        /**
+         * @var DefinitionsCollection $consumer
+         */
+        $consumer = (array) $consumer;
+        return $consumer;
     }
 
     private function logServiceDefinition(
@@ -383,7 +387,6 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinition);
         }
 
-        /** @var ServiceDelegateDefinition $serviceDelegateDefinition */
         foreach ($consumer['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $serviceDelegateDefinition->getServiceType());
             if ($serviceDef === null) {
@@ -420,7 +423,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         foreach ($abstractPrepareDefinitions as $abstractPrepareDefinition) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServicePrepareDefinition($abstractPrepareDefinition);
         }
-        /** @var ServicePrepareDefinition $concretePrepareDefinition */
+
         foreach ($concretePrepareDefinitions as $concretePrepareDefinition) {
             $hasAbstractPrepare = false;
             foreach ($abstractPrepareDefinitions as $abstractPrepareDefinition) {
@@ -450,12 +453,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     }
 
     private function getServiceDefinition(ContainerDefinitionBuilder $containerDefinitionBuilder, ObjectType $objectType) : ?ServiceDefinition {
+        $return = null;
         foreach ($containerDefinitionBuilder->getServiceDefinitions() as $serviceDefinition) {
             if ($serviceDefinition->getType() === $objectType) {
-                return $serviceDefinition;
+                $return = $serviceDefinition;
+                break;
             }
         }
-        return null;
+        return $return;
     }
 
     private function addThirdPartyServices(
@@ -494,7 +499,9 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     }
 
     private function addAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, LoggerInterface $logger) : ContainerDefinitionBuilder {
+        /** @var list<ServiceDefinition> $abstractDefinitions */
         $abstractDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isAbstract());
+        /** @var list<ServiceDefinition> $concreteDefinitions */
         $concreteDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isConcrete());
 
         foreach ($abstractDefinitions as $abstractDefinition) {

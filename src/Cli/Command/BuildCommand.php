@@ -56,7 +56,9 @@ SHELL;
             // But it is possible that somebody created the configuration manually and is not using composer
             $composerFile = $this->directoryResolver->getConfigurationPath('composer.json');
             if (file_exists($composerFile)) {
+                /** @var mixed $composer */
                 $composer = json_decode(file_get_contents($composerFile), true);
+                assert(is_array($composer));
                 $configName = $composer['extra']['annotatedContainer']['configFile'] ?? 'annotated-container.xml';
             } else {
                 $configName = 'annotated-container.xml';
@@ -69,6 +71,7 @@ SHELL;
             }
         }
 
+        assert(is_string($configName));
         $configFile = $this->directoryResolver->getConfigurationPath($configName);
         if (!file_exists($configFile)) {
             throw ConfigurationNotFound::fromMissingFile($configName);
