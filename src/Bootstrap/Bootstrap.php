@@ -20,6 +20,10 @@ final class Bootstrap {
     private readonly ?LoggerInterface $logger;
     private readonly ?ParameterStoreFactory $parameterStoreFactory;
     private readonly ?ContainerDefinitionBuilderContextConsumerFactory $containerDefinitionBuilderContextConsumerFactory;
+    /**
+     * @var list<Observer>
+     */
+    private array $observers = [];
 
     public function __construct(
         BootstrappingDirectoryResolver $directoryResolver = null,
@@ -31,6 +35,10 @@ final class Bootstrap {
         $this->logger = $logger;
         $this->parameterStoreFactory = $parameterStoreFactory;
         $this->containerDefinitionBuilderContextConsumerFactory = $containerDefinitionBuilderContextConsumerFactory;
+    }
+
+    public function addObserver(Observer $observer) : void {
+        $this->observers[] = $observer;
     }
 
     /**
@@ -72,7 +80,16 @@ final class Bootstrap {
         if ($configuredCacheDir !== null) {
             $cacheDir = $this->directoryResolver->getCachePath($configuredCacheDir);
         }
+
+        foreach ($this->observers as $observer) {
+            $observer->beforeCompilation();
+        }
+
         $containerDefinition = compiler($cacheDir)->compile($compileOptions->build());
+
+        foreach ($this->observers as $observer) {
+            $observer->afterCompilation($containerDefinition);
+        }
 
         $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
 
@@ -84,7 +101,14 @@ final class Bootstrap {
             $factoryOptions = $factoryOptions->withLogger($logger);
         }
 
-        return containerFactory()->createContainer($containerDefinition, $factoryOptions->build());
+        foreach ($this->observers as $observer) {
+            $observer->beforeContainerCreation($containerDefinition);
+        }
+        $container = containerFactory()->createContainer($containerDefinition, $factoryOptions->build());
+        foreach ($this->observers as $observer) {
+            $observer->afterContainerCreation($containerDefinition, $container);
+        }
+        return $container;
     }
 
     private function getDefaultDirectoryResolver() : BootstrappingDirectoryResolver {
