@@ -4,6 +4,9 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\Typiphy\ObjectType;
 
+/**
+ * @deprecated This class is designated to be removed in 2.0
+ */
 abstract class ServiceGatheringListener implements AnnotatedContainerListener {
 
     private ContainerDefinition $containerDefinition;

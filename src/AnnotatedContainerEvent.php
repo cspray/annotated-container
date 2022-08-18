@@ -2,6 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
+/**
+ * @deprecated This class is designated to be removed in 2.0
+ */
 interface AnnotatedContainerEvent {
 
     public function getLifecycle() : AnnotatedContainerLifecycle;

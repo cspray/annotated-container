@@ -52,6 +52,7 @@ use function Cspray\Typiphy\voidType;
  *         storeName: ?string
  *     }>
  * }
+ * @deprecated This class is designated to be removed in 2.0
  */
 final class JsonContainerDefinitionSerializer implements ContainerDefinitionSerializer {
 
