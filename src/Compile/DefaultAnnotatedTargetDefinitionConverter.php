@@ -12,6 +12,7 @@ use Cspray\AnnotatedContainer\Attribute\ServicePrepareAttribute;
 use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
+use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
@@ -108,44 +109,28 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         } else {
             $returnType = $reflection->getReturnType();
             if ($returnType instanceof ReflectionIntersectionType) {
-                $message = sprintf(
-                    'The #[ServiceDelegate] Attribute on %s::%s declares an unsupported intersection as a service type.',
-                    $delegateType,
-                    $delegateMethod
-                );
-                $this->logger->error($message);
-                throw new InvalidAnnotationException($message);
+                $exception = InvalidServiceDelegate::factoryMethodReturnsIntersectionType($delegateType, $delegateMethod);
+                $this->logger->error($exception->getMessage());
+                throw $exception;
             } else if ($returnType instanceof ReflectionUnionType) {
-                $message = sprintf(
-                    'The #[ServiceDelegate] Attribute on %s::%s declares an unsupported union as a service type.',
-                    $delegateType,
-                    $delegateMethod
-                );
-                $this->logger->error($message);
-                throw new InvalidAnnotationException($message);
+                $exception = InvalidServiceDelegate::factoryMethodReturnsUnionType($delegateType, $delegateMethod);
+                $this->logger->error($exception->getMessage());
+                throw $exception;
             }
 
             if ($returnType instanceof ReflectionNamedType) {
                 if (!class_exists($returnType->getName()) && !interface_exists($returnType->getName())) {
-                    $message = sprintf(
-                        'The #[ServiceDelegate] Attribute on %s::%s declares a scalar value as a service type.',
-                        $delegateType,
-                        $delegateMethod
-                    );
-                    $this->logger->error($message);
-                    throw new InvalidAnnotationException($message);
+                    $exception = InvalidServiceDelegate::factoryMethodReturnsScalarType($delegateType, $delegateMethod);
+                    $this->logger->error($exception->getMessage());
+                    throw $exception;
                 }
                 return ServiceDelegateDefinitionBuilder::forService(objectType($returnType->getName()))
                     ->withDelegateMethod(objectType($delegateType), $delegateMethod)
                     ->build();
             } else {
-                $message = sprintf(
-                    'The #[ServiceDelegate] Attribute on %s::%s does not declare a service in the Attribute or as a return type of the method.',
-                    $delegateType,
-                    $delegateMethod
-                );
-                $this->logger->error($message);
-                throw new InvalidAnnotationException($message);
+                $exception = InvalidServiceDelegate::factoryMethodDoesNotDeclareService($delegateType, $delegateMethod);
+                $this->logger->error($exception->getMessage());
+                throw $exception;
             }
         }
     }

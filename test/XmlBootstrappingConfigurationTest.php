@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Exception\InvalidBootstrappingConfigurationException;
+use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Helper\AdditionalStubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumer;
@@ -36,7 +36,7 @@ XML;
         VirtualFilesystem::newFile('annotated-container.xml')
             ->withContent($badXml)
             ->at($this->vfs);
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'Configuration file vfs://root/annotated-container.xml does not validate against the appropriate schema.'
         );
@@ -120,7 +120,7 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . ContainerDefinitionBuilderContextConsumer::class
         );
@@ -150,7 +150,7 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . ContainerDefinitionBuilderContextConsumer::class
         );
@@ -279,7 +279,7 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
@@ -308,7 +308,7 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );

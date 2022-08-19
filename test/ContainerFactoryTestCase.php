@@ -2,12 +2,12 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Helper\StubParameterStore;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
-use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedContainerFixture\InjectEnumConstructorServices;
@@ -23,7 +23,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use TheSeer\Tokenizer\XMLSerializer;
 use function Cspray\Typiphy\objectType;
 
 abstract class ContainerFactoryTestCase extends TestCase {
@@ -243,13 +242,13 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testCreateArbitraryStoreOnServiceNotPresent() {
-        self::expectException(InvalidParameterException::class);
+        self::expectException(ParameterStoreNotFound::class);
         self::expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
         $this->getContainer(Fixtures::injectCustomStoreServices()->getPath());
     }
 
     public function testCreateArbitraryStoreOnConfigurationNotPresent() {
-        self::expectException(InvalidParameterException::class);
+        self::expectException(ParameterStoreNotFound::class);
         self::expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
         $this->getContainer(Fixtures::configurationMissingStore()->getPath());
     }

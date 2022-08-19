@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
-use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
+use Cspray\AnnotatedContainer\Exception\InvalidCache;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -108,7 +108,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         );
 
 
-        $this->expectException(InvalidCacheException::class);
+        $this->expectException(InvalidCache::class);
         $this->expectExceptionMessage('The cache directory, vfs://cache, could not be written to. Please ensure it exists and is writeable.');
 
         $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build());

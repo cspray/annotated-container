@@ -2,8 +2,9 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\InvalidAutowireParameter;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
-use Cspray\AnnotatedContainer\Exception\ParameterNotFoundException;
+use Cspray\AnnotatedContainer\Exception\AutowireParameterNotFound;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use function Cspray\Typiphy\objectType;
@@ -29,7 +30,7 @@ class AutowireableFunctionsTest extends TestCase {
     }
 
     public function testRawParameterWithEmptyNameThrowsException() {
-        $this->expectException(InvalidParameterException::class);
+        $this->expectException(InvalidAutowireParameter::class);
         $this->expectExceptionMessage('A parameter name must have a non-empty value.');
         rawParam('', []);
     }
@@ -44,7 +45,7 @@ class AutowireableFunctionsTest extends TestCase {
     }
 
     public function testServiceParameterWithEmptyNameThrowsException() {
-        $this->expectException(InvalidParameterException::class);
+        $this->expectException(InvalidAutowireParameter::class);
         $this->expectExceptionMessage('A parameter name must have a non-empty value.');
         serviceParam('', objectType($this::class));
     }
@@ -96,7 +97,7 @@ class AutowireableFunctionsTest extends TestCase {
     }
 
     public function testAutowireableSetWithNoParamsGetThrowsException() {
-        $this->expectException(ParameterNotFoundException::class);
+        $this->expectException(AutowireParameterNotFound::class);
         $this->expectExceptionMessage('There is no parameter found at index 1');
         autowiredParams()->get(1);
     }
@@ -157,7 +158,7 @@ class AutowireableFunctionsTest extends TestCase {
     }
 
     public function testAutowireableSetWithDuplicateParameterNamesThrowsException() {
-        $this->expectException(InvalidParameterException::class);
+        $this->expectException(InvalidAutowireParameter::class);
         $this->expectExceptionMessage('A parameter named "foo" has already been added to this set.');
         autowiredParams(rawParam('foo', 'value'), serviceParam('foo', objectType($this::class)));
     }

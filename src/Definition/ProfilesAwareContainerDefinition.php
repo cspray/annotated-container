@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
 use Cspray\Typiphy\ObjectType;
 
@@ -28,18 +29,12 @@ final class ProfilesAwareContainerDefinition implements ContainerDefinition {
         foreach ($this->containerDefinition->getAliasDefinitions() as $aliasDefinition) {
             $abstract = $this->getServiceDefinition($aliasDefinition->getAbstractService());
             if ($abstract === null) {
-                throw new InvalidDefinitionException(sprintf(
-                    'An AliasDefinition has an abstract type, %s, that is not a registered ServiceDefinition.',
-                    $aliasDefinition->getAbstractService()->getName()
-                ));
+                throw InvalidAlias::fromAbstractNotService($aliasDefinition->getAbstractService()->getName());
             }
 
             $concrete = $this->getServiceDefinition($aliasDefinition->getConcreteService());
             if ($concrete === null) {
-                throw new InvalidDefinitionException(sprintf(
-                    'An AliasDefinition has a concrete type, %s, that is not a registered ServiceDefinition.',
-                    $aliasDefinition->getConcreteService()->getName()
-                ));
+                throw InvalidAlias::fromConcreteNotService($aliasDefinition->getConcreteService()->getName());
             }
 
             if ($this->hasActiveProfile($abstract) && $this->hasActiveProfile($concrete)) {

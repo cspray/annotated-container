@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
+use Cspray\AnnotatedContainer\Exception\InvalidLogFile;
 use Cspray\AnnotatedContainer\Exception\InvalidLogFileException;
 use DateTime;
 use DateTimeImmutable;
@@ -27,9 +28,7 @@ final class FileLogger extends AbstractLogger {
     ) {
         $this->dateTimeProvider = $dateTimeProvider;
         if (! @touch($this->file)) {
-            throw new InvalidLogFileException(
-                sprintf('Unable to write to log file "%s".', $this->file)
-            );
+            throw InvalidLogFile::fromLogFileNotWritable($this->file);
         }
     }
 

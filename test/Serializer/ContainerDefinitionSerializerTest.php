@@ -9,6 +9,7 @@ use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
 use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
+use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Helper\UnserializableObject;
 use Cspray\AnnotatedContainer\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder;
@@ -771,7 +772,7 @@ XML;
 
         $subject = new ContainerDefinitionSerializer();
 
-        $this->expectException(InvalidDefinitionException::class);
+        $this->expectException(InvalidInjectDefinition::class);
         $this->expectExceptionMessage('An InjectDefinition with a value that cannot be serialized was provided.');
 
         $subject->serialize($containerDefinition);

@@ -7,7 +7,9 @@ use Cspray\AnnotatedContainer\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
+use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
+use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\StandardAliasDefinitionResolver;
 use Cspray\Phinal\AllowInheritance;
@@ -26,7 +28,7 @@ use Cspray\AnnotatedContainer\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
-use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
+use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\Typiphy\ObjectType;
 use DI\ContainerBuilder;
@@ -52,8 +54,8 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             $container =  $this->createDiContainer($containerDefinition, $activeProfiles);
             $this->logFinishedCreatingContainer(objectType(Container::class), $activeProfiles);
             return $container;
-        } catch (InvalidDefinitionException $exception) {
-            throw new ContainerException($exception->getMessage(), previous: $exception);
+        } catch (InvalidAlias $exception) {
+            throw ContainerException::fromCaughtThrowable($exception);
         }
     }
 
@@ -83,11 +85,8 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
         $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
             $concreteDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getConcreteService());
-            if (is_null($concreteDefinition)) {
-                throw new ContainerException(sprintf(
-                    'An AliasDefinition is defined with a concrete type %s that is not a registered #[Service].',
-                    $aliasDefinition->getConcreteService()->getName()
-                ));
+            if ($concreteDefinition === null) {
+                throw InvalidAlias::fromConcreteNotService($aliasDefinition->getConcreteService()->getName());
             }
             if (!in_array($aliasDefinition->getAbstractService()->getName(), $aliasedTypes)) {
                 $resolution = $this->aliasDefinitionResolver->resolveAlias(
@@ -191,10 +190,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
             public function get(string $id) {
                 if (!$this->has($id)) {
-                    throw new ServiceNotFoundException(sprintf(
-                        'The service "%s" could not be found in this container.',
-                        $id
-                    ));
+                    throw ServiceNotFound::fromServiceNotInContainer($id);
                 }
                 return $this->container->get($id);
             }
@@ -247,13 +243,10 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
             $injectStore = $injectDefinition->getStoreName();
             $value = $injectDefinition->getValue();
-            if (!is_null($injectStore)) {
+            if ($injectStore !== null) {
                 $parameterStore = $this->getParameterStore($injectStore);
-                if (!isset($parameterStore)) {
-                    throw new InvalidParameterException(sprintf(
-                        'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
-                        $injectStore
-                    ));
+                if ($parameterStore === null) {
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($injectStore);
                 }
 
                 $value = $parameterStore->fetch($injectDefinition->getType(), $value);
@@ -285,11 +278,8 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             $value = $injectDefinition->getValue();
             if (!is_null($injectStore)) {
                 $parameterStore = $this->getParameterStore($injectStore);
-                if (!isset($parameterStore)) {
-                    throw new InvalidParameterException(sprintf(
-                        'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
-                        $injectStore
-                    ));
+                if ($parameterStore === null) {
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($injectStore);
                 }
 
                 $value = $parameterStore->fetch($injectDefinition->getType(), $value);
