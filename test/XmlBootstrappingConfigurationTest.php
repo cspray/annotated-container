@@ -2,9 +2,12 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Bootstrap\Observer;
+use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Helper\AdditionalStubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Helper\StubBootstrapObserverWithDependencies;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumerWithDependencies;
 use Cspray\AnnotatedContainer\Helper\StubParameterStore;
@@ -524,5 +527,96 @@ XML;
         );
 
         self::assertSame(['foo', 'bar', 'baz'], $config->getLoggingExcludedProfiles());
+    }
+
+    public function testObserversContainsNonClassThrowsException() : void {
+        $badXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <observers>
+    <fqcn>something not a class</fqcn>
+  </observers>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($badXml)
+            ->at($this->vfs);
+
+        self::expectException(InvalidBootstrapConfiguration::class);
+        self::expectExceptionMessage(
+            'All entries in observers must be classes that implement ' . Observer::class
+        );
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+    }
+
+    public function testObserversContainsNotObserverThrowsException() : void {
+        $badXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <observers>
+    <fqcn>Cspray\AnnotatedContainer\Helper\StubContextConsumer</fqcn>
+  </observers>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($badXml)
+            ->at($this->vfs);
+
+        self::expectException(InvalidBootstrapConfiguration::class);
+        self::expectExceptionMessage(
+            'All entries in observers must be classes that implement ' . Observer::class
+        );
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+    }
+
+    public function testObserverFactoryPresentRespected() : void {
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <observers><fqcn>Cspray\AnnotatedContainer\Helper\StubBootstrapObserverWithDependencies</fqcn></observers>
+</annotatedContainer>
+XML;
+
+        $observerFactory = new class implements ObserverFactory {
+            public function createObserver(string $observer) : Observer {
+                return new $observer('from observer factory');
+            }
+        };
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver(),
+            observerFactory: $observerFactory
+        );
+
+        self::assertCount(1, $config->getObservers());
+        self::assertInstanceOf(StubBootstrapObserverWithDependencies::class, $config->getObservers()[0]);
     }
 }

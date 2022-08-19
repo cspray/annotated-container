@@ -61,9 +61,9 @@ final class Bootstrap {
         $configFile = $this->directoryResolver->getConfigurationPath($configurationFile);
         $configuration = new XmlBootstrappingConfiguration(
             $configFile,
-            $this->directoryResolver,
-            $this->parameterStoreFactory,
-            $this->containerDefinitionBuilderContextConsumerFactory
+            directoryResolver: $this->directoryResolver,
+            parameterStoreFactory: $this->parameterStoreFactory,
+            consumerFactory: $this->containerDefinitionBuilderContextConsumerFactory
         );
 
         $scanPaths = [];
@@ -86,6 +86,10 @@ final class Bootstrap {
         $configuredCacheDir = $configuration->getCacheDirectory();
         if ($configuredCacheDir !== null) {
             $cacheDir = $this->directoryResolver->getCachePath($configuredCacheDir);
+        }
+
+        foreach ($configuration->getObservers() as $observer) {
+            $this->addObserver($observer);
         }
 
         foreach ($this->observers as $observer) {
