@@ -427,4 +427,35 @@ XML;
         self::assertCount(4, $three->getInvokedMethods());
     }
 
+    public function testObserversAddedFromConfiguration() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+    <observers>
+      <fqcn>Cspray\AnnotatedContainer\Helper\StubBootstrapObserver</fqcn>
+    </observers>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+        $bootstrap->bootstrapContainer();
+
+        $observers = (new \ReflectionObject($bootstrap))->getProperty('observers')->getValue($bootstrap);
+
+        self::assertCount(1, $observers);
+        self::assertInstanceOf(StubBootstrapObserver::class, $observers[0]);
+        self::assertCount(4, $observers[0]->getInvokedMethods());
+    }
+
 }

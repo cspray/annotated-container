@@ -36,10 +36,16 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
      */
     private readonly array $parameterStores;
 
+    /**
+     * @var list<Observer>
+     */
+    private readonly array $observers;
+
     public function __construct(
         private readonly string $xmlFile,
         private readonly BootstrappingDirectoryResolver $directoryResolver,
         private readonly ?ParameterStoreFactory $parameterStoreFactory = null,
+        private readonly ?ObserverFactory $observerFactory = null,
         private readonly ?ContainerDefinitionBuilderContextConsumerFactory $consumerFactory = null
     ) {
         try{
@@ -93,6 +99,23 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 }
             }
 
+            $observers = [];
+            $observerNodes = $xpath->query('/ac:annotatedContainer/ac:observers/ac:fqcn/text()');
+            if ($observerNodes instanceof DOMNodeList) {
+                foreach ($observerNodes as $observerNode) {
+                    $observerClass = (string) $observerNode->nodeValue;
+                    if (!class_exists($observerClass) || !is_subclass_of($observerClass, Observer::class)) {
+                        throw InvalidBootstrapConfiguration::fromConfiguredObserverWrongType();
+                    }
+                    if (isset($this->observerFactory)) {
+                        $observer = $this->observerFactory->createObserver($observerClass);
+                    } else {
+                        $observer = new $observerClass();
+                    }
+                    $observers[] = $observer;
+                }
+            }
+
             /** @var DOMNodeList $cacheDirNodes */
             $cacheDirNodes = $xpath->query('/ac:annotatedContainer/ac:cacheDir');
             $cache = null;
@@ -134,6 +157,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             $this->contextConsumer = $contextConsumer;
             $this->cacheDir = $cache;
             $this->parameterStores = $parameterStores;
+            $this->observers = $observers;
             $this->logger = $logger;
             $this->excludedProfiles = $excludedProfiles;
         } finally {
@@ -168,5 +192,9 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
 
     public function getLoggingExcludedProfiles() : array {
         return $this->excludedProfiles;
+    }
+
+    public function getObservers() : array {
+        return $this->observers;
     }
 }
