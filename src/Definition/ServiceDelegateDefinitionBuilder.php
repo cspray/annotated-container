@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegateDefinition;
 use Cspray\Typiphy\ObjectType;
 
 final class ServiceDelegateDefinitionBuilder {
@@ -19,12 +19,9 @@ final class ServiceDelegateDefinitionBuilder {
         return $instance;
     }
 
-    /**
-     * @throws DefinitionBuilderException
-     */
     public function withDelegateMethod(ObjectType $delegateType, string $delegateMethod) : self {
-        if (empty($delegateMethod)) {
-            throw new DefinitionBuilderException('The delegate method for a ServiceDelegateDefinition must not be blank.');
+        if (trim($delegateMethod) === '') {
+            throw InvalidServiceDelegateDefinition::fromEmptyDelegateMethod();
         }
         $instance = clone $this;
         $instance->delegateType = $delegateType;

@@ -9,6 +9,7 @@ use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
+use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\SerializerInjectValueParser;
 use Cspray\AnnotatedContainer\ServiceDefinitionBuilder;
@@ -209,10 +210,7 @@ final class ContainerDefinitionSerializer {
             try{
                 $serializedValue = serialize($injectDefinition->getValue());
             } catch(PhpException $exception) {
-                throw new InvalidDefinitionException(
-                    'An InjectDefinition with a value that cannot be serialized was provided.',
-                    previous: $exception
-                );
+                throw InvalidInjectDefinition::fromValueNotSerializable($exception);
             }
 
             $dom = $root->ownerDocument;

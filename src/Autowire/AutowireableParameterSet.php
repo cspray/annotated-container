@@ -4,8 +4,9 @@ namespace Cspray\AnnotatedContainer\Autowire;
 
 use Countable;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
+use Cspray\AnnotatedContainer\Exception\InvalidAutowireParameter;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
-use Cspray\AnnotatedContainer\Exception\ParameterNotFoundException;
+use Cspray\AnnotatedContainer\Exception\AutowireParameterNotFound;
 use IteratorAggregate;
 
 /**
@@ -17,16 +18,15 @@ interface AutowireableParameterSet extends Countable, IteratorAggregate {
 
     /**
      * @param AutowireableParameter $autowireableParameter The parameter that should be added to the set
-     * @throws InvalidParameterException Thrown if there is already an added parameter with the same name as the
-     *                                   $autowireableParameter
      * @return void
+     * @throws InvalidAutowireParameter Thrown if an error was found with the passed parameter
      */
     public function add(AutowireableParameter $autowireableParameter) : void;
 
     /**
      * @param int $index The 0-based index for which parameter to retrieve
-     * @throws ParameterNotFoundException Thrown if an $index is passed that has no corresponding parameter
      * @return AutowireableParameter The parameter at the given index.
+     * @throws AutowireParameterNotFound Thrown if an $index is passed that has no corresponding parameter
      */
     public function get(int $index) : AutowireableParameter;
 

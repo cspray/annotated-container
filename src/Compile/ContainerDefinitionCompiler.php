@@ -23,8 +23,6 @@ interface ContainerDefinitionCompiler {
      *
      * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
-     * @throws InvalidCompileOptionsException
-     * @throws InvalidAnnotationException
      */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition;
 

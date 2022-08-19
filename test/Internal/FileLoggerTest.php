@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
+use Cspray\AnnotatedContainer\Exception\InvalidLogFile;
 use Cspray\AnnotatedContainer\Exception\InvalidLogFileException;
 use DateTime;
 use DateTimeImmutable;
@@ -28,7 +29,7 @@ class FileLoggerTest extends TestCase {
     }
 
     public function testFileNotTouchableThrowsException() : void {
-        self::expectException(InvalidLogFileException::class);
+        self::expectException(InvalidLogFile::class);
         self::expectExceptionMessage(
             'Unable to write to log file "vfs://root/nested/path/annotated-container.log".'
         );

@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Definition;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Exception\InvalidServicePrepareDefinition;
 use Cspray\Typiphy\ObjectType;
 
 final class ServicePrepareDefinitionBuilder {
@@ -12,14 +13,9 @@ final class ServicePrepareDefinitionBuilder {
 
     private function __construct() {}
 
-    /**
-     * Exception is thrown if the method passed is blank.
-     *
-     * @throws DefinitionBuilderException
-     */
     public static function forMethod(ObjectType $serviceDefinition, string $method) : self {
         if (empty($method)) {
-            throw new DefinitionBuilderException('A method for a ServicePrepareDefinition must not be blank.');
+            throw InvalidServicePrepareDefinition::fromEmptyPrepareMethod();
         }
         $instance = new self;
         $instance->service = $serviceDefinition;

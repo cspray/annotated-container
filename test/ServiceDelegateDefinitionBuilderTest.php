@@ -2,16 +2,14 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate;
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegateDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
-use function Cspray\Typiphy\objectType;
 
 class ServiceDelegateDefinitionBuilderTest extends TestCase {
 
     public function testWithEmptyDelegateMethodThrowsException() {
-        $this->expectException(DefinitionBuilderException::class);
+        $this->expectException(InvalidServiceDelegateDefinition::class);
         $this->expectExceptionMessage('The delegate method for a ServiceDelegateDefinition must not be blank.');
         ServiceDelegateDefinitionBuilder::forService(Fixtures::delegatedService()->serviceInterface())
             ->withDelegateMethod(Fixtures::delegatedService()->serviceFactory(), '');

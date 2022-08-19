@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
+use Cspray\AnnotatedContainer\Exception\EnvironmentVarNotFound;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\stringType;
 
@@ -18,7 +18,7 @@ class EnvironmentParameterStoreTest extends TestCase {
     }
 
     public function testGetEnvironmentVariableDoesNotExistThrowsException() {
-        $this->expectException(InvalidParameterException::class);
+        $this->expectException(EnvironmentVarNotFound::class);
         $this->expectExceptionMessage('The key "ANNOTATED_CONTAINER_NOT_PRESENT" is not available in store "env".');
         (new EnvironmentParameterStore())->fetch(stringType(), 'ANNOTATED_CONTAINER_NOT_PRESENT');
     }
