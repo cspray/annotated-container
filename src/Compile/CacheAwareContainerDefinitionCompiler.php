@@ -5,9 +5,7 @@ namespace Cspray\AnnotatedContainer\Compile;
 use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
-use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
-use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
-use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedContainer\Exception\InvalidCache;
 
 /**
  * A ContainerDefinitionCompiler decorator that allows for a ContainerDefinition to be serialized and cached to the
@@ -42,9 +40,7 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
      *
      * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
-     * @throws InvalidAnnotationException
-     * @throws InvalidCompileOptionsException
-     * @throws InvalidCacheException
+     * @throws InvalidCache
      */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions): ContainerDefinition {
         $cacheFile = $this->getCacheFile($containerDefinitionCompileOptions->getScanDirectories());
@@ -66,7 +62,7 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
         $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
         $contentWritten = @file_put_contents($cacheFile, $serialized);
         if (!$contentWritten) {
-            throw new InvalidCacheException(sprintf('The cache directory, %s, could not be written to. Please ensure it exists and is writeable.', $this->cacheDir));
+            throw InvalidCache::fromUnwritableDirectory($this->cacheDir);
         }
         return $containerDefinition;
     }

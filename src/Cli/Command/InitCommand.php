@@ -184,9 +184,7 @@ SHELL;
 
         $composerFile = $this->directoryResolver->getConfigurationPath('composer.json');
         if (!file_exists($composerFile)) {
-            throw new ComposerConfigurationNotFound(
-                'The file "composer.json" does not exist and is expected to be found.'
-            );
+            throw ComposerConfigurationNotFound::fromMissingComposerJson();
         }
 
         $composer = json_decode(file_get_contents($composerFile), true);

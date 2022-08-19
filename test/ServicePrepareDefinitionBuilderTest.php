@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Exception\InvalidServicePrepareDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\objectType;
@@ -22,7 +23,7 @@ class ServicePrepareDefinitionBuilderTest extends TestCase {
     }
 
     public function testExceptionThrownIfMethodEmpty() {
-        $this->expectException(DefinitionBuilderException::class);
+        $this->expectException(InvalidServicePrepareDefinition::class);
         $this->expectExceptionMessage('A method for a ServicePrepareDefinition must not be blank.');
         ServicePrepareDefinitionBuilder::forMethod(objectType($this::class), '')->build();
     }

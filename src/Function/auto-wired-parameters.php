@@ -3,8 +3,9 @@
 namespace Cspray\AnnotatedContainer;
 
 use ArrayIterator;
+use Cspray\AnnotatedContainer\Exception\InvalidAutowireParameter;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
-use Cspray\AnnotatedContainer\Exception\ParameterNotFoundException;
+use Cspray\AnnotatedContainer\Exception\AutowireParameterNotFound;
 use Cspray\Typiphy\ObjectType;
 use Traversable;
 
@@ -30,9 +31,7 @@ function autowiredParams(AutowireableParameter... $parameters) : AutowireablePar
         public function add(AutowireableParameter $autowireableParameter) : void {
             foreach ($this->parameters as $parameter) {
                 if ($parameter->getName() === $autowireableParameter->getName()) {
-                    throw new InvalidParameterException(sprintf(
-                        'A parameter named "%s" has already been added to this set.', $parameter->getName()
-                    ));
+                    throw InvalidAutowireParameter::fromParameterAlreadyAddedToSet($parameter->getName());
                 }
             }
             $this->parameters[] = $autowireableParameter;
@@ -40,7 +39,7 @@ function autowiredParams(AutowireableParameter... $parameters) : AutowireablePar
 
         public function get(int $index) : AutowireableParameter {
             if (!$this->has($index)) {
-                throw new ParameterNotFoundException(sprintf('There is no parameter found at index %s', $index));
+                throw AutowireParameterNotFound::fromIndexNotFound($index);
             }
             return $this->parameters[$index];
         }
@@ -66,11 +65,11 @@ function autowiredParams(AutowireableParameter... $parameters) : AutowireablePar
  * @param string $name
  * @param ObjectType $service
  * @return AutowireableParameter
- * @throws InvalidParameterException
+ * @throws InvalidAutowireParameter
  */
 function serviceParam(string $name, ObjectType $service) : AutowireableParameter {
     if (empty($name)) {
-        throw new InvalidParameterException('A parameter name must have a non-empty value.');
+        throw InvalidAutowireParameter::fromParameterWithMissingValue();
     }
     return new class($name, $service) implements AutowireableParameter {
 
@@ -100,11 +99,11 @@ function serviceParam(string $name, ObjectType $service) : AutowireableParameter
  * @param string $name
  * @param mixed $value
  * @return AutowireableParameter
- * @throws InvalidParameterException
+ * @throws InvalidAutowireParameter
  */
 function rawParam(string $name, mixed $value) : AutowireableParameter {
     if (empty($name)) {
-        throw new InvalidParameterException('A parameter name must have a non-empty value.');
+        throw InvalidAutowireParameter::fromParameterWithMissingName();
     }
     return new class($name, $value) implements AutowireableParameter {
 

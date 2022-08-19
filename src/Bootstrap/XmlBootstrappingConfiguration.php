@@ -4,7 +4,7 @@ namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumerFactory;
-use Cspray\AnnotatedContainer\Exception\InvalidBootstrappingConfigurationException;
+use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\Internal\CompositeLogger;
 use Cspray\AnnotatedContainer\Internal\FileLogger;
@@ -48,9 +48,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             $dom->load($this->xmlFile);
             libxml_use_internal_errors(true);
             if (!$dom->schemaValidate($schemaFile)) {
-                throw new InvalidBootstrappingConfigurationException(
-                    sprintf('Configuration file %s does not validate against the appropriate schema.', $this->xmlFile)
-                );
+                throw InvalidBootstrapConfiguration::fromFileDoesNotValidateSchema($this->xmlFile);
             }
 
             $xpath = new DOMXPath($dom);
@@ -68,10 +66,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 $consumerClassType = trim($contextConsumerTextNode->nodeValue);
                 if (!class_exists($consumerClassType) ||
                     !is_subclass_of($consumerClassType, ContainerDefinitionBuilderContextConsumer::class)) {
-                    throw new InvalidBootstrappingConfigurationException(sprintf(
-                        'All entries in containerDefinitionBuilderContextConsumers must be classes that implement %s',
-                        ContainerDefinitionBuilderContextConsumer::class
-                    ));
+                    throw InvalidBootstrapConfiguration::fromConfiguredContainerDefinitionConsumerWrongType();
                 }
                 if (isset($this->consumerFactory)) {
                     $contextConsumer = $this->consumerFactory->createConsumer($consumerClassType);
@@ -87,10 +82,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                     assert(isset($parameterStoreNode->nodeValue));
                     $parameterStoreType = trim($parameterStoreNode->nodeValue);
                     if (!class_exists($parameterStoreType) || !is_subclass_of($parameterStoreType, ParameterStore::class)) {
-                        throw new InvalidBootstrappingConfigurationException(sprintf(
-                            'All entries in parameterStores must be classes that implement %s',
-                            ParameterStore::class
-                        )) ;
+                        throw InvalidBootstrapConfiguration::fromConfiguredParameterStoreWrongType();
                     }
                     if (isset($this->parameterStoreFactory)) {
                         $parameterStore = $this->parameterStoreFactory->createParameterStore($parameterStoreType);

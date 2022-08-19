@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\objectType;
@@ -14,7 +15,7 @@ class InjectDefinitionBuilderTest extends TestCase {
     public function testInjectDefinitionWithNoMethodOrPropertyThrowsException() {
         $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
-        $this->expectException(DefinitionBuilderException::class);
+        $this->expectException(InvalidInjectDefinition::class);
         $this->expectExceptionMessage('A method or property to inject into MUST be provided before building an InjectDefinition.');
         $builder->build();
     }
@@ -24,7 +25,7 @@ class InjectDefinitionBuilderTest extends TestCase {
 
         $builder = $builder->withMethod('does-not-matter', stringType(), 'else')->withProperty(stringType(), 'else');
 
-        $this->expectException(DefinitionBuilderException::class);
+        $this->expectException(InvalidInjectDefinition::class);
         $this->expectExceptionMessage('A method and property MUST NOT be set together when building an InjectDefinition.');
         $builder->build();
     }
@@ -34,7 +35,7 @@ class InjectDefinitionBuilderTest extends TestCase {
 
         $builder = $builder->withMethod('does-not-matter', stringType(), 'else');
 
-        $this->expectException(DefinitionBuilderException::class);
+        $this->expectException(InvalidInjectDefinition::class);
         $this->expectExceptionMessage('A value MUST be provided when building an InjectDefinition.');
         $builder->build();
     }

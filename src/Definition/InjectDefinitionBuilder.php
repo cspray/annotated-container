@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Definition;
 
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier;
 use Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier;
 use Cspray\Typiphy\ObjectType;
@@ -72,11 +73,11 @@ final class InjectDefinitionBuilder {
 
     public function build() : InjectDefinition {
         if (!isset($this->method) && !isset($this->property)) {
-            throw new DefinitionBuilderException('A method or property to inject into MUST be provided before building an InjectDefinition.');
+            throw InvalidInjectDefinition::fromMissingMethodAndProperty();
         } else if (isset($this->method) && isset($this->property)) {
-            throw new DefinitionBuilderException('A method and property MUST NOT be set together when building an InjectDefinition.');
+            throw InvalidInjectDefinition::fromMethodAndPropertySet();
         } else if (!$this->isValueCalled) {
-            throw new DefinitionBuilderException('A value MUST be provided when building an InjectDefinition.');
+            throw InvalidInjectDefinition::fromMissingValue();
         }
 
         if (isset($this->method)) {

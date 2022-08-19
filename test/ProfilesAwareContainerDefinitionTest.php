@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
@@ -98,7 +99,7 @@ class ProfilesAwareContainerDefinitionTest extends TestCase {
 
         $subject = new ProfilesAwareContainerDefinition($containerDefinition, ['default']);
 
-        self::expectException(InvalidDefinitionException::class);
+        self::expectException(InvalidAlias::class);
         self::expectExceptionMessage(sprintf(
             'An AliasDefinition has an abstract type, %s, that is not a registered ServiceDefinition.',
             Fixtures::ambiguousAliasedServices()->fooInterface()->getName()
@@ -120,7 +121,7 @@ class ProfilesAwareContainerDefinitionTest extends TestCase {
 
         $subject = new ProfilesAwareContainerDefinition($containerDefinition, ['default']);
 
-        self::expectException(InvalidDefinitionException::class);
+        self::expectException(InvalidAlias::class);
         self::expectExceptionMessage(sprintf(
             'An AliasDefinition has a concrete type, %s, that is not a registered ServiceDefinition.',
             Fixtures::ambiguousAliasedServices()->barImplementation()->getName()

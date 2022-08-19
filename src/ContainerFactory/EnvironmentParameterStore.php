@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Cspray\AnnotatedContainer\Exception\EnvironmentVarNotFound;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
@@ -16,11 +17,7 @@ final class EnvironmentParameterStore implements ParameterStore {
     public function fetch(Type|TypeUnion|TypeIntersect $type, string $key) : string|array|false {
         $value = getenv($key);
         if ($value === false) {
-            throw new InvalidParameterException(sprintf(
-                'The key "%s" is not available in store "%s".',
-                $key,
-                $this->getName()
-            ));
+            throw EnvironmentVarNotFound::fromMissingEnvironmentVariable($key);
         }
         return $value;
     }

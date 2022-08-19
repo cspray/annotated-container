@@ -14,9 +14,8 @@ use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactoryOptionsBuilder;
 use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
-use Cspray\AnnotatedContainer\Exception\ContainerFactoryNotFoundException;
-use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
-use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedContainer\Exception\BackingContainerNotFound;
+use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -52,9 +51,8 @@ final class Bootstrap {
 
     /**
      * @param list<string> $profiles
-     * @throws ContainerFactoryNotFoundException
-     * @throws InvalidCompileOptionsException
-     * @throws InvalidAnnotationException
+     * @throws BackingContainerNotFound
+     * @throws InvalidBootstrapConfiguration
      */
     public function bootstrapContainer(
         array $profiles = ['default'],
@@ -138,7 +136,7 @@ final class Bootstrap {
         } else if (class_exists(Container::class)) {
             return new PhpDiContainerFactory();
         } else {
-            throw new ContainerFactoryNotFoundException('There is no backing Container library found. Please run "composer suggests" for supported containers.');
+            throw BackingContainerNotFound::fromMissingImplementation();
         }
     }
 

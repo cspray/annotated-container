@@ -5,6 +5,9 @@ namespace Cspray\AnnotatedContainer\Compile;
 use Cspray\AnnotatedContainer\AliasDefinition;
 use Cspray\AnnotatedContainer\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Exception\InvalidScanDirectories;
+use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
+use Cspray\AnnotatedContainer\Exception\InvalidServicePrepare;
 use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainer\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
@@ -58,28 +61,25 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
      *
      * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
-     * @throws InvalidCompileOptionsException|InvalidAnnotationException
+     * @throws InvalidArgumentException
+     * @throws InvalidScanDirectories
+     * @throws InvalidServiceDelegate
+     * @throws InvalidServicePrepare
      */
     public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
         $logger = $containerDefinitionCompileOptions->getLogger() ?? new NullLogger();
 
         $scanDirs = $containerDefinitionCompileOptions->getScanDirectories();
         if (empty($scanDirs)) {
-            $message = sprintf(
-                'The ContainerDefinitionCompileOptions passed to %s must include at least 1 directory to scan, but none were provided.',
-                'Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler'
-            );
-            $logger->error($message);
-            throw new InvalidCompileOptionsException($message);
+            $exception = InvalidScanDirectories::fromEmptyList();
+            $logger->error($exception->getMessage());
+            throw $exception;
         }
 
         if (count(array_unique($scanDirs)) !== count($scanDirs)) {
-            $message = sprintf(
-                'The ContainerDefinitionCompileOptions passed to %s includes duplicate directories. Please pass a distinct set of directories to scan.',
-                'Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler'
-            );
-            $logger->error($message, ['sourcePaths' => $scanDirs]);
-            throw new InvalidCompileOptionsException($message);
+            $exception = InvalidScanDirectories::fromDuplicatedDirectories();
+            $logger->error($exception->getMessage(), ['sourcePaths' => $scanDirs]);
+            throw $exception;
         }
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
@@ -375,8 +375,10 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     /**
      * @param ContainerDefinitionBuilder $containerDefinitionBuilder
      * @param DefinitionsCollection $consumer
+     * @param LoggerInterface $logger
      * @return ContainerDefinitionBuilder
-     * @throws InvalidAnnotationException
+     * @throws InvalidServiceDelegate
+     * @throws InvalidServicePrepare
      */
     private function addAnnotatedDefinitions(
         ContainerDefinitionBuilder $containerDefinitionBuilder,
@@ -390,13 +392,10 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         foreach ($consumer['serviceDelegateDefinitions'] as $serviceDelegateDefinition) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $serviceDelegateDefinition->getServiceType());
             if ($serviceDef === null) {
-                throw new InvalidAnnotationException(
-                    sprintf(
-                        'Service delegation defined on %s::%s declares a type, %s, that is not a service.',
-                        $serviceDelegateDefinition->getDelegateType()->getName(),
-                        $serviceDelegateDefinition->getDelegateMethod(),
-                        $serviceDelegateDefinition->getServiceType()->getName()
-                    )
+                throw InvalidServiceDelegate::factoryMethodDoesNotCreateService(
+                    $serviceDelegateDefinition->getServiceType()->getName(),
+                    $serviceDelegateDefinition->getDelegateType()->getName(),
+                    $serviceDelegateDefinition->getDelegateMethod()
                 );
             }
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition($serviceDelegateDefinition);
@@ -405,13 +404,9 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         $concretePrepareDefinitions = array_filter($consumer['servicePrepareDefinitions'], function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder, $logger) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
             if (is_null($serviceDef)) {
-                $message = sprintf(
-                    'Service preparation defined on %s::%s, but that class is not a service.',
-                    $prepareDef->getService()->getName(),
-                    $prepareDef->getMethod()
-                );
-                $logger->error($message);
-                throw new InvalidAnnotationException($message);
+                $exception = InvalidServicePrepare::fromClassNotService($prepareDef->getService()->getName(), $prepareDef->getMethod());
+                $logger->error($exception->getMessage());
+                throw $exception;
             }
             return $serviceDef->isConcrete();
         });
