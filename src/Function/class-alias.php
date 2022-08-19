@@ -4,38 +4,33 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
-
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionBuilderContextConsumerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\RootDirectoryBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
-
 use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Compile\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Compile\CallableContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumerFactory;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptions;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompilerBuilder;
 use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
-
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasResolutionReason;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\StandardAliasDefinitionResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerFactory\EnvironmentParameterStore;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
-use Cspray\AnnotatedContainer\ContainerFactory\ParameterStoreFactory;
-
-use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
-use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
-use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasResolutionReason;
-use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\StandardAliasDefinitionResolver;
-
 use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
@@ -52,7 +47,6 @@ use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinitionBuilder;
-
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfilesBuilder;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfilesParser;

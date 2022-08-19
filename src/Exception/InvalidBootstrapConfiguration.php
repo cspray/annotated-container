@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
+use Cspray\AnnotatedContainer\Bootstrap\Observer;
 use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\ParameterStore;
 
@@ -26,6 +27,13 @@ final class InvalidBootstrapConfiguration extends Exception {
             ParameterStore::class
         );
         return new self($message);
+    }
+
+    public static function fromConfiguredObserverWrongType() : self {
+        return new self(sprintf(
+            'All entries in observers must be classes that implement %s',
+            Observer::class
+        ));
     }
 
 }

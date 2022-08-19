@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\ContainerFactory;
+namespace Cspray\AnnotatedContainer\Bootstrap;
+
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 
 interface ParameterStoreFactory {
 

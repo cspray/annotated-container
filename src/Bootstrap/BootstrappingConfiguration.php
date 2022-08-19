@@ -24,6 +24,11 @@ interface BootstrappingConfiguration {
      */
     public function getParameterStores() : array;
 
+    /**
+     * @return list<Observer>
+     */
+    public function getObservers() : array;
+
     public function getLogger() : ?LoggerInterface;
 
     public function getLoggingExcludedProfiles() : array;
