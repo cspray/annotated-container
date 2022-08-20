@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\PotentialConfigurationOverwrite;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
+use Cspray\AnnotatedContainer\Exception\ComposerAutoloadNotFound;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Helper\InMemoryOutput;
 use Cspray\AnnotatedContainer\Helper\StubInput;
@@ -211,6 +212,23 @@ SHELL;
 
         $stubInput = new StubInput([], ['init']);
         $this->subject->handle($stubInput, $this->output);
+    }
+
+    public function testInitDefaultComposerJsonHasNoAutoload() : void {
+        VirtualFilesystem::newFile('composer.json')
+            ->withContent(json_encode([
+                'autoload' => [
+                ],
+                'autoload-dev' => [
+                ]
+            ]))->at($this->vfs);
+
+        $input = new StubInput([], ['init']);
+
+        self::expectException(ComposerAutoloadNotFound::class);
+        self::expectExceptionMessage('Did not find any directories to scan based on composer autoload configuration. Please ensure there is a PSR-4 or PSR-0 autoload or autoload-dev set in your composer.json and try again.');
+        $this->subject->handle($input, $this->output);
+
     }
 
     public function testInitDefaultFileComposerJsonPresentCreatesConfigurationFile() : void {
