@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [v1.6.0](https://github.com/cspray/annotated-container/tree/v.1.6.0) - 2022-08-20
+
+This release only deprecates code constructs replaced in v2.
+
+### Changed
+
+- Deprecated `AnnotatedContainerEmitter`
+- Deprecated `AnnotatedContainerEvent`
+- Deprecated `AnnotatedContainerLifecycle`
+- Deprecated `AnnotatedContainerListener`
+- Deprecated `EventEmittingContainerDefinitionCompiler`
+- Deprecated `EventEmittingContainerFactory`
+- Deprecated `JsonContainerDefinitionSerializer`
+- Deprecated `ServiceGatheringListener`
+- Deprecated `StandardAnnotatedContainerEmitter`
+- Deprecated `SupportedContainer`
+- Deprecated function `eventEmitter`
+- Deprecated function `compiler`
+- Deprecated function `containerFactory`
+
 ## [v1.5.2](https://github.com/cspray/annoated-container/tree/v1.5.2) - 2022-08-13
 
 ### Added
