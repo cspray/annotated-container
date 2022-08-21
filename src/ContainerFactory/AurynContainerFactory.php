@@ -7,6 +7,7 @@ use Auryn\Injector;
 use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\AutowireableFactory;
+use Cspray\AnnotatedContainer\AutowireableInvoker;
 use Cspray\AnnotatedContainer\AutowireableParameter;
 use Cspray\AnnotatedContainer\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerDefinition;
@@ -85,6 +86,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 ActiveProfiles $activeProfiles
             ) {
                 $this->injector->delegate(AutowireableFactory::class, fn() => $this);
+                $this->injector->delegate(AutowireableInvoker::class, fn() => $this);
                 $this->injector->delegate(ActiveProfiles::class, fn() => $activeProfiles);
             }
 
