@@ -328,6 +328,13 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertSame($container, $container->get(AutowireableFactory::class));
     }
 
+    public function testGettingAutowireableInvoker() {
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
+        $container = $this->getContainerFactory()->createContainer($containerDefinition);
+
+        self::assertSame($container, $container->get(AutowireableInvoker::class));
+    }
+
     public function testNamedServicesShared() : void {
         $container = $this->getContainer(Fixtures::injectNamedServices()->getPath());
 
