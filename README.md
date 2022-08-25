@@ -149,3 +149,23 @@ This library is thoroughly documented in-repo under the `/docs` directory. The d
 ## Roadmap
 
 The Roadmap can be found in the [annotated-container Project page](https://github.com/users/cspray/projects/1/views/1).
+
+## External Resources
+
+### Notable Libraries Using Annotated Container
+
+- [Annotated Console](https://github.com/cspray/annotated-console)
+- [Labrador Async Event](https://github.com/labrador-kennel/async-event) (main only)
+
+### Blog Posts
+
+- [Introducing Annotated Container - Part 1](https://www.cspray.io/blog/introducing-annotated-container-part-1/)
+- [Introducing Annotated Container - Part 2](https://www.cspray.io/blog/introducing-annotated-container-part-2/)
+- [Introducing Annotated Container - Part 3](https://www.cspray.io/blog/introducing-annotatedcontainer-part-3/)
+- [Annotated Container, Why Attributes?](https://www.cspray.io/blog/annotated-container-why-attributes/)
+
+### Demo Apps
+
+- [cspray/annotated-container-doctrine-demo](https://github.com/cspray/annotated-container-doctrine-demo) A Symfony Console app with working database interactions using Doctrine and Sqlite3.
+- [cspray/annotated-container-amp-http-server-demo](https://github.com/cspray/annotated-container-amp-http-server-demo) An Amp http-server app with controller autowiring, routing through attributes, and controller DTO injection.
+
