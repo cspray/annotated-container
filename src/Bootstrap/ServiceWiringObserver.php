@@ -28,6 +28,7 @@ abstract class ServiceWiringObserver implements Observer {
             ) {}
 
             public function getServicesForType(string $type) : array {
+                /** @var array<array-key, object> $services */
                 $services = [];
                 foreach ($this->containerDefinition->getServiceDefinitions() as $serviceDefinition) {
                     if ($serviceDefinition->isAbstract()) {
@@ -37,7 +38,9 @@ abstract class ServiceWiringObserver implements Observer {
                     /** @var class-string $serviceType */
                     $serviceType = $serviceDefinition->getType()->getName();
                     if (is_a($serviceType, $type, true)) {
-                        $services[] = $this->container->get($serviceType);
+                        $service = $this->container->get($serviceType);
+                        assert($service instanceof $type);
+                        $services[] = $service;
                     }
                 }
 
