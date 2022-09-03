@@ -2,12 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
-use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
-use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\StaticAnalysisAnnotatedTargetParser;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;

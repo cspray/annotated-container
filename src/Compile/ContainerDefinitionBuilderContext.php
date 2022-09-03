@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
 
 /**
  * An object that allows the functional API for creating definition instances to work with the immutable

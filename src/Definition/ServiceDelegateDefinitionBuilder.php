@@ -53,6 +53,10 @@ final class ServiceDelegateDefinitionBuilder {
             public function getServiceType() : ObjectType {
                 return $this->serviceDefinition;
             }
+
+            public function getAttribute() : ?object {
+                // TODO: Implement getAttribute() method.
+            }
         };
     }
 

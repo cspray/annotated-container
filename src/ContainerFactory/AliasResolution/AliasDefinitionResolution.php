@@ -2,8 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory\AliasResolution;
 
-use Cspray\AnnotatedContainer\AliasResolutionReason;
-use Cspray\AnnotatedContainer\AliasDefinition;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 
 interface AliasDefinitionResolution {
 

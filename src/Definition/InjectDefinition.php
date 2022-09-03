@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
@@ -49,5 +50,7 @@ interface InjectDefinition {
      * @return string|null
      */
     public function getStoreName() : ?string;
+
+    public function getAttribute() : ?InjectAttribute;
 
 }

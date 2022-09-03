@@ -2,8 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 
 /**
  * A LogicalConstraint that will check each abstract Service to ensure that at least 1 concrete Service is aliased for it.

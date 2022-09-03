@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Profiles\ActiveProfilesBuilder;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

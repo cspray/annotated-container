@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Bootstrap\RootDirectoryBootstrappingDirectoryResolver;
 use PHPUnit\Framework\TestCase;
 
 final class RootDirectoryBootstrappingDirectoryResolverTest extends TestCase {

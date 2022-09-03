@@ -2,19 +2,18 @@
 
 namespace Cspray\AnnotatedContainer\Serializer;
 
-use Cspray\AnnotatedContainer\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
-use Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
-use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\SerializerInjectValueParser;
-use Cspray\AnnotatedContainer\ServiceDefinitionBuilder;
-use Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder;
-use Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder;
 use DOMDocument;
 use DOMElement;
 use DOMNodeList;

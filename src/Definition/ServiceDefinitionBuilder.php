@@ -99,6 +99,10 @@ final class ServiceDefinitionBuilder {
             public function isAbstract() : bool {
                 return $this->isAbstract;
             }
+
+            public function getAttribute() : ?object {
+                // TODO: Implement getAttribute() method.
+            }
         };
     }
 

@@ -31,4 +31,6 @@ interface ServiceDelegateDefinition {
 
     public function getServiceType() : ObjectType;
 
+    public function getAttribute() : ?object;
+
 }

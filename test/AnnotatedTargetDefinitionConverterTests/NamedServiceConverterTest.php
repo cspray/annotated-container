@@ -2,9 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
 

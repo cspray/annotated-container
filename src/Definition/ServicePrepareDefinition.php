@@ -26,4 +26,6 @@ interface ServicePrepareDefinition {
      */
     public function getMethod() : string;
 
+    public function getAttribute() : ?object;
+
 }

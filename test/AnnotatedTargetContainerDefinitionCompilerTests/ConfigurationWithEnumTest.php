@@ -14,7 +14,6 @@ use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\Ha
 use Cspray\AnnotatedContainerFixture\ConfigurationWithEnum\MyEnum;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
-use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\objectType;
 
 class ConfigurationWithEnumTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {

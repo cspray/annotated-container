@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepareDefinition;
 use Cspray\Typiphy\ObjectType;
 
@@ -37,6 +36,10 @@ final class ServicePrepareDefinitionBuilder {
 
             public function getMethod() : string {
                 return $this->method;
+            }
+
+            public function getAttribute() : ?object {
+                // TODO: Implement getAttribute() method.
             }
         };
     }

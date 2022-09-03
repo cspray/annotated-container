@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Exception\InvalidAutowireParameter;
-use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainer\Exception\AutowireParameterNotFound;
 use PHPUnit\Framework\TestCase;
 use stdClass;

@@ -3,8 +3,9 @@
 namespace Cspray\AnnotatedContainer;
 
 use ArrayIterator;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\Exception\InvalidAutowireParameter;
-use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainer\Exception\AutowireParameterNotFound;
 use Cspray\Typiphy\ObjectType;
 use Traversable;

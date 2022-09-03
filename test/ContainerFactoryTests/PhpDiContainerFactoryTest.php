@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactoryTests;
 
-use Cspray\AnnotatedContainer\ContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactoryTestCase;
 use Cspray\Typiphy\ObjectType;

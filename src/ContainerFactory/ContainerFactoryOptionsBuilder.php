@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
-use Cspray\AnnotatedContainer\ContainerFactoryOptions;
 use Psr\Log\LoggerInterface;
 
 final class ContainerFactoryOptionsBuilder {

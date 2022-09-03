@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects;
 
-use Cspray\AnnotatedContainer\InjectTargetIdentifier;
+use Cspray\AnnotatedContainer\Definition\InjectTargetIdentifier;
 
 enum InjectTargetType {
     case MethodParameter;

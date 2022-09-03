@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer\Compile;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
 use Psr\Log\LoggerInterface;
 
 /**

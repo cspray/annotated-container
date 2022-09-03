@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier;
@@ -71,6 +72,10 @@ final class InjectDefinitionBuilder {
         return $instance;
     }
 
+    public function withAttribute(InjectAttribute $injectAttribute) : self {
+
+    }
+
     public function build() : InjectDefinition {
         if (!isset($this->method) && !isset($this->property)) {
             throw InvalidInjectDefinition::fromMissingMethodAndProperty();
@@ -128,6 +133,10 @@ final class InjectDefinitionBuilder {
 
             public function getStoreName() : ?string {
                 return $this->store;
+            }
+
+            public function getAttribute() : ?InjectAttribute {
+                return null;
             }
         };
     }

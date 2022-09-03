@@ -2,8 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\Helper;
 
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
 use Cspray\Typiphy\ObjectType;
 use function Cspray\AnnotatedContainer\service;
 

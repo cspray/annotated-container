@@ -2,12 +2,10 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Attribute\Inject;
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
-use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
 class InjectDefinitionBuilderTest extends TestCase {

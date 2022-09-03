@@ -2,34 +2,20 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
-use Cspray\AnnotatedContainer\ActiveProfiles;
-use Cspray\AnnotatedContainer\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
-use Cspray\AnnotatedContainer\AutowireableInvoker;
-use Cspray\AnnotatedContainer\AutowireableParameter;
+use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
+use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
-use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
-use Cspray\AnnotatedContainer\StandardAliasDefinitionResolver;
-use Cspray\Phinal\AllowInheritance;
+use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use DI\Container;
-
-// @codeCoverageIgnoreStart
-if (!class_exists(Container::class)) {
-    throw new \RuntimeException("To enable the PhpDiContainerFactory please install php-di/php-di 7+!");
-}
-// @codeCoverageIgnoreEnd
-
-use Cspray\AnnotatedContainer\AutowireableFactory;
-use Cspray\AnnotatedContainer\AutowireableParameterSet;
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
-use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
-use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\Typiphy\ObjectType;
 use DI\ContainerBuilder;
 use DI\Definition\Helper\AutowireDefinitionHelper;
@@ -38,6 +24,13 @@ use function Cspray\Typiphy\objectType;
 use function DI\autowire;
 use function DI\decorate;
 use function DI\get;
+
+// @codeCoverageIgnoreStart
+if (!class_exists(Container::class)) {
+    throw new \RuntimeException("To enable the PhpDiContainerFactory please install php-di/php-di 7+!");
+}
+// @codeCoverageIgnoreEnd
+
 
 /**
  * A ContainerFactory that utilizes the php-di/php-di library.

@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer\Exception;
 
 use Psr\Container\ContainerExceptionInterface;
-use function Amp\Promise\wait;
 
 final class ContainerException extends Exception implements ContainerExceptionInterface {
 

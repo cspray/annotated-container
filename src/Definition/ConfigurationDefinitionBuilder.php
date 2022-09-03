@@ -40,6 +40,10 @@ final class ConfigurationDefinitionBuilder {
             public function getName() : ?string {
                 return $this->name;
             }
+
+            public function getAttribute() : ?object {
+                // TODO: Implement getAttribute() method.
+            }
         };
     }
 

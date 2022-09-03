@@ -2,10 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
-use Cspray\AnnotatedContainer\ParameterStore;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 /**
  * A factory that is responsible for turning a ContainerDefinition into a PSR ContainerInterface.

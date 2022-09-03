@@ -2,9 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory\AliasResolution;
 
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\AliasDefinition;
-use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\Typiphy\ObjectType;
 
 final class StandardAliasDefinitionResolver implements AliasDefinitionResolver {

@@ -2,18 +2,16 @@
 
 namespace Cspray\AnnotatedContainer\Serializer;
 
-use Cspray\AnnotatedContainer\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
-use Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Helper\UnserializableObject;
-use Cspray\AnnotatedContainer\InjectDefinitionBuilder;
-use Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder;
-use Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedContainerFixture\InjectEnumConstructorServices\CardinalDirections;
 use PHPUnit\Framework\TestCase;

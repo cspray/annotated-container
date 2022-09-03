@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\ContainerFactory\EnvironmentParameterStore;
 use Cspray\AnnotatedContainer\Exception\EnvironmentVarNotFound;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\stringType;
