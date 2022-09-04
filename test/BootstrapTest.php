@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 use Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionBuilderContextConsumerFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceWiringObserver;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
@@ -506,14 +507,16 @@ XML;
 
         $actual = $observer->getServices();
 
-        usort($actual, fn($a, $b) => $a::class <=> $b::class);
+        $actualServices = array_map(fn(ServiceFromServiceDefinition $fromServiceDefinition) => $fromServiceDefinition->getService(), $actual);
+
+        usort($actualServices, fn($a, $b) => $a::class <=> $b::class);
 
         self::assertSame($container, $observer->getAnnotatedContainer());
         self::assertSame([
             $container->get(Fixtures::ambiguousAliasedServices()->barImplementation()->getName()),
             $container->get(Fixtures::ambiguousAliasedServices()->bazImplementation()->getName()),
             $container->get(Fixtures::ambiguousAliasedServices()->quxImplementation()->getName()),
-        ], $actual);
+        ], $actualServices);
     }
 
 }

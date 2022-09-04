@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 
 abstract class ServiceWiringObserver implements Observer {
 
@@ -40,7 +41,21 @@ abstract class ServiceWiringObserver implements Observer {
                     if (is_a($serviceType, $type, true)) {
                         $service = $this->container->get($serviceType);
                         assert($service instanceof $type);
-                        $services[] = $service;
+                        $services[] = new class($service, $serviceDefinition) implements ServiceFromServiceDefinition {
+
+                            public function __construct(
+                                private readonly object $service,
+                                private readonly ServiceDefinition $definition
+                            ) {}
+
+                            public function getService() : object {
+                                return $this->service;
+                            }
+
+                            public function getDefinition() : ServiceDefinition {
+                                return $this->definition;
+                            }
+                        };
                     }
                 }
 
