@@ -32,66 +32,56 @@ class MonologLoggerFactory {
 }
 ```
 
-## Step 3 - Define Compile Options to scan source
-
-This code should likely be in your app's bootstrap or startup process.
+## Step 3 - Define a ContainerDefinitionBuilderContextConsumer
 
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-
-$compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')
-    ->build();
-```
-
-## Step 4 - Update Compile Options to include 3rd-party Services
-
-```php
-<?php
-
-use Psr\Log\LoggerInterface;
-use Psr\Log\LoggerAwareInterface;
-use Cspray\AnnotatedContainer\CallableContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
 use function Cspray\AnnotatedContainer\service;
 use function Cspray\AnnotatedContainer\serviceDelegate;
+use function Cspray\AnnotatedContainer\servicePrepare;
 use function Cspray\Typiphy\objectType;
 
-$compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')
-    ->withContainerDefinitionBuilderContextConsumer(new CallableContainerDefinitionBuilderContextConsumer(function($context) {
-        service($context, $loggerType = objectType(LoggerInterface::class));
-        serviceDelegate($context, $loggerType, objectType(MonologLoggerFactory::class), 'createLogger');
-    }))
-    ->build();
-```
+class ThirdPartyServicesProvider implements ContainerDefinitionBuilderContextConsumer {
 
-## Step 5 - Compile your Container
-
-```php
-<?php
-
-use Psr\Log\LoggerInterface;
-use Psr\Log\LoggerAwareInterface;
-use Cspray\AnnotatedContainer\CallableContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use function Cspray\AnnotatedContainer\compiler;
-use function Cspray\AnnotatedContainer\containerFactory;
-use function Cspray\AnnotatedContainer\service;
-use function Cspray\AnnotatedContainer\serviceDelegate;
-
-$compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')
-    ->withContainerDefinitionBuilderContextConsumer(new CallableContainerDefinitionBuilderContextConsumer(function($context) {
+    public function consume(ContainerDefinitionBuilderContext $context) : void {
         service($context, $loggerType = objectType(LoggerInterface::class));
         serviceDelegate($context, $loggerType, objectType(MonologLoggerFactory::class), 'createLogger');
         servicePrepare(
             objectType(LoggerAwareInterface::class),
             'setLogger'
         );
-    }))
-    ->build();
+    }
+}
 
-$containerDefinition = compiler()->compile($compileOptions);
-
-$container = containerFactory()->createContainer($containerDefinition);
 ```
+
+## Step 4 - Update Bootstrapping Configuration
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+      <dir packagePrivate="true">tests</dir>
+    </source>
+  </scanDirectories>
+  <cacheDir>.annotated-container-cache</cacheDir>
+  <containerDefinitionBuilderContextConsumer>ThirdPartyServicesProvider</containerDefinitionBuilderContextConsumer>
+</annotatedContainer>
+```
+
+## Step 5 - Bootstrap your Container
+
+```php
+<?php
+
+use Psr\Log\LoggerInterface;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
+
+$container = (new Bootstrap())->bootstrapContainer();
+```
+
+Now, your PSR Logger will be created through a factory. Any services can inject a `LoggerInterface` directly in the constructor, preferred, or implement the `LoggerAwareInterface` to have it injected automatically after construction.

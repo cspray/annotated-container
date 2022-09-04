@@ -265,7 +265,7 @@ final class ContainerDefinitionSerializer {
             }
 
             $injectDefinitionNode->appendChild(
-                $dom->createElementNS(self::XML_SCHEMA, 'valueType', $injectDefinition->getType()->getName())
+                $dom->createElementNS(self::XML_SCHEMA, 'valueType', base64_encode($injectDefinition->getType()->getName()))
             );
 
             $injectDefinitionNode->appendChild(
@@ -483,7 +483,7 @@ final class ContainerDefinitionSerializer {
             $encodedSerializedValue = $xpath->query('cd:value/text()', $injectDefinition)[0]->nodeValue;
             $serializedValue = base64_decode($encodedSerializedValue);
             $value = unserialize($serializedValue);
-            $valueType = $this->injectValueParser->convertStringToType($valueType);
+            $valueType = $this->injectValueParser->convertStringToType(base64_decode($valueType));
 
             $hasClassMethod = $xpath->query('cd:target/cd:classMethod', $injectDefinition)->count() === 1;
             if ($hasClassMethod) {

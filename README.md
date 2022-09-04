@@ -12,31 +12,48 @@ A Dependency Injection framework for creating an autowired, feature-rich, [PSR-1
 - Create type-safe, highly flexible configuration objects
 - Bring Your Own Container!
 
-## Installation
-
-```
-composer require cspray/annotated-container
-```
-
-### Choose a Backing Container
-
-AnnotatedContainer does not provide any of the actual Container functionality. We provide Attributes and definition objects that can determine how actual implementations are intended to be setup. AnnotatedContainer currently supports the following backing Containers:
-
-```
-composer require rdlowrey/auryn
-```
-
-Uses the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) Injector.
-
-```
-composer require php-di/php-di:v7.x-dev
-```
-
-Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. At the moment this library only supports the necessary 8.1 features in a development branch.
-
 ## Quick Start
 
-Annotated Container ships with a built-in CLI tool to easily create a configuration detailing how to build your Container and a corresponding `Cspray\AnnotatedContainer\Bootstrap` implementation to create your Container using that configuration. It is highly recommended to utilize the CLI tool and configuration file when generating your Container.
+This quick start is intended to get you familiar with Annotated Container's core functionality and get a working Container created. First, a simple example showing how an interface can be aliased to a concrete Service. After that we'll show you how to get a Container to create the Service.
+
+### Code Example
+
+```php
+<?php declare(strict_types=1);
+
+// interfaces and classes in __DIR__ . '/src'
+
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\InjectEnv;
+
+#[Service]
+interface BlobStorage {
+
+    public function store(string $identifier, string $contents) : void;
+    
+    public function retrieve(string $identifier) : ?string;
+
+}
+
+#[Service]
+class FilesystemStorage implements BlobStorage {
+    
+    public function store(string $identifier, string $contents) : void {
+        file_put_contents($identifier, $contents);
+    }
+    
+    public function retrieve(string $identifier) : ?string {
+        return file_get_contents($identifier) ?? null;
+    }
+
+}
+```
+
+This example is built upon in the docs. Check out the tutorials for more examples of Annotated Container's functionality!
+
+### Bootstrapping Your Container
+
+Annotated Container ships with a built-in CLI tool to easily create a configuration detailing how to build your Container and a corresponding `Cspray\AnnotatedContainer\Bootstrap\Bootstrap` implementation to create your Container using that configuration. It is highly recommended to use the provided tooling to create your Container.
 
 > The CLI tool offers extensive documentation detailing how to run commands and what options are available. If you're ever looking for more info run: `./vendor/bin/annotated-container help`
 
@@ -68,6 +85,7 @@ Now, bootstrap your Container in your app.
 ```php
 <?php declare(strict_types=1);
 
+// app bootstrap in __DIR__ . '/app.php'
 require __DIR__ . '/vendor/autoload.php';
 
 use Cspray\AnnotatedContainer\Bootstrap;
@@ -76,65 +94,31 @@ use Cspray\AnnotatedContainer\Bootstrap;
 // If the only active profile is default you can call this method without any arguments
 $profiles = ['default'];
 $container = (new Bootstrap())->bootstrapContainer($profiles);
+
+$storage = $container->get(BlobStorage::class);     // instanceof FilesystemStorage
 ```
 
-## Detailed Setup Guide
+## Installation
 
-This is a short example to whet your appetite for learning more about AnnotatedContainer. Dependency resolution can be a complicated subject, and you should review the material in `/docs` if you plan on using the framework. Our example below is highly contrived but the rest of the documentation builds on top of it to show how AnnotatedContainer can help simplify dependency injection!
-
-In our example we've been given a task to store some blob data. How that data might get stored will change over time, and we should abstract that change from the rest of the system. We decide to introduce a new interface and an initial implementation that will store the data on a filesystem.
-
-```php
-<?php
-
-// interfaces and classes in __DIR__ . '/src'
-
-use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Attribute\InjectEnv;
-
-#[Service]
-interface BlobStorage {
-
-    public function store(string $identifier, string $contents) : void;
-    
-    public function retrieve(string $identifier) : ?string;
-
-}
-
-#[Service]
-class FilesystemStorage implements BlobStorage {
-    
-    public function store(string $identifier, string $contents) : void {
-        file_put_contents($identifier, $contents);
-    }
-    
-    public function retrieve(string $identifier) : ?string {
-        return file_get_contents($identifier) ?? null;
-    }
-
-}
-
-// app bootstrap in __DIR__ . '/app.php'
-require __DIR__ . '/vendor/autoload.php';
-
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use function Cspray\AnnotatedContainer\compiler;
-use function Cspray\AnnotatedContainer\containerFactory;
-
-$containerDefinition = compiler()->compile(
-    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
-);
-
-// If you have not installed a backing container at this point you'll get an exception thrown 
-$container = containerFactory()->createContainer($containerDefinition);
-
-var_dump($container->get(BlobStorage::class) instanceof FilesystemStorage); // true
-var_dump($container->get(BlobStorage::class) === $container->get(BlobStorage::class)); // true
+```
+composer require cspray/annotated-container
 ```
 
-While far from something you'd want to use in production our example shows that we can create a Container that can infer what concrete implementation to use from the name of an interface. Pretty neat! There's a lot more functionality available to you and this is just the tip of the proverbial iceberg.
+### Choose a Backing Container
 
-Dependency resolution can be a complicated subject, especially when a layer of syntactic sugar is laid on top of it. It is important before you use this library, or any other, that you understand what opinions it has made and how to use it properly. The articles in `/docs` in the root of this repo will provide more information. Additionally, many use cases have been created and tested in the repo's test suite. Reviewing those tests could also show you a lot of information for how the library works.
+AnnotatedContainer does not provide any of the actual Container functionality. We provide Attributes and definition objects that can determine how actual implementations are intended to be setup. AnnotatedContainer currently supports the following backing Containers:
+
+```
+composer require rdlowrey/auryn
+```
+
+Uses the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) Injector.
+
+```
+composer require php-di/php-di:v7.x-dev
+```
+
+Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. At the moment this library only supports the necessary 8.1 features in a development branch.
 
 ## Documentation
 
@@ -149,3 +133,22 @@ This library is thoroughly documented in-repo under the `/docs` directory. The d
 ## Roadmap
 
 The Roadmap can be found in the [annotated-container Project page](https://github.com/users/cspray/projects/1/views/1).
+
+## External Resources
+
+### Notable Libraries Using Annotated Container
+
+- [Annotated Console](https://github.com/cspray/annotated-console)
+- [Labrador Async Event](https://github.com/labrador-kennel/async-event) (3.0.0-beta2+)
+
+### Blog Posts
+
+- [Introducing Annotated Container - Part 1](https://www.cspray.io/blog/introducing-annotated-container-part-1/)
+- [Introducing Annotated Container - Part 2](https://www.cspray.io/blog/introducing-annotated-container-part-2/)
+- [Introducing Annotated Container - Part 3](https://www.cspray.io/blog/introducing-annotatedcontainer-part-3/)
+- [Annotated Container, Why Attributes?](https://www.cspray.io/blog/annotated-container-why-attributes/)
+
+### Demo Apps
+
+- [cspray/annotated-container-doctrine-demo](https://github.com/cspray/annotated-container-doctrine-demo) A Symfony Console app with working database interactions using Doctrine and Sqlite3.
+- [cspray/annotated-container-amp-http-server-demo](https://github.com/cspray/annotated-container-amp-http-server-demo) An Amp http-server app with controller autowiring, routing through attributes, and controller DTO injection.

@@ -44,17 +44,11 @@ A couple important things to note. First, the Widget is not marked as a service,
 ```php
 <?php declare(strict_types=1);
 
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use function Cspray\AnnotatedContainer\compiler;
-use function Cspray\AnnotatedContainer\containerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 use function Cspray\AnnotatedContainer\autowiredParams;
 use function Cspray\AnnotatedContainer\rawParam;
 
-$containerDefinition = compiler()->compile(
-    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
-);
-
-$autowiredFactory = containerFactory()->createContainer($containerDefinition);
+$autowiredFactory = (new Bootstrap())->bootstrapContainer();
 
 $fooWidget = $autowiredFactory->make(FooWidget::class);
 $fooWidget->service instanceof FooService; // true
@@ -66,6 +60,6 @@ $barWidget->foo === 'bar'; // true
 
 ## Making Defined Services
 
-It should be noted that using the `AutowireableFactory` interface to create defined Services is not recommended. Making a shared service won't recreate the instance the way you'd might expect. Which means if you call `AutowireableFactory::make` and attempt to override the parameters that are used it will still use what is defined in the Container. If you have defined the class in the Container you should use the `ContainInterface::get()` method to retrieve it.
+It should be noted that using the `AutowireableFactory` interface to create defined Services is not recommended. Making a shared service won't recreate the instance the way you'd might expect. Which means if you call `AutowireableFactory::make` and attempt to override the parameters that are used it will still use what is defined in the Container. If you have defined the class in the Container you should use the `ContainerInterface::get()` method to retrieve it.
 
 

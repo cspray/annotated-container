@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [v2.0.0-beta1](https://github.com/cspray/annotated-container/tree/v2.0.0-beta1) - 2022-09-04
+
+Version 2 represents significant improvements but includes backwards-breaking changes. If you run into problems migrating from v1 to v2 please [submit an Issue](https://github.com/cspray/annotated-container/issues/new).
+
+### Added
+
+- A simplified, unified interface for interacting with Annotated Container during bootstrapping. Implement a `Boostrap\Observer` to respond to the various Annotated Container lifecycle events.
+- Ability to setup a bootstrapping observer through the `annotated-container.xml` configuration file.
+- Added the ability to retrieve the Attribute instance for a given Definition.
+
+### Changed
+
+- The codebase was restructured to be separated by namespaces more properly. Attribute namespaces were not changed, the biggest user-facing migration change will be updating class names using in bootstrapping code.
+- The `Serializer\ContainerDefinitionSerializer` interface has been refactored into a concrete instance that uses an XML serialization format.
+- Improves handling `Attribute\Inject` serialization to properly handle objects being able to be used in Attribute constructors.
+- Exceptions were renamed to properly convey information about what went wrong.
+
+### Removed
+
+- Removed code constructs that were deprecated in Version 1. A complete list of removed constructs:
+  - `Definition\ContainerDefinition::merge`
+  - `Definition\ServiceDefinition::equals`
+- Removed the `JsonContainerDefinitionSerializer` implementation, all serialization happens with the `Serializer\ContainerDefinitionSerializer`.
+- Removed the entire bootstrapping event system. It had different, overly-complicated pieces. The system's functionality was replaced with the new bootstrap observer system.
+- Removed several functions aimed at bootstrapping a container. Supported bootstrapping happens through the `Bootstrap\Bootstrap` instance. A complete list of removed functions:
+  - `Cspray\AnnotatedContainer\compiler`
+  - `Cspray\AnnotatedContainer\containerFactory`
+  - `Cspray\AnnotatedContainer\eventEmitter`
+
+### Fixed
+
+- Bug where the `AutowireableInvoker` is not properly aliased to the Container implementation.
+- Bug where running `bin/annotated-container init` without a `composer.json` results in an error accessing a file that does not exist.
+
 ## [v1.5.2](https://github.com/cspray/annoated-container/tree/v1.5.2) - 2022-08-13
 
 ### Added
