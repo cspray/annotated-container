@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -66,6 +67,12 @@ class InjectDefinitionBuilderTest extends TestCase {
         $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
 
         $this->assertNotSame($builder, $builder->withProfiles('profile'));
+    }
+
+    public function testInjectDefinitionWithAttributeHasDifferentObject() : void {
+        $builder = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector());
+
+        $this->assertNotSame($builder, $builder->withAttribute(new Inject('my-value')));
     }
 
     public function testValidMethodInjectDefinitionGetTargetIdentifierIsMethod() {
@@ -203,5 +210,24 @@ class InjectDefinitionBuilderTest extends TestCase {
             ->build();
 
         $this->assertNull($injectDefinition->getTargetIdentifier()->getMethodName());
+    }
+
+    public function testWithNoAttributeReturnsInjectDefinitionWithNullAttribute() : void {
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
+            ->withProperty(stringType(), 'key')
+            ->withValue('my-api-key')
+            ->build();
+
+        self::assertNull($injectDefinition->getAttribute());
+    }
+
+    public function testWithAttributeReturnsSameInstance() : void {
+        $injectDefinition = InjectDefinitionBuilder::forService(Fixtures::injectPrepareServices()->prepareInjector())
+            ->withProperty(stringType(), 'key')
+            ->withValue('my-api-key')
+            ->withAttribute($attr = new Inject("my-inject-value"))
+            ->build();
+
+        self::assertSame($attr, $injectDefinition->getAttribute());
     }
 }

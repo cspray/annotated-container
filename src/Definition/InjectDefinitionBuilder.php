@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer\Definition;
 
 use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier;
 use Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier;
@@ -21,6 +20,8 @@ final class InjectDefinitionBuilder {
     private Type|TypeUnion|TypeIntersect $type;
     private mixed $value;
     private bool $isValueCalled = false;
+    private ?InjectAttribute $attribute = null;
+
     /**
      * @var list<string>
      */
@@ -73,7 +74,9 @@ final class InjectDefinitionBuilder {
     }
 
     public function withAttribute(InjectAttribute $injectAttribute) : self {
-
+        $instance = clone $this;
+        $instance->attribute = $injectAttribute;
+        return $instance;
     }
 
     public function build() : InjectDefinition {
@@ -98,7 +101,7 @@ final class InjectDefinitionBuilder {
             $profiles[] = 'default';
         }
 
-        return new class($targetIdentifier, $this->type, $this->value, $this->store, $profiles) implements InjectDefinition {
+        return new class($targetIdentifier, $this->type, $this->value, $this->store, $profiles, $this->attribute) implements InjectDefinition {
 
             /**
              * @param InjectTargetIdentifier $targetIdentifier
@@ -112,7 +115,8 @@ final class InjectDefinitionBuilder {
                 private readonly Type|TypeUnion|TypeIntersect $type,
                 private readonly mixed $annotationValue,
                 private readonly ?string $store,
-                private readonly array $profiles
+                private readonly array $profiles,
+                private readonly ?InjectAttribute $attribute
             ) {}
 
             public function getTargetIdentifier() : InjectTargetIdentifier {
@@ -136,7 +140,7 @@ final class InjectDefinitionBuilder {
             }
 
             public function getAttribute() : ?InjectAttribute {
-                return null;
+                return $this->attribute;
             }
         };
     }

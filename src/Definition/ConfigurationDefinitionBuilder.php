@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute;
 use Cspray\Typiphy\ObjectType;
 
 /**
@@ -11,6 +12,7 @@ final class ConfigurationDefinitionBuilder {
 
     private ObjectType $classType;
     private ?string $name = null;
+    private ?ConfigurationAttribute $attribute = null;
 
     private function __construct() {}
 
@@ -26,11 +28,18 @@ final class ConfigurationDefinitionBuilder {
         return $instance;
     }
 
+    public function withAttribute(ConfigurationAttribute $attribute) : self {
+        $instance = clone $this;
+        $instance->attribute = $attribute;
+        return $instance;
+    }
+
     public function build() : ConfigurationDefinition {
-        return new class($this->classType, $this->name) implements ConfigurationDefinition {
+        return new class($this->classType, $this->name, $this->attribute) implements ConfigurationDefinition {
             public function __construct(
                 private readonly ObjectType $classType,
-                private readonly ?string $name
+                private readonly ?string $name,
+                private readonly ?ConfigurationAttribute $attribute
             ) {}
 
             public function getClass() : ObjectType {
@@ -41,8 +50,8 @@ final class ConfigurationDefinitionBuilder {
                 return $this->name;
             }
 
-            public function getAttribute() : ?object {
-                // TODO: Implement getAttribute() method.
+            public function getAttribute() : ?ConfigurationAttribute {
+                return $this->attribute;
             }
         };
     }

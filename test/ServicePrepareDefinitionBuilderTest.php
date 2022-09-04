@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepareDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -28,4 +29,26 @@ class ServicePrepareDefinitionBuilderTest extends TestCase {
         ServicePrepareDefinitionBuilder::forMethod(objectType($this::class), '')->build();
     }
 
+    public function testWithAttributeIsImmutable() : void {
+        $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(
+            Fixtures::interfacePrepareServices()->fooInterface(), 'setBar'
+        );
+        self::assertNotSame($prepareDefinition, $prepareDefinition->withAttribute(new ServicePrepare()));
+    }
+
+    public function testNoAttributeDefinitionAttributeIsNull() : void {
+        $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(
+            Fixtures::interfacePrepareServices()->fooInterface(), 'setBar'
+        )->build();
+
+        self::assertNull($prepareDefinition->getAttribute());
+    }
+
+    public function testWithAttributeDefinitionAttributeIsSameInstance() : void {
+        $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(
+            Fixtures::interfacePrepareServices()->fooInterface(), 'setBar'
+        )->withAttribute($attr = new ServicePrepare())->build();
+
+        self::assertSame($attr, $prepareDefinition->getAttribute());
+    }
 }

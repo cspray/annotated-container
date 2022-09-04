@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
@@ -36,5 +37,10 @@ class ProfileResolvedServicesConverterTest extends AnnotatedTargetDefinitionConv
 
     public function testServiceProfiles() {
         $this->assertSame(['dev'], $this->definition->getProfiles());
+    }
+
+    public function testGetAttribute() : void {
+        self::assertInstanceOf(Service::class, $this->definition->getAttribute());
+        self::assertSame(['dev'], $this->definition->getAttribute()->getProfiles());
     }
 }

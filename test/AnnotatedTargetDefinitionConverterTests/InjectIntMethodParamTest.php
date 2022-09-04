@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
@@ -48,6 +49,11 @@ class InjectIntMethodParamTest extends AnnotatedTargetDefinitionConverterTestCas
 
     public function testGetProfiles() {
         $this->assertSame(['default'], $this->definition->getProfiles());
+    }
+
+    public function testGetAttribute() {
+        self::assertInstanceOf(Inject::class, $this->definition->getAttribute());
+        self::assertSame(42, $this->definition->getAttribute()->getValue());
     }
 
 }

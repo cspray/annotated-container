@@ -96,6 +96,15 @@ final class ContainerDefinitionSerializer {
             $serviceDefinitionNode->appendChild(
                 $dom->createElementNS(self::XML_SCHEMA, 'concreteOrAbstract', $serviceDefinition->isConcrete() ? 'Concrete' : 'Abstract')
             );
+
+            $serviceDefinitionNode->appendChild(
+                $attrNode = $dom->createElementNS(self::XML_SCHEMA, 'attribute')
+            );
+
+            $attr = $serviceDefinition->getAttribute();
+            if ($attr !== null) {
+                $attrNode->nodeValue = base64_encode(serialize($attr));
+            }
         }
 
     }
@@ -143,9 +152,18 @@ final class ContainerDefinitionSerializer {
                 $nameNode = $dom->createElementNS(self::XML_SCHEMA, 'name')
             );
 
+            $configurationDefinitionNode->appendChild(
+                $attrNode = $dom->createElementNS(self::XML_SCHEMA, 'attribute')
+            );
+
             $name = $configurationDefinition->getName();
             if ($name !== null) {
                 $nameNode->nodeValue = $name;
+            }
+
+            $attr = $configurationDefinition->getAttribute();
+            if ($attr !== null) {
+                $attrNode->nodeValue = base64_encode(serialize($attr));
             }
         }
     }
@@ -169,6 +187,15 @@ final class ContainerDefinitionSerializer {
             $servicePrepareDefinitionNode->appendChild(
                 $dom->createElementNS(self::XML_SCHEMA, 'method', $servicePrepareDefinition->getMethod())
             );
+
+            $servicePrepareDefinitionNode->appendChild(
+                $attrNode = $dom->createElementNS(self::XML_SCHEMA, 'attribute')
+            );
+
+            $attr = $servicePrepareDefinition->getAttribute();
+            if ($attr !== null) {
+                $attrNode->nodeValue = base64_encode(serialize($attr));
+            }
         }
     }
 
@@ -194,6 +221,14 @@ final class ContainerDefinitionSerializer {
             $serviceDelegateDefinitionNode->appendChild(
                 $dom->createElementNS(self::XML_SCHEMA, 'delegateMethod', $serviceDelegateDefinition->getDelegateMethod())
             );
+            $serviceDelegateDefinitionNode->appendChild(
+                $attrNode = $dom->createElementNS(self::XML_SCHEMA, 'attribute')
+            );
+
+            $attr = $serviceDelegateDefinition->getAttribute();
+            if ($attr !== null) {
+                $attrNode->nodeValue = base64_encode(serialize($attr));
+            }
         }
     }
 
@@ -255,9 +290,18 @@ final class ContainerDefinitionSerializer {
                 $storeNode = $dom->createElementNS(self::XML_SCHEMA, 'store')
             );
 
+            $injectDefinitionNode->appendChild(
+                $attrNode = $dom->createElementNS(self::XML_SCHEMA, 'attribute')
+            );
+
             $store = $injectDefinition->getStoreName();
             if ($store !== null) {
                 $storeNode->nodeValue = $store;
+            }
+
+            $attr = $injectDefinition->getAttribute();
+            if ($attr !== null) {
+                $attrNode->nodeValue = base64_encode(serialize($attr));
             }
         }
     }
@@ -357,6 +401,11 @@ final class ContainerDefinitionSerializer {
 
             $serviceBuilder = $serviceBuilder->withProfiles($serviceProfiles);
 
+            $attr = $xpath->query('cd:attribute/text()', $serviceDefinition)[0]?->nodeValue;
+            if ($attr !== null) {
+                $serviceBuilder = $serviceBuilder->withAttribute(unserialize(base64_decode($attr)));
+            }
+
             $builder = $builder->withServiceDefinition($serviceBuilder->build());
         }
 
@@ -385,9 +434,15 @@ final class ContainerDefinitionSerializer {
         foreach ($prepareDefinitions as $prepareDefinition) {
             $service = $xpath->query('cd:type/text()', $prepareDefinition)[0]->nodeValue;
             $method = $xpath->query('cd:method/text()', $prepareDefinition)[0]->nodeValue;
-            $builder = $builder->withServicePrepareDefinition(
-                ServicePrepareDefinitionBuilder::forMethod(objectType($service), $method)->build()
-            );
+
+            $servicePrepareBuilder = ServicePrepareDefinitionBuilder::forMethod(objectType($service), $method);
+
+            $attr = $xpath->query('cd:attribute/text()', $prepareDefinition)[0]?->nodeValue;
+            if ($attr !== null) {
+                $servicePrepareBuilder = $servicePrepareBuilder->withAttribute(unserialize(base64_decode($attr)));
+            }
+
+            $builder = $builder->withServicePrepareDefinition($servicePrepareBuilder->build());
         }
 
         return $builder;
@@ -402,12 +457,15 @@ final class ContainerDefinitionSerializer {
             $delegateType = $xpath->query('cd:delegateType/text()', $delegateDefinition)[0]->nodeValue;
             $delegateMethod = $xpath->query('cd:delegateMethod/text()', $delegateDefinition)[0]->nodeValue;
 
-            $builder = $builder->withServiceDelegateDefinition(
-                ServiceDelegateDefinitionBuilder::forService(objectType($service))
-                    ->withDelegateMethod(objectType($delegateType), $delegateMethod)
-                    ->build()
+            $serviceDelegateBuilder = ServiceDelegateDefinitionBuilder::forService(objectType($service))
+                    ->withDelegateMethod(objectType($delegateType), $delegateMethod);
 
-            );
+            $attr = $xpath->query('cd:attribute/text()', $delegateDefinition)[0]?->nodeValue;
+            if ($attr !== null) {
+                $serviceDelegateBuilder = $serviceDelegateBuilder->withAttribute(unserialize(base64_decode($attr)));
+            }
+
+            $builder = $builder->withServiceDelegateDefinition($serviceDelegateBuilder->build());
         }
 
         return $builder;
@@ -420,6 +478,7 @@ final class ContainerDefinitionSerializer {
         foreach ($injectDefinitions as $injectDefinition) {
             $valueType = $xpath->query('cd:valueType/text()', $injectDefinition)[0]->nodeValue;
             $store = $xpath->query('cd:store/text()', $injectDefinition)[0]?->nodeValue;
+            $attr = $xpath->query('cd:attribute/text()', $injectDefinition)[0]?->nodeValue;
             $profiles = $xpath->query('cd:profiles/cd:profile/text()', $injectDefinition);
             $encodedSerializedValue = $xpath->query('cd:value/text()', $injectDefinition)[0]->nodeValue;
             $serializedValue = base64_decode($encodedSerializedValue);
@@ -453,6 +512,10 @@ final class ContainerDefinitionSerializer {
                 $injectBuilder = $injectBuilder->withStore($store);
             }
 
+            if ($attr !== null) {
+                $injectBuilder = $injectBuilder->withAttribute(unserialize(base64_decode($attr)));
+            }
+
             $builder = $builder->withInjectDefinition($injectBuilder->build());
         }
 
@@ -466,9 +529,14 @@ final class ContainerDefinitionSerializer {
         foreach ($configurationDefinitions as $configurationDefinition) {
             $type = $xpath->query('cd:type/text()', $configurationDefinition)[0]->nodeValue;
             $name = $xpath->query('cd:name/text()', $configurationDefinition)[0]?->nodeValue;
+            $attr = $xpath->query('cd:attribute/text()', $configurationDefinition)[0]?->nodeValue;
             $configBuilder = ConfigurationDefinitionBuilder::forClass(objectType($type));
             if ($name !== null) {
                 $configBuilder = $configBuilder->withName($name);
+            }
+
+            if ($attr !== null) {
+                $configBuilder = $configBuilder->withAttribute(unserialize(base64_decode($attr)));
             }
 
             $builder = $builder->withConfigurationDefinition(

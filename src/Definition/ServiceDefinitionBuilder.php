@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\Attribute\ServiceAttribute;
 use Cspray\Typiphy\ObjectType;
 
 final class ServiceDefinitionBuilder {
@@ -9,6 +10,7 @@ final class ServiceDefinitionBuilder {
     private ?string $name = null;
     private ObjectType $type;
     private bool $isAbstract;
+    private ?ServiceAttribute $attribute = null;
     /**
      * @var list<string>
      */
@@ -48,12 +50,18 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
+    public function withAttribute(ServiceAttribute $attribute) : self {
+        $instance = clone $this;
+        $instance->attribute = $attribute;
+        return $instance;
+    }
+
     public function build() : ServiceDefinition {
         $profiles = $this->profiles;
         if (empty($profiles)) {
             $profiles[] = 'default';
         }
-        return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary) implements ServiceDefinition {
+        return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary, $this->attribute) implements ServiceDefinition {
 
             /**
              * @param string|null $name
@@ -70,7 +78,8 @@ final class ServiceDefinitionBuilder {
                  * @var list<string> $profiles
                  */
                 private readonly array $profiles,
-                private readonly bool $isPrimary
+                private readonly bool $isPrimary,
+                private readonly ?ServiceAttribute $attribute
             ) {}
 
             public function getName() : ?string {
@@ -100,8 +109,8 @@ final class ServiceDefinitionBuilder {
                 return $this->isAbstract;
             }
 
-            public function getAttribute() : ?object {
-                // TODO: Implement getAttribute() method.
+            public function getAttribute() : ?ServiceAttribute {
+                return $this->attribute;
             }
         };
     }

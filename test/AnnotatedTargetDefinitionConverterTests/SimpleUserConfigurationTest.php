@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
@@ -43,6 +44,10 @@ class SimpleUserConfigurationTest extends AnnotatedTargetDefinitionConverterTest
 
     public function testGetDefinitionStore() {
         $this->assertSame('env', $this->definition->getStoreName());
+    }
+
+    public function testGetAttribute() : void {
+        self::assertInstanceOf(Inject::class, $this->definition->getAttribute());
     }
 
 }

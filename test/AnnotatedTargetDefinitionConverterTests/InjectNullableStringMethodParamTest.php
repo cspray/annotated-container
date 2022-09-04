@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -49,5 +50,10 @@ class InjectNullableStringMethodParamTest extends AnnotatedTargetDefinitionConve
 
     public function testGetProfiles() {
         $this->assertSame(['default'], $this->definition->getProfiles());
+    }
+
+    public function testGetAttribute() {
+        self::assertInstanceOf(Inject::class, $this->definition->getAttribute());
+        self::assertNull($this->definition->getAttribute()->getValue());
     }
 }
