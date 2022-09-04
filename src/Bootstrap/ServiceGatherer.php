@@ -3,13 +3,13 @@
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
 /**
- * @template Service
+ * @template T
  */
 interface ServiceGatherer {
 
     /**
-     * @param class-string<Service> $type
-     * @return Service[]
+     * @param class-string<T> $type
+     * @return ServiceFromServiceDefinition<T>[]
      */
     public function getServicesForType(string $type) : array;
 
