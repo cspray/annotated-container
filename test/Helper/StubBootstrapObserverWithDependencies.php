@@ -4,7 +4,7 @@ namespace Cspray\AnnotatedContainer\Helper;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Bootstrap\Observer;
-use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 final class StubBootstrapObserverWithDependencies implements Observer {
 

@@ -1,37 +1,40 @@
-# Annotated Container Events
+# Annotated Container Observers
 
-Annotated Container has an event system that allows you to get access to pertinent information during [Annotated Container's lifecycle](../references/02-annotated-container-lifecycle.md). This system could be used to gather information about the compilation process, perform action on the Container post creation, or some other action that might be necessary. Below we'll talk about how to register listeners and perform actions.
+Annotated Container has a boostrapping observer system that allows you to get access to pertinent information during [Annotated Container's lifecycle](../references/02-annotated-container-lifecycle.md). This system could be used to gather information about the compilation process, perform action on the Container post creation, or some other action that might be necessary. Below we'll talk about how to register listeners and perform actions.
 
-## Event Overview
+## Registering Observers
 
-Every triggered event implements the `Cspray\AnnotatedContainer\AnnotatedContainerEvent` interface. This provides lifecycle phase currently processing and, if applicable, the `Cspray\AnnotatedContainer\ContainerDefinition` or `Cspray\AnnotatedContainer\AnnotatedContainer` based on the lifecycle phase.
-
-## Registering Listeners
-
- First, you'll need to create a `Cspray\AnnotatedContainer\AnnotatedContainerListener` implementation. 
+ First, you'll need to create a `Cspray\AnnotatedContainer\Boostrap\Observer` implementation. 
 
 ```php
 <?php declare(strict_types=1);
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\AnnotatedContainerListener;
-use Cspray\AnnotatedContainer\AnnotatedContainerEvent;
+use Cspray\AnnotatedContainer\Bootstrap\Observer;
 
-final class MyContainerListener implements AnnotatedContainerListener {
+final class MyContainerObserver implements Observer {
 
-    public function handle(AnnotatedContainerEvent $event) : void {
-        // Do whatever your listener needs
-        // This will be invoked for every lifecycle event that is triggered
-        // Check the $event->getLifecycle() if you only care about specific events 
+    public function beforeCompilation() : void {
+    
+    }
+
+    public function afterCompilation(ContainerDefinition $containerDefinition) : void {
+    
+    }
+
+    public function beforeContainerCreation(ContainerDefinition $containerDefinition) : void {
+    
+    }
+
+    public function afterContainerCreation(ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
+    
     }
 
 }
 ```
 
-If you're using the built-in [bootstrapping functionality](../how-to/02-bootstrap-your-container.md) or using the [functional API](../references/03-functional-api.md) to compile and create your Container then the next step is straight-forward. You'll need to make sure the event emitter knows about your listener.
-
-This code should live in your app's bootstrapping code, before you call `Cspray\AnnotatedContainer\Bootstrap::bootstrapContainer()`.
+This code should live in your app's bootstrapping code, before you call `Cspray\AnnotatedContainer\Bootstrap\Bootstrap::bootstrapContainer()`.
 
 ```php
 <?php declare(strict_types=1);

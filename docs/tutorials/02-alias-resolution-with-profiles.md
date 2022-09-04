@@ -87,16 +87,14 @@ Nifty!
 
 ## Configuring Profiles for the Container
 
-Now that we have our services properly annotated it is important to construct the correct `ContainerFactoryOptions`. If we were on the cloud provider we'd want to build the options with the following code:
+Now that we have our services properly annotated it is important to update the boostrapping code to include the proper profiles. If we were on the cloud provider we'd want to build the Container with the following code:
 
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\ContainerDefinitionFactoryOptionsBuilder;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
-$compileOptions == ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')
-    ->withProfiles('default', 'cloud')
-    ->build();
+$container = (new Bootstrap())->bootstrapContainer(profiles: ['default', 'cloud']);
 ```
 
 If we were on a local machine we'd want to build the options with the following code:
@@ -104,11 +102,9 @@ If we were on a local machine we'd want to build the options with the following 
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
-$compileOptions == ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')
-    ->withProfiles('default', 'local')
-    ->build();
+$container = (new Bootstrap())->bootstrapContainer(profiles: ['default', 'local']);
 ```
 
 It is important...**always include the 'default' profile**! Many services will not be annotated with a specific profile and will be implicitly added to the 'default' profile. Failure to include it in the list of active profiles will likely make the vast majority of services configured incorrectly or unavailable.

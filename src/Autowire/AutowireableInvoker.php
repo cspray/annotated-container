@@ -2,8 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Autowire;
 
-use Cspray\AnnotatedContainer\AutowireableParameterSet;
-
 /**
  * Invoke a callable, autowiring any dependencies that it might have.
  */

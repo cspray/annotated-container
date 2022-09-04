@@ -2,24 +2,18 @@
 
 namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\AliasDefinition;
-use Cspray\AnnotatedContainer\AliasDefinitionBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
+use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Exception\InvalidScanDirectories;
 use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepare;
-use Cspray\AnnotatedContainer\ServiceDefinition;
-use Cspray\AnnotatedContainer\ServicePrepareDefinition;
-use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
-use Cspray\AnnotatedContainer\InjectDefinition;
-use Cspray\AnnotatedContainer\ConfigurationDefinition;
-use Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverter;
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions;
-use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
-use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedTarget\AnnotatedTargetParser;

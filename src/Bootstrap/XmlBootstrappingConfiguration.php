@@ -2,18 +2,15 @@
 
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumerFactory;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\Internal\CompositeLogger;
 use Cspray\AnnotatedContainer\Internal\FileLogger;
 use Cspray\AnnotatedContainer\Internal\StdoutLogger;
-use Cspray\AnnotatedContainer\ParameterStore;
-use Cspray\AnnotatedContainer\ParameterStoreFactory;
 use DateTimeImmutable;
 use DOMDocument;
-use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 

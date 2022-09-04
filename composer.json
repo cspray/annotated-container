@@ -38,7 +38,6 @@
     },
     "files": [
       "src/Function/auto-wired-parameters.php",
-      "src/Function/class-alias.php",
       "src/Function/definitions.php"
     ]
   },

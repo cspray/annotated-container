@@ -2,10 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions;
-use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
-use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 /**
  * An object that knows how to create a ContainerDefinition instance from a given set of options.

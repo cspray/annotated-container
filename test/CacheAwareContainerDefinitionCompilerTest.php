@@ -2,6 +2,12 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Exception\InvalidCache;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
@@ -147,6 +153,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testCacheFileVersionMismatchRecompiles() : void {
+        $attrVal = base64_encode(serialize(new Service()));
         $dir = Fixtures::singleConcreteService()->getPath();
         $oldXml = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -159,6 +166,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute>{$attrVal}</attribute>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -188,6 +196,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute>{$attrVal}</attribute>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>

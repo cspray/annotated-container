@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer\Definition;
 
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
 use Cspray\Typiphy\ObjectType;
 
 final class ProfilesAwareContainerDefinition implements ContainerDefinition {

@@ -36,7 +36,7 @@
   </xs:complexType>
 
   <xs:complexType name="serviceDefinitionsType">
-    <xs:sequence maxOccurs="unbounded">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
       <xs:element name="serviceDefinition" type="serviceDefinitionType" />
     </xs:sequence>
   </xs:complexType>
@@ -47,6 +47,7 @@
       <xs:element name="name" type="xs:token" />
       <xs:element name="profiles" type="profilesType" />
       <xs:element name="concreteOrAbstract" type="concreteOrAbstractType" />
+      <xs:element name="attribute" type="xs:string" />
     </xs:all>
     <xs:attribute name="isPrimary" type="xs:boolean" default="false" />
   </xs:complexType>
@@ -74,6 +75,7 @@
     <xs:all>
       <xs:element name="type" type="xs:token" />
       <xs:element name="name" type="xs:token" />
+      <xs:element name="attribute" type="xs:string" />
     </xs:all>
   </xs:complexType>
 
@@ -87,6 +89,7 @@
     <xs:all>
       <xs:element name="type" type="xs:token" />
       <xs:element name="method" type="xs:token" />
+      <xs:element name="attribute" type="xs:string" />
     </xs:all>
   </xs:complexType>
 
@@ -101,6 +104,7 @@
       <xs:element name="service" type="xs:token" />
       <xs:element name="delegateType" type="xs:token" />
       <xs:element name="delegateMethod" type="xs:token" />
+      <xs:element name="attribute" type="xs:string" />
     </xs:all>
   </xs:complexType>
 
@@ -117,6 +121,7 @@
       <xs:element name="value" type="xs:string" />
       <xs:element name="profiles" type="profilesType" />
       <xs:element name="store" type="xs:token" />
+      <xs:element name="attribute" type="xs:string" />
     </xs:all>
   </xs:complexType>
 

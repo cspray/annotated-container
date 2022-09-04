@@ -2,8 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
-use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\stringType;
@@ -46,5 +47,11 @@ class InjectEnvMethodParamTest extends AnnotatedTargetDefinitionConverterTestCas
 
     public function testGetProfiles() {
         $this->assertSame(['default'], $this->definition->getProfiles());
+    }
+
+    public function testGetAttribute() {
+        self::assertInstanceOf(Inject::class, $this->definition->getAttribute());
+        self::assertSame('USER', $this->definition->getAttribute()->getValue());
+        self::assertSame('env', $this->definition->getAttribute()->getFrom());
     }
 }

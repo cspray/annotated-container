@@ -2,9 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\ServicePrepareDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionMethod;
 
@@ -27,5 +28,9 @@ class ServicePrepareConverterTest extends AnnotatedTargetDefinitionConverterTest
 
     public function testGetMethodIsCorrect() {
         $this->assertSame('setBar', $this->definition->getMethod());
+    }
+
+    public function testGetAttribute() : void {
+        self::assertInstanceOf(ServicePrepare::class, $this->definition->getAttribute());
     }
 }

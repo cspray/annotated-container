@@ -4,6 +4,8 @@ namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedInject;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\AssertExpectedInjectDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;

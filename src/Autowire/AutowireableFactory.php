@@ -2,8 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Autowire;
 
-use Cspray\AnnotatedContainer\AutowireableParameterSet;
-
 /**
  * An interface that allows recursively autowiring object construction for classes that have not been annotated as a
  * Service.

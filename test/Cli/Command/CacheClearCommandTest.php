@@ -10,7 +10,6 @@ use Cspray\AnnotatedContainer\Cli\TerminalOutput;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Helper\InMemoryOutput;
 use Cspray\AnnotatedContainer\Helper\StubInput;
-use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;

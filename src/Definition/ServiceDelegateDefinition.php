@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegateAttribute;
 use Cspray\Typiphy\ObjectType;
 
 /**
@@ -30,5 +31,7 @@ interface ServiceDelegateDefinition {
     public function getDelegateMethod() : string;
 
     public function getServiceType() : ObjectType;
+
+    public function getAttribute() : ?ServiceDelegateAttribute;
 
 }

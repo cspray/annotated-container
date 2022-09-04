@@ -3,10 +3,10 @@
 namespace Cspray\AnnotatedContainer\Helper;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactoryOptions;
-use Cspray\AnnotatedContainer\ParameterStore;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptions;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 final class StubContainerFactory implements ContainerFactory {
 

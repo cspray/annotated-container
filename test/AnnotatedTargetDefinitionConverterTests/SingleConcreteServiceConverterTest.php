@@ -2,9 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
 use function Cspray\Typiphy\objectType;
@@ -41,5 +42,9 @@ class SingleConcreteServiceConverterTest extends AnnotatedTargetDefinitionConver
 
     public function testServiceProfiles() {
         $this->assertSame(['default'], $this->definition->getProfiles());
+    }
+
+    public function testGetAttribute() : void {
+        self::assertInstanceOf(Service::class, $this->definition->getAttribute());
     }
 }

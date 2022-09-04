@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait;
 
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedServiceDelegate;
-use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 trait HasServiceDelegateDefinitionTestsTrait {
 

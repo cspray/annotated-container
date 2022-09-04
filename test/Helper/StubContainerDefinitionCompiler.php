@@ -2,9 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\Helper;
 
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptions;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptions;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 final class StubContainerDefinitionCompiler implements ContainerDefinitionCompiler {
 

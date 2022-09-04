@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 

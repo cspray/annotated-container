@@ -2,10 +2,11 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\intType;
-use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
 class ThirdPartyFunctionsTest extends TestCase {

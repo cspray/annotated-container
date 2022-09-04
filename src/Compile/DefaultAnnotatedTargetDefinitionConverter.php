@@ -6,32 +6,32 @@ use Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute;
 use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServiceAttribute;
-use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegateAttribute;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepareAttribute;
-use Cspray\AnnotatedContainer\ConfigurationDefinition;
-use Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder;
-use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
+use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
-use Cspray\AnnotatedContainer\InjectDefinition;
-use Cspray\AnnotatedContainer\InjectDefinitionBuilder;
-use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\ServiceDefinition;
-use Cspray\AnnotatedContainer\ServiceDefinitionBuilder;
-use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
-use Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder;
-use Cspray\AnnotatedContainer\ServicePrepareDefinition;
-use Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
-use Generator;
+use Cspray\Typiphy\TypeIntersect;
+use Cspray\Typiphy\TypeUnion;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use ReflectionClass;
 use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
+use ReflectionType;
 use ReflectionUnionType;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
@@ -44,9 +44,6 @@ use function Cspray\Typiphy\stringType;
 use function Cspray\Typiphy\typeIntersect;
 use function Cspray\Typiphy\typeUnion;
 
-/**
- *
- */
 final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTargetDefinitionConverter {
 
     private readonly LoggerInterface $logger;
@@ -84,6 +81,8 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
             $builder = ServiceDefinitionBuilder::forConcrete($serviceType, $attribute->isPrimary());
         }
 
+        $builder = $builder->withAttribute($attribute);
+
         $profiles = empty($attribute->getProfiles()) ? ['default'] : $attribute->getProfiles();
         $builder = $builder->withProfiles($profiles);
         if ($attribute->getName() !== null) {
@@ -105,6 +104,7 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         if ($service !== null) {
             return ServiceDelegateDefinitionBuilder::forService(objectType($service))
                 ->withDelegateMethod(objectType($delegateType), $delegateMethod)
+                ->withAttribute($attribute)
                 ->build();
         } else {
             $returnType = $reflection->getReturnType();
@@ -126,6 +126,7 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
                 }
                 return ServiceDelegateDefinitionBuilder::forService(objectType($returnType->getName()))
                     ->withDelegateMethod(objectType($delegateType), $delegateMethod)
+                    ->withAttribute($attribute)
                     ->build();
             } else {
                 $exception = InvalidServiceDelegate::factoryMethodDoesNotDeclareService($delegateType, $delegateMethod);
@@ -140,7 +141,12 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         assert($reflection instanceof ReflectionMethod);
         $prepareType = $reflection->getDeclaringClass()->getName();
         $method = $reflection->getName();
-        return ServicePrepareDefinitionBuilder::forMethod(objectType($prepareType), $method)->build();
+        $attribute = $target->getAttributeInstance();
+        assert($attribute instanceof ServicePrepare);
+
+        return ServicePrepareDefinitionBuilder::forMethod(objectType($prepareType), $method)
+            ->withAttribute($attribute)
+            ->build();
     }
 
     private function buildConfigurationDefinition(AnnotatedTarget $target) : ConfigurationDefinition {
@@ -151,7 +157,7 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         if ($name !== null) {
             $builder = $builder->withName($name);
         }
-        return $builder->build();
+        return $builder->withAttribute($attributeInstance)->build();
     }
 
     private function buildInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
@@ -171,41 +177,40 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         $serviceType = objectType($declaringClass->getName());
         $method = $targetReflection->getDeclaringFunction()->getName();
         $param = $targetReflection->getName();
-        if (is_null($targetReflection->getType())) {
-            $paramType = mixedType();
-        } else if ($targetReflection->getType() instanceof ReflectionNamedType) {
-            $paramType = $this->convertReflectionNamedType($targetReflection->getType());
-            // The ?type syntax is not recognized as a TypeUnion but we normalize it to use with our type system
-            if ($paramType !== mixedType() && $targetReflection->getType()->allowsNull()) {
-                $paramType = typeUnion($paramType, nullType());
-            }
-        } else if ($targetReflection->getType() instanceof ReflectionUnionType || $targetReflection->getType() instanceof ReflectionIntersectionType) {
-            $types = [];
-            foreach ($targetReflection->getType()->getTypes() as $type) {
-                assert($type instanceof ReflectionNamedType);
-                $types[] = $this->convertReflectionNamedType($type);
-            }
-            if ($targetReflection->getType() instanceof ReflectionUnionType) {
-                $paramType = typeUnion(...$types);
-            } else {
-                /** @psalm-var list<ObjectType> $types */
-                $paramType = typeIntersect(...$types);
-            }
-        }
-
-        assert(isset($paramType));
+        $paramType = $this->convertReflectionType($targetReflection->getType());
         $attributeInstance = $target->getAttributeInstance();
         assert($attributeInstance instanceof InjectAttribute);
-        $builder = InjectDefinitionBuilder::forService($serviceType)
-            ->withMethod($method, $paramType, $param)
-            ->withValue($attributeInstance->getValue());
 
-        $from = $attributeInstance->getFrom();
+        $builder = InjectDefinitionBuilder::forService($serviceType)->withMethod($method, $paramType, $param);
+
+        return $this->buildInjectFromAttributeData($builder, $attributeInstance);
+    }
+
+    private function buildPropertyInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
+        $targetReflection = $target->getTargetReflection();
+        assert($targetReflection instanceof \ReflectionProperty);
+
+        $propType = $this->convertReflectionType($targetReflection->getType());
+        $attributeInstance = $target->getAttributeInstance();
+        assert($attributeInstance instanceof InjectAttribute);
+
+        $builder = InjectDefinitionBuilder::forService(objectType($targetReflection->getDeclaringClass()->getName()))
+            ->withProperty(
+                $propType,
+                $target->getTargetReflection()->getName()
+            );
+
+        return $this->buildInjectFromAttributeData($builder, $attributeInstance);
+    }
+
+    private function buildInjectFromAttributeData(InjectDefinitionBuilder $builder, InjectAttribute $inject) : InjectDefinition {
+        $builder = $builder->withAttribute($inject)->withValue($inject->getValue());
+        $from = $inject->getFrom();
         if ($from !== null) {
             $builder = $builder->withStore($from);
         }
 
-        $profiles = $attributeInstance->getProfiles();
+        $profiles = $inject->getProfiles();
         if (count($profiles) === 0) {
             $profiles[] = 'default';
         }
@@ -214,46 +219,30 @@ final class DefaultAnnotatedTargetDefinitionConverter implements AnnotatedTarget
         return $builder->build();
     }
 
-    private function buildPropertyInjectDefinition(AnnotatedTarget $target) : InjectDefinition {
-        $targetReflection = $target->getTargetReflection();
-        assert($targetReflection instanceof \ReflectionProperty);
-        $builder = InjectDefinitionBuilder::forService(objectType($targetReflection->getDeclaringClass()->getName()));
-        if ($targetReflection->getType() instanceof ReflectionNamedType) {
-            $propType = $this->convertReflectionNamedType($targetReflection->getType());
-        } else if ($targetReflection->getType() instanceof ReflectionIntersectionType || $targetReflection->getType() instanceof ReflectionUnionType) {
+    private function convertReflectionType(?ReflectionType $reflectionType) : Type|TypeUnion|TypeIntersect {
+        if ($reflectionType instanceof ReflectionNamedType) {
+            $paramType = $this->convertReflectionNamedType($reflectionType);
+            // The ?type syntax is not recognized as a TypeUnion but we normalize it to use with our type system
+            if ($paramType !== mixedType() && $reflectionType->allowsNull()) {
+                $paramType = typeUnion($paramType, nullType());
+            }
+        } else if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
             $types = [];
-            foreach ($targetReflection->getType()->getTypes() as $reflectionType) {
-                assert($reflectionType instanceof ReflectionNamedType);
-                $types[] = $this->convertReflectionNamedType($reflectionType);
+            foreach ($reflectionType->getTypes() as $type) {
+                assert($type instanceof ReflectionNamedType);
+                $types[] = $this->convertReflectionNamedType($type);
             }
-            if ($targetReflection->getType() instanceof ReflectionIntersectionType) {
-                /** @psalm-var list<ObjectType> $types */
-                $propType = typeIntersect(...$types);
+            if ($reflectionType instanceof ReflectionUnionType) {
+                $paramType = typeUnion(...$types);
             } else {
-                $propType = typeUnion(...$types);
+                /** @psalm-var list<ObjectType> $types */
+                $paramType = typeIntersect(...$types);
             }
+        } else {
+            $paramType = mixedType();
         }
 
-        assert(isset($propType));
-        $builder = $builder->withProperty(
-            $propType,
-            $target->getTargetReflection()->getName()
-        );
-        $attributeInstance = $target->getAttributeInstance();
-        assert($attributeInstance instanceof InjectAttribute);
-        $builder = $builder->withValue($attributeInstance->getValue());
-        $from = $attributeInstance->getFrom();
-        if ($from !== null) {
-            $builder = $builder->withStore($from);
-        }
-
-        $profiles = $attributeInstance->getProfiles();
-        if (count($profiles) === 0) {
-            $profiles[] = 'default';
-        }
-
-        $builder = $builder->withProfiles(...$profiles);
-        return $builder->build();
+        return $paramType;
     }
 
     private function convertReflectionNamedType(ReflectionNamedType $reflectionNamedType) : Type {

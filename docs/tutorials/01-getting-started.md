@@ -1,6 +1,6 @@
 # Getting Started
 
-Thanks for choosing to learn more about Annotated Container! In this document we'll show you how to get started with the library by expanding on the example from the README and go step-by-step what's going on. After that we'll give you some places to go next based on what you might be interested in learning.
+Thanks for choosing to learn more about Annotated Container! In this document we'll show you how to get started with the library by expanding on the [Quick Start from the README](../../README.md) and go step-by-step what's going on. After that we'll give you some places to go next based on what you might be interested in learning.
 
 Our requirements have some external code executed when a blob is stored or retrieved. We decide to introduce a new abstract and concrete Service that will emit blob storage events. Our existing Service will become dependent on this new Service. Let's start digging into some code!
 
@@ -107,15 +107,9 @@ The `FilesystemStorage` service has been refactored from our example in README.m
 
 require __DIR__ . '/vendor/autoload.php';
 
-use Cspray\AnnotatedContainer\ContainerDefinitionCompilerBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use function Cspray\AnnotatedContainer\compiler;
-use function Cspray\AnnotatedContainer\containerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
-$containerDefinition = compiler()->compile(
-    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
-);
-$container = containerFactory()->createContainer($containerDefinition);
+$container = (new Bootstrap())->bootstrapContainer();
 
 $emitter = $container->get(BlobStorageEventEmitter::class);
 $emitter->onStore(fn(string $identifier) -> echo "Stored $identifier");

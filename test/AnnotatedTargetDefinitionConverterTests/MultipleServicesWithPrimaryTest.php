@@ -2,9 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\ServiceDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionClass;
 
@@ -38,6 +39,11 @@ class MultipleServicesWithPrimaryTest extends AnnotatedTargetDefinitionConverter
 
     public function testServiceProfiles() {
         $this->assertSame(['default'], $this->definition->getProfiles());
+    }
+
+    public function testGetAttribute() : void {
+        self::assertInstanceOf(Service::class, $this->definition->getAttribute());
+        self::assertTrue($this->definition->getAttribute()->isPrimary());
     }
 
 }

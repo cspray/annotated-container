@@ -2,7 +2,10 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Attribute\Configuration;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 
 trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
 

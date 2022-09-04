@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Definition;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\ConfigurationCannotBeAssignedProfiles;
+use Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute;
 use Cspray\Typiphy\ObjectType;
 
 /**
@@ -26,5 +27,7 @@ interface ConfigurationDefinition {
      * @return string|null
      */
     public function getName() : ?string;
+
+    public function getAttribute() : ?ConfigurationAttribute;
 
 }

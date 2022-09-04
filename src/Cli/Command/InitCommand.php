@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
-use Cspray\AnnotatedContainer\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Cli\Command;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
@@ -12,7 +12,6 @@ use Cspray\AnnotatedContainer\Cli\TerminalOutput;
 use Cspray\AnnotatedContainer\Exception\ComposerAutoloadNotFound;
 use DOMDocument;
 use DOMException;
-use Generator;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 

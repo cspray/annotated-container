@@ -2,12 +2,12 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests;
 
-use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;

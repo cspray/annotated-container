@@ -3,6 +3,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\Attribute\ServicePrepareAttribute;
 use Cspray\Typiphy\ObjectType;
 
 /**
@@ -25,5 +26,7 @@ interface ServicePrepareDefinition {
      * @return string
      */
     public function getMethod() : string;
+
+    public function getAttribute() : ?ServicePrepareAttribute;
 
 }

@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\Attribute\ServiceAttribute;
 use Cspray\Typiphy\ObjectType;
 
 /**
@@ -54,5 +55,7 @@ interface ServiceDefinition {
      * @return bool
      */
     public function isAbstract() : bool;
+
+    public function getAttribute() : ?ServiceAttribute;
 
 }

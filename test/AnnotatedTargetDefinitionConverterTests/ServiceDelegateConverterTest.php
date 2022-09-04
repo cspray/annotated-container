@@ -2,9 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
-use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use ReflectionMethod;
 
@@ -31,6 +32,10 @@ class ServiceDelegateConverterTest extends AnnotatedTargetDefinitionConverterTes
 
     public function testGetServiceType() {
         $this->assertSame(Fixtures::delegatedService()->serviceInterface(), $this->definition->getServiceType());
+    }
+
+    public function testGetAttribute() : void {
+        self::assertInstanceOf(ServiceDelegate::class, $this->definition->getAttribute());
     }
 
 

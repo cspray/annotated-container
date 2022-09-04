@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Profiles\CsvActiveProfilesParser;
 use PHPUnit\Framework\TestCase;
 
 class CsvActiveProfilesParserTest extends TestCase {

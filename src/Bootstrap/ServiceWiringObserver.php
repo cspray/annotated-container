@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
-use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 abstract class ServiceWiringObserver implements Observer {
 

@@ -2,26 +2,38 @@
 
 namespace Cspray\AnnotatedContainer\Serializer;
 
-use Cspray\AnnotatedContainer\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
-use Cspray\AnnotatedContainer\ConfigurationDefinitionBuilder;
-use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Attribute\Configuration;
+use Cspray\AnnotatedContainer\Attribute\Inject;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Helper\UnserializableObject;
-use Cspray\AnnotatedContainer\InjectDefinitionBuilder;
-use Cspray\AnnotatedContainer\ServiceDelegateDefinitionBuilder;
-use Cspray\AnnotatedContainer\ServicePrepareDefinitionBuilder;
+use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedContainerFixture\InjectEnumConstructorServices\CardinalDirections;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\intType;
 use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
 class ContainerDefinitionSerializerTest extends TestCase {
+
+    private const Base64EncodedString = 'c3RyaW5n';
+    private const Base64EncodedInt = 'aW50';
+    private const Base64EncodedCardinalDirections = 'Q3NwcmF5XEFubm90YXRlZENvbnRhaW5lckZpeHR1cmVcSW5qZWN0RW51bUNvbnN0cnVjdG9yU2VydmljZXNcQ2FyZGluYWxEaXJlY3Rpb25z';
 
     public function testSerializingSingleConcreteService() : void {
         $version = AnnotatedContainerVersion::getVersion();
@@ -36,6 +48,7 @@ class ContainerDefinitionSerializerTest extends TestCase {
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -59,6 +72,46 @@ XML;
         self::assertSame($expected, $actual);
     }
 
+    public function testSerializingSingleConcreteServiceWithAttribute() : void {
+        $attributeVal = base64_encode(serialize($attr = new Service()));
+        $version = AnnotatedContainerVersion::getVersion();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\SingleConcreteService\FooImplementation</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute>{$attributeVal}</attribute>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions/>
+  <servicePrepareDefinitions/>
+  <serviceDelegateDefinitions/>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        $subject = new ContainerDefinitionSerializer();
+
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()
+            ->withServiceDefinition(
+                ServiceDefinitionBuilder::forConcrete(Fixtures::singleConcreteService()->fooImplementation())
+                    ->withAttribute($attr)
+                    ->build()
+            )->build();
+
+        $actual = $subject->serialize($containerDefinition);
+
+        self::assertSame($expected, $actual);
+    }
+
     public function testSerializingServiceWithExplicitProfiles() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $expected = <<<XML
@@ -73,6 +126,7 @@ XML;
         <profile>my-other-profile</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -111,6 +165,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
     <serviceDefinition>
       <type>Cspray\AnnotatedContainerFixture\ImplicitAliasedServices\FooImplementation</type>
@@ -119,6 +174,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions>
@@ -166,6 +222,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -202,6 +259,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -240,6 +298,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -247,6 +306,7 @@ XML;
     <configurationDefinition>
       <type>Cspray\AnnotatedContainerFixture\ConfigurationServices\MyConfig</type>
       <name/>
+      <attribute/>
     </configurationDefinition>
   </configurationDefinitions>
   <servicePrepareDefinitions/>
@@ -271,6 +331,55 @@ XML;
         self::assertSame($expected, $actual);
     }
 
+    public function testSerializingConfigurationDefinitionWithAttribute() : void {
+        $attrVal = base64_encode(serialize(new Configuration()));
+        $version = AnnotatedContainerVersion::getVersion();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\SingleConcreteService\FooImplementation</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions>
+    <configurationDefinition>
+      <type>Cspray\AnnotatedContainerFixture\ConfigurationServices\MyConfig</type>
+      <name/>
+      <attribute>{$attrVal}</attribute>
+    </configurationDefinition>
+  </configurationDefinitions>
+  <servicePrepareDefinitions/>
+  <serviceDelegateDefinitions/>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        $subject = new ContainerDefinitionSerializer();
+
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()
+            ->withServiceDefinition(
+                ServiceDefinitionBuilder::forConcrete(Fixtures::singleConcreteService()->fooImplementation())
+                    ->build()
+            )->withConfigurationDefinition(
+                ConfigurationDefinitionBuilder::forClass(Fixtures::configurationServices()->myConfig())
+                    ->withAttribute(new Configuration())
+                    ->build()
+            )->build();
+
+        $actual = $subject->serialize($containerDefinition);
+
+        self::assertSame($expected, $actual);
+    }
+
     public function testSerializingNamedConfigurationService() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $expected = <<<XML
@@ -284,6 +393,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -291,6 +401,7 @@ XML;
     <configurationDefinition>
       <type>Cspray\AnnotatedContainerFixture\ConfigurationServices\MyConfig</type>
       <name>config-name</name>
+      <attribute/>
     </configurationDefinition>
   </configurationDefinitions>
   <servicePrepareDefinitions/>
@@ -330,6 +441,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -338,6 +450,7 @@ XML;
     <servicePrepareDefinition>
       <type>Cspray\AnnotatedContainerFixture\InterfacePrepareServices\FooInterface</type>
       <method>setBar</method>
+      <attribute/>
     </servicePrepareDefinition>
   </servicePrepareDefinitions>
   <serviceDelegateDefinitions/>
@@ -364,6 +477,56 @@ XML;
         self::assertSame($expected, $actual);
     }
 
+    public function testSerializingServicePrepareDefinitionWithAttribute() : void {
+        $attrVal = base64_encode(serialize(new ServicePrepare()));
+        $version = AnnotatedContainerVersion::getVersion();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\InterfacePrepareServices\FooInterface</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions/>
+  <servicePrepareDefinitions>
+    <servicePrepareDefinition>
+      <type>Cspray\AnnotatedContainerFixture\InterfacePrepareServices\FooInterface</type>
+      <method>setBar</method>
+      <attribute>{$attrVal}</attribute>
+    </servicePrepareDefinition>
+  </servicePrepareDefinitions>
+  <serviceDelegateDefinitions/>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        $subject = new ContainerDefinitionSerializer();
+
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()
+            ->withServiceDefinition(
+                ServiceDefinitionBuilder::forAbstract(Fixtures::interfacePrepareServices()->fooInterface())
+                    ->build()
+            )->withServicePrepareDefinition(
+                ServicePrepareDefinitionBuilder::forMethod(
+                    Fixtures::interfacePrepareServices()->fooInterface(),
+                    'setBar'
+                )->withAttribute(new ServicePrepare())->build()
+            )->build();
+
+        $actual = $subject->serialize($containerDefinition);
+
+        self::assertSame($expected, $actual);
+    }
+
     public function testSerializingServiceDelegateDefinition() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $expected = <<<XML
@@ -377,6 +540,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -387,6 +551,7 @@ XML;
       <service>Cspray\AnnotatedContainerFixture\DelegatedService\ServiceInterface</service>
       <delegateType>Cspray\AnnotatedContainerFixture\DelegatedService\ServiceFactory</delegateType>
       <delegateMethod>createService</delegateMethod>
+      <attribute/>
     </serviceDelegateDefinition>
   </serviceDelegateDefinitions>
   <injectDefinitions/>
@@ -410,9 +575,61 @@ XML;
         self::assertSame($expected, $actual);
     }
 
+    public function testSerializingServiceDelegateDefinitionWithAttribute() : void {
+        $attrVal = base64_encode(serialize(new ServiceDelegate()));
+        $version = AnnotatedContainerVersion::getVersion();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\DelegatedService\ServiceInterface</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions/>
+  <servicePrepareDefinitions/>
+  <serviceDelegateDefinitions>
+    <serviceDelegateDefinition>
+      <service>Cspray\AnnotatedContainerFixture\DelegatedService\ServiceInterface</service>
+      <delegateType>Cspray\AnnotatedContainerFixture\DelegatedService\ServiceFactory</delegateType>
+      <delegateMethod>createService</delegateMethod>
+      <attribute>{$attrVal}</attribute>
+    </serviceDelegateDefinition>
+  </serviceDelegateDefinitions>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        $subject = new ContainerDefinitionSerializer();
+
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()
+            ->withServiceDefinition(
+                ServiceDefinitionBuilder::forAbstract(Fixtures::delegatedService()->serviceInterface())->build()
+            )->withServiceDelegateDefinition(
+                ServiceDelegateDefinitionBuilder::forService(Fixtures::delegatedService()->serviceInterface())
+                    ->withDelegateMethod(Fixtures::delegatedService()->serviceFactory(), 'createService')
+                    ->withAttribute(new ServiceDelegate())
+                    ->build()
+            )->build();
+
+        $actual = $subject->serialize($containerDefinition);
+
+        self::assertSame($expected, $actual);
+    }
+
     public function testSerializingInjectMethodParameterStringValue() : void {
+        $attrVal = base64_encode(serialize(new Inject('foobar')));
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize('foobar'));
+        $type = self::Base64EncodedString;
         $expected = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -424,6 +641,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -439,12 +657,13 @@ XML;
           <parameter>val</parameter>
         </classMethod>
       </target>
-      <valueType>string</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store/>
+      <attribute>{$attrVal}</attribute>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -460,6 +679,7 @@ XML;
                 InjectDefinitionBuilder::forService(Fixtures::injectConstructorServices()->injectStringService())
                 ->withMethod('__construct', stringType(), 'val')
                 ->withValue('foobar')
+                ->withAttribute(new Inject('foobar'))
                 ->build()
             )->build();
 
@@ -471,6 +691,7 @@ XML;
     public function testSerializingInjectMethodParameterIntValue() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize(42));
+        $type = self::Base64EncodedInt;
         $expected = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -482,6 +703,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -497,12 +719,13 @@ XML;
           <parameter>meaningOfLife</parameter>
         </classMethod>
       </target>
-      <valueType>int</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store/>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -529,6 +752,7 @@ XML;
     public function testSerializingInjectMethodParameterUnitEnumValue() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize(CardinalDirections::West));
+        $type = self::Base64EncodedCardinalDirections;
         $expected = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -540,6 +764,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -555,12 +780,13 @@ XML;
           <parameter>directions</parameter>
         </classMethod>
       </target>
-      <valueType>Cspray\AnnotatedContainerFixture\InjectEnumConstructorServices\CardinalDirections</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store/>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -586,6 +812,7 @@ XML;
     public function testSerializingInjectMethodParameterWithStore() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize('key'));
+        $type = self::Base64EncodedString;
         $expected = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -597,6 +824,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -612,12 +840,13 @@ XML;
           <parameter>key</parameter>
         </classMethod>
       </target>
-      <valueType>string</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store>test-store</store>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -645,6 +874,7 @@ XML;
     public function testSerializingInjectMethodParameterExplicitProfiles() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize('foobar'));
+        $type = self::Base64EncodedString;
         $expected = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -656,6 +886,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -671,13 +902,14 @@ XML;
           <parameter>val</parameter>
         </classMethod>
       </target>
-      <valueType>string</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>foo</profile>
         <profile>baz</profile>
       </profiles>
       <store/>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -705,6 +937,7 @@ XML;
     public function testSerializingInjectClassPropertyStringValue() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize('my-api-key'));
+        $type = self::Base64EncodedString;
         $expected = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -716,6 +949,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -730,12 +964,13 @@ XML;
           <property>key</property>
         </classProperty>
       </target>
-      <valueType>string</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store/>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -791,6 +1026,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -832,6 +1068,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -873,6 +1110,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -916,6 +1154,7 @@ XML;
         <profile>baz</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -957,6 +1196,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -997,6 +1237,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
     <serviceDefinition>
       <type>Cspray\AnnotatedContainerFixture\ImplicitAliasedServices\FooImplementation</type>
@@ -1005,6 +1246,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions>
@@ -1043,6 +1285,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1051,6 +1294,7 @@ XML;
     <servicePrepareDefinition>
       <type>Cspray\AnnotatedContainerFixture\InterfacePrepareServices\FooInterface</type>
       <method>setBar</method>
+      <attribute/>
     </servicePrepareDefinition>
   </servicePrepareDefinitions>
   <serviceDelegateDefinitions/>
@@ -1081,6 +1325,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Abstract</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1091,6 +1336,7 @@ XML;
       <service>Cspray\AnnotatedContainerFixture\DelegatedService\ServiceInterface</service>
       <delegateType>Cspray\AnnotatedContainerFixture\DelegatedService\ServiceFactory</delegateType>
       <delegateMethod>createService</delegateMethod>
+      <attribute/>
     </serviceDelegateDefinition>
   </serviceDelegateDefinitions>
   <injectDefinitions/>
@@ -1110,6 +1356,7 @@ XML;
     }
 
     public function testDeserializeInjectMethodParameter() : void {
+        $type = self::Base64EncodedString;
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize('foobar'));
         $xml = <<<XML
@@ -1123,6 +1370,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1138,12 +1386,13 @@ XML;
           <parameter>val</parameter>
         </classMethod>
       </target>
-      <valueType>string</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store/>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -1175,6 +1424,7 @@ XML;
     public function testDeserializeInjectDefinitionUnitEnumValueMethodParameter() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize(CardinalDirections::West));
+        $type = self::Base64EncodedCardinalDirections;
         $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -1186,6 +1436,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1201,12 +1452,13 @@ XML;
           <parameter>directions</parameter>
         </classMethod>
       </target>
-      <valueType>Cspray\AnnotatedContainerFixture\InjectEnumConstructorServices\CardinalDirections</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store/>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -1238,6 +1490,7 @@ XML;
     public function testDeserializeInjectDefinitionMethodParameterWithStore() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize('key'));
+        $type = self::Base64EncodedString;
         $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -1249,6 +1502,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1264,12 +1518,13 @@ XML;
           <parameter>key</parameter>
         </classMethod>
       </target>
-      <valueType>string</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store>test-store</store>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -1301,6 +1556,7 @@ XML;
     public function testDeserializeInjectMethodWithProfiles() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize('annotated container'));
+        $type = self::Base64EncodedString;
         $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -1312,6 +1568,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1327,13 +1584,14 @@ XML;
           <parameter>val</parameter>
         </classMethod>
       </target>
-      <valueType>string</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>foo</profile>
         <profile>baz</profile>
       </profiles>
       <store/>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -1365,6 +1623,7 @@ XML;
     public function testDeserializeInjectClassPropertyDefinition() : void {
         $version = AnnotatedContainerVersion::getVersion();
         $encodedVal = base64_encode(serialize('annotated container'));
+        $type = self::Base64EncodedString;
         $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
@@ -1376,6 +1635,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1390,12 +1650,13 @@ XML;
           <property>key</property>
         </classProperty>
       </target>
-      <valueType>string</valueType>
+      <valueType>{$type}</valueType>
       <value><![CDATA[{$encodedVal}]]></value>
       <profiles>
         <profile>default</profile>
       </profiles>
       <store/>
+      <attribute/>
     </injectDefinition>
   </injectDefinitions>
 </annotatedContainerDefinition>
@@ -1435,6 +1696,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1442,6 +1704,7 @@ XML;
     <configurationDefinition>
       <type>Cspray\AnnotatedContainerFixture\ConfigurationServices\MyConfig</type>
       <name>my-config</name>
+      <attribute/>
     </configurationDefinition>
   </configurationDefinitions>
   <servicePrepareDefinitions/>
@@ -1473,6 +1736,7 @@ XML;
         <profile>default</profile>
       </profiles>
       <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute/>
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
@@ -1489,6 +1753,41 @@ XML;
         $actual = $subject->deserialize($xml);
 
         self::assertNull($actual);
+    }
+
+    public function fixturesDirProvider() : array {
+        return [
+            'singleConcreteService' => [Fixtures::singleConcreteService()],
+            'injectConstructorServices' => [Fixtures::injectConstructorServices()],
+            'interfacePrepareServices' => [Fixtures::interfacePrepareServices()],
+            'injectPrepareServices' => [Fixtures::injectPrepareServices()],
+            'delegatedService' => [Fixtures::delegatedService()],
+            'implicitServiceDelegate' => [Fixtures::implicitServiceDelegateType()],
+            'configurationServices' => [Fixtures::configurationServices()],
+            'namedConfigurationServices' => [Fixtures::namedConfigurationServices()],
+            'injectConstructorIntersectServices' => [Fixtures::injectServiceIntersectConstructorServices()]
+        ];
+    }
+
+    /**
+     * @dataProvider fixturesDirProvider
+     */
+    public function testScannedAndSerializedContainerDefinitionMatchesDeserialized(Fixture $fixture) : void {
+        $compiler = new AnnotatedTargetContainerDefinitionCompiler(
+            new PhpParserAnnotatedTargetParser(),
+            new DefaultAnnotatedTargetDefinitionConverter()
+        );
+
+        $subject = new ContainerDefinitionSerializer();
+
+        $containerDefinition = $compiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($fixture->getPath())->build()
+        );
+
+        $expected = $subject->serialize($containerDefinition);
+        $actual = $subject->serialize($subject->deserialize($expected));
+
+        self::assertSame($expected, $actual);
     }
 
 }

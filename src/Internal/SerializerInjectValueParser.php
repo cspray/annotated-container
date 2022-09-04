@@ -6,7 +6,6 @@ use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
-use ReflectionEnum;
 use function Cspray\Typiphy\arrayType;
 use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\callableType;

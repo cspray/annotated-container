@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier;
 use Cspray\AnnotatedContainer\Internal\PropertyInjectTargetIdentifier;
@@ -20,6 +20,8 @@ final class InjectDefinitionBuilder {
     private Type|TypeUnion|TypeIntersect $type;
     private mixed $value;
     private bool $isValueCalled = false;
+    private ?InjectAttribute $attribute = null;
+
     /**
      * @var list<string>
      */
@@ -71,6 +73,12 @@ final class InjectDefinitionBuilder {
         return $instance;
     }
 
+    public function withAttribute(InjectAttribute $injectAttribute) : self {
+        $instance = clone $this;
+        $instance->attribute = $injectAttribute;
+        return $instance;
+    }
+
     public function build() : InjectDefinition {
         if (!isset($this->method) && !isset($this->property)) {
             throw InvalidInjectDefinition::fromMissingMethodAndProperty();
@@ -93,7 +101,7 @@ final class InjectDefinitionBuilder {
             $profiles[] = 'default';
         }
 
-        return new class($targetIdentifier, $this->type, $this->value, $this->store, $profiles) implements InjectDefinition {
+        return new class($targetIdentifier, $this->type, $this->value, $this->store, $profiles, $this->attribute) implements InjectDefinition {
 
             /**
              * @param InjectTargetIdentifier $targetIdentifier
@@ -107,7 +115,8 @@ final class InjectDefinitionBuilder {
                 private readonly Type|TypeUnion|TypeIntersect $type,
                 private readonly mixed $annotationValue,
                 private readonly ?string $store,
-                private readonly array $profiles
+                private readonly array $profiles,
+                private readonly ?InjectAttribute $attribute
             ) {}
 
             public function getTargetIdentifier() : InjectTargetIdentifier {
@@ -128,6 +137,10 @@ final class InjectDefinitionBuilder {
 
             public function getStoreName() : ?string {
                 return $this->store;
+            }
+
+            public function getAttribute() : ?InjectAttribute {
+                return $this->attribute;
             }
         };
     }

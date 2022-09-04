@@ -2,8 +2,13 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\stringType;

@@ -2,9 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Helper\StubAnnotatedContainerListener;
-use Cspray\AnnotatedContainer\Internal\AfterCompileAnnotatedContainerEvent;
-use Cspray\AnnotatedContainer\Internal\BeforeCompileAnnotatedContainerEvent;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompilerBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;

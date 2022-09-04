@@ -2,11 +2,11 @@
 
 namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\ConfigurationDefinition;
-use Cspray\AnnotatedContainer\InjectDefinition;
-use Cspray\AnnotatedContainer\ServiceDefinition;
-use Cspray\AnnotatedContainer\ServiceDelegateDefinition;
-use Cspray\AnnotatedContainer\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 
 /**

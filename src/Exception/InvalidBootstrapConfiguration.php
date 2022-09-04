@@ -3,8 +3,8 @@
 namespace Cspray\AnnotatedContainer\Exception;
 
 use Cspray\AnnotatedContainer\Bootstrap\Observer;
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\ParameterStore;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 
 final class InvalidBootstrapConfiguration extends Exception {
 

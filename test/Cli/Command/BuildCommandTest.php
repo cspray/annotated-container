@@ -2,15 +2,14 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
-use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\CacheAwareContainerDefinitionCompiler;
 use Cspray\AnnotatedContainer\Cli\Exception\CacheDirConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
-use Cspray\AnnotatedContainer\Cli\Exception\InvalidBuild;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Helper\InMemoryOutput;
 use Cspray\AnnotatedContainer\Helper\StubInput;
@@ -20,7 +19,6 @@ use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
-use function Cspray\AnnotatedContainer\compiler;
 
 class BuildCommandTest extends TestCase {
 
