@@ -2,31 +2,18 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
+use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
+use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\stringType;
 
 class ProfilesAwareContainerDefinitionTest extends TestCase {
-
-    public function testMergeDelegatedToInjectedContainerDefinition() : void {
-        $mockContainerDefinition = $this->getMockBuilder(ContainerDefinition::class)->getMock();
-        $mergeContainerDefinition = $this->getMockBuilder(ContainerDefinition::class)->getMock();
-        $mergedContainerDefinition = $this->getMockBuilder(ContainerDefinition::class)->getMock();
-
-        $mockContainerDefinition->expects($this->once())
-            ->method('merge')
-            ->with($mergeContainerDefinition)
-            ->willReturn($mergedContainerDefinition);
-
-        $mergedContainerDefinition->expects($this->never())->method('merge');
-        $mergedContainerDefinition->expects($this->never())->method('merge');
-
-        $subject = new ProfilesAwareContainerDefinition($mockContainerDefinition, ['default']);
-        $result = $subject->merge($mergeContainerDefinition);
-
-        self::assertSame($mergedContainerDefinition, $result);
-    }
 
     public function testGetServiceDefinitionsOnlyReturnThoseMatchingProfiles() : void {
         $serviceDefinition1 = ServiceDefinitionBuilder::forConcrete(Fixtures::singleConcreteService()->fooImplementation())
@@ -117,7 +104,7 @@ class ProfilesAwareContainerDefinitionTest extends TestCase {
 
         $subject = new ProfilesAwareContainerDefinition($containerDefinition, ['default']);
 
-        self::expectException(InvalidDefinitionException::class);
+        self::expectException(InvalidAlias::class);
         self::expectExceptionMessage(sprintf(
             'An AliasDefinition has an abstract type, %s, that is not a registered ServiceDefinition.',
             Fixtures::ambiguousAliasedServices()->fooInterface()->getName()
@@ -139,7 +126,7 @@ class ProfilesAwareContainerDefinitionTest extends TestCase {
 
         $subject = new ProfilesAwareContainerDefinition($containerDefinition, ['default']);
 
-        self::expectException(InvalidDefinitionException::class);
+        self::expectException(InvalidAlias::class);
         self::expectExceptionMessage(sprintf(
             'An AliasDefinition has a concrete type, %s, that is not a registered ServiceDefinition.',
             Fixtures::ambiguousAliasedServices()->barImplementation()->getName()

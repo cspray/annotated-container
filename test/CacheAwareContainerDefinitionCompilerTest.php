@@ -2,8 +2,14 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\DummyApps\DummyAppUtils;
-use Cspray\AnnotatedContainer\Exception\InvalidCacheException;
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
+use Cspray\AnnotatedContainer\Exception\InvalidCache;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -25,7 +31,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
                 new PhpParserAnnotatedTargetParser(),
                 new DefaultAnnotatedTargetDefinitionConverter()
             ),
-            $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
+            $this->containerDefinitionSerializer = new ContainerDefinitionSerializer(),
             'vfs://root'
         );
         $this->root = vfsStream::setup();
@@ -42,7 +48,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $expected = $this->containerDefinitionSerializer->serialize($containerDefinition);
         $actual = $this->root->getChild('root/' . md5($dir))->getContent();
 
-        $this->assertJsonStringEqualsJsonString($expected, $actual);
+        $this->assertSame($expected, $actual);
     }
 
     public function testFileDoesExistDoesNotCallCompiler() {
@@ -67,7 +73,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         );
         $actual = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
-        $this->assertJsonStringEqualsJsonString($serialized, $actual);
+        $this->assertSame($serialized, $actual);
     }
 
     public function testMultipleDirectoriesCachedRegardlessOfOrder() {
@@ -93,7 +99,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         );
         $actual = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
-        $this->assertJsonStringEqualsJsonString($serialized, $actual);
+        $this->assertSame($serialized, $actual);
     }
 
     public function testFailingToWriteCacheFileThrowsException() {
@@ -103,12 +109,12 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
                 new PhpParserAnnotatedTargetParser(),
                 new DefaultAnnotatedTargetDefinitionConverter()
             ),
-            $this->containerDefinitionSerializer = new JsonContainerDefinitionSerializer(),
+            $this->containerDefinitionSerializer,
             'vfs://cache'
         );
 
 
-        $this->expectException(InvalidCacheException::class);
+        $this->expectException(InvalidCache::class);
         $this->expectExceptionMessage('The cache directory, vfs://cache, could not be written to. Please ensure it exists and is writeable.');
 
         $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build());
@@ -144,6 +150,65 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
             'context' => []
         ];
         self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testCacheFileVersionMismatchRecompiles() : void {
+        $attrVal = base64_encode(serialize(new Service()));
+        $dir = Fixtures::singleConcreteService()->getPath();
+        $oldXml = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="0.1">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\SingleConcreteService\FooImplementation</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute>{$attrVal}</attribute>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions/>
+  <servicePrepareDefinitions/>
+  <serviceDelegateDefinitions/>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        vfsStream::newFile(md5($dir))->at($this->root)->setContent($oldXml);
+
+        $this->cacheAwareContainerDefinitionCompiler->compile(
+            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
+        );
+
+        $version = AnnotatedContainerVersion::getVersion();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainerDefinition xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd" version="{$version}">
+  <serviceDefinitions>
+    <serviceDefinition>
+      <type>Cspray\AnnotatedContainerFixture\SingleConcreteService\FooImplementation</type>
+      <name/>
+      <profiles>
+        <profile>default</profile>
+      </profiles>
+      <concreteOrAbstract>Concrete</concreteOrAbstract>
+      <attribute>{$attrVal}</attribute>
+    </serviceDefinition>
+  </serviceDefinitions>
+  <aliasDefinitions/>
+  <configurationDefinitions/>
+  <servicePrepareDefinitions/>
+  <serviceDelegateDefinitions/>
+  <injectDefinitions/>
+</annotatedContainerDefinition>
+
+XML;
+
+        self::assertStringEqualsFile('vfs://root/' . md5($dir), $expected);
     }
 
 }

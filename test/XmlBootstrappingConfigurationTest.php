@@ -2,9 +2,16 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Exception\InvalidBootstrappingConfigurationException;
-use Cspray\AnnotatedContainer\Helper\AdditionalStubContextConsumer;
+use Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionBuilderContextConsumerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Observer;
+use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
+use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
+use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Helper\StubBootstrapObserverWithDependencies;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumerWithDependencies;
 use Cspray\AnnotatedContainer\Helper\StubParameterStore;
@@ -16,7 +23,6 @@ use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
 
-use function Cspray\Typiphy\objectType;
 use function Cspray\Typiphy\stringType;
 
 class XmlBootstrappingConfigurationTest extends TestCase {
@@ -36,7 +42,7 @@ XML;
         VirtualFilesystem::newFile('annotated-container.xml')
             ->withContent($badXml)
             ->at($this->vfs);
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'Configuration file vfs://root/annotated-container.xml does not validate against the appropriate schema.'
         );
@@ -120,7 +126,7 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . ContainerDefinitionBuilderContextConsumer::class
         );
@@ -150,7 +156,7 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . ContainerDefinitionBuilderContextConsumer::class
         );
@@ -279,7 +285,7 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
@@ -308,7 +314,7 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrappingConfigurationException::class);
+        self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
@@ -524,5 +530,96 @@ XML;
         );
 
         self::assertSame(['foo', 'bar', 'baz'], $config->getLoggingExcludedProfiles());
+    }
+
+    public function testObserversContainsNonClassThrowsException() : void {
+        $badXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <observers>
+    <fqcn>something not a class</fqcn>
+  </observers>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($badXml)
+            ->at($this->vfs);
+
+        self::expectException(InvalidBootstrapConfiguration::class);
+        self::expectExceptionMessage(
+            'All entries in observers must be classes that implement ' . Observer::class
+        );
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+    }
+
+    public function testObserversContainsNotObserverThrowsException() : void {
+        $badXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <observers>
+    <fqcn>Cspray\AnnotatedContainer\Helper\StubContextConsumer</fqcn>
+  </observers>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($badXml)
+            ->at($this->vfs);
+
+        self::expectException(InvalidBootstrapConfiguration::class);
+        self::expectExceptionMessage(
+            'All entries in observers must be classes that implement ' . Observer::class
+        );
+        new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+    }
+
+    public function testObserverFactoryPresentRespected() : void {
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <observers><fqcn>Cspray\AnnotatedContainer\Helper\StubBootstrapObserverWithDependencies</fqcn></observers>
+</annotatedContainer>
+XML;
+
+        $observerFactory = new class implements ObserverFactory {
+            public function createObserver(string $observer) : Observer {
+                return new $observer('from observer factory');
+            }
+        };
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $config = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver(),
+            observerFactory: $observerFactory
+        );
+
+        self::assertCount(1, $config->getObservers());
+        self::assertInstanceOf(StubBootstrapObserverWithDependencies::class, $config->getObservers()[0]);
     }
 }

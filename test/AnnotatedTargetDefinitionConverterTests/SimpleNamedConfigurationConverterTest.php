@@ -2,8 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
-use Cspray\AnnotatedContainer\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
@@ -22,5 +23,9 @@ class SimpleNamedConfigurationConverterTest extends AnnotatedTargetDefinitionCon
 
     public function testConfigurationName() {
         $this->assertSame('my-config', $this->definition->getName());
+    }
+
+    public function testGetAttribute() : void {
+        self::assertInstanceOf(Configuration::class, $this->definition->getAttribute());
     }
 }

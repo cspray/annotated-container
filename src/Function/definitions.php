@@ -2,12 +2,33 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
+use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
+use Cspray\AnnotatedContainer\Definition\InjectDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinitionBuilder;
 use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
 use ReflectionClass;
+use ReflectionException;
 
+/**
+ * @param ContainerDefinitionBuilderContext $context
+ * @param ObjectType $type
+ * @param string|null $name
+ * @param list<string> $profiles
+ * @param bool $isPrimary
+ * @return ServiceDefinition
+ * @throws ReflectionException
+ */
 function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false) : ServiceDefinition {
     /** @psalm-var class-string $typeName */
     $typeName = $type->getName();

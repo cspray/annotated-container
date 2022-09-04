@@ -2,8 +2,6 @@
 
 namespace Cspray\AnnotatedContainerFixture;
 
-use Cspray\AnnotatedContainer\Attribute\Configuration;
-
 final class Fixtures {
 
     private function __construct() {}

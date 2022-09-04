@@ -7,8 +7,19 @@ use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
-use Cspray\AnnotatedContainer\Exception\InvalidAnnotationException;
-use Cspray\AnnotatedContainer\Exception\InvalidCompileOptionsException;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Exception\InvalidScanDirectories;
+use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
+use Cspray\AnnotatedContainer\Exception\InvalidServicePrepare;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumer;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum;
@@ -52,19 +63,19 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testEmptyScanDirectoriesThrowsException() : void {
-        $this->expectException(InvalidCompileOptionsException::class);
-        $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' must include at least 1 directory to scan, but none were provided.');
+        $this->expectException(InvalidScanDirectories::class);
+        $this->expectExceptionMessage('ContainerDefinitionCompileOptions must include at least 1 directory to scan, but none were provided.');
         $this->runCompileDirectory([]);
     }
 
     public function testLogEmptyScanDirectories() : void {
         try {
             $this->runCompileDirectory([]);
-        } catch (InvalidCompileOptionsException $exception) {
+        } catch (InvalidScanDirectories $exception) {
             // noop, we expect this
         } finally {
             $expected = [
-                'message' => 'The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' must include at least 1 directory to scan, but none were provided.',
+                'message' => 'ContainerDefinitionCompileOptions must include at least 1 directory to scan, but none were provided.',
                 'context' => []
             ];
             self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
@@ -72,7 +83,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testServicePrepareNotOnServiceThrowsException() {
-        $this->expectException(InvalidAnnotationException::class);
+        $this->expectException(InvalidServicePrepare::class);
         $this->expectExceptionMessage(sprintf(
             'Service preparation defined on %s::postConstruct, but that class is not a service.',
             LogicalErrorApps\ServicePrepareNotService\FooImplementation::class
@@ -83,7 +94,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     public function testLogServicePrepareNotOnService() : void {
         try {
             $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
-        }  catch (InvalidAnnotationException $exception) {
+        }  catch (InvalidServicePrepare $exception) {
             // noop, we expect this
         } finally {
             $expected = [
@@ -98,8 +109,8 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testDuplicateScanDirectoriesThrowsException() {
-        $this->expectException(InvalidCompileOptionsException::class);
-        $this->expectExceptionMessage('The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' includes duplicate directories. Please pass a distinct set of directories to scan.');
+        $this->expectException(InvalidScanDirectories::class);
+        $this->expectExceptionMessage('ContainerDefinitionCompileOptions includes duplicate scan directories. Please pass a distinct set of directories to scan.');
         $this->runCompileDirectory([
             Fixtures::singleConcreteService()->getPath(),
             Fixtures::ambiguousAliasedServices()->getPath(),
@@ -114,11 +125,11 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
                 Fixtures::singleConcreteService()->getPath(),
                 Fixtures::configurationServices()->getPath()
             ]);
-        } catch (InvalidCompileOptionsException $exception) {
+        } catch (InvalidScanDirectories $exception) {
             // noop, we expect this
         } finally {
             $expected = [
-                'message' => 'The ContainerDefinitionCompileOptions passed to ' . AnnotatedTargetContainerDefinitionCompiler::class . ' includes duplicate directories. Please pass a distinct set of directories to scan.',
+                'message' => 'ContainerDefinitionCompileOptions includes duplicate scan directories. Please pass a distinct set of directories to scan.',
                 'context' => [
                     'sourcePaths' => [
                         Fixtures::singleConcreteService()->getPath(),
@@ -132,7 +143,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testImplicitServiceDelegateHasNoReturnType() {
-        $this->expectException(InvalidAnnotationException::class);
+        $this->expectException(InvalidServiceDelegate::class);
         $this->expectExceptionMessage(
             'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateNoType\FooFactory::class . '::create does not declare a service in the Attribute or as a return type of the method.'
         );
@@ -143,7 +154,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     public function testLogImplicitServiceDelegateHasNoReturnType() : void {
         try {
             $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateNoType');
-        }  catch (InvalidAnnotationException $exception) {
+        }  catch (InvalidServiceDelegate $exception) {
             // noop, we expect this
         } finally {
             $expected = [
@@ -155,7 +166,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testImplicitServiceDelegateHasScalarReturnType() {
-        $this->expectException(InvalidAnnotationException::class);
+        $this->expectException(InvalidServiceDelegate::class);
         $this->expectExceptionMessage(
             'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateScalarType\FooFactory::class . '::create declares a scalar value as a service type.'
         );
@@ -166,7 +177,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     public function testLogImplicitServiceDelegateHasScalarReturnType() : void {
         try {
             $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateScalarType');
-        } catch (InvalidAnnotationException $exception) {
+        } catch (InvalidServiceDelegate $exception) {
             // noop, we expect this
         } finally {
             $expected = [
@@ -178,7 +189,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testImplicitServiceDelegateHasIntersectionReturnType() {
-        $this->expectException(InvalidAnnotationException::class);
+        $this->expectException(InvalidServiceDelegate::class);
         $this->expectExceptionMessage(
             'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateIntersectionType\FooFactory::class . '::create declares an unsupported intersection as a service type.'
         );
@@ -189,7 +200,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     public function testLogImplicitServiceDelegateHasIntersectionReturnType() : void {
         try {
             $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateIntersectionType');
-        } catch (InvalidAnnotationException $exception) {
+        } catch (InvalidServiceDelegate $exception) {
             // noop we expect this
         } finally {
             $expected = [
@@ -201,7 +212,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testImplicitServiceDelegateHasUnionReturnType() {
-        $this->expectException(InvalidAnnotationException::class);
+        $this->expectException(InvalidServiceDelegate::class);
         $this->expectExceptionMessage(
             'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateUnionType\FooFactory::class . '::create declares an unsupported union as a service type.'
         );
@@ -212,7 +223,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     public function testLogImplicitServiceDelegateHasUnionReturnType() {
         try {
             $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
-        } catch (InvalidAnnotationException $exception) {
+        } catch (InvalidServiceDelegate $exception) {
             // noop, we expect this
         } finally {
             $expected = [
@@ -491,7 +502,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             LogicalErrorApps\ServiceDelegateNotService\ServiceFactory::class,
             LogicalErrorApps\ServiceDelegateNotService\FooService::class
         );
-        self::expectException(InvalidAnnotationException::class);
+        self::expectException(InvalidServiceDelegate::class);
         self::expectExceptionMessage($message);
 
         $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServiceDelegateNotService');

@@ -2,32 +2,20 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
-use Cspray\AnnotatedContainer\ActiveProfiles;
-use Cspray\AnnotatedContainer\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
-use Cspray\AnnotatedContainer\AutowireableInvoker;
-use Cspray\AnnotatedContainer\AutowireableParameter;
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
-use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
-use Cspray\AnnotatedContainer\StandardAliasDefinitionResolver;
-use Cspray\Phinal\AllowInheritance;
+use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
+use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Exception\InvalidAlias;
+use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
+use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use DI\Container;
-
-// @codeCoverageIgnoreStart
-if (!class_exists(Container::class)) {
-    throw new \RuntimeException("To enable the PhpDiContainerFactory please install php-di/php-di 7+!");
-}
-// @codeCoverageIgnoreEnd
-
-use Cspray\AnnotatedContainer\AutowireableFactory;
-use Cspray\AnnotatedContainer\AutowireableParameterSet;
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
-use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
-use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
-use Cspray\AnnotatedContainer\ServiceDefinition;
+use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\Typiphy\ObjectType;
 use DI\ContainerBuilder;
 use DI\Definition\Helper\AutowireDefinitionHelper;
@@ -36,6 +24,13 @@ use function Cspray\Typiphy\objectType;
 use function DI\autowire;
 use function DI\decorate;
 use function DI\get;
+
+// @codeCoverageIgnoreStart
+if (!class_exists(Container::class)) {
+    throw new \RuntimeException("To enable the PhpDiContainerFactory please install php-di/php-di 7+!");
+}
+// @codeCoverageIgnoreEnd
+
 
 /**
  * A ContainerFactory that utilizes the php-di/php-di library.
@@ -52,8 +47,8 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             $container =  $this->createDiContainer($containerDefinition, $activeProfiles);
             $this->logFinishedCreatingContainer(objectType(Container::class), $activeProfiles);
             return $container;
-        } catch (InvalidDefinitionException $exception) {
-            throw new ContainerException($exception->getMessage(), previous: $exception);
+        } catch (InvalidAlias $exception) {
+            throw ContainerException::fromCaughtThrowable($exception);
         }
     }
 
@@ -61,7 +56,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
         $containerBuilder = new ContainerBuilder();
         $definitions = [];
         // We have to maintain a set of known services to let our Container comply with PSR-11
-        $serviceTypes = [AutowireableFactory::class, ActiveProfiles::class];
+        $serviceTypes = [AutowireableFactory::class, ActiveProfiles::class, AutowireableInvoker::class];
         $definitions[ActiveProfiles::class] = function() use($activeProfiles) : ActiveProfiles {
             return $this->getActiveProfilesService($activeProfiles);
         };
@@ -83,11 +78,8 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
         $aliasDefinitions = $containerDefinition->getAliasDefinitions();
         foreach ($aliasDefinitions as $aliasDefinition) {
             $concreteDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getConcreteService());
-            if (is_null($concreteDefinition)) {
-                throw new ContainerException(sprintf(
-                    'An AliasDefinition is defined with a concrete type %s that is not a registered #[Service].',
-                    $aliasDefinition->getConcreteService()->getName()
-                ));
+            if ($concreteDefinition === null) {
+                throw InvalidAlias::fromConcreteNotService($aliasDefinition->getConcreteService()->getName());
             }
             if (!in_array($aliasDefinition->getAbstractService()->getName(), $aliasedTypes)) {
                 $resolution = $this->aliasDefinitionResolver->resolveAlias(
@@ -180,6 +172,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
                 private readonly array $serviceTypes
             ) {
                 $this->container->set(AutowireableFactory::class, $this);
+                $this->container->set(AutowireableInvoker::class, $this);
             }
 
             public function make(string $classType, AutowireableParameterSet $parameters = null) : object {
@@ -191,10 +184,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
             public function get(string $id) {
                 if (!$this->has($id)) {
-                    throw new ServiceNotFoundException(sprintf(
-                        'The service "%s" could not be found in this container.',
-                        $id
-                    ));
+                    throw ServiceNotFound::fromServiceNotInContainer($id);
                 }
                 return $this->container->get($id);
             }
@@ -247,13 +237,10 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
             $injectStore = $injectDefinition->getStoreName();
             $value = $injectDefinition->getValue();
-            if (!is_null($injectStore)) {
+            if ($injectStore !== null) {
                 $parameterStore = $this->getParameterStore($injectStore);
-                if (!isset($parameterStore)) {
-                    throw new InvalidParameterException(sprintf(
-                        'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
-                        $injectStore
-                    ));
+                if ($parameterStore === null) {
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($injectStore);
                 }
 
                 $value = $parameterStore->fetch($injectDefinition->getType(), $value);
@@ -285,11 +272,8 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             $value = $injectDefinition->getValue();
             if (!is_null($injectStore)) {
                 $parameterStore = $this->getParameterStore($injectStore);
-                if (!isset($parameterStore)) {
-                    throw new InvalidParameterException(sprintf(
-                        'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
-                        $injectStore
-                    ));
+                if ($parameterStore === null) {
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($injectStore);
                 }
 
                 $value = $parameterStore->fetch($injectDefinition->getType(), $value);

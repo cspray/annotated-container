@@ -2,14 +2,19 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionBuilderContextConsumerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
+use Cspray\AnnotatedContainer\Bootstrap\ServiceWiringObserver;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Helper\StubBootstrapObserver;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumerWithDependencies;
 use Cspray\AnnotatedContainer\Helper\StubParameterStoreWithDependencies;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\Fixtures;
-use Cspray\Typiphy\Type;
-use Cspray\Typiphy\TypeIntersect;
-use Cspray\Typiphy\TypeUnion;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
@@ -360,6 +365,155 @@ XML;
         $service = $container->get(Fixtures::injectCustomStoreServices()->scalarInjector()->getName());
 
         self::assertSame('ac-ackey', $service->key);
+    }
+
+    public function testBootstrapObserverInvokedCorrectOrder() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+
+        $bootstrap->addObserver($subject = new StubBootstrapObserver());
+
+        $bootstrap->bootstrapContainer();
+
+        self::assertCount(4, $subject->getInvokedMethods());
+        self::assertSame([
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'beforeCompilation')],
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'afterCompilation')],
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'beforeContainerCreation')],
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'afterContainerCreation')]
+        ], $subject->getInvokedMethods());
+    }
+
+    public function testBootstrapMultipleObservers() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+
+        $bootstrap->addObserver($one = new StubBootstrapObserver());
+        $bootstrap->addObserver($two = new StubBootstrapObserver());
+        $bootstrap->addObserver($three = new StubBootstrapObserver());
+
+        $bootstrap->bootstrapContainer();
+
+        self::assertCount(4, $one->getInvokedMethods());
+        self::assertCount(4, $two->getInvokedMethods());
+        self::assertCount(4, $three->getInvokedMethods());
+    }
+
+    public function testObserversAddedFromConfiguration() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+    <observers>
+      <fqcn>Cspray\AnnotatedContainer\Helper\StubBootstrapObserver</fqcn>
+    </observers>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+        $bootstrap->bootstrapContainer();
+
+        $observers = (new \ReflectionObject($bootstrap))->getProperty('observers')->getValue($bootstrap);
+
+        self::assertCount(1, $observers);
+        self::assertInstanceOf(StubBootstrapObserver::class, $observers[0]);
+        self::assertCount(4, $observers[0]->getInvokedMethods());
+    }
+
+    public function testServiceWiringObserver() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>AmbiguousAliasedServices</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+
+        $observer = new class extends ServiceWiringObserver {
+
+            private ?AnnotatedContainer $container = null;
+            private array $services = [];
+
+            public function getAnnotatedContainer() : ?AnnotatedContainer {
+                return $this->container;
+            }
+
+            public function getServices() : array {
+                return $this->services;
+            }
+
+            protected function wireServices(AnnotatedContainer $container, ServiceGatherer $gatherer) : void {
+                $this->container = $container;
+                $this->services = $gatherer->getServicesForType(Fixtures::ambiguousAliasedServices()->fooInterface()->getName());
+            }
+        };
+        $bootstrap->addObserver($observer);
+
+        $container = $bootstrap->bootstrapContainer();
+
+        $actual = $observer->getServices();
+
+        usort($actual, fn($a, $b) => $a::class <=> $b::class);
+
+        self::assertSame($container, $observer->getAnnotatedContainer());
+        self::assertSame([
+            $container->get(Fixtures::ambiguousAliasedServices()->barImplementation()->getName()),
+            $container->get(Fixtures::ambiguousAliasedServices()->bazImplementation()->getName()),
+            $container->get(Fixtures::ambiguousAliasedServices()->quxImplementation()->getName()),
+        ], $actual);
     }
 
 }

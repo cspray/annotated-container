@@ -2,9 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ServiceDefinition;
-use Cspray\AnnotatedContainer\DummyApps;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 
 /**
  * A LogicalConstraint that checks to see if any abstract ServiceDefinition has more than 1 concrete alias defined for it.

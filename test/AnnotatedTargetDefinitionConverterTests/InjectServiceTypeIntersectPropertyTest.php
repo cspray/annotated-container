@@ -2,13 +2,12 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetDefinitionConverterTests;
 
+use Cspray\AnnotatedContainer\Attribute\Inject;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
-use Cspray\AnnotatedContainer\InjectDefinition;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainerFixture\Fixtures;
-use function Cspray\Typiphy\floatType;
 use function Cspray\Typiphy\typeIntersect;
-use function Cspray\Typiphy\typeUnion;
 
 class InjectServiceTypeIntersectPropertyTest extends AnnotatedTargetDefinitionConverterTestCase {
 
@@ -48,5 +47,10 @@ class InjectServiceTypeIntersectPropertyTest extends AnnotatedTargetDefinitionCo
 
     public function testGetProfiles() {
         $this->assertSame(['default'], $this->definition->getProfiles());
+    }
+
+    public function testGetAttribute() {
+        self::assertInstanceOf(Inject::class, $this->definition->getAttribute());
+        self::assertSame(Fixtures::injectServiceIntersectConstructorServices()->fooBarImplementation()->getName(), $this->definition->getAttribute()->getValue());
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait;
 
-use Cspray\AnnotatedContainer\AliasDefinition;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedAliasDefinition;
-use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 trait HasAliasDefinitionTestsTrait {
 

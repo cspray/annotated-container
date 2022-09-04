@@ -45,18 +45,12 @@ Now, let's take a look at some callables that will consume dependencies from our
 ```php
 <?php declare(strict_types=1);
 
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use function Cspray\AnnotatedContainer\compiler;
-use function Cspray\AnnotatedContainer\containerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 use function Cspray\AnnotatedContainer\autowiredParams;
 use function Cspray\AnnotatedContainer\rawParam;
 use function Cspray\AnnotatedContainer\serviceParam;
 
-$containerDefinition = compiler()->compile(
-    ContainerDefinitionCompileOptionsBuilder::scanDirectories(__DIR__ . '/src')->build()
-);
-
-$autowiredInvoker = containerFactory()->createContainer($containerDefinition);
+$autowiredInvoker = (new Bootstrap())->bootstrapContainer();
 
 $someServiceConsumer = function(SomeService $service) {};
 $widgetConsumer = function(Widget $widget) {};

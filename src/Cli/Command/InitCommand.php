@@ -2,16 +2,16 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
-use Cspray\AnnotatedContainer\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Cli\Command;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\PotentialConfigurationOverwrite;
 use Cspray\AnnotatedContainer\Cli\Input;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
+use Cspray\AnnotatedContainer\Exception\ComposerAutoloadNotFound;
 use DOMDocument;
 use DOMException;
-use Generator;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 
@@ -184,9 +184,7 @@ SHELL;
 
         $composerFile = $this->directoryResolver->getConfigurationPath('composer.json');
         if (!file_exists($composerFile)) {
-            throw new ComposerConfigurationNotFound(
-                'The file "composer.json" does not exist and is expected to be found.'
-            );
+            throw ComposerConfigurationNotFound::fromMissingComposerJson();
         }
 
         $composer = json_decode(file_get_contents($composerFile), true);
@@ -254,9 +252,9 @@ SHELL;
     }
 
     /**
-     * @return Generator<int, array{dir: string, packagePrivate: bool}, mixed, void>
+     * @return list<array{dir: string, packagePrivate: bool}>
      */
-    private function getComposerDirectories(array $composer) : Generator {
+    private function getComposerDirectories(array $composer) : array {
         $autoloadPsr4 = $composer['autoload']['psr-4'] ?? [];
         $autoloadPsr0 = $composer['autoload']['psr-0'] ?? [];
         $autoloadDevPsr4 = $composer['autoload-dev']['psr-4'] ?? [];
@@ -271,22 +269,30 @@ SHELL;
             ...$autoloadDevPsr4,
         ];
 
+        $dirs = [];
+
         foreach (new RecursiveIteratorIterator(new RecursiveArrayIterator($composerDirs)) as $composerDir) {
-            yield [
+            $dirs[] = [
                 'dir' => (string) $composerDir,
                 'packagePrivate' => false
             ];
         }
 
         foreach (new RecursiveIteratorIterator(new RecursiveArrayIterator($composerDevDirs)) as $composerDevDir) {
-            yield [
+            $dirs[] = [
                 'dir' => (string) $composerDevDir,
                 'packagePrivate' => true
             ];
         }
+
+        return $dirs;
     }
 
     private function generateAndSaveConfiguration(Input $input, array $composer, string $configFile) : void {
+        $composerDirectories = $this->getComposerDirectories($composer);
+        if ($composerDirectories === []) {
+            throw ComposerAutoloadNotFound::fromMissingAutoload();
+        }
         $dom = new DOMDocument(version: '1.0', encoding: 'UTF-8');
         $dom->formatOutput = true;
 
@@ -295,7 +301,7 @@ SHELL;
         $scanDirectories = $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'scanDirectories'));
         $source = $scanDirectories->appendChild($dom->createElementNS(self::XML_SCHEMA, 'source'));
 
-        foreach ($this->getComposerDirectories($composer) as $composerDirectory) {
+        foreach ($composerDirectories as $composerDirectory) {
             $dirNode = $dom->createElementNS(self::XML_SCHEMA, 'dir', $composerDirectory['dir']);
             if ($composerDirectory['packagePrivate']) {
                 $dirNode->setAttribute('packagePrivate', 'true');

@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
-use Cspray\AnnotatedContainer\InjectTargetIdentifier;
+use Cspray\AnnotatedContainer\Definition\InjectTargetIdentifier;
 use Cspray\Typiphy\ObjectType;
 
 /**

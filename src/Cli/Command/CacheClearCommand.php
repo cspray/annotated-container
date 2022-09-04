@@ -2,7 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
-use Cspray\AnnotatedContainer\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Cli\Command;
 use Cspray\AnnotatedContainer\Cli\Exception\CacheDirConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\CacheDirNotFound;
@@ -10,7 +11,6 @@ use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Input;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
-use Cspray\AnnotatedContainer\XmlBootstrappingConfiguration;
 
 final class CacheClearCommand implements Command {
 

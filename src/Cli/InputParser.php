@@ -6,12 +6,18 @@ use Cspray\AnnotatedContainer\Cli\Exception\OptionNotFound;
 
 final class InputParser {
 
+    /**
+     * @param list<string> $argv
+     * @return Input
+     */
     public function parse(array $argv) : Input {
         array_shift($argv);
         $options = [];
+        /** @var list<non-empty-string> $arguments */
         $arguments = [];
 
         $handleOption = function(string $arg) use(&$options) : void {
+            assert(is_array($options));
             if (str_contains($arg, '=')) {
                 [$opt, $val] = explode('=', $arg);
             } else {
@@ -52,11 +58,18 @@ final class InputParser {
 
         return new class($options, $arguments) implements Input {
 
+            /**
+             * @param array<non-empty-string, list<string>|string|bool> $options
+             * @param list<non-empty-string> $args
+             */
             public function __construct(
                 private readonly array $options,
                 private readonly array $args
             ) {}
 
+            /**
+             * @return array<non-empty-string, list<string>|string|bool>
+             */
             public function getOptions() : array {
                 return $this->options;
             }

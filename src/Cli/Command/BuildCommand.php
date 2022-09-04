@@ -2,16 +2,21 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
-use Cspray\AnnotatedContainer\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Cli\Command;
 use Cspray\AnnotatedContainer\Cli\Exception\CacheDirConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Input;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
-use Cspray\AnnotatedContainer\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\XmlBootstrappingConfiguration;
-use function Cspray\AnnotatedContainer\compiler;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
+use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 
 final class BuildCommand implements Command {
 
@@ -56,7 +61,9 @@ SHELL;
             // But it is possible that somebody created the configuration manually and is not using composer
             $composerFile = $this->directoryResolver->getConfigurationPath('composer.json');
             if (file_exists($composerFile)) {
+                /** @var mixed $composer */
                 $composer = json_decode(file_get_contents($composerFile), true);
+                assert(is_array($composer));
                 $configName = $composer['extra']['annotatedContainer']['configFile'] ?? 'annotated-container.xml';
             } else {
                 $configName = 'annotated-container.xml';
@@ -69,6 +76,7 @@ SHELL;
             }
         }
 
+        assert(is_string($configName));
         $configFile = $this->directoryResolver->getConfigurationPath($configName);
         if (!file_exists($configFile)) {
             throw ConfigurationNotFound::fromMissingFile($configName);
@@ -98,10 +106,22 @@ SHELL;
             $compileOptions = $compileOptions->withLogger($logger);
         }
 
-        compiler($cacheDir)->compile($compileOptions->build());
+        $this->getCompiler($cacheDir)->compile($compileOptions->build());
 
         $output->stdout->write('<fg:green>Successfully built and cached your Container!</fg:green>');
 
         return 0;
+    }
+
+    private function getCompiler(?string $cacheDir) : ContainerDefinitionCompiler {
+        $compiler = new AnnotatedTargetContainerDefinitionCompiler(
+            new PhpParserAnnotatedTargetParser(),
+            new DefaultAnnotatedTargetDefinitionConverter()
+        );
+        if ($cacheDir !== null) {
+            $compiler = new CacheAwareContainerDefinitionCompiler($compiler, new ContainerDefinitionSerializer(), $cacheDir);
+        }
+
+        return $compiler;
     }
 }

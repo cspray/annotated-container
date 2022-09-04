@@ -2,11 +2,27 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
+use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
+use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
+use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasResolutionReason;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
+use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
+use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Helper\StubParameterStore;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
+use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
+use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
-use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedContainerFixture\InjectEnumConstructorServices;
@@ -241,13 +257,13 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testCreateArbitraryStoreOnServiceNotPresent() {
-        self::expectException(InvalidParameterException::class);
+        self::expectException(ParameterStoreNotFound::class);
         self::expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
         $this->getContainer(Fixtures::injectCustomStoreServices()->getPath());
     }
 
     public function testCreateArbitraryStoreOnConfigurationNotPresent() {
-        self::expectException(InvalidParameterException::class);
+        self::expectException(ParameterStoreNotFound::class);
         self::expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
         $this->getContainer(Fixtures::configurationMissingStore()->getPath());
     }
@@ -325,6 +341,13 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $container = $this->getContainerFactory()->createContainer($containerDefinition);
 
         self::assertSame($container, $container->get(AutowireableFactory::class));
+    }
+
+    public function testGettingAutowireableInvoker() {
+        $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
+        $container = $this->getContainerFactory()->createContainer($containerDefinition);
+
+        self::assertSame($container, $container->get(AutowireableInvoker::class));
     }
 
     public function testNamedServicesShared() : void {
@@ -475,7 +498,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
      * @dataProvider deserializeContainerProvider
      */
     public function testDeserializingContainerWithInjectAllowsServiceCreation(Fixture $fixture, callable $assertions) {
-        $serializer = new JsonContainerDefinitionSerializer();
+        $serializer = new ContainerDefinitionSerializer();
         $containerDefinition = $this->getContainerDefinitionCompiler()->compile(
             ContainerDefinitionCompileOptionsBuilder::scanDirectories($fixture->getPath())->build()
         );

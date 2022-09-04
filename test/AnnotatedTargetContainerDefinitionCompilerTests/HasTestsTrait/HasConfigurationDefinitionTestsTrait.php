@@ -4,8 +4,8 @@ namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTe
 
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedConfigurationName;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedConfigurationType;
-use Cspray\AnnotatedContainer\ContainerDefinition;
 use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 trait HasConfigurationDefinitionTestsTrait {
 

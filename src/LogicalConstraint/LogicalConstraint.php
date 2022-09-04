@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
-use Cspray\AnnotatedContainer\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 /**
  * Represents a check on a ContainerDefinition to ensure that the configured Container would behave according to the

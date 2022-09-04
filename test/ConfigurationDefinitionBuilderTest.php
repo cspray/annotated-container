@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Configuration;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 
@@ -16,6 +18,12 @@ class ConfigurationDefinitionBuilderTest extends TestCase {
         $this->assertNotSame($a, $b);
     }
 
+    public function testWithAttributeDifferentObject() : void {
+        $configDefinition = ConfigurationDefinitionBuilder::forClass(Fixtures::configurationServices()->myConfig());
+
+        self::assertNotSame($configDefinition, $configDefinition->withAttribute(new Configuration()));
+    }
+
     public function testForServiceBuild() {
         $configurationDefinition = ConfigurationDefinitionBuilder::forClass(Fixtures::configurationServices()->myConfig())->build();
 
@@ -28,6 +36,21 @@ class ConfigurationDefinitionBuilderTest extends TestCase {
             ->build();
 
         $this->assertSame('my-config', $configurationDefinition->getName());
+    }
+
+    public function testGetAttributeIsNull() : void {
+        $configDefinition = ConfigurationDefinitionBuilder::forClass(Fixtures::configurationServices()->myConfig())
+            ->build();
+
+        self::assertNull($configDefinition->getAttribute());
+    }
+
+    public function testGetAttributeIsSameInstance() : void {
+        $configDefinition = ConfigurationDefinitionBuilder::forClass(Fixtures::configurationServices()->myConfig())
+            ->withAttribute($attr = new Configuration())
+            ->build();
+
+        self::assertSame($attr, $configDefinition->getAttribute());
     }
 
 }

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema
+    xml:lang="en"
+    version="1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified"
+    targetNamespace="https://annotated-container.cspray.io/schema/annotated-container-definition.xsd">
+
+  <xs:annotation>
+    <xs:documentation>
+      Defines how to store the compilation results of a ContainerDefinition in XML format. This format is
+      intended to be used both in caching scenarios and static analysis of a container.
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="annotatedContainerDefinition" type="containerDefinitionType">
+    <xs:annotation>
+      <xs:documentation>
+        The root element.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="containerDefinitionType">
+    <xs:all>
+      <xs:element name="serviceDefinitions" type="serviceDefinitionsType" />
+      <xs:element name="aliasDefinitions" type="aliasDefinitionsType" />
+      <xs:element name="configurationDefinitions" type="configurationDefinitionsType" />
+      <xs:element name="servicePrepareDefinitions" type="servicePrepareDefinitionsType" />
+      <xs:element name="serviceDelegateDefinitions" type="serviceDelegateDefinitionsType" />
+      <xs:element name="injectDefinitions" type="injectDefinitionsType" />
+    </xs:all>
+    <xs:attribute name="version" use="required" type="xs:token" />
+  </xs:complexType>
+
+  <xs:complexType name="serviceDefinitionsType">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="serviceDefinition" type="serviceDefinitionType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="serviceDefinitionType">
+    <xs:all>
+      <xs:element name="type" type="xs:token" />
+      <xs:element name="name" type="xs:token" />
+      <xs:element name="profiles" type="profilesType" />
+      <xs:element name="concreteOrAbstract" type="concreteOrAbstractType" />
+      <xs:element name="attribute" type="xs:string" />
+    </xs:all>
+    <xs:attribute name="isPrimary" type="xs:boolean" default="false" />
+  </xs:complexType>
+
+  <xs:complexType name="aliasDefinitionsType">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="aliasDefinition" type="aliasDefinitionType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="aliasDefinitionType">
+    <xs:all>
+      <xs:element name="abstractService" type="xs:token" />
+      <xs:element name="concreteService" type="xs:token" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="configurationDefinitionsType">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="configurationDefinition" type="configurationDefinitionType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="configurationDefinitionType">
+    <xs:all>
+      <xs:element name="type" type="xs:token" />
+      <xs:element name="name" type="xs:token" />
+      <xs:element name="attribute" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="servicePrepareDefinitionsType">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="servicePrepareDefinition" type="servicePrepareDefinitionType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="servicePrepareDefinitionType">
+    <xs:all>
+      <xs:element name="type" type="xs:token" />
+      <xs:element name="method" type="xs:token" />
+      <xs:element name="attribute" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="serviceDelegateDefinitionsType">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="serviceDelegateDefinition" type="serviceDelegateDefinitionType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="serviceDelegateDefinitionType">
+    <xs:all>
+      <xs:element name="service" type="xs:token" />
+      <xs:element name="delegateType" type="xs:token" />
+      <xs:element name="delegateMethod" type="xs:token" />
+      <xs:element name="attribute" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="injectDefinitionsType">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="injectDefinition" type="injectDefinitionType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="injectDefinitionType">
+    <xs:all>
+      <xs:element name="target" type="injectTargetType" />
+      <xs:element name="valueType" type="xs:token" />
+      <xs:element name="value" type="xs:string" />
+      <xs:element name="profiles" type="profilesType" />
+      <xs:element name="store" type="xs:token" />
+      <xs:element name="attribute" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="injectTargetType">
+    <xs:choice>
+      <xs:element name="classMethod" type="classMethodType" />
+      <xs:element name="classProperty" type="classPropertyType" />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="profilesType">
+    <xs:sequence maxOccurs="unbounded">
+      <xs:element name="profile" type="xs:token" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="concreteOrAbstractType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Concrete" />
+      <xs:enumeration value="Abstract" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="classMethodType">
+    <xs:all>
+      <xs:element name="class" type="xs:token" />
+      <xs:element name="method" type="xs:token" />
+      <xs:element name="parameter" type="xs:token" />
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="classPropertyType">
+    <xs:all>
+      <xs:element name="class" type="xs:token" />
+      <xs:element name="property" type="xs:token" />
+    </xs:all>
+  </xs:complexType>
+</xs:schema>

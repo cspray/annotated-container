@@ -2,21 +2,10 @@
 
 Annotated Container provides a series of functions that are designed to:
 
-- Make bootstrapping easier
 - Provide a mechanism for defining services that can't be annotated
 - Define a standardized way for passing arguments to `AutowireableFactory` and `AutowireableInvoker`.
 
 This document lists the functions for each purpose.
-
-## Bootstrapping Functions
-
-```php
-\Cspray\AnnotatedContainer\containerFactory(SupportedContainers $supportedContainer = \Cspray\AnnotatedContainer\SupportedContainers::Default) : ContainerFactory;
-
-\Cspray\AnnotatedContainer\compiler(string $cacheDir = null) : \Cspray\AnnotatedContainer\ContainerDefinitionCompiler;
-
-\Cspray\AnnotatedContainer\eventEmitter() : \Cspray\AnnotatedContainer\AnnotatedContainerEmitter;
-```
 
 ## Defining Services
 

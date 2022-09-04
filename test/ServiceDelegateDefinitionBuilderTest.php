@@ -2,16 +2,16 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\DummyApps\ServiceDelegate;
-use Cspray\AnnotatedContainer\Exception\DefinitionBuilderException;
+use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinitionBuilder;
+use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegateDefinition;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
-use function Cspray\Typiphy\objectType;
 
 class ServiceDelegateDefinitionBuilderTest extends TestCase {
 
     public function testWithEmptyDelegateMethodThrowsException() {
-        $this->expectException(DefinitionBuilderException::class);
+        $this->expectException(InvalidServiceDelegateDefinition::class);
         $this->expectExceptionMessage('The delegate method for a ServiceDelegateDefinition must not be blank.');
         ServiceDelegateDefinitionBuilder::forService(Fixtures::delegatedService()->serviceInterface())
             ->withDelegateMethod(Fixtures::delegatedService()->serviceFactory(), '');
@@ -22,6 +22,13 @@ class ServiceDelegateDefinitionBuilderTest extends TestCase {
         $builder2 = $builder1->withDelegateMethod(Fixtures::delegatedService()->serviceFactory(), 'createService');
 
         $this->assertNotSame($builder1, $builder2);
+    }
+
+    public function testWithAttributeImmutableBuilder() {
+        $builder1 = ServiceDelegateDefinitionBuilder::forService(Fixtures::delegatedService()->serviceInterface());
+        $builder2 = $builder1->withAttribute(new ServiceDelegate());
+
+        self::assertNotSame($builder1, $builder2);
     }
 
     public function testBuildHasServiceDefinition() {
@@ -46,6 +53,23 @@ class ServiceDelegateDefinitionBuilderTest extends TestCase {
             ->build();
 
         $this->assertSame('createService', $delegateDefinition->getDelegateMethod());
+    }
+
+    public function testBuildWithNoAttributeReturnsNull() : void {
+        $delegateDefinition = ServiceDelegateDefinitionBuilder::forService(Fixtures::delegatedService()->serviceInterface())
+            ->withDelegateMethod(Fixtures::delegatedService()->serviceFactory(), 'createService')
+            ->build();
+
+        self::assertNull($delegateDefinition->getAttribute());
+    }
+
+    public function testBuildWithAttributeReturnsSameInstance() : void {
+        $delegateDefinition = ServiceDelegateDefinitionBuilder::forService(Fixtures::delegatedService()->serviceInterface())
+            ->withDelegateMethod(Fixtures::delegatedService()->serviceFactory(), 'createService')
+            ->withAttribute($attr = new ServiceDelegate())
+            ->build();
+
+        self::assertSame($attr, $delegateDefinition->getAttribute());
     }
 
 }

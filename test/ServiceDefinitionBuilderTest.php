@@ -2,6 +2,8 @@
 
 namespace Cspray\AnnotatedContainer;
 
+use Cspray\AnnotatedContainer\Attribute\Service;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use function Cspray\Typiphy\objectType;
@@ -74,6 +76,20 @@ class ServiceDefinitionBuilderTest extends TestCase {
         $this->assertNotSame($serviceDefinition1, $serviceDefinition2);
     }
 
+    public function testWithNameImmutableBuilder() : void {
+        $serviceDefinition1 = ServiceDefinitionBuilder::forConcrete(objectType($this->getConcreteType()));
+        $serviceDefinition2 = $serviceDefinition1->withName('name');
+
+        self::assertNotSame($serviceDefinition1, $serviceDefinition2);
+    }
+
+    public function testWithAttributeImmutableBuilder() : void {
+        $serviceDefinition1 = ServiceDefinitionBuilder::forConcrete(objectType($this->getConcreteType()));
+        $serviceDefinition2 = $serviceDefinition1->withAttribute(new Service());
+
+        self::assertNotSame($serviceDefinition1, $serviceDefinition2);
+    }
+
     public function testWithProfileReplacesDefault() {
         $serviceDefinition = ServiceDefinitionBuilder::forConcrete(objectType($this->getConcreteType()))
             ->withProfiles(['dev'])->build();
@@ -87,6 +103,20 @@ class ServiceDefinitionBuilderTest extends TestCase {
             ->build();
 
         $this->assertSame(['default', 'dev', 'local'], $serviceDefinition->getProfiles());
+    }
+
+    public function testWithNoAttributeDefinitionAttributeIsNull() : void {
+        $serviceDefinition = ServiceDefinitionBuilder::forAbstract(objectType($this->getAbstractType()))->build();
+
+        self::assertNull($serviceDefinition->getAttribute());
+    }
+
+    public function testWithAttributeDefinitionAttributeIsSame() : void {
+        $serviceDefinition = ServiceDefinitionBuilder::forAbstract(objectType($this->getAbstractType()))
+            ->withAttribute($attr = new Service())
+            ->build();
+
+        self::assertSame($attr, $serviceDefinition->getAttribute());
     }
 
 }

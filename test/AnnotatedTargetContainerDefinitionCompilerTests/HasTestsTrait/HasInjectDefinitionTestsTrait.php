@@ -3,10 +3,7 @@
 namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait;
 
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\ExpectedInject;
-use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\DataProviderExpects\InjectTargetType;
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\InjectDefinition;
-use PHPUnit\Framework\TestCase;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 
 trait HasInjectDefinitionTestsTrait {
 

@@ -4,20 +4,19 @@ namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Auryn\InjectionException;
 use Auryn\Injector;
-use Cspray\AnnotatedContainer\ActiveProfiles;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
-use Cspray\AnnotatedContainer\AutowireableFactory;
-use Cspray\AnnotatedContainer\AutowireableParameter;
-use Cspray\AnnotatedContainer\AutowireableParameterSet;
-use Cspray\AnnotatedContainer\ContainerDefinition;
-use Cspray\AnnotatedContainer\ContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactoryOptions;
+use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
+use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
-use Cspray\AnnotatedContainer\Exception\InvalidDefinitionException;
-use Cspray\AnnotatedContainer\Exception\InvalidParameterException;
-use Cspray\AnnotatedContainer\Exception\ServiceNotFoundException;
-use Cspray\AnnotatedContainer\ProfilesAwareContainerDefinition;
-use Cspray\AnnotatedContainer\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Exception\InvalidAlias;
+use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
+use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
+use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\Typiphy\ObjectType;
 use UnitEnum;
 use function Cspray\Typiphy\objectType;
@@ -52,8 +51,8 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
         $this->setLoggerFromOptions($containerFactoryOptions);
         $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
 
-        $nameTypeMap = [];
         try {
+            $nameTypeMap = [];
             $this->logCreatingContainer(objectType(Injector::class), $activeProfiles);
             $this->logServicesNotMatchingProfiles(
                 $containerDefinition,
@@ -65,8 +64,8 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
             );
             $this->logFinishedCreatingContainer(objectType(Injector::class), $activeProfiles);
             return $this->getAnnotatedContainer($injector, $nameTypeMap, $this->getActiveProfilesService($activeProfiles));
-        } catch (InvalidDefinitionException $exception) {
-            throw new ContainerException($exception->getMessage(), previous: $exception);
+        } catch (InvalidAlias $exception) {
+            throw ContainerException::fromCaughtThrowable($exception);
         }
     }
 
@@ -83,16 +82,14 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 ActiveProfiles $activeProfiles
             ) {
                 $this->injector->delegate(AutowireableFactory::class, fn() => $this);
+                $this->injector->delegate(AutowireableInvoker::class, fn() => $this);
                 $this->injector->delegate(ActiveProfiles::class, fn() => $activeProfiles);
             }
 
             public function get(string $id) {
                 try {
                     if (!$this->has($id)) {
-                        throw new ServiceNotFoundException(sprintf(
-                            'The service "%s" could not be found in this container.',
-                            $id
-                        ));
+                        throw ServiceNotFound::fromServiceNotInContainer($id);
                     }
 
                     if (isset($this->nameTypeMap[$id])) {
@@ -100,10 +97,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                     }
                     return $this->injector->make($id);
                 } catch (InjectionException $injectionException) {
-                    throw new ContainerException(
-                        sprintf('An error was encountered creating %s', $id),
-                        previous: $injectionException
-                    );
+                    throw ContainerException::fromCaughtThrowable($injectionException);
                 }
             }
 
@@ -189,10 +183,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 if ($storeName !== null) {
                     $store = $this->getParameterStore($storeName);
                     if ($store === null) {
-                        throw new InvalidParameterException(sprintf(
-                            'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
-                            $storeName
-                        ));
+                        throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($storeName);
                     }
                     $value = $store->fetch($injectDefinition->getType(), $value);
                 }
@@ -308,10 +299,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
             if (!is_null($storeName)) {
                 $parameterStore = $this->getParameterStore($storeName);
                 if (is_null($parameterStore)) {
-                    throw new InvalidParameterException(sprintf(
-                        'The ParameterStore "%s" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.',
-                        $storeName
-                    ));
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($storeName);
                 }
                 $value = $parameterStore->fetch($injectDefinition->getType(), $value);
             }
