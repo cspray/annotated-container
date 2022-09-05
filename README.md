@@ -90,7 +90,7 @@ Now, bootstrap your Container in your app.
 // app bootstrap in __DIR__ . '/app.php'
 require __DIR__ . '/vendor/autoload.php';
 
-use Cspray\AnnotatedContainer\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
 // Include other active profiles in this list
 // If the only active profile is default you can call this method without any arguments
