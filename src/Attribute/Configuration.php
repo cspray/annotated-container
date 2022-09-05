@@ -23,6 +23,9 @@ final class Configuration implements ConfigurationAttribute {
         public readonly ?string $name = null
     ) {}
 
+    /**
+     * @inheritDoc
+     */
     public function getName() : ?string {
         return $this->name;
     }
