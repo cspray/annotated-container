@@ -34,11 +34,11 @@ final class Inject implements InjectAttribute {
      * Attribute on a distinct parameter or property should include a unique set of profiles. Whichever Inject Attribute
      * that is included in the list of active profiles will be used.
      *
-     * @param string|int|float|bool|array|UnitEnum|null $value The value that should be injected or provided to the
-     *                                                         ParameterStore defined by $from if it is present
+     * @param mixed $value The value that should be injected or provided to the
+     *                     ParameterStore defined by $from if it is present
      * @param string|null $from The ParameterStore that should be used to fetch the value, with $value acting as the key
      *                          to fetch from the given store.
-     * @param string[] $profiles A list of active profiles that this Inject Attribute will applicable for.
+     * @param list<string> $profiles A list of active profiles that this Inject Attribute will applicable for.
      */
     public function __construct(
         public readonly mixed $value,
@@ -50,6 +50,9 @@ final class Inject implements InjectAttribute {
         return $this->value;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getProfiles() : array {
         return $this->profiles;
     }
