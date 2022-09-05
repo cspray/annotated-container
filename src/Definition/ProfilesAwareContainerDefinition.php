@@ -31,7 +31,7 @@ final class ProfilesAwareContainerDefinition implements ContainerDefinition {
                 throw InvalidAlias::fromAbstractNotService($aliasDefinition->getAbstractService()->getName());
             }
 
-            $concrete = $this->getServiceDefinition($aliasDefinition->getConcreteService());
+            $concrete = $this->getServiceDefinition($aliasDefinition->getConcreteService()) ?? $this->getConfigurationDefinition($aliasDefinition->getConcreteService());
             if ($concrete === null) {
                 throw InvalidAlias::fromConcreteNotService($aliasDefinition->getConcreteService()->getName());
             }
@@ -75,7 +75,21 @@ final class ProfilesAwareContainerDefinition implements ContainerDefinition {
         return null;
     }
 
-    private function hasActiveProfile(ServiceDefinition|InjectDefinition $definition) : bool {
+    private function hasActiveProfile(ServiceDefinition|InjectDefinition|ConfigurationDefinition $definition) : bool {
+        if ($definition instanceof ConfigurationDefinition) {
+            return true;
+        }
+
         return count(array_intersect($this->activeProfiles, $definition->getProfiles())) >= 1;
+    }
+
+    private function getConfigurationDefinition(ObjectType $objectType) : ?ConfigurationDefinition {
+        foreach ($this->getConfigurationDefinitions() as $configurationDefinition) {
+            if ($configurationDefinition->getClass() === $objectType) {
+                return $configurationDefinition;
+            }
+        }
+
+        return null;
     }
 }

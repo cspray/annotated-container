@@ -7,6 +7,7 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
@@ -74,32 +75,6 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             }
         }
 
-        $aliasedTypes = [];
-        $aliasDefinitions = $containerDefinition->getAliasDefinitions();
-        foreach ($aliasDefinitions as $aliasDefinition) {
-            $concreteDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getConcreteService());
-            if ($concreteDefinition === null) {
-                throw InvalidAlias::fromConcreteNotService($aliasDefinition->getConcreteService()->getName());
-            }
-            if (!in_array($aliasDefinition->getAbstractService()->getName(), $aliasedTypes)) {
-                $resolution = $this->aliasDefinitionResolver->resolveAlias(
-                    $containerDefinition, $aliasDefinition->getAbstractService()
-                );
-                $this->logAliasingService($resolution, $aliasDefinition->getAbstractService());
-
-                $aliasDefinition = $resolution->getAliasDefinition();
-                if ($aliasDefinition !== null) {
-                    $abstractDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getAbstractService());
-                    assert(!is_null($abstractDefinition));
-
-                    $abstractName = is_null($abstractDefinition->getName()) ? $abstractDefinition->getType()->getName() : $abstractDefinition->getName();
-                    assert(!is_null($abstractName));
-
-                    $definitions[$abstractName] = autowire($aliasDefinition->getConcreteService()->getName());
-                }
-            }
-        }
-
         foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
             $configName = is_null($configurationDefinition->getName()) ? $configurationDefinition->getClass()->getName() : $configurationDefinition->getName();
             $serviceTypes[] = $configurationDefinition->getClass()->getName();
@@ -138,6 +113,29 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
                 $definitions[$service]->property($property, $value);
             }
         }
+
+        $aliasedTypes = [];
+        $aliasDefinitions = $containerDefinition->getAliasDefinitions();
+        foreach ($aliasDefinitions as $aliasDefinition) {
+            if (!in_array($aliasDefinition->getAbstractService()->getName(), $aliasedTypes)) {
+                $resolution = $this->aliasDefinitionResolver->resolveAlias(
+                    $containerDefinition, $aliasDefinition->getAbstractService()
+                );
+                $this->logAliasingService($resolution, $aliasDefinition->getAbstractService());
+
+                $aliasDefinition = $resolution->getAliasDefinition();
+                if ($aliasDefinition !== null) {
+                    $abstractDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getAbstractService());
+                    assert(!is_null($abstractDefinition));
+
+                    $abstractName = is_null($abstractDefinition->getName()) ? $abstractDefinition->getType()->getName() : $abstractDefinition->getName();
+                    assert(!is_null($abstractName));
+
+                    $definitions[$abstractName] = get($aliasDefinition->getConcreteService()->getName());
+                }
+            }
+        }
+
 
         foreach ($containerDefinition->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
             $serviceName = $serviceDelegateDefinition->getServiceType()->getName();

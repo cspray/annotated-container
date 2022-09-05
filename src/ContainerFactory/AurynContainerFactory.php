@@ -192,17 +192,21 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
 
             }
 
-            $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($injectPropertyMap, $configurationDefinition) {
-                /** @var class-string $configurationClass */
-                $configurationClass = $configurationDefinition->getClass()->getName();
-                $configReflection = (new \ReflectionClass($configurationClass));
-                $configInstance = $configReflection->newInstanceWithoutConstructor();
-                foreach ($injectPropertyMap as $prop => $value) {
-                    $reflectionProperty = $configReflection->getProperty($prop);
-                    $reflectionProperty->setValue($configInstance, $value);
-                }
-                return $configInstance;
-            });
+            /** @var class-string $configurationClass */
+            $configurationClass = $configurationDefinition->getClass()->getName();
+            // If the Congifuration class has a __construct method defined on it then we should let the Container create
+            // the instance and rely on autowiring and #[Inject] Attributes defined in method parameters to provide correct values
+            if (!method_exists($configurationClass, '__construct')) {
+                $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($configurationClass, $injectPropertyMap) {
+                    $configReflection = (new \ReflectionClass($configurationClass));
+                    $configInstance = $configReflection->newInstanceWithoutConstructor();
+                    foreach ($injectPropertyMap as $prop => $value) {
+                        $reflectionProperty = $configReflection->getProperty($prop);
+                        $reflectionProperty->setValue($configInstance, $value);
+                    }
+                    return $configInstance;
+                });
+            }
         }
 
         // We need to keep track of which abstract types we have aliased

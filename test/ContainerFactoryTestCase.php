@@ -965,4 +965,22 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
     }
 
+    public function testCreatingConstructorPromotedConfiguration() : void {
+        $container = $this->getContainer(Fixtures::constructorPromotedConfigurationFixture()->getPath());
+
+        $configuration = $container->get(Fixtures::constructorPromotedConfigurationFixture()->constructorConfig()->getName());
+
+        self::assertInstanceOf(Fixtures::constructorPromotedConfigurationFixture()->constructorConfig()->getName(), $configuration);
+        self::assertSame('bar', $configuration->foo);
+        self::assertSame(42, $configuration->bar);
+    }
+
+    public function testCreatingAliasedConfiguration() : void {
+        $container = $this->getContainer(Fixtures::aliasedConfigurationFixture()->getPath());
+
+        $configuration = $container->get(Fixtures::aliasedConfigurationFixture()->appConfig()->getName());
+
+        self::assertInstanceOf(Fixtures::aliasedConfigurationFixture()->myAppConfig()->getName(), $configuration);
+        self::assertSame('my-app-name', $configuration->getAppName());
+    }
 }

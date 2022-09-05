@@ -170,4 +170,12 @@ final class Fixtures {
         return new InjectListOfScalarsFixture();
     }
 
+    public static function constructorPromotedConfigurationFixture() : ConstructorPromotedConfigurationFixture {
+        return new ConstructorPromotedConfigurationFixture();
+    }
+
+    public static function aliasedConfigurationFixture() : AliasedConfigurationFixture {
+        return new AliasedConfigurationFixture();
+    }
+
 }

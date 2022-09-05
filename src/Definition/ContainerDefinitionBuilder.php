@@ -89,6 +89,13 @@ final class ContainerDefinitionBuilder {
         return $this->serviceDefinitions;
     }
 
+    /**
+     * @return ConfigurationDefinition[]
+     */
+    public function getConfigurationDefinitions() : array {
+        return $this->configurationDefinitions;
+    }
+
     public function build() : ContainerDefinition {
         return new class(
             $this->serviceDefinitions,
