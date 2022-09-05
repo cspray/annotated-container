@@ -4,7 +4,9 @@ namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 
 abstract class ServiceWiringObserver implements Observer {
 
@@ -23,10 +25,16 @@ abstract class ServiceWiringObserver implements Observer {
     final public function afterContainerCreation(ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
         $serviceGatherer = new class($containerDefinition, $container) implements ServiceGatherer {
 
+            private readonly ContainerDefinition $containerDefinition;
+
             public function __construct(
-                private readonly ContainerDefinition $containerDefinition,
+                ContainerDefinition $containerDefinition,
                 private readonly AnnotatedContainer $container
-            ) {}
+            ) {
+                $activeProfiles = $container->get(ActiveProfiles::class);
+                assert($activeProfiles instanceof ActiveProfiles);
+                $this->containerDefinition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles->getProfiles());
+            }
 
             public function getServicesForType(string $type) : array {
                 /** @var array<array-key, object> $services */
@@ -41,25 +49,48 @@ abstract class ServiceWiringObserver implements Observer {
                     if (is_a($serviceType, $type, true)) {
                         $service = $this->container->get($serviceType);
                         assert($service instanceof $type);
-                        $services[] = new class($service, $serviceDefinition) implements ServiceFromServiceDefinition {
-
-                            public function __construct(
-                                private readonly object $service,
-                                private readonly ServiceDefinition $definition
-                            ) {}
-
-                            public function getService() : object {
-                                return $this->service;
-                            }
-
-                            public function getDefinition() : ServiceDefinition {
-                                return $this->definition;
-                            }
-                        };
+                        $services[] = $this->createServiceFromServiceDefinition($service, $serviceDefinition);
                     }
                 }
 
                 return $services;
+            }
+
+            public function getServicesWithAttribute(string $attributeType) : array {
+                $services = [];
+                foreach ($this->containerDefinition->getServiceDefinitions() as $serviceDefinition) {
+                    if ($serviceDefinition->isAbstract()) {
+                        continue;
+                    }
+
+                    $serviceAttribute = $serviceDefinition->getAttribute();
+                    if (!($serviceAttribute instanceof $attributeType)) {
+                        continue;
+                    }
+
+                    $service = $this->container->get($serviceDefinition->getType()->getName());
+
+                    $services[] = $this->createServiceFromServiceDefinition($service, $serviceDefinition);
+                }
+                return $services;
+            }
+
+            private function createServiceFromServiceDefinition(object $service, ServiceDefinition $serviceDefinition) : ServiceFromServiceDefinition {
+                return new class($service, $serviceDefinition) implements ServiceFromServiceDefinition {
+                    public function __construct(
+                        private readonly object $service,
+                        private readonly ServiceDefinition $definition
+                    ) {}
+
+                    public function getService() : object {
+                        return $this->service;
+                    }
+
+                    public function getDefinition() : ServiceDefinition {
+                        return $this->definition;
+                    }
+                };
+
             }
         };
         $this->wireServices($container, $serviceGatherer);

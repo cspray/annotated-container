@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [v2.0.0-beta3](https://github.com/cspray/annotated-container/tree/v2.0.0-beta3) - 2022-09-05
+
+### Added
+
+- Added a new `Bootstrap\ServiceGatherer::getServicesWithAttribute` method that allows retrieving all services and definitions that have an Attribute of a given type.
+
+### Fixed
+
+- Fixed a bug where the `Bootstrap\ServiceWiringObserver` was not profile aware and could result in attempting to make a service the Container was unaware of.
+
+## [v2.0.0-beta2](https://github.com/cspray/annotated-container/tree/v2.0.0-beta2) - 2022-09-04
+
+### Changed
+
+- The provided `Bootstrap\ServiceWiringObserver` now provides an array of `Bootstrap\ServiceFromServiceDefinition` which provides the `Definition\ServiceDefinition` as well as the corresponding service. This provides access to the new `Definition\ServiceDefinition::getAttribute` method which could be useful in contexts where service wiring occurs.
+
 ## [v2.0.0-beta1](https://github.com/cspray/annotated-container/tree/v2.0.0-beta1) - 2022-09-04
 
 Version 2 represents significant improvements but includes backwards-breaking changes. If you run into problems migrating from v1 to v2 please [submit an Issue](https://github.com/cspray/annotated-container/issues/new).

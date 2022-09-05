@@ -15,6 +15,7 @@ use Cspray\AnnotatedContainer\Helper\StubParameterStoreWithDependencies;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
+use Cspray\AnnotatedContainerFixture\CustomServiceAttribute\Repository;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
@@ -517,6 +518,158 @@ XML;
             $container->get(Fixtures::ambiguousAliasedServices()->bazImplementation()->getName()),
             $container->get(Fixtures::ambiguousAliasedServices()->quxImplementation()->getName()),
         ], $actualServices);
+    }
+
+    public function testServiceWiringObserverByAttributes() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>CustomServiceAttribute</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+
+        $observer = new class extends ServiceWiringObserver {
+
+            private ?AnnotatedContainer $container = null;
+            private array $services = [];
+
+            public function getAnnotatedContainer() : ?AnnotatedContainer {
+                return $this->container;
+            }
+
+            public function getServices() : array {
+                return $this->services;
+            }
+
+            protected function wireServices(AnnotatedContainer $container, ServiceGatherer $gatherer) : void {
+                $this->container = $container;
+                $this->services = $gatherer->getServicesWithAttribute(Repository::class);
+            }
+        };
+        $bootstrap->addObserver($observer);
+
+        $container = $bootstrap->bootstrapContainer(['default', 'test']);
+
+        $actual = $observer->getServices();
+        $actualServices = array_map(fn(ServiceFromServiceDefinition $fromServiceDefinition) => $fromServiceDefinition->getService(), $actual);
+
+        self::assertSame($container, $observer->getAnnotatedContainer());
+        self::assertSame([
+            $container->get(Fixtures::customServiceAttribute()->myRepo()->getName()),
+        ], $actualServices);
+    }
+
+    public function testServiceWiringObserverByTypeProfileAware() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>ProfileResolvedServices</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+
+        $observer = new class extends ServiceWiringObserver {
+
+            private ?AnnotatedContainer $container = null;
+            private array $services = [];
+
+            public function getAnnotatedContainer() : ?AnnotatedContainer {
+                return $this->container;
+            }
+
+            public function getServices() : array {
+                return $this->services;
+            }
+
+            protected function wireServices(AnnotatedContainer $container, ServiceGatherer $gatherer) : void {
+                $this->container = $container;
+                $this->services = $gatherer->getServicesForType(Fixtures::profileResolvedServices()->fooInterface()->getName());
+            }
+        };
+        $bootstrap->addObserver($observer);
+
+        $container = $bootstrap->bootstrapContainer(['default', 'prod']);
+
+        $actual = $observer->getServices();
+
+        $actualServices = array_map(fn(ServiceFromServiceDefinition $fromServiceDefinition) => $fromServiceDefinition->getService(), $actual);
+
+        usort($actualServices, fn($a, $b) => $a::class <=> $b::class);
+
+        self::assertSame($container, $observer->getAnnotatedContainer());
+        self::assertSame([
+            $container->get(Fixtures::profileResolvedServices()->prodImplementation()->getName()),
+        ], $actualServices);
+    }
+
+    public function testServiceWiringObserverByAttributesProfileAware() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>CustomServiceAttribute</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $bootstrap = new Bootstrap(directoryResolver: $directoryResolver);
+
+        $observer = new class extends ServiceWiringObserver {
+
+            private ?AnnotatedContainer $container = null;
+            private array $services = [];
+
+            public function getAnnotatedContainer() : ?AnnotatedContainer {
+                return $this->container;
+            }
+
+            public function getServices() : array {
+                return $this->services;
+            }
+
+            protected function wireServices(AnnotatedContainer $container, ServiceGatherer $gatherer) : void {
+                $this->container = $container;
+                $this->services = $gatherer->getServicesWithAttribute(Repository::class);
+            }
+        };
+        $bootstrap->addObserver($observer);
+
+        // The Repository is only active under 'test' profile and should not be included
+        $container = $bootstrap->bootstrapContainer(['default', 'dev']);
+
+        self::assertSame($container, $observer->getAnnotatedContainer());
+        self::assertEmpty($observer->getServices());
     }
 
 }
