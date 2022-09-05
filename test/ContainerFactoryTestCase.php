@@ -975,4 +975,12 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertSame(42, $configuration->bar);
     }
 
+    public function testCreatingAliasedConfiguration() : void {
+        $container = $this->getContainer(Fixtures::aliasedConfigurationFixture()->getPath());
+
+        $configuration = $container->get(Fixtures::aliasedConfigurationFixture()->appConfig()->getName());
+
+        self::assertInstanceOf(Fixtures::aliasedConfigurationFixture()->myAppConfig()->getName(), $configuration);
+        self::assertSame('my-app-name', $configuration->getAppName());
+    }
 }

@@ -488,16 +488,30 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     }
 
     private function addAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, LoggerInterface $logger) : ContainerDefinitionBuilder {
-        /** @var list<ServiceDefinition> $abstractDefinitions */
-        $abstractDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isAbstract());
-        /** @var list<ServiceDefinition> $concreteDefinitions */
-        $concreteDefinitions = array_filter($containerDefinitionBuilder->getServiceDefinitions(), static fn($def): bool => $def->isConcrete());
+        /** @var list<ObjectType> $abstractTypes */
+        /** @var list<ObjectType> $concreteTypes */
+        $abstractTypes = [];
+        $concreteTypes = [];
 
-        foreach ($abstractDefinitions as $abstractDefinition) {
-            foreach ($concreteDefinitions as $concreteDefinition) {
-                if (is_subclass_of($concreteDefinition->getType()->getName(), $abstractDefinition->getType()->getName())) {
-                    $aliasDefinition = AliasDefinitionBuilder::forAbstract($abstractDefinition->getType())
-                        ->withConcrete($concreteDefinition->getType())
+        foreach ($containerDefinitionBuilder->getServiceDefinitions() as $serviceDefinition) {
+            if ($serviceDefinition->isAbstract()) {
+                $abstractTypes[] = $serviceDefinition->getType();
+            } else {
+                $concreteTypes[] = $serviceDefinition->getType();
+            }
+        }
+
+        foreach ($containerDefinitionBuilder->getConfigurationDefinitions() as $configurationDefinition) {
+            $concreteTypes[] = $configurationDefinition->getClass();
+        }
+
+        foreach ($abstractTypes as $abstractType) {
+            foreach ($concreteTypes as $concreteType) {
+                /** @var class-string $abstractTypeString */
+                $abstractTypeString = $abstractType->getName();
+                if (is_subclass_of($concreteType->getName(), $abstractTypeString)) {
+                    $aliasDefinition = AliasDefinitionBuilder::forAbstract($abstractType)
+                        ->withConcrete($concreteType)
                         ->build();
                     $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition($aliasDefinition);
                     $this->logAliasDefinition($aliasDefinition, $logger);

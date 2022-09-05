@@ -174,4 +174,8 @@ final class Fixtures {
         return new ConstructorPromotedConfigurationFixture();
     }
 
+    public static function aliasedConfigurationFixture() : AliasedConfigurationFixture {
+        return new AliasedConfigurationFixture();
+    }
+
 }
