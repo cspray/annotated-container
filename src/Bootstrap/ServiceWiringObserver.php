@@ -69,7 +69,7 @@ abstract class ServiceWiringObserver implements Observer {
                     }
 
                     $service = $this->container->get($serviceDefinition->getType()->getName());
-
+                    assert(is_object($service));
                     $services[] = $this->createServiceFromServiceDefinition($service, $serviceDefinition);
                 }
                 return $services;
