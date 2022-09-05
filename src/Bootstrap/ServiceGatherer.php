@@ -13,4 +13,10 @@ interface ServiceGatherer {
      */
     public function getServicesForType(string $type) : array;
 
+    /**
+     * @param class-string<T> $attributeType
+     * @return ServiceFromServiceDefinition<T>[]
+     */
+    public function getServicesWithAttribute(string $attributeType) : array;
+
 }
