@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
+use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
 use Cspray\AnnotatedContainer\Cli\Command;
 use Cspray\AnnotatedContainer\Cli\CommandExecutor;
 use Cspray\AnnotatedContainer\Cli\Input;
@@ -18,8 +19,9 @@ final class HelpCommand implements Command {
     }
 
     public function getHelp() : string {
+        $version = AnnotatedContainerVersion::getVersion();
         return <<<SHELL
-<bold>Annotated Container v1.0.2</bold>
+<bold>Annotated Container $version</bold>
 
 Available Commands:
 

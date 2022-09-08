@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Cli\Command;
 
+use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
 use Cspray\AnnotatedContainer\Cli\Command\HelpCommand;
 use Cspray\AnnotatedContainer\Cli\CommandExecutor;
 use Cspray\AnnotatedContainer\Cli\InputParser;
@@ -22,8 +23,9 @@ class HelpCommandTest extends TestCase {
     }
 
     private function getExpectedHelp() : string {
+        $version = AnnotatedContainerVersion::getVersion();
         return <<<SHELL
-<bold>Annotated Container v1.0.2</bold>
+<bold>Annotated Container $version</bold>
 
 Available Commands:
 
@@ -63,8 +65,9 @@ SHELL;
             $stderr = new InMemoryOutput()
         );
         $exitCode = $this->subject->handle($input, $terminalOutput);
+        $version = AnnotatedContainerVersion::getVersion();
         $expected = <<<SHELL
-\033[1mAnnotated Container v1.0.2\033[22m
+\033[1mAnnotated Container $version\033[22m
 
 Available Commands:
 
@@ -119,11 +122,11 @@ SHELL;
             $stderr = new InMemoryOutput()
         );
         $exitCode = $this->subject->handle($input, $terminalOutput);
-        $help = $this->getExpectedHelp();
+        $version = AnnotatedContainerVersion::getVersion();
         $expected = <<<SHELL
 \033[41m\033[37m!! Warning !!\033[0m\033[0m - Expecting 1 arg, showing default help
 
-\033[1mAnnotated Container v1.0.2\033[22m
+\033[1mAnnotated Container $version\033[22m
 
 Available Commands:
 
