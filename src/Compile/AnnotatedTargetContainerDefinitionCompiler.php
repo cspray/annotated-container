@@ -457,8 +457,8 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         ContainerDefinitionBuilder $builder,
         LoggerInterface $logger
     ) : ContainerDefinitionBuilder {
-        $contextConsumer = $compileOptions->getDefinitionsProvider();
-        if ($contextConsumer !== null) {
+        $definitionProvider = $compileOptions->getDefinitionProvider();
+        if ($definitionProvider !== null) {
             $context = new class($builder) implements DefinitionProviderContext {
                 public function __construct(private ContainerDefinitionBuilder $builder) {
                 }
@@ -471,11 +471,11 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
                     $this->builder = $containerDefinitionBuilder;
                 }
             };
-            $contextConsumer->consume($context);
+            $definitionProvider->consume($context);
             $logger->info(
-                sprintf('Added services from %s to ContainerDefinition.', $contextConsumer::class),
+                sprintf('Added services from %s to ContainerDefinition.', $definitionProvider::class),
                 [
-                    'containerDefinitionBuilderConsumer' => $contextConsumer::class
+                    'containerDefinitionBuilderConsumer' => $definitionProvider::class
                 ]
             );
             return $context->getBuilder();

@@ -15,8 +15,8 @@ use Cspray\AnnotatedContainer\Internal\FileLogger;
 use Cspray\AnnotatedContainer\Internal\StdoutLogger;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapObserverWithDependencies;
-use Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumer;
-use Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumerWithDependencies;
+use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
+use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
@@ -78,7 +78,7 @@ XML;
         );
     }
 
-    public function testValidXmlReturnsContextConsumers() : void {
+    public function testValidXmlReturnsDefinitionProvider() : void {
         $goodXml = <<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
 <annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
@@ -88,7 +88,7 @@ XML;
         </source>
     </scanDirectories>
     <definitionProvider>
-        Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumer
+        Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider
     </definitionProvider>
 </annotatedContainer>
 XML;
@@ -101,12 +101,12 @@ XML;
             new FixtureBootstrappingDirectoryResolver()
         );
         self::assertInstanceOf(
-            StubContextConsumer::class,
+            StubDefinitionProvider::class,
             $configuration->getContainerDefinitionConsumer()
         );
     }
 
-    public function testContainerContextConsumersNotClass() : void {
+    public function testDefinitionProviderNotClass() : void {
         $badXml = <<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
 <annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
@@ -127,7 +127,7 @@ XML;
 
         self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
-            'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . DefinitionProvider::class
+            'All entries in definitionProviders must be classes that implement ' . DefinitionProvider::class
         );
 
         new XmlBootstrappingConfiguration(
@@ -136,7 +136,7 @@ XML;
         );
     }
 
-    public function testContainerContextConsumersNotImplementCorrectInterface() : void {
+    public function testDefinitionProviderNotImplementCorrectInterface() : void {
         $badXml = <<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
 <annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
@@ -157,7 +157,7 @@ XML;
 
         self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
-            'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . DefinitionProvider::class
+            'All entries in definitionProviders must be classes that implement ' . DefinitionProvider::class
         );
 
         new XmlBootstrappingConfiguration(
@@ -166,7 +166,7 @@ XML;
         );
     }
 
-    public function testContainerContextConsumersEmptyIfNoneDefined() : void {
+    public function testDefinitionProviderEmptyIfNoneDefined() : void {
         $goodXml = <<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
 <annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
@@ -304,7 +304,7 @@ XML;
     </source>
   </scanDirectories>
   <parameterStores>
-    <parameterStore>Cspray\AnnotatedContainer\Helper\StubContextConsumer</parameterStore>
+    <parameterStore>Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider</parameterStore>
   </parameterStores>
 </annotatedContainer>
 XML;
@@ -363,7 +363,7 @@ XML;
         self::assertSame('passed to constructor my-key', $config->getParameterStores()[0]->fetch(stringType(), 'my-key'));
     }
 
-    public function testContainerDefinitionBuilderContextConsumerFactoryPresentRespected() : void {
+    public function testDefinitionProviderFactoryPresentRespected() : void {
         $goodXml = <<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
 <annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
@@ -373,7 +373,7 @@ XML;
     </source>
   </scanDirectories>
   <definitionProvider>
-    Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumerWithDependencies
+    Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies
   </definitionProvider>
 </annotatedContainer>
 XML;
@@ -391,10 +391,10 @@ XML;
         $config = new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
             new FixtureBootstrappingDirectoryResolver(),
-            consumerFactory: $consumerFactory
+            definitionProviderFactory: $consumerFactory
         );
 
-        self::assertInstanceOf(StubContextConsumerWithDependencies::class, $config->getContainerDefinitionConsumer());
+        self::assertInstanceOf(StubDefinitionProviderWithDependencies::class, $config->getContainerDefinitionConsumer());
     }
 
     public function testLoggingFileConfigurationReturnsCorrectLogger() : void {
@@ -570,7 +570,7 @@ XML;
     </source>
   </scanDirectories>
   <observers>
-    <observer>Cspray\AnnotatedContainer\Helper\StubContextConsumer</observer>
+    <observer>Cspray\AnnotatedContainer\Helper\StubDefinitionProvider</observer>
   </observers>
 </annotatedContainer>
 XML;

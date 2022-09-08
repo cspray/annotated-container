@@ -20,7 +20,7 @@ use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Exception\InvalidScanDirectories;
 use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepare;
-use Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumer;
+use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum;
 use Cspray\AnnotatedContainerFixture\ConfigurationWithEnum\MyEnum;
@@ -56,7 +56,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             ->withLogger($this->logger);
 
         if ($consumer !== null) {
-            $options = $options->withContainerDefinitionBuilderContextConsumer($consumer);
+            $options = $options->withDefinitionProvider($consumer);
         }
 
         return $this->subject->compile($options->build());
@@ -462,16 +462,16 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     public function testLoggingThirdPartyServices() : void {
         $this->runCompileDirectory(
             Fixtures::singleConcreteService()->getPath(),
-            new StubContextConsumer()
+            new StubDefinitionProvider()
         );
 
         $expected = [
             'message' => sprintf(
                 'Added services from %s to ContainerDefinition.',
-                StubContextConsumer::class
+                StubDefinitionProvider::class
             ),
             'context' => [
-                'containerDefinitionBuilderConsumer' => StubContextConsumer::class
+                'containerDefinitionBuilderConsumer' => StubDefinitionProvider::class
             ]
         ];
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer;
+namespace Cspray\AnnotatedContainer\Unit;
 
 use Cspray\AnnotatedContainer\Compile\CallableDefinitionProvider;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
@@ -10,10 +10,10 @@ use Psr\Log\LoggerInterface;
 
 class ContainerDefinitionCompileOptionsBuilderTest extends TestCase {
 
-    public function testByDefaultContainerDefinitionBuilderContextConsumerIsNull() : void {
+    public function testByDefaultDefinitionProviderIsNull() : void {
         $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build();
 
-        self::assertNull($compilerOptions->getDefinitionsProvider());
+        self::assertNull($compilerOptions->getDefinitionProvider());
     }
 
     public function testByDefaultLoggerIsNull() : void {
@@ -22,19 +22,19 @@ class ContainerDefinitionCompileOptionsBuilderTest extends TestCase {
         self::assertNull($compilerOptions->getLogger());
     }
 
-    public function testWithContextConsumerImmutable() : void {
+    public function testWithDefinitionProviderImmutable() : void {
         $a = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath());
-        $b = $a->withContainerDefinitionBuilderContextConsumer(new CallableDefinitionProvider(function() {}));
+        $b = $a->withDefinitionProvider(new CallableDefinitionProvider(function() {}));
 
         self::assertNotSame($a, $b);
     }
 
-    public function testWithContextConsumerReturnsConsumer() : void {
+    public function testWithDefinitionProviderReturnsCorrectInstance() : void {
         $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())
-            ->withContainerDefinitionBuilderContextConsumer($expected = new CallableDefinitionProvider(function() {}))
+            ->withDefinitionProvider($expected = new CallableDefinitionProvider(function() {}))
             ->build();
 
-        self::assertSame($expected, $compilerOptions->getDefinitionsProvider());
+        self::assertSame($expected, $compilerOptions->getDefinitionProvider());
     }
 
     public function testWithLoggerImmutable() : void {

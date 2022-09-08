@@ -249,10 +249,10 @@ SHELL;
             throw InvalidOptionType::fromArrayOption('cache-dir');
         }
 
-        $contextConsumer = $input->getOption('definition-provider');
-        if (is_bool($contextConsumer)) {
+        $definitionProvider = $input->getOption('definition-provider');
+        if (is_bool($definitionProvider)) {
             throw InvalidOptionType::fromBooleanOption('definition-provider');
-        } else if (is_array($contextConsumer)) {
+        } else if (is_array($definitionProvider)) {
             throw InvalidOptionType::fromArrayOption('definition-provider');
         }
 
@@ -331,10 +331,10 @@ SHELL;
 
         $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'cacheDir', $cacheName));
 
-        /** @var string|null $contextConsumer */
-        $contextConsumer = $input->getOption('definition-provider');
-        if (isset($contextConsumer)) {
-            $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $contextConsumer));
+        /** @var string|null $definitionProvider */
+        $definitionProvider = $input->getOption('definition-provider');
+        if (isset($definitionProvider)) {
+            $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $definitionProvider));
         }
 
         /** @var string|array|null $parameterStores */

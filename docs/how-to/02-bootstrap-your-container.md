@@ -53,7 +53,7 @@ Bootstrapping allows logging to a file or logging to stdout. In our example the 
 
 ## Step 3 - Setup Third Party Services (optional)
 
-To define services that can't be annotated you can make use of a `Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer` implementation. Implementing this interface allows you to use the [functional API](../references/03-functional-api.md) to augment your ContainerDefinition without using Attributes. Out-of-the-box, it is expected this implementation will have a zero-argument constructor. Later on in this document I will discuss ways that you can override construction if your implementation has dependencies. Primarily this should be used to integrate third-party libraries that can't have Attributes assigned to them.
+To define services that can't be annotated you can make use of a `Cspray\AnnotatedContainer\Compile\DefinitionProvider` implementation. Implementing this interface allows you to use the [functional API](../references/03-functional-api.md) to augment your ContainerDefinition without using Attributes. Out-of-the-box, it is expected this implementation will have a zero-argument constructor. Later on in this document I will discuss ways that you can override construction if your implementation has dependencies. Primarily this should be used to integrate third-party libraries that can't have Attributes assigned to them.
 
 Somewhere in your source code:
 
@@ -62,11 +62,12 @@ Somewhere in your source code:
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
+use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
 
-class ThirdPartyServicesProvider implements ContainerDefinitionBuilderContextConsumer {
+class ThirdPartyServicesProvider implements DefinitionProvider {
 
-    public function consume(ContainerDefinitionBuilderContext $context) : void {
+    public function consume(DefinitionProviderContext $context) : void {
         // Make calls to the functional API to add 
     }
 
@@ -85,9 +86,9 @@ Now, upgrade the configuration to let bootstrapping know which class to use.
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
-  <containerDefinitionBuilderContextConsumer>
+  <definitionProvider>
     Acme\Demo\ThirdPartyServicesProvider
-  </containerDefinitionBuilderContextConsumer>
+  </definitionProvider>
 </annotatedContainer>
 ```
 
@@ -102,7 +103,7 @@ Somewhere in your source code:
 
 namespace Acme\Demo;
 
-use Cspray\Annotatedcontainer\ParameterStore;
+use Cspray\Annotatedcontainer\ContainerFactory\ParameterStore;
 
 final class MyCustomParameterStore implements ParameterStore {
 
@@ -132,7 +133,7 @@ Next, update your configuration.
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
   <parameterStores>
-    <fqcn>Acme\Demo\MyCustomParameterStore</fqcn>
+    <parameterStore>Acme\Demo\MyCustomParameterStore</parameterStore>
   </parameterStores>
 </annotatedContainer>
 ```
@@ -148,7 +149,7 @@ Now that the configuration file has been modified, and you've attributed your co
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
 $container = (new Bootstrap())->bootstrapContainer();
 ```
@@ -164,7 +165,7 @@ The first argument, `$profiles`, passed to `bootstrapContainer` should be an arr
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
 // If you specify 'dev', 'test, 'prod' profiles this container will be ready for production
 $container = (new Bootstrap())->bootstrapContainer(profiles: ['default', 'prod']);
@@ -179,7 +180,7 @@ Perhaps you didn't name your configuration file the default, it is recommended y
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
 // If you specify 'dev', 'test, 'prod' profiles this container will be ready for production
 $container = (new Bootstrap())->bootstrapContainer(configurationFile: 'my-container.xml');
@@ -194,7 +195,7 @@ Perhaps the out-of-the-box logging provided by Annotated Container isn't suffici
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
 // This method is an implementation provided by the reader
 $logger = MyLoggerFactory::create();
@@ -204,35 +205,35 @@ $container = (new Bootstrap(logger: $logger))->bootstrapContainer();
 
 **Any logger passed to this constructor will override the logging set in the configuration!**
 
-#### Constructing ContainerDefinitionBuilderContextConsumer
+#### Constructing DefinitionProvider 
 
-There might be dependencies you need to determine what third-party services should be included in your `ContainerDefinitionBuilderContextconsumer` implementations. If so, there's a `Cspray\AnnotatedContainer\ContainerDefinitionBuilderContextConsumerFactory` interface that you can implement and then pass that instance to the `$containerDefinitionBuilderContextConsumerFactory` construct argument.
+There might be dependencies you need to determine what third-party services should be included in your `DefinitionProvider` implementations. If so, there's a `Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory` interface that you can implement and then pass that instance to the `$definitionProviderFactory` construct argument.
 
 ```php
 <?php declare(strict_types=1);
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
 // This method is an implementation provided by the reader
-$contextConsumerFactory = MyContextConsumerFactory::create();
+$definitionProviderFactory = MyDefinitionProviderFactory::create();
 
 $container = (new Bootstrap(
-    containerDefinitionBuilderContextConsumerFactory: $contextConsumerFactory
+   definitionProviderFactory: $definitionProviderFactory 
 ))->bootstrapContainer();
 ```
 
 #### Constructing ParameterStore
 
-The custom `ParameterStore` implementations you use might require some dependency to gather the appropriate values. In this case, the `Cspray\AnnotatedContainer\ParameterStoreFactory` interface can be implemented and passed to the `$parameterStoreFactory` construct argument.
+The custom `ParameterStore` implementations you use might require some dependency to gather the appropriate values. In this case, the `Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory` interface can be implemented and passed to the `$parameterStoreFactory` construct argument.
 
 ```php
 <?php declare(strict_types=1);
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
 // This method is an implementation provided by the reader
 $parameterStoreFactory = MyParameterStoreFactory::create();
@@ -244,7 +245,7 @@ $container = (new Bootstrap(
 
 #### Changing Resolved Paths
 
-By default, boostrapping expects all the path fragments in your configuration to be in the root of your project. You can have explicit control over which absolute path is used by implementing a `Cspray\AnnotatedContainer\BootstrappingDirectoryResolver` and passed to `$directoryResolver` contruct argument.
+By default, boostrapping expects all the path fragments in your configuration to be in the root of your project. You can have explicit control over which absolute path is used by implementing a `Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver` and passed to `$directoryResolver` contruct argument.
 
 ```php
 <?php declare(strict_types=1);

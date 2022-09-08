@@ -13,9 +13,9 @@ final class InvalidBootstrapConfiguration extends Exception {
         return new self($message);
     }
 
-    public static function fromConfiguredContainerDefinitionConsumerWrongType() : self {
+    public static function fromConfiguredDefinitionProviderWrongType() : self {
         $message = sprintf(
-            'All entries in containerDefinitionBuilderContextConsumers must be classes that implement %s',
+            'All entries in definitionProviders must be classes that implement %s',
             DefinitionProvider::class
         );
         return new self($message);

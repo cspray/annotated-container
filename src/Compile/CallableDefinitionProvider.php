@@ -3,8 +3,8 @@
 namespace Cspray\AnnotatedContainer\Compile;
 
 /**
- * A ContainerDefinitionBuilderContextConsumer that allows you to pass in an anonymous function or some other callable
- * without having to implement your own type.
+ * A DefinitionProvider that allows you to pass in an anonymous function or some other callable without having to
+ * implement your own type.
  */
 final class CallableDefinitionProvider implements DefinitionProvider {
 

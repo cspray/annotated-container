@@ -13,7 +13,7 @@ use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapObserver;
-use Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumerWithDependencies;
+use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStoreWithDependencies;
 use Cspray\AnnotatedContainer\Unit\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\CustomServiceAttribute\Repository;
@@ -90,7 +90,7 @@ XML;
         self::assertFileExists('vfs://root/.annotated-container-cache/' . $expected);
     }
 
-    public function testBootstrapWithValidContextConsumers() : void {
+    public function testBootstrapWithValidDefinitionProvider() : void {
         $directoryResolver = new FixtureBootstrappingDirectoryResolver();
 
         $goodXml = <<<XML
@@ -102,7 +102,7 @@ XML;
         </source>
     </scanDirectories>
     <definitionProvider>
-      Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumer
+      Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider
     </definitionProvider>
 </annotatedContainer>
 XML;
@@ -292,7 +292,7 @@ XML;
         self::assertGreaterThan(1, count($logger->getLogsForLevel(LogLevel::INFO)));
     }
 
-    public function testBoostrapContextConsumerFactoryPassedToConfiguration() : void {
+    public function testBoostrapDefinitionProviderFactoryPassedToConfiguration() : void {
         $directoryResolver = new FixtureBootstrappingDirectoryResolver();
 
         $xml = <<<XML
@@ -304,7 +304,7 @@ XML;
         </source>
     </scanDirectories>
     <definitionProvider>
-      Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumerWithDependencies
+      Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies
     </definitionProvider>
 </annotatedContainer>
 XML;
@@ -316,15 +316,15 @@ XML;
         $factory = new class implements DefinitionProviderFactory {
 
             public function createProvider(string $identifier) : DefinitionProvider {
-                if ($identifier === StubContextConsumerWithDependencies::class) {
-                    return new StubContextConsumerWithDependencies(Fixtures::thirdPartyServices()->fooImplementation());
+                if ($identifier === StubDefinitionProviderWithDependencies::class) {
+                    return new StubDefinitionProviderWithDependencies(Fixtures::thirdPartyServices()->fooImplementation());
                 } else {
                     throw new \RuntimeException();
                 }
             }
         };
 
-        $container = (new Bootstrap(directoryResolver: $directoryResolver, containerDefinitionBuilderContextConsumerFactory: $factory))->bootstrapContainer();
+        $container = (new Bootstrap(directoryResolver: $directoryResolver, definitionProviderFactory: $factory))->bootstrapContainer();
 
         $service = $container->get(Fixtures::thirdPartyServices()->fooInterface()->getName());
 

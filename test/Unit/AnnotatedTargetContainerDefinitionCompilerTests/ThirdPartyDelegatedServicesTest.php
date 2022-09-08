@@ -39,7 +39,7 @@ class ThirdPartyDelegatedServicesTest extends AnnotatedTargetContainerDefinition
         return new ThirdPartyDelegatedServicesFixture();
     }
 
-    protected function getContainerDefinitionBuilderContextConsumer() : ?DefinitionProvider {
+    protected function getDefinitionProvider() : ?DefinitionProvider {
         return new CallableDefinitionProvider(function(DefinitionProviderContext $context) {
             service($context, objectType(LoggerInterface::class));
         });

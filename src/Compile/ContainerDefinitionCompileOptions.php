@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionsProvider;
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,8 +24,8 @@ interface ContainerDefinitionCompileOptions {
      *
      * @return DefinitionProvider|null
      */
-    #[SingleEntrypointDefinitionsProvider]
-    public function getDefinitionsProvider() : ?DefinitionProvider;
+    #[SingleEntrypointDefinitionProvider]
+    public function getDefinitionProvider() : ?DefinitionProvider;
 
     /**
      * If a LoggerInterface is returned information about the compilation and container creation process will be logged

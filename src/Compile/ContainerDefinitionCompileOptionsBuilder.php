@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionsProvider;
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -36,8 +36,8 @@ final class ContainerDefinitionCompileOptionsBuilder {
      * @param DefinitionProvider $consumer
      * @return $this
      */
-    #[SingleEntrypointDefinitionsProvider]
-    public function withContainerDefinitionBuilderContextConsumer(DefinitionProvider $consumer) : self {
+    #[SingleEntrypointDefinitionProvider]
+    public function withDefinitionProvider(DefinitionProvider $consumer) : self {
         $instance = clone $this;
         $instance->consumer = $consumer;
         return $instance;
@@ -66,7 +66,7 @@ final class ContainerDefinitionCompileOptionsBuilder {
                 return $this->directories;
             }
 
-            public function getDefinitionsProvider(): ?DefinitionProvider {
+            public function getDefinitionProvider(): ?DefinitionProvider {
                 return $this->consumer;
             }
 

@@ -215,7 +215,7 @@ XML;
         $this->subject->handle($input, $this->output);
     }
 
-    public function testBuildCommandCachesContainerDefinitionWithConsumers() : void {
+    public function testBuildCommandCachesContainerDefinitionWithDefinitionProvider() : void {
         $config = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
@@ -226,7 +226,7 @@ XML;
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
   <definitionProvider>
-    Cspray\AnnotatedContainer\Unit\Helper\StubContextConsumer
+    Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider
   </definitionProvider>
 </annotatedContainer>
 XML;

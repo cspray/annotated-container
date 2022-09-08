@@ -516,7 +516,7 @@ XML;
         self::assertDirectoryExists('vfs://root/path/cache/my-cache-dir');
     }
 
-    public function testSingleContextConsumerRespected() : void {
+    public function testSingleDefinitionProviderRespected() : void {
         VirtualFilesystem::newFile('composer.json')
             ->withContent(json_encode([
                 'autoload' => [
@@ -714,7 +714,7 @@ XML;
         $this->subject->handle($input, $this->output);
     }
 
-    public function testContextConsumerBooleanThrowsException() : void {
+    public function testDefinitionProviderBooleanThrowsException() : void {
         self::expectException(InvalidOptionType::class);
         self::expectExceptionMessage('The option "definition-provider" MUST NOT be a flag-only option.');
 
@@ -722,7 +722,7 @@ XML;
         $this->subject->handle($input, $this->output);
     }
 
-    public function testContextConsumerArrayThrowsException() : void {
+    public function testDefinitionProviderArrayThrowsException() : void {
         self::expectException(InvalidOptionType::class);
         self::expectExceptionMessage('The option "definition-provider" MUST NOT be provided multiple times.');
 

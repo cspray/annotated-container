@@ -7,7 +7,7 @@ use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\AnnotatedContainer\service;
 
-final class StubContextConsumer implements DefinitionProvider {
+final class StubDefinitionProvider implements DefinitionProvider {
 
     public function consume(DefinitionProviderContext $context) : void {
         service($context, Fixtures::thirdPartyServices()->fooImplementation());

@@ -25,7 +25,7 @@ final class Bootstrap {
     private readonly BootstrappingDirectoryResolver $directoryResolver;
     private readonly ?LoggerInterface $logger;
     private readonly ?ParameterStoreFactory $parameterStoreFactory;
-    private readonly ?DefinitionProviderFactory $containerDefinitionBuilderContextConsumerFactory;
+    private readonly ?DefinitionProviderFactory $definitionProviderFactory;
     /**
      * @var list<Observer>
      */
@@ -35,12 +35,12 @@ final class Bootstrap {
         BootstrappingDirectoryResolver $directoryResolver = null,
         LoggerInterface $logger = null,
         ParameterStoreFactory $parameterStoreFactory = null,
-        DefinitionProviderFactory $containerDefinitionBuilderContextConsumerFactory = null
+        DefinitionProviderFactory $definitionProviderFactory = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->getDefaultDirectoryResolver();
         $this->logger = $logger;
         $this->parameterStoreFactory = $parameterStoreFactory;
-        $this->containerDefinitionBuilderContextConsumerFactory = $containerDefinitionBuilderContextConsumerFactory;
+        $this->definitionProviderFactory = $definitionProviderFactory;
     }
 
     public function addObserver(Observer $observer) : void {
@@ -61,7 +61,7 @@ final class Bootstrap {
             $configFile,
             directoryResolver: $this->directoryResolver,
             parameterStoreFactory: $this->parameterStoreFactory,
-            consumerFactory: $this->containerDefinitionBuilderContextConsumerFactory
+            definitionProviderFactory: $this->definitionProviderFactory
         );
 
         $scanPaths = [];
@@ -71,7 +71,7 @@ final class Bootstrap {
         $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanPaths);
         $containerDefinitionConsumer = $configuration->getContainerDefinitionConsumer();
         if ($containerDefinitionConsumer !== null) {
-            $compileOptions = $compileOptions->withContainerDefinitionBuilderContextConsumer($containerDefinitionConsumer);
+            $compileOptions = $compileOptions->withDefinitionProvider($containerDefinitionConsumer);
         }
 
         $profilesAllowLogging = count(array_intersect($profiles, $configuration->getLoggingExcludedProfiles())) === 0;

@@ -7,7 +7,7 @@ use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
 use Cspray\Typiphy\ObjectType;
 use function Cspray\AnnotatedContainer\service;
 
-final class StubContextConsumerWithDependencies implements DefinitionProvider {
+final class StubDefinitionProviderWithDependencies implements DefinitionProvider {
 
     public function __construct(private readonly ObjectType $service) {}
 

@@ -7,7 +7,7 @@ use Cspray\ArchitecturalDecision\DecisionStatus;
 use Cspray\ArchitecturalDecision\DocBlockArchitecturalDecision;
 
 /**
- * # Allow Single Entrypoint for DefinitionsProvider
+ * # Allow Single Entrypoint for DefinitionProvider
  *
  * ## Context
  *
@@ -29,7 +29,7 @@ use Cspray\ArchitecturalDecision\DocBlockArchitecturalDecision;
  * you know precisely what code is determining the services for your application.
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-final class SingleEntrypointDefinitionsProvider extends DocBlockArchitecturalDecision {
+final class SingleEntrypointDefinitionProvider extends DocBlockArchitecturalDecision {
     public function getDate() : string {
         return '2022-07-19';
     }

@@ -39,15 +39,15 @@ abstract class AnnotatedTargetContainerDefinitionCompilerTestCase extends TestCa
         }
 
         $builder = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dirs);
-        $consumer = $this->getContainerDefinitionBuilderContextConsumer();
+        $consumer = $this->getDefinitionProvider();
         if (!is_null($consumer)) {
-            $builder = $builder->withContainerDefinitionBuilderContextConsumer($consumer);
+            $builder = $builder->withDefinitionProvider($consumer);
         }
 
         $this->subject = $compiler->compile($builder->build());
     }
 
-    protected function getContainerDefinitionBuilderContextConsumer() : ?DefinitionProvider {
+    protected function getDefinitionProvider() : ?DefinitionProvider {
         return null;
     }
 

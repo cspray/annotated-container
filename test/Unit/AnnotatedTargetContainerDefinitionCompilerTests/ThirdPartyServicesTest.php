@@ -35,7 +35,7 @@ class ThirdPartyServicesTest extends AnnotatedTargetContainerDefinitionCompilerT
         return Fixtures::thirdPartyServices();
     }
 
-    protected function getContainerDefinitionBuilderContextConsumer() : ?DefinitionProvider {
+    protected function getDefinitionProvider() : ?DefinitionProvider {
         return new CallableDefinitionProvider(function($context) {
             service($context, Fixtures::thirdPartyServices()->fooImplementation());
         });
