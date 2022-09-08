@@ -31,7 +31,7 @@
       </xs:element>
 
       <xs:element name="cacheDir" type="xs:token" minOccurs="0" maxOccurs="1"/>
-      <xs:element name="containerDefinitionBuilderContextConsumer" type="xs:token" minOccurs="0" maxOccurs="1" />
+      <xs:element name="definitionProvider" type="xs:token" minOccurs="0" maxOccurs="1" />
       <xs:element name="parameterStores" type="parameterStoresType" minOccurs="0" maxOccurs="1" />
       <xs:element name="observers" type="observersType" minOccurs="0" maxOccurs="1" />
       <xs:element name="logging" type="loggingType" minOccurs="0" maxOccurs="1" />
@@ -60,13 +60,13 @@
 
   <xs:complexType name="parameterStoresType">
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
-      <xs:element name="fqcn" type="xs:token" />
+      <xs:element name="parameterStore" type="xs:token" />
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="observersType">
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
-      <xs:element name="fqcn" type="xs:token" />
+      <xs:element name="observer" type="xs:token" />
     </xs:sequence>
   </xs:complexType>
 

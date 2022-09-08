@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
@@ -13,9 +13,9 @@ class ThirdPartyFunctionsTest extends TestCase {
 
     use ContainerDefinitionAssertionsTrait;
 
-    private function getContext() : ContainerDefinitionBuilderContext {
+    private function getContext() : DefinitionProviderContext {
         $builder = ContainerDefinitionBuilder::newDefinition();
-        return new class($builder) implements ContainerDefinitionBuilderContext {
+        return new class($builder) implements DefinitionProviderContext {
 
             public function __construct(private ContainerDefinitionBuilder $builder) {}
 

@@ -14,6 +14,7 @@ use DOMDocument;
 use DOMException;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
+use function DI\get;
 
 final class InitCommand implements Command {
 
@@ -105,13 +106,12 @@ DESCRIPTION
        disable caching for some reason, you're in early development and services 
        are likely to change frequently, you can remove this configuration.
 
-    4. Setup configuration to include a ContainerDefinitionBuilderContextConsumer 
-       when you need to configure third-party services. You can provide a single 
-       --context-consumer option when executing this command to define configured 
-       value. The value passed to this option MUST be a fully-qualified class name. 
-       By default, no consumer will be defined unless an option is passed. If you 
-       use this configuration option please review Defining Class Configurations 
-       below.
+    4. Setup configuration to include a DefinitionProvider when you need to 
+       configure third-party services. You can provide a single --definition-provider 
+       option when executing this command to define configured value. The value
+       passed to this option MUST be a fully-qualified class name. By default, 
+       no provider will be defined unless an option is passed. If you use this 
+       configuration option please review Defining Class Configurations below.
        
     5. Setup configuration to include ParameterStore implementations in the 
        ContainerFactory. You can provide multiple --parameter-store options when 
@@ -119,6 +119,14 @@ DESCRIPTION
        this option MUST be a fully-qualified class name. By default, no stores 
        will be defined unless options are passed. If you use this configuration 
        option please review Defining Class Configurations detailed below.
+       
+    6. Setup configuration to include Observer implementations to respond to 
+       events that happen during Annotated Container's bootstrapping. You can 
+       provide multiple --observer options when executing this command to 
+       define configured values. The value passed to this option MUST be a 
+       fully-qualified class name. By default, no observers will be defined 
+       unless options are passed. If you use this configuration option please 
+       review Defining Class Configurations detailed below.
        
     Resolving File Paths
     ============================================================================
@@ -136,11 +144,10 @@ DESCRIPTION
     Defining Class Configurations
     ============================================================================
     
-    Because of restrictions for instantiating a class from a string any classes 
-    defined MUST be able to created with a zero-dependency constructor. If you 
-    need to include instances of ContainerDefinitionBuilderContextConsumer or 
-    ParameterStore that can't be constructed in this manner please look into 
-    the RuntimeBootstrappingConfiguration decorator.
+    By default, any class you define in a configuration must be a fully-qualified 
+    class name with an empty constructor. If you require constructor dependencies, 
+    or can't provide the entire class name for some reason, you can override the 
+    corresponding factory implementation passed to the Bootstrap constructor.
    
 OPTIONS
 
@@ -156,13 +163,12 @@ OPTIONS
         is not provided the config file will default to "annotated-container.xml".
         This option can only be defined 1 time.
         
-    --context-consumer="Fully\Qualified\Class\Name"
+    --definition-provider="Fully\Qualified\Class\Name"
     
-        Add a ContainerDefinitionBuilderContextConsumer when generating your 
-        Annotated Container. This is primarily used to add third-party services 
-        to your Container that can't be annotated. Please be sure to review 
-        Defining Class Configurations if you use this value. This option can only 
-        be defined 1 time.
+        Add a DefinitionProvider when generating your Annotated Container. This 
+        is primarily used to add third-party services to your Container that 
+        can't be annotated. Please be sure to review Defining Class Configurations 
+        if you use this value. This option can only be defined 1 time.
 
     --parameter-store="Fully\Qualified\Class\Name"
     
@@ -170,6 +176,11 @@ OPTIONS
         injecting custom values with the Inject Attribute. Please be sure to 
         review Defining Class Configurations if you use this value.
     
+    --observer="Fully\Qualified\Class\Name"
+
+        Add an Observer to the bootstrapping process. This can be used to respond 
+        to events during the compilation and creation of your Container.
+
 SHELL;
     }
 
@@ -238,16 +249,21 @@ SHELL;
             throw InvalidOptionType::fromArrayOption('cache-dir');
         }
 
-        $contextConsumer = $input->getOption('context-consumer');
+        $contextConsumer = $input->getOption('definition-provider');
         if (is_bool($contextConsumer)) {
-            throw InvalidOptionType::fromBooleanOption('context-consumer');
+            throw InvalidOptionType::fromBooleanOption('definition-provider');
         } else if (is_array($contextConsumer)) {
-            throw InvalidOptionType::fromArrayOption('context-consumer');
+            throw InvalidOptionType::fromArrayOption('definition-provider');
         }
 
         $parameterStore = $input->getOption('parameter-store');
         if (is_bool($parameterStore)) {
             throw InvalidOptionType::fromBooleanOption('parameter-store');
+        }
+
+        $observers = $input->getOption('observer');
+        if (is_bool($observers)) {
+            throw InvalidOptionType::fromBooleanOption('observer');
         }
     }
 
@@ -316,18 +332,29 @@ SHELL;
         $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'cacheDir', $cacheName));
 
         /** @var string|null $contextConsumer */
-        $contextConsumer = $input->getOption('context-consumer');
+        $contextConsumer = $input->getOption('definition-provider');
         if (isset($contextConsumer)) {
-            $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'containerDefinitionBuilderContextConsumer', $contextConsumer));
+            $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $contextConsumer));
         }
 
         /** @var string|array|null $parameterStores */
         $parameterStores = $input->getOption('parameter-store');
-        if (isset($parameterStores)) {
+        if ($parameterStores !== null) {
             $parameterStores = is_string($parameterStores) ? [$parameterStores] : $parameterStores;
             $parameterStoresNode = $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'parameterStores'));
             foreach ($parameterStores as $parameterStore) {
-                $parameterStoresNode->appendChild($dom->createElementNS(self::XML_SCHEMA, 'fqcn', $parameterStore));
+                $parameterStoresNode->appendChild($dom->createElementNS(self::XML_SCHEMA, 'parameterStore', $parameterStore));
+            }
+        }
+
+        /** @var string|array|null $observers */
+        $observers = $input->getOption('observer');
+        if ($observers !== null) {
+            $observers = is_string($observers) ? [$observers] : $observers;
+            $observersNode = $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'observers'));
+            /** @var string $observer */
+            foreach ($observers as $observer) {
+                $observersNode->appendChild($dom->createElementNS(self::XML_SCHEMA, 'observer', $observer));
             }
         }
 

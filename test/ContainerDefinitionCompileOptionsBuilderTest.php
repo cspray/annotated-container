@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Compile\CallableContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\CallableDefinitionProvider;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
@@ -13,7 +13,7 @@ class ContainerDefinitionCompileOptionsBuilderTest extends TestCase {
     public function testByDefaultContainerDefinitionBuilderContextConsumerIsNull() : void {
         $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build();
 
-        self::assertNull($compilerOptions->getContainerDefinitionBuilderContextConsumer());
+        self::assertNull($compilerOptions->getDefinitionsProvider());
     }
 
     public function testByDefaultLoggerIsNull() : void {
@@ -24,17 +24,17 @@ class ContainerDefinitionCompileOptionsBuilderTest extends TestCase {
 
     public function testWithContextConsumerImmutable() : void {
         $a = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath());
-        $b = $a->withContainerDefinitionBuilderContextConsumer(new CallableContainerDefinitionBuilderContextConsumer(function() {}));
+        $b = $a->withContainerDefinitionBuilderContextConsumer(new CallableDefinitionProvider(function() {}));
 
         self::assertNotSame($a, $b);
     }
 
     public function testWithContextConsumerReturnsConsumer() : void {
         $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())
-            ->withContainerDefinitionBuilderContextConsumer($expected = new CallableContainerDefinitionBuilderContextConsumer(function() {}))
+            ->withContainerDefinitionBuilderContextConsumer($expected = new CallableDefinitionProvider(function() {}))
             ->build();
 
-        self::assertSame($expected, $compilerOptions->getContainerDefinitionBuilderContextConsumer());
+        self::assertSame($expected, $compilerOptions->getDefinitionsProvider());
     }
 
     public function testWithLoggerImmutable() : void {

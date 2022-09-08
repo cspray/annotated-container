@@ -457,9 +457,9 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
         ContainerDefinitionBuilder $builder,
         LoggerInterface $logger
     ) : ContainerDefinitionBuilder {
-        $contextConsumer = $compileOptions->getContainerDefinitionBuilderContextConsumer();
+        $contextConsumer = $compileOptions->getDefinitionsProvider();
         if ($contextConsumer !== null) {
-            $context = new class($builder) implements ContainerDefinitionBuilderContext {
+            $context = new class($builder) implements DefinitionProviderContext {
                 public function __construct(private ContainerDefinitionBuilder $builder) {
                 }
 
@@ -481,7 +481,7 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
             return $context->getBuilder();
         } else {
             $logger->info(
-                sprintf('No %s was provided.', ContainerDefinitionBuilderContextConsumer::class)
+                sprintf('No %s was provided.', DefinitionProvider::class)
             );
             return $builder;
         }

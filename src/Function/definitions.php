@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
 use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
@@ -21,7 +21,7 @@ use ReflectionClass;
 use ReflectionException;
 
 /**
- * @param ContainerDefinitionBuilderContext $context
+ * @param DefinitionProviderContext $context
  * @param ObjectType $type
  * @param string|null $name
  * @param list<string> $profiles
@@ -29,7 +29,7 @@ use ReflectionException;
  * @return ServiceDefinition
  * @throws ReflectionException
  */
-function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false) : ServiceDefinition {
+function service(DefinitionProviderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false) : ServiceDefinition {
     /** @psalm-var class-string $typeName */
     $typeName = $type->getName();
     $reflection = new ReflectionClass($typeName);
@@ -55,25 +55,25 @@ function service(ContainerDefinitionBuilderContext $context, ObjectType $type, ?
     return $serviceDefinition;
 }
 
-function alias(ContainerDefinitionBuilderContext $context, ObjectType $abstract, ObjectType $concrete) : AliasDefinition {
+function alias(DefinitionProviderContext $context, ObjectType $abstract, ObjectType $concrete) : AliasDefinition {
     $aliasDefinition = AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete)->build();
     $context->setBuilder($context->getBuilder()->withAliasDefinition($aliasDefinition));
     return $aliasDefinition;
 }
 
-function serviceDelegate(ContainerDefinitionBuilderContext $context, ObjectType $service, ObjectType $factoryClass, string $factoryMethod) : ServiceDelegateDefinition {
+function serviceDelegate(DefinitionProviderContext $context, ObjectType $service, ObjectType $factoryClass, string $factoryMethod) : ServiceDelegateDefinition {
     $serviceDelegateDefinition = ServiceDelegateDefinitionBuilder::forService($service)->withDelegateMethod($factoryClass, $factoryMethod)->build();
     $context->setBuilder($context->getBuilder()->withServiceDelegateDefinition($serviceDelegateDefinition));
     return $serviceDelegateDefinition;
 }
 
-function servicePrepare(ContainerDefinitionBuilderContext $context, ObjectType $service, string $method) : ServicePrepareDefinition {
+function servicePrepare(DefinitionProviderContext $context, ObjectType $service, string $method) : ServicePrepareDefinition {
     $servicePrepareDefinition = ServicePrepareDefinitionBuilder::forMethod($service, $method)->build();
     $context->setBuilder($context->getBuilder()->withServicePrepareDefinition($servicePrepareDefinition));
     return $servicePrepareDefinition;
 }
 
-function injectMethodParam(ContainerDefinitionBuilderContext $context, ObjectType $service, string $method, string $paramName, Type|TypeUnion|TypeIntersect $type, mixed $value, array $profiles = [], string $from = null) : InjectDefinition {
+function injectMethodParam(DefinitionProviderContext $context, ObjectType $service, string $method, string $paramName, Type|TypeUnion|TypeIntersect $type, mixed $value, array $profiles = [], string $from = null) : InjectDefinition {
     $injectDefinitionBuilder = InjectDefinitionBuilder::forService($service)
         ->withMethod($method, $type, $paramName)
         ->withValue($value);
@@ -91,7 +91,7 @@ function injectMethodParam(ContainerDefinitionBuilderContext $context, ObjectTyp
     return $injectDefinition;
 }
 
-function injectProperty(ContainerDefinitionBuilderContext $context, ObjectType $service, string $property, Type|TypeUnion|TypeIntersect $type, mixed $value, array $profiles = [], string $from = null) : InjectDefinition {
+function injectProperty(DefinitionProviderContext $context, ObjectType $service, string $property, Type|TypeUnion|TypeIntersect $type, mixed $value, array $profiles = [], string $from = null) : InjectDefinition {
     $injectDefinitionBuilder = InjectDefinitionBuilder::forService($service)
         ->withProperty($type, $property)
         ->withValue($value);

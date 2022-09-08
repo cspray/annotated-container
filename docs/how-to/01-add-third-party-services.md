@@ -37,13 +37,13 @@ class MonologLoggerFactory {
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use function Cspray\AnnotatedContainer\service;
 use function Cspray\AnnotatedContainer\serviceDelegate;
 use function Cspray\AnnotatedContainer\servicePrepare;
 use function Cspray\Typiphy\objectType;
 
-class ThirdPartyServicesProvider implements ContainerDefinitionBuilderContextConsumer {
+class ThirdPartyServicesProvider implements DefinitionProvider {
 
     public function consume(ContainerDefinitionBuilderContext $context) : void {
         service($context, $loggerType = objectType(LoggerInterface::class));

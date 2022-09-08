@@ -25,7 +25,7 @@ final class Bootstrap {
     private readonly BootstrappingDirectoryResolver $directoryResolver;
     private readonly ?LoggerInterface $logger;
     private readonly ?ParameterStoreFactory $parameterStoreFactory;
-    private readonly ?ContainerDefinitionBuilderContextConsumerFactory $containerDefinitionBuilderContextConsumerFactory;
+    private readonly ?DefinitionProviderFactory $containerDefinitionBuilderContextConsumerFactory;
     /**
      * @var list<Observer>
      */
@@ -35,7 +35,7 @@ final class Bootstrap {
         BootstrappingDirectoryResolver $directoryResolver = null,
         LoggerInterface $logger = null,
         ParameterStoreFactory $parameterStoreFactory = null,
-        ContainerDefinitionBuilderContextConsumerFactory $containerDefinitionBuilderContextConsumerFactory = null
+        DefinitionProviderFactory $containerDefinitionBuilderContextConsumerFactory = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->getDefaultDirectoryResolver();
         $this->logger = $logger;

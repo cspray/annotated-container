@@ -118,13 +118,12 @@ DESCRIPTION
        disable caching for some reason, you're in early development and services 
        are likely to change frequently, you can remove this configuration.
 
-    4. Setup configuration to include a ContainerDefinitionBuilderContextConsumer 
-       when you need to configure third-party services. You can provide a single 
-       --context-consumer option when executing this command to define configured 
-       value. The value passed to this option MUST be a fully-qualified class name. 
-       By default, no consumer will be defined unless an option is passed. If you 
-       use this configuration option please review Defining Class Configurations 
-       below.
+    4. Setup configuration to include a DefinitionProvider when you need to 
+       configure third-party services. You can provide a single --definition-provider 
+       option when executing this command to define configured value. The value
+       passed to this option MUST be a fully-qualified class name. By default, 
+       no provider will be defined unless an option is passed. If you use this 
+       configuration option please review Defining Class Configurations below.
        
     5. Setup configuration to include ParameterStore implementations in the 
        ContainerFactory. You can provide multiple --parameter-store options when 
@@ -132,6 +131,14 @@ DESCRIPTION
        this option MUST be a fully-qualified class name. By default, no stores 
        will be defined unless options are passed. If you use this configuration 
        option please review Defining Class Configurations detailed below.
+       
+    6. Setup configuration to include Observer implementations to respond to 
+       events that happen during Annotated Container's bootstrapping. You can 
+       provide multiple --observer options when executing this command to 
+       define configured values. The value passed to this option MUST be a 
+       fully-qualified class name. By default, no observers will be defined 
+       unless options are passed. If you use this configuration option please 
+       review Defining Class Configurations detailed below.
        
     Resolving File Paths
     ============================================================================
@@ -149,11 +156,10 @@ DESCRIPTION
     Defining Class Configurations
     ============================================================================
     
-    Because of restrictions for instantiating a class from a string any classes 
-    defined MUST be able to created with a zero-dependency constructor. If you 
-    need to include instances of ContainerDefinitionBuilderContextConsumer or 
-    ParameterStore that can't be constructed in this manner please look into 
-    the RuntimeBootstrappingConfiguration decorator.
+    By default, any class you define in a configuration must be a fully-qualified 
+    class name with an empty constructor. If you require constructor dependencies, 
+    or can't provide the entire class name for some reason, you can override the 
+    corresponding factory implementation passed to the Bootstrap constructor.
    
 OPTIONS
 
@@ -169,13 +175,12 @@ OPTIONS
         is not provided the config file will default to "annotated-container.xml".
         This option can only be defined 1 time.
         
-    --context-consumer="Fully\Qualified\Class\Name"
+    --definition-provider="Fully\Qualified\Class\Name"
     
-        Add a ContainerDefinitionBuilderContextConsumer when generating your 
-        Annotated Container. This is primarily used to add third-party services 
-        to your Container that can't be annotated. Please be sure to review 
-        Defining Class Configurations if you use this value. This option can only 
-        be defined 1 time.
+        Add a DefinitionProvider when generating your Annotated Container. This 
+        is primarily used to add third-party services to your Container that 
+        can't be annotated. Please be sure to review Defining Class Configurations 
+        if you use this value. This option can only be defined 1 time.
 
     --parameter-store="Fully\Qualified\Class\Name"
     
@@ -183,6 +188,11 @@ OPTIONS
         injecting custom values with the Inject Attribute. Please be sure to 
         review Defining Class Configurations if you use this value.
     
+    --observer="Fully\Qualified\Class\Name"
+
+        Add an Observer to the bootstrapping process. This can be used to respond 
+        to events during the compilation and creation of your Container.
+
 SHELL;
 
         self::assertSame($expected, $this->subject->getHelp());
@@ -515,7 +525,7 @@ XML;
                 ],
             ]))->at($this->vfs);
 
-        $input = new StubInput(['context-consumer' => 'ConsumerClass'], ['init']);
+        $input = new StubInput(['definition-provider' => 'ConsumerClass'], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
 
         self::assertSame(0, $exitCode);
@@ -529,7 +539,7 @@ XML;
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
-  <containerDefinitionBuilderContextConsumer>ConsumerClass</containerDefinitionBuilderContextConsumer>
+  <definitionProvider>ConsumerClass</definitionProvider>
 </annotatedContainer>
 
 XML;
@@ -561,7 +571,7 @@ XML;
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
   <parameterStores>
-    <fqcn>MyParameterStoreClass</fqcn>
+    <parameterStore>MyParameterStoreClass</parameterStore>
   </parameterStores>
 </annotatedContainer>
 
@@ -594,14 +604,82 @@ XML;
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
   <parameterStores>
-    <fqcn>MyParameterStoreClassOne</fqcn>
-    <fqcn>MyParameterStoreClassTwo</fqcn>
+    <parameterStore>MyParameterStoreClassOne</parameterStore>
+    <parameterStore>MyParameterStoreClassTwo</parameterStore>
   </parameterStores>
 </annotatedContainer>
 
 XML;
         self::assertStringEqualsFile('vfs://root/annotated-container.xml', $expected);
     }
+
+    public function testSingleObserverRespected() : void {
+        VirtualFilesystem::newFile('composer.json')
+            ->withContent(json_encode([
+                'autoload' => [
+                    'psr-0' => [
+                        'Namespace\\' => 'src'
+                    ]
+                ],
+            ]))->at($this->vfs);
+
+        $input = new StubInput(['observer' => 'MyObserverClass'], ['init']);
+        $exitCode = $this->subject->handle($input, $this->output);
+
+        self::assertSame(0, $exitCode);
+
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <cacheDir>.annotated-container-cache</cacheDir>
+  <observers>
+    <observer>MyObserverClass</observer>
+  </observers>
+</annotatedContainer>
+
+XML;
+        self::assertStringEqualsFile('vfs://root/annotated-container.xml', $expected);
+    }
+
+    public function testMultipleObserversRespected() : void {
+        VirtualFilesystem::newFile('composer.json')
+            ->withContent(json_encode([
+                'autoload' => [
+                    'psr-0' => [
+                        'Namespace\\' => 'src'
+                    ]
+                ],
+            ]))->at($this->vfs);
+
+        $input = new StubInput(['observer' => ['MyObserverClassOne', 'MyObserverClassTwo']], ['init']);
+        $exitCode = $this->subject->handle($input, $this->output);
+
+        self::assertSame(0, $exitCode);
+
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+  </scanDirectories>
+  <cacheDir>.annotated-container-cache</cacheDir>
+  <observers>
+    <observer>MyObserverClassOne</observer>
+    <observer>MyObserverClassTwo</observer>
+  </observers>
+</annotatedContainer>
+
+XML;
+        self::assertStringEqualsFile('vfs://root/annotated-container.xml', $expected);
+    }
+
 
     public function testConfigFileBooleanThrowsException() : void {
         self::expectException(InvalidOptionType::class);
@@ -637,17 +715,17 @@ XML;
 
     public function testContextConsumerBooleanThrowsException() : void {
         self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "context-consumer" MUST NOT be a flag-only option.');
+        self::expectExceptionMessage('The option "definition-provider" MUST NOT be a flag-only option.');
 
-        $input = new StubInput(['context-consumer' => true], ['init']);
+        $input = new StubInput(['definition-provider' => true], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
     public function testContextConsumerArrayThrowsException() : void {
         self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "context-consumer" MUST NOT be provided multiple times.');
+        self::expectExceptionMessage('The option "definition-provider" MUST NOT be provided multiple times.');
 
-        $input = new StubInput(['context-consumer' => ['a', 'b']], ['init']);
+        $input = new StubInput(['definition-provider' => ['a', 'b']], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
@@ -656,6 +734,14 @@ XML;
         self::expectExceptionMessage('The option "parameter-store" MUST NOT be a flag-only option.');
 
         $input = new StubInput(['parameter-store' => true], ['init']);
+        $this->subject->handle($input, $this->output);
+    }
+
+    public function testObserverBooleanThrowsException() : void {
+        self::expectException(InvalidOptionType::class);
+        self::expectExceptionMessage('The option "observer" MUST NOT be a flag-only option.');
+
+        $input = new StubInput(['observer' => true], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
@@ -683,4 +769,5 @@ SHELL;
         self::assertSame($expected, $this->stdout->getContentsAsString());
         self::assertEmpty($this->stderr->getContents());
     }
+
 }

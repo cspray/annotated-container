@@ -11,7 +11,7 @@ use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
  * This concept allows our functional API to return the definition type it is creating without having to require the
  * end user to do a bunch of interacting with the ContainerDefinitionBuilder to properly add the definition.
  */
-interface ContainerDefinitionBuilderContext {
+interface DefinitionProviderContext {
 
     /**
      * Return the current builder.

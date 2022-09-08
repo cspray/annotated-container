@@ -8,7 +8,7 @@ use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
@@ -47,7 +47,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
     private function runCompileDirectory(
         array|string $dir,
-        ContainerDefinitionBuilderContextConsumer $consumer = null
+        DefinitionProvider $consumer = null
     ) : ContainerDefinition {
         if (is_string($dir)) {
             $dir = [$dir];
@@ -451,7 +451,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         $expected = [
             'message' => sprintf(
                 'No %s was provided.',
-                ContainerDefinitionBuilderContextConsumer::class
+                DefinitionProvider::class
             ),
             'context' => []
         ];

@@ -2,8 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
-use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionsProvider;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Psr\Log\LoggerInterface;
 
@@ -16,8 +16,8 @@ interface BootstrappingConfiguration {
 
     public function getCacheDirectory() : ?string;
 
-    #[SingleEntrypointContainerDefinitionBuilderContextConsumer]
-    public function getContainerDefinitionConsumer() : ?ContainerDefinitionBuilderContextConsumer;
+    #[SingleEntrypointDefinitionsProvider]
+    public function getContainerDefinitionConsumer() : ?DefinitionProvider;
 
     /**
      * @return list<ParameterStore>

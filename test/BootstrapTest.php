@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer;
 
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
-use Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionBuilderContextConsumerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
@@ -12,7 +12,7 @@ use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Helper\StubBootstrapObserver;
 use Cspray\AnnotatedContainer\Helper\StubContextConsumerWithDependencies;
 use Cspray\AnnotatedContainer\Helper\StubParameterStoreWithDependencies;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\CustomServiceAttribute\Repository;
@@ -100,9 +100,9 @@ XML;
             <dir>ThirdPartyServices</dir>
         </source>
     </scanDirectories>
-    <containerDefinitionBuilderContextConsumer>
+    <definitionProvider>
       Cspray\AnnotatedContainer\Helper\StubContextConsumer
-    </containerDefinitionBuilderContextConsumer>
+    </definitionProvider>
 </annotatedContainer>
 XML;
 
@@ -129,7 +129,7 @@ XML;
     </source>
   </scanDirectories>
   <parameterStores>
-    <fqcn>Cspray\AnnotatedContainer\Helper\StubParameterStore</fqcn>
+    <parameterStore>Cspray\AnnotatedContainer\Helper\StubParameterStore</parameterStore>
   </parameterStores>
 </annotatedContainer>
 XML;
@@ -302,9 +302,9 @@ XML;
             <dir>ThirdPartyServices</dir>
         </source>
     </scanDirectories>
-    <containerDefinitionBuilderContextConsumer>
+    <definitionProvider>
       Cspray\AnnotatedContainer\Helper\StubContextConsumerWithDependencies
-    </containerDefinitionBuilderContextConsumer>
+    </definitionProvider>
 </annotatedContainer>
 XML;
 
@@ -312,9 +312,9 @@ XML;
             ->withContent($xml)
             ->at($this->vfs);
 
-        $factory = new class implements ContainerDefinitionBuilderContextConsumerFactory {
+        $factory = new class implements DefinitionProviderFactory {
 
-            public function createConsumer(string $identifier) : ContainerDefinitionBuilderContextConsumer {
+            public function createProvider(string $identifier) : DefinitionProvider {
                 if ($identifier === StubContextConsumerWithDependencies::class) {
                     return new StubContextConsumerWithDependencies(Fixtures::thirdPartyServices()->fooImplementation());
                 } else {
@@ -342,7 +342,7 @@ XML;
         </source>
     </scanDirectories>
     <parameterStores>
-      <fqcn>Cspray\AnnotatedContainer\Helper\StubParameterStoreWithDependencies</fqcn>
+      <parameterStore>Cspray\AnnotatedContainer\Helper\StubParameterStoreWithDependencies</parameterStore>
     </parameterStores>
 </annotatedContainer>
 XML;
@@ -445,7 +445,7 @@ XML;
         </source>
     </scanDirectories>
     <observers>
-      <fqcn>Cspray\AnnotatedContainer\Helper\StubBootstrapObserver</fqcn>
+      <observer>Cspray\AnnotatedContainer\Helper\StubBootstrapObserver</observer>
     </observers>
 </annotatedContainer>
 XML;

@@ -2,11 +2,11 @@
 
 namespace Cspray\AnnotatedContainer\Helper;
 
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 
-final class AdditionalStubContextConsumer implements ContainerDefinitionBuilderContextConsumer {
+final class AdditionalStubContextConsumer implements DefinitionProvider {
 
-    public function consume(ContainerDefinitionBuilderContext $context) : void {
+    public function consume(DefinitionProviderContext $context) : void {
     }
 }

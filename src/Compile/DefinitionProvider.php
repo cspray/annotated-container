@@ -6,13 +6,13 @@ namespace Cspray\AnnotatedContainer\Compile;
  * An interface that allows for making modifications to the ContainerDefinitionBuilder before the resultant
  * ContainerDefinition is built.
  */
-interface ContainerDefinitionBuilderContextConsumer {
+interface DefinitionProvider {
 
     /**
      * Add definitions to the $context->getBuilder(), then pass the new builder instance to $context->setBuilder().
      *
-     * @param ContainerDefinitionBuilderContext $context
+     * @param DefinitionProviderContext $context
      */
-    public function consume(ContainerDefinitionBuilderContext $context) : void;
+    public function consume(DefinitionProviderContext $context) : void;
 
 }

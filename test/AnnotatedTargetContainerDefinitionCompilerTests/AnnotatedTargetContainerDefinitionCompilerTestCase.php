@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests;
 
 use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
 use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\ContainerDefinitionAssertionsTrait;
@@ -47,7 +47,7 @@ abstract class AnnotatedTargetContainerDefinitionCompilerTestCase extends TestCa
         $this->subject = $compiler->compile($builder->build());
     }
 
-    protected function getContainerDefinitionBuilderContextConsumer() : ?ContainerDefinitionBuilderContextConsumer {
+    protected function getContainerDefinitionBuilderContextConsumer() : ?DefinitionProvider {
         return null;
     }
 

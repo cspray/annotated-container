@@ -2,12 +2,12 @@
 
 namespace Cspray\AnnotatedContainer;
 
-use Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionBuilderContextConsumerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
 use Cspray\AnnotatedContainer\Bootstrap\Observer;
 use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Helper\FixtureBootstrappingDirectoryResolver;
@@ -88,9 +88,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <containerDefinitionBuilderContextConsumer>
+    <definitionProvider>
         Cspray\AnnotatedContainer\Helper\StubContextConsumer
-    </containerDefinitionBuilderContextConsumer>
+    </definitionProvider>
 </annotatedContainer>
 XML;
         VirtualFilesystem::newFile('annotated-container.xml')
@@ -116,9 +116,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <containerDefinitionBuilderContextConsumer>
+    <definitionProvider>
         FooBar
-    </containerDefinitionBuilderContextConsumer>
+    </definitionProvider>
 </annotatedContainer>
 XML;
 
@@ -128,7 +128,7 @@ XML;
 
         self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
-            'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . ContainerDefinitionBuilderContextConsumer::class
+            'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . DefinitionProvider::class
         );
 
         new XmlBootstrappingConfiguration(
@@ -146,9 +146,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <containerDefinitionBuilderContextConsumer>
+    <definitionProvider>
         Cspray\AnnotatedContainer\XmlBootstrappingConfiguration
-    </containerDefinitionBuilderContextConsumer>
+    </definitionProvider>
 </annotatedContainer>
 XML;
 
@@ -158,7 +158,7 @@ XML;
 
         self::expectException(InvalidBootstrapConfiguration::class);
         self::expectExceptionMessage(
-            'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . ContainerDefinitionBuilderContextConsumer::class
+            'All entries in containerDefinitionBuilderContextConsumers must be classes that implement ' . DefinitionProvider::class
         );
 
         new XmlBootstrappingConfiguration(
@@ -248,7 +248,7 @@ XML;
     </source>
   </scanDirectories>
   <parameterStores>
-    <fqcn>Cspray\AnnotatedContainer\Helper\StubParameterStore</fqcn>
+    <parameterStore>Cspray\AnnotatedContainer\Helper\StubParameterStore</parameterStore>
   </parameterStores>
 </annotatedContainer>
 XML;
@@ -276,7 +276,7 @@ XML;
     </source>
   </scanDirectories>
   <parameterStores>
-    <fqcn>something not a class</fqcn>
+    <parameterStore>something not a class</parameterStore>
   </parameterStores>
 </annotatedContainer>
 XML;
@@ -305,7 +305,7 @@ XML;
     </source>
   </scanDirectories>
   <parameterStores>
-    <fqcn>Cspray\AnnotatedContainer\Helper\StubContextConsumer</fqcn>
+    <parameterStore>Cspray\AnnotatedContainer\Helper\StubContextConsumer</parameterStore>
   </parameterStores>
 </annotatedContainer>
 XML;
@@ -334,7 +334,7 @@ XML;
     </source>
   </scanDirectories>
   <parameterStores>
-    <fqcn>Cspray\AnnotatedContainer\Helper\StubParameterStoreWithDependencies</fqcn>
+    <parameterStore>Cspray\AnnotatedContainer\Helper\StubParameterStoreWithDependencies</parameterStore>
   </parameterStores>
 </annotatedContainer>
 XML;
@@ -373,14 +373,14 @@ XML;
       <dir>src</dir>
     </source>
   </scanDirectories>
-  <containerDefinitionBuilderContextConsumer>
+  <definitionProvider>
     Cspray\AnnotatedContainer\Helper\StubContextConsumerWithDependencies
-  </containerDefinitionBuilderContextConsumer>
+  </definitionProvider>
 </annotatedContainer>
 XML;
 
-        $consumerFactory = new class implements ContainerDefinitionBuilderContextConsumerFactory {
-            public function createConsumer(string $identifier) : ContainerDefinitionBuilderContextConsumer {
+        $consumerFactory = new class implements DefinitionProviderFactory {
+            public function createProvider(string $identifier) : DefinitionProvider {
                 return new $identifier(Fixtures::thirdPartyServices()->fooInterface());
             }
         };
@@ -542,7 +542,7 @@ XML;
     </source>
   </scanDirectories>
   <observers>
-    <fqcn>something not a class</fqcn>
+    <observer>something not a class</observer>
   </observers>
 </annotatedContainer>
 XML;
@@ -571,7 +571,7 @@ XML;
     </source>
   </scanDirectories>
   <observers>
-    <fqcn>Cspray\AnnotatedContainer\Helper\StubContextConsumer</fqcn>
+    <observer>Cspray\AnnotatedContainer\Helper\StubContextConsumer</observer>
   </observers>
 </annotatedContainer>
 XML;
@@ -599,7 +599,9 @@ XML;
       <dir>src</dir>
     </source>
   </scanDirectories>
-  <observers><fqcn>Cspray\AnnotatedContainer\Helper\StubBootstrapObserverWithDependencies</fqcn></observers>
+  <observers>
+    <observer>Cspray\AnnotatedContainer\Helper\StubBootstrapObserverWithDependencies</observer>
+  </observers>
 </annotatedContainer>
 XML;
 

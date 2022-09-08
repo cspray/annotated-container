@@ -224,9 +224,9 @@ XML;
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
-  <containerDefinitionBuilderContextConsumer>
+  <definitionProvider>
     Cspray\AnnotatedContainer\Helper\StubContextConsumer
-  </containerDefinitionBuilderContextConsumer>
+  </definitionProvider>
 </annotatedContainer>
 XML;
 

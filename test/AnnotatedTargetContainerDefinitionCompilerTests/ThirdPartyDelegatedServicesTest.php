@@ -15,9 +15,9 @@ use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\Ha
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
 use Cspray\AnnotatedContainer\AnnotatedTargetContainerDefinitionCompilerTests\HasTestsTrait\HasServiceDelegateDefinitionTestsTrait;
-use Cspray\AnnotatedContainer\Compile\CallableContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\Compile\CallableDefinitionProvider;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
+use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedContainerFixture\ThirdPartyDelegatedServicesFixture;
@@ -39,8 +39,8 @@ class ThirdPartyDelegatedServicesTest extends AnnotatedTargetContainerDefinition
         return new ThirdPartyDelegatedServicesFixture();
     }
 
-    protected function getContainerDefinitionBuilderContextConsumer() : ?ContainerDefinitionBuilderContextConsumer {
-        return new CallableContainerDefinitionBuilderContextConsumer(function(ContainerDefinitionBuilderContext $context) {
+    protected function getContainerDefinitionBuilderContextConsumer() : ?DefinitionProvider {
+        return new CallableDefinitionProvider(function(DefinitionProviderContext $context) {
             service($context, objectType(LoggerInterface::class));
         });
     }

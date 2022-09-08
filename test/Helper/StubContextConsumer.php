@@ -2,14 +2,14 @@
 
 namespace Cspray\AnnotatedContainer\Helper;
 
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContext;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
+use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\AnnotatedContainer\service;
 
-final class StubContextConsumer implements ContainerDefinitionBuilderContextConsumer {
+final class StubContextConsumer implements DefinitionProvider {
 
-    public function consume(ContainerDefinitionBuilderContext $context) : void {
+    public function consume(DefinitionProviderContext $context) : void {
         service($context, Fixtures::thirdPartyServices()->fooImplementation());
     }
 }

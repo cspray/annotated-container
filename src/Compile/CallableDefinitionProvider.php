@@ -6,7 +6,7 @@ namespace Cspray\AnnotatedContainer\Compile;
  * A ContainerDefinitionBuilderContextConsumer that allows you to pass in an anonymous function or some other callable
  * without having to implement your own type.
  */
-final class CallableContainerDefinitionBuilderContextConsumer implements ContainerDefinitionBuilderContextConsumer {
+final class CallableDefinitionProvider implements DefinitionProvider {
 
     private $callable;
 
@@ -15,10 +15,10 @@ final class CallableContainerDefinitionBuilderContextConsumer implements Contain
     }
 
     /**
-     * @param ContainerDefinitionBuilderContext $context
+     * @param DefinitionProviderContext $context
      * @return void
      */
-    public function consume(ContainerDefinitionBuilderContext $context) : void {
+    public function consume(DefinitionProviderContext $context) : void {
         ($this->callable)($context);
     }
 
