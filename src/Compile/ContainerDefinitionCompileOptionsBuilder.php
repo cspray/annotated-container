@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -12,7 +12,7 @@ final class ContainerDefinitionCompileOptionsBuilder {
 
     private array $directories = [];
 
-    private ?ContainerDefinitionBuilderContextConsumer $consumer = null;
+    private ?DefinitionProvider $consumer = null;
 
     private ?LoggerInterface $logger = null;
 
@@ -33,11 +33,11 @@ final class ContainerDefinitionCompileOptionsBuilder {
     /**
      * Specify that the ContainerDefinitionBuilder should be modified before the ContainerDefinition is built.
      *
-     * @param ContainerDefinitionBuilderContextConsumer $consumer
+     * @param DefinitionProvider $consumer
      * @return $this
      */
-    #[SingleEntrypointContainerDefinitionBuilderContextConsumer]
-    public function withContainerDefinitionBuilderContextConsumer(ContainerDefinitionBuilderContextConsumer $consumer) : self {
+    #[SingleEntrypointDefinitionProvider]
+    public function withDefinitionProvider(DefinitionProvider $consumer) : self {
         $instance = clone $this;
         $instance->consumer = $consumer;
         return $instance;
@@ -56,9 +56,9 @@ final class ContainerDefinitionCompileOptionsBuilder {
             $this->logger
         ) implements ContainerDefinitionCompileOptions {
             public function __construct(
-                private readonly array $directories,
-                private readonly ?ContainerDefinitionBuilderContextConsumer $consumer,
-                private readonly ?LoggerInterface $logger
+                private readonly array               $directories,
+                private readonly ?DefinitionProvider $consumer,
+                private readonly ?LoggerInterface    $logger
             ) {
             }
 
@@ -66,7 +66,7 @@ final class ContainerDefinitionCompileOptionsBuilder {
                 return $this->directories;
             }
 
-            public function getContainerDefinitionBuilderContextConsumer(): ?ContainerDefinitionBuilderContextConsumer {
+            public function getDefinitionProvider(): ?DefinitionProvider {
                 return $this->consumer;
             }
 

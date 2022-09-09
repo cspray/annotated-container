@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Compile;
 
-use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,10 +22,10 @@ interface ContainerDefinitionCompileOptions {
      *
      * This is the primary entrypoint for adding third-party services that can't be annotated to the container.
      *
-     * @return ContainerDefinitionBuilderContextConsumer|null
+     * @return DefinitionProvider|null
      */
-    #[SingleEntrypointContainerDefinitionBuilderContextConsumer]
-    public function getContainerDefinitionBuilderContextConsumer() : ?ContainerDefinitionBuilderContextConsumer;
+    #[SingleEntrypointDefinitionProvider]
+    public function getDefinitionProvider() : ?DefinitionProvider;
 
     /**
      * If a LoggerInterface is returned information about the compilation and container creation process will be logged

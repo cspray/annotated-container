@@ -2,10 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
-use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Cspray\AnnotatedContainer\Internal\CompositeLogger;
 use Cspray\AnnotatedContainer\Internal\FileLogger;
 use Cspray\AnnotatedContainer\Internal\StdoutLogger;
@@ -23,7 +23,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
      * @var list<string>
      */
     private readonly array $directories;
-    private readonly ?ContainerDefinitionBuilderContextConsumer $contextConsumer;
+    private readonly ?DefinitionProvider $definitionProvider;
     private readonly ?string $cacheDir;
     private readonly ?LoggerInterface $logger;
     private readonly array $excludedProfiles;
@@ -43,7 +43,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         private readonly BootstrappingDirectoryResolver $directoryResolver,
         private readonly ?ParameterStoreFactory $parameterStoreFactory = null,
         private readonly ?ObserverFactory $observerFactory = null,
-        private readonly ?ContainerDefinitionBuilderContextConsumerFactory $consumerFactory = null
+        private readonly ?DefinitionProviderFactory $definitionProviderFactory = null
     ) {
         try{
             $schemaFile = dirname(__DIR__, 2) . '/annotated-container.xsd';
@@ -62,24 +62,22 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 $scanDirectories[] = $scanDirectory->textContent;
             }
 
-            $contextConsumerNodes = $xpath->query('/ac:annotatedContainer/ac:containerDefinitionBuilderContextConsumer/text()');
-            $contextConsumer = null;
-            if (count($contextConsumerNodes) === 1) {
-                $contextConsumerTextNode = $contextConsumerNodes[0];
-                $consumerClassType = trim($contextConsumerTextNode->nodeValue);
-                if (!class_exists($consumerClassType) ||
-                    !is_subclass_of($consumerClassType, ContainerDefinitionBuilderContextConsumer::class)) {
-                    throw InvalidBootstrapConfiguration::fromConfiguredContainerDefinitionConsumerWrongType();
+            $definitionProvider = $xpath->query('/ac:annotatedContainer/ac:definitionProvider/text()')[0]?->nodeValue;
+            if ($definitionProvider !== null) {
+                $definitionProviderType = trim($definitionProvider);
+                if (!class_exists($definitionProviderType) ||
+                    !is_subclass_of($definitionProviderType, DefinitionProvider::class)) {
+                    throw InvalidBootstrapConfiguration::fromConfiguredDefinitionProviderWrongType();
                 }
-                if (isset($this->consumerFactory)) {
-                    $contextConsumer = $this->consumerFactory->createConsumer($consumerClassType);
+                if (isset($this->definitionProviderFactory)) {
+                    $definitionProvider = $this->definitionProviderFactory->createProvider($definitionProviderType);
                 } else{
-                    $contextConsumer = new $consumerClassType();
+                    $definitionProvider = new $definitionProviderType();
                 }
             }
 
             $parameterStores = [];
-            $parameterStoreNodes = $xpath->query('/ac:annotatedContainer/ac:parameterStores/ac:fqcn/text()');
+            $parameterStoreNodes = $xpath->query('/ac:annotatedContainer/ac:parameterStores/ac:parameterStore/text()');
             if ($parameterStoreNodes instanceof DOMNodeList) {
                 foreach ($parameterStoreNodes as $parameterStoreNode) {
                     assert(isset($parameterStoreNode->nodeValue));
@@ -97,7 +95,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             }
 
             $observers = [];
-            $observerNodes = $xpath->query('/ac:annotatedContainer/ac:observers/ac:fqcn/text()');
+            $observerNodes = $xpath->query('/ac:annotatedContainer/ac:observers/ac:observer/text()');
             if ($observerNodes instanceof DOMNodeList) {
                 foreach ($observerNodes as $observerNode) {
                     $observerClass = (string) $observerNode->nodeValue;
@@ -151,7 +149,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             }
 
             $this->directories = $scanDirectories;
-            $this->contextConsumer = $contextConsumer;
+            $this->definitionProvider = $definitionProvider;
             $this->cacheDir = $cache;
             $this->parameterStores = $parameterStores;
             $this->observers = $observers;
@@ -167,9 +165,9 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         return $this->directories;
     }
 
-    #[SingleEntrypointContainerDefinitionBuilderContextConsumer]
-    public function getContainerDefinitionConsumer() : ?ContainerDefinitionBuilderContextConsumer {
-        return $this->contextConsumer;
+    #[SingleEntrypointDefinitionProvider]
+    public function getContainerDefinitionConsumer() : ?DefinitionProvider {
+        return $this->definitionProvider;
     }
 
     /**

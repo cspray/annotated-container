@@ -11,34 +11,34 @@ This document lists the functions for each purpose.
 
 ```php
 \Cspray\AnnotatedContainer\service(
-    \Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext $context,
+    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     ?string $name = null,
     array $profiles = [],
     bool $isPrimary = false
-) : \Cspray\AnnotatedContainer\ServiceDefinition;
+) : \Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 
 \Cspray\AnnotatedContainer\alias(
-    \Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext $context,
+    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $abstract,
     \Cspray\Typiphy\ObjectType $concrete
-) : \Cspray\AnnotatedContainer\AliasDefinition;
+) : \Cspray\AnnotatedContainer\Definition\AliasDefinition;
 
 \Cspray\AnnotatedContainer\serviceDelegate(
-    \Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext $context,
+    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     \Cspray\Typiphy\ObjectType $factoryClass,
     string $factoryMethod
-) : \Cspray\AnnotatedContainer\ServiceDelegateDefinition;
+) : \Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 
 \Cspray\AnnotatedContainer\servicePrepare(
-    \Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext $context,
+    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     string $method
-) : \Cspray\AnnotatedContainer\ServicePrepareDefinition;
+) : \Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 
 \Cspray\AnnotatedContainer\injectMethodParam(
-    \Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext $context,
+    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     string $method,
     string $paramName,
@@ -46,17 +46,17 @@ This document lists the functions for each purpose.
     mixed $value,
     array $profiles = [],
     string $from = null
-) : \Cspray\AnnotatedContainer\InjectDefinition;
+) : \Cspray\AnnotatedContainer\Definition\InjectDefinition;
 
 \Cspray\AnnotatedContainer\injectProperty(
-    \Cspray\AnnotatedContainer\ContainerDefinitionBuilderContext $context,
+    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     string $property,
     \Cspray\Typiphy\Type|\Cspray\Typiphy\TypeUnion|\Cspray\Typiphy\TypeIntersect $type,
     mixed $value,
     array $profiles = [],
     string $from = null
-) : \Cspray\AnnotatedContainer\InjectDefinition;
+) : \Cspray\AnnotatedContainer\Definition\InjectDefinition;
 ```
 
 ## Autowireable Parameters

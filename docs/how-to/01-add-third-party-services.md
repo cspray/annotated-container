@@ -32,20 +32,21 @@ class MonologLoggerFactory {
 }
 ```
 
-## Step 3 - Define a ContainerDefinitionBuilderContextConsumer
+## Step 3 - Define a DefinitionProvider 
 
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
+use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
 use function Cspray\AnnotatedContainer\service;
 use function Cspray\AnnotatedContainer\serviceDelegate;
 use function Cspray\AnnotatedContainer\servicePrepare;
 use function Cspray\Typiphy\objectType;
 
-class ThirdPartyServicesProvider implements ContainerDefinitionBuilderContextConsumer {
+class ThirdPartyServicesProvider implements DefinitionProvider {
 
-    public function consume(ContainerDefinitionBuilderContext $context) : void {
+    public function consume(DefinitionProviderContext $context) : void {
         service($context, $loggerType = objectType(LoggerInterface::class));
         serviceDelegate($context, $loggerType, objectType(MonologLoggerFactory::class), 'createLogger');
         servicePrepare(
@@ -69,7 +70,7 @@ class ThirdPartyServicesProvider implements ContainerDefinitionBuilderContextCon
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
-  <containerDefinitionBuilderContextConsumer>ThirdPartyServicesProvider</containerDefinitionBuilderContextConsumer>
+  <definitionProvider>ThirdPartyServicesProvider</definitionProvider>
 </annotatedContainer>
 ```
 

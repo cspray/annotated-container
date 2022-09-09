@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\Exception;
 
 use Cspray\AnnotatedContainer\Bootstrap\Observer;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionBuilderContextConsumer;
+use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 
 final class InvalidBootstrapConfiguration extends Exception {
@@ -13,10 +13,10 @@ final class InvalidBootstrapConfiguration extends Exception {
         return new self($message);
     }
 
-    public static function fromConfiguredContainerDefinitionConsumerWrongType() : self {
+    public static function fromConfiguredDefinitionProviderWrongType() : self {
         $message = sprintf(
-            'All entries in containerDefinitionBuilderContextConsumers must be classes that implement %s',
-            ContainerDefinitionBuilderContextConsumer::class
+            'All entries in definitionProviders must be classes that implement %s',
+            DefinitionProvider::class
         );
         return new self($message);
     }
