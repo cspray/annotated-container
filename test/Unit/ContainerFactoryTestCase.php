@@ -785,9 +785,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Injecting enum "%s::%s" into %s::__construct($directions).',
+                'Injecting enum "%s::North" into %s::__construct($directions).',
                 InjectEnumConstructorServices\CardinalDirections::class,
-                'North',
                 Fixtures::injectEnumConstructorServices()->enumInjector()->getName()
             ),
             'context' => [
@@ -953,9 +952,9 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         $expected = [
             'message' => sprintf(
-                'Injecting value "[%s, %s]" into %s::cases.',
-                var_export(AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::Bar, true),
-                var_export(AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::Qux, true),
+                'Injecting value "[%s::Bar, %s::Qux]" into %s::cases.',
+                AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::class,
+                AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::class,
                 Fixtures::configurationWithArrayEnum()->myConfiguration()->getName()
             ),
             'context' => [
