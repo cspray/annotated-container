@@ -209,7 +209,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
                 $this->logger->info(
                     sprintf(
                         'Injecting enum "%s" into %s::%s($%s).',
-                        var_export($inject->getValue(), true),
+                        VarExporter::export($inject->getValue(), VarExporter::INLINE_ARRAY),
                         $inject->getTargetIdentifier()->getClass()->getName(),
                         $methodName,
                         $inject->getTargetIdentifier()->getName()
