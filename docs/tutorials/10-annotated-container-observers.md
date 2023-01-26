@@ -16,19 +16,20 @@ use Cspray\AnnotatedContainer\Bootstrap\Observer;
 final class MyContainerObserver implements Observer {
 
     public function beforeCompilation() : void {
-    
+        // do something before the source code is analyzed and the ContainerDefinition is compiled
     }
 
     public function afterCompilation(ContainerDefinition $containerDefinition) : void {
-    
+        // do something after the source is analyzed and the ContainerDefinition is compiled
     }
 
     public function beforeContainerCreation(ContainerDefinition $containerDefinition) : void {
-    
+        // do something after the ContainerDefinition is compiled, and the ConatinerFactory has been created with all 
+        // configured ParameterStores
     }
 
     public function afterContainerCreation(ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
-    
+        // do something after the AnnotatedContainer has been created based off of the given ContainerDefinition 
     }
 
 }
@@ -42,13 +43,9 @@ This code should live in your app's bootstrapping code, before you call `Cspray\
 namespace Acme\Demo;
 
 use Cspray\AnnotatedContainer\Bootstrap;
-use function Cspray\AnnotatedContainer\eventEmitter;
 
-evetEmitter()->registerListener(new MyContainerListener());
-
-$container = (new Bootstrap())->bootstrapContainer();
+$bootstrap = new Bootstrap();
+$bootstrap->addObserver(new MyContainerObserver());
+$container = $bootstrap->bootstrapContainer();
 ```
 
-Now your listener will be triggered on every event emitted by Annotated Container!
-
-If you aren't using the built-in bootstrapping or functional API be sure to call `EventEmitter::registerListener` on the implementations that you create.

@@ -49,7 +49,7 @@
     }
   },
   "suggest": {
-    "rdlowrey/auryn": "Install to use the Auryn\\Injector as the backing container.",
-    "php-di/php-di": "Install v7.x-dev to use the DI\\Container as the backing container."
+    "rdlowrey/auryn": "Install to use Auryn\\Injector as the backing container.",
+    "php-di/php-di": "Install 7.0+ to use DI\\Container as the backing container.",
   }
 }

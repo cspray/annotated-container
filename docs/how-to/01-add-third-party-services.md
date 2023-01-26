@@ -50,6 +50,7 @@ class ThirdPartyServicesProvider implements DefinitionProvider {
         service($context, $loggerType = objectType(LoggerInterface::class));
         serviceDelegate($context, $loggerType, objectType(MonologLoggerFactory::class), 'createLogger');
         servicePrepare(
+            $context,
             objectType(LoggerAwareInterface::class),
             'setLogger'
         );

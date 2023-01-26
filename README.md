@@ -10,6 +10,7 @@ A Dependency Injection framework for creating an autowired, feature-rich, [PSR-1
 - Automatically invoke methods after the service is constructed
 - Use Profiles to easily use different services in different runtimes
 - Create type-safe, highly flexible configuration objects
+- Easily include third-party services that cannot be easily annotated
 - Bring Your Own Container!
 
 > This README refers to functionality available in v2.0.0-beta1+. For information on v1 functionality please check out the 1.6.0 tag.
@@ -117,10 +118,10 @@ composer require rdlowrey/auryn
 Uses the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) Injector.
 
 ```
-composer require php-di/php-di:v7.x-dev
+composer require php-di/php-di
 ```
 
-Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. At the moment this library only supports the necessary 8.1 features in a development branch.
+Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. This library only supports necessary 8.1 features 7.0+.
 
 ## Documentation
 
