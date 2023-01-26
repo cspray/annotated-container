@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [v2.0.0-rc1](https://github.com/cspray/annotated-container/tree/v2.0.0-rc1) - 2023-01-26
+
+### Fixed
+
+- Fixed a bug where Inject values were not being exported consistently when a ContainerDefinition is serialized.
+
+### Changed
+
+- Updated dependencies to their newest minor versions. Of particular note is upgrading `php-di/php-di` in dev and suggestions to use 7.0 instead of dev version
+
 ## [v2.0.0-beta3](https://github.com/cspray/annotated-container/tree/v2.0.0-beta3) - 2022-09-05
 
 ### Added
