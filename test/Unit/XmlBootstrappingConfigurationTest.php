@@ -7,6 +7,7 @@ use Cspray\AnnotatedContainer\Bootstrap\Observer;
 use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Compile\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
@@ -87,9 +88,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <definitionProvider>
-        Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider
-    </definitionProvider>
+    <definitionProviders>
+        <definitionProvider>Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider</definitionProvider>
+    </definitionProviders>
 </annotatedContainer>
 XML;
         VirtualFilesystem::newFile('annotated-container.xml')
@@ -100,9 +101,14 @@ XML;
             'vfs://root/annotated-container.xml',
             new FixtureBootstrappingDirectoryResolver()
         );
+        $provider = $configuration->getContainerDefinitionProvider();
         self::assertInstanceOf(
+            CompositeDefinitionProvider::class,
+            $provider
+        );
+        self::assertContainsOnlyInstancesOf(
             StubDefinitionProvider::class,
-            $configuration->getContainerDefinitionConsumer()
+            $provider->getDefinitionProviders()
         );
     }
 
@@ -115,9 +121,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <definitionProvider>
-        FooBar
-    </definitionProvider>
+    <definitionProviders>
+        <definitionProvider>FooBar</definitionProvider>
+    </definitionProviders>
 </annotatedContainer>
 XML;
 
@@ -145,9 +151,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <definitionProvider>
-        Cspray\AnnotatedContainer\XmlBootstrappingConfiguration
-    </definitionProvider>
+    <definitionProviders>
+        <definitionProvider>Cspray\AnnotatedContainer\XmlBootstrappingConfiguration</definitionProvider>
+    </definitionProviders>
 </annotatedContainer>
 XML;
 
@@ -187,7 +193,7 @@ XML;
             new FixtureBootstrappingDirectoryResolver()
         );
 
-        self::assertNull($config->getContainerDefinitionConsumer());
+        self::assertNull($config->getContainerDefinitionProvider());
     }
 
     public function testCacheDirNotSpecifiedReturnsNull() : void {
@@ -372,9 +378,9 @@ XML;
       <dir>src</dir>
     </source>
   </scanDirectories>
-  <definitionProvider>
-    Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies
-  </definitionProvider>
+  <definitionProviders>
+    <definitionProvider>Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies</definitionProvider>
+  </definitionProviders>
 </annotatedContainer>
 XML;
 
@@ -394,7 +400,9 @@ XML;
             definitionProviderFactory: $consumerFactory
         );
 
-        self::assertInstanceOf(StubDefinitionProviderWithDependencies::class, $config->getContainerDefinitionConsumer());
+        $provider = $config->getContainerDefinitionProvider();
+        self::assertInstanceOf(CompositeDefinitionProvider::class, $provider);
+        self::assertContainsOnlyInstancesOf(StubDefinitionProviderWithDependencies::class, $provider->getDefinitionProviders());
     }
 
     public function testLoggingFileConfigurationReturnsCorrectLogger() : void {

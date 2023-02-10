@@ -17,7 +17,7 @@ interface BootstrappingConfiguration {
     public function getCacheDirectory() : ?string;
 
     #[SingleEntrypointDefinitionProvider]
-    public function getContainerDefinitionConsumer() : ?DefinitionProvider;
+    public function getContainerDefinitionProvider() : ?DefinitionProvider;
 
     /**
      * @return list<ParameterStore>

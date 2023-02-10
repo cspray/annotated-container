@@ -334,7 +334,12 @@ SHELL;
         /** @var string|null $definitionProvider */
         $definitionProvider = $input->getOption('definition-provider');
         if (isset($definitionProvider)) {
-            $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $definitionProvider));
+            $definitionProvidersNode = $root->appendChild(
+                $dom->createElementNS(self::XML_SCHEMA, 'definitionProviders')
+            );
+            $definitionProvidersNode->appendChild(
+                $dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $definitionProvider)
+            );
         }
 
         /** @var string|array|null $parameterStores */

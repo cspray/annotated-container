@@ -206,8 +206,8 @@ SHELL;
         VirtualFilesystem::newFile('annotated-container.xml')
             ->withContent('does not matter for this test')
             ->at($this->vfs);
-        self::expectException(PotentialConfigurationOverwrite::class);
-        self::expectExceptionMessage(
+        $this->expectException(PotentialConfigurationOverwrite::class);
+        $this->expectExceptionMessage(
             'The configuration file "annotated-container.xml" is already present and cannot be overwritten.'
         );
 
@@ -216,8 +216,8 @@ SHELL;
     }
 
     public function testInitDefaultFileNoComposerJsonFound() : void {
-        self::expectException(ComposerConfigurationNotFound::class);
-        self::expectExceptionMessage(
+        $this->expectException(ComposerConfigurationNotFound::class);
+        $this->expectExceptionMessage(
             'The file "composer.json" does not exist and is expected to be found.'
         );
 
@@ -232,7 +232,7 @@ SHELL;
                 ],
                 'autoload-dev' => [
                 ]
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput([], ['init']);
 
@@ -258,7 +258,7 @@ SHELL;
                         'Namespace\\Test\\' => ['test']
                     ]
                 ]
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput([], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
@@ -291,7 +291,7 @@ XML;
                         'Namespace\\' => 'src'
                     ],
                 ],
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         self::assertDirectoryDoesNotExist('vfs:///root/.annotated-container-cache');
 
@@ -315,7 +315,7 @@ XML;
                         'Namespace\\Test\\' => ['lib']
                     ]
                 ]
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput(['config-file' => 'my-config.xml'], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
@@ -356,7 +356,7 @@ XML;
                         'configFile' => 'composer-defined.xml'
                     ]
                 ]
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput([], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
@@ -387,7 +387,7 @@ XML;
                         'configFile' => 'composer-defined.xml'
                     ]
                 ]
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
         VirtualFilesystem::newFile('composer-defined.xml')
             ->withContent('does not matter for this test')
             ->at($this->vfs);
@@ -414,7 +414,7 @@ XML;
                         'Namespace\\Test\\' => ['lib']
                     ]
                 ]
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
         VirtualFilesystem::newDirectory('.annotated-container-cache')->at($this->vfs);
 
         $input = new StubInput([], ['init']);
@@ -451,7 +451,7 @@ XML;
                         'Namespace\\Test\\' => 'tests'
                     ]
                 ]
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         self::assertDirectoryDoesNotExist('vfs://root/my-cache-dir');
 
@@ -490,7 +490,7 @@ XML;
                         'Namespace\\Test\\' => 'tests'
                     ]
                 ]
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         self::assertDirectoryDoesNotExist('vfs://root/path/cache/my-cache-dir');
 
@@ -524,7 +524,7 @@ XML;
                         'Namespace\\' => 'src'
                     ]
                 ],
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput(['definition-provider' => 'ConsumerClass'], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
@@ -540,7 +540,9 @@ XML;
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
-  <definitionProvider>ConsumerClass</definitionProvider>
+  <definitionProviders>
+    <definitionProvider>ConsumerClass</definitionProvider>
+  </definitionProviders>
 </annotatedContainer>
 
 XML;
@@ -555,7 +557,7 @@ XML;
                         'Namespace\\' => 'src'
                     ]
                 ],
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput(['parameter-store' => 'MyParameterStoreClass'], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
@@ -588,7 +590,7 @@ XML;
                         'Namespace\\' => 'src'
                     ]
                 ],
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput(['parameter-store' => ['MyParameterStoreClassOne', 'MyParameterStoreClassTwo']], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
@@ -622,7 +624,7 @@ XML;
                         'Namespace\\' => 'src'
                     ]
                 ],
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput(['observer' => 'MyObserverClass'], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
@@ -655,7 +657,7 @@ XML;
                         'Namespace\\' => 'src'
                     ]
                 ],
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput(['observer' => ['MyObserverClassOne', 'MyObserverClassTwo']], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);
@@ -683,64 +685,64 @@ XML;
 
 
     public function testConfigFileBooleanThrowsException() : void {
-        self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "config-file" MUST NOT be a flag-only option.');
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "config-file" MUST NOT be a flag-only option.');
 
         $input = new StubInput(['config-file' => true], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
     public function testConfigFileArrayThrowsException() : void {
-        self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "config-file" MUST NOT be provided multiple times.');
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "config-file" MUST NOT be provided multiple times.');
 
         $input = new StubInput(['config-file' => ['a', 'b']], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
     public function testCacheDirBooleanThrowsException() : void {
-        self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "cache-dir" MUST NOT be a flag-only option.');
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "cache-dir" MUST NOT be a flag-only option.');
 
         $input = new StubInput(['cache-dir' => true], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
     public function testCacheDirArrayThrowsException() : void {
-        self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "cache-dir" MUST NOT be provided multiple times.');
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "cache-dir" MUST NOT be provided multiple times.');
 
         $input = new StubInput(['cache-dir' => ['a', 'b']], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
     public function testDefinitionProviderBooleanThrowsException() : void {
-        self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "definition-provider" MUST NOT be a flag-only option.');
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "definition-provider" MUST NOT be a flag-only option.');
 
         $input = new StubInput(['definition-provider' => true], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
     public function testDefinitionProviderArrayThrowsException() : void {
-        self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "definition-provider" MUST NOT be provided multiple times.');
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "definition-provider" MUST NOT be provided multiple times.');
 
         $input = new StubInput(['definition-provider' => ['a', 'b']], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
     public function testParameterStoreBooleanThrowsException() : void {
-        self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "parameter-store" MUST NOT be a flag-only option.');
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "parameter-store" MUST NOT be a flag-only option.');
 
         $input = new StubInput(['parameter-store' => true], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
     public function testObserverBooleanThrowsException() : void {
-        self::expectException(InvalidOptionType::class);
-        self::expectExceptionMessage('The option "observer" MUST NOT be a flag-only option.');
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "observer" MUST NOT be a flag-only option.');
 
         $input = new StubInput(['observer' => true], ['init']);
         $this->subject->handle($input, $this->output);
@@ -754,7 +756,7 @@ XML;
                         'Namespace\\' => 'src'
                     ],
                 ],
-            ]))->at($this->vfs);
+            ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput([], ['init']);
         $exitCode = $this->subject->handle($input, $this->output);

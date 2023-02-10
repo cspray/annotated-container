@@ -96,7 +96,7 @@ SHELL;
         }
 
         $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanDirs);
-        $containerDefinitionConsumer = $config->getContainerDefinitionConsumer();
+        $containerDefinitionConsumer = $config->getContainerDefinitionProvider();
         if ($containerDefinitionConsumer !== null) {
             $compileOptions = $compileOptions->withDefinitionProvider($containerDefinitionConsumer);
         }

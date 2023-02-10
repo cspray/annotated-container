@@ -69,7 +69,7 @@ final class Bootstrap {
             $scanPaths[] = $this->directoryResolver->getSourceScanPath($scanDirectory);
         }
         $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanPaths);
-        $containerDefinitionConsumer = $configuration->getContainerDefinitionConsumer();
+        $containerDefinitionConsumer = $configuration->getContainerDefinitionProvider();
         if ($containerDefinitionConsumer !== null) {
             $compileOptions = $compileOptions->withDefinitionProvider($containerDefinitionConsumer);
         }

@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
+use Cspray\AnnotatedContainer\Compile\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
@@ -62,18 +63,24 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 $scanDirectories[] = $scanDirectory->textContent;
             }
 
-            $definitionProvider = $xpath->query('/ac:annotatedContainer/ac:definitionProvider/text()')[0]?->nodeValue;
-            if ($definitionProvider !== null) {
-                $definitionProviderType = trim($definitionProvider);
+            $definitionProvider = null;
+            $definitionProviderNodes = $xpath->query('/ac:annotatedContainer/ac:definitionProviders/ac:definitionProvider/text()');
+            $definitionProviders = [];
+            foreach ($definitionProviderNodes as $definitionProviderNode) {
+                $definitionProviderType = trim($definitionProviderNode->nodeValue);
                 if (!class_exists($definitionProviderType) ||
                     !is_subclass_of($definitionProviderType, DefinitionProvider::class)) {
                     throw InvalidBootstrapConfiguration::fromConfiguredDefinitionProviderWrongType();
                 }
                 if (isset($this->definitionProviderFactory)) {
-                    $definitionProvider = $this->definitionProviderFactory->createProvider($definitionProviderType);
+                    $definitionProviders[] = $this->definitionProviderFactory->createProvider($definitionProviderType);
                 } else{
-                    $definitionProvider = new $definitionProviderType();
+                    $definitionProviders[] = new $definitionProviderType();
                 }
+            }
+
+            if ($definitionProviders !== []) {
+                $definitionProvider = new CompositeDefinitionProvider(...$definitionProviders);
             }
 
             $parameterStores = [];
@@ -166,7 +173,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     }
 
     #[SingleEntrypointDefinitionProvider]
-    public function getContainerDefinitionConsumer() : ?DefinitionProvider {
+    public function getContainerDefinitionProvider() : ?DefinitionProvider {
         return $this->definitionProvider;
     }
 

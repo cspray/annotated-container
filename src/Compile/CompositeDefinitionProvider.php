@@ -24,4 +24,8 @@ final class CompositeDefinitionProvider implements DefinitionProvider {
             $provider->consume($context);
         }
     }
+
+    public function getDefinitionProviders() : array {
+        return $this->providers;
+    }
 }
