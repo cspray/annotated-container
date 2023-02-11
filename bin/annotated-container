@@ -2,6 +2,7 @@
 <?php declare(strict_types=1);
 
 use Cspray\AnnotatedContainer\Bootstrap\RootDirectoryBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\VendorScanningThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Command\BuildCommand;
 use Cspray\AnnotatedContainer\Cli\Command\CacheClearCommand;
 use Cspray\AnnotatedContainer\Cli\Command\HelpCommand;
@@ -22,7 +23,7 @@ $directoryResolver = new RootDirectoryBootstrappingDirectoryResolver($dir);
 $commandExecutor = new CommandExecutor();
 
 $commandExecutor->setDefaultCommand(new HelpCommand($commandExecutor));
-$commandExecutor->addCommand(new InitCommand($directoryResolver));
+$commandExecutor->addCommand(new InitCommand($directoryResolver, new VendorScanningThirdPartyInitializerProvider($directoryResolver)));
 $commandExecutor->addCommand(new BuildCommand($directoryResolver));
 $commandExecutor->addCommand(new CacheClearCommand($directoryResolver));
 

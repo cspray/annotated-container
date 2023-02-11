@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
+use Cspray\AnnotatedContainer\Compile\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
@@ -11,6 +12,8 @@ use Cspray\AnnotatedContainer\Internal\FileLogger;
 use Cspray\AnnotatedContainer\Internal\StdoutLogger;
 use DateTimeImmutable;
 use DOMDocument;
+use DOMElement;
+use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 
@@ -62,18 +65,60 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 $scanDirectories[] = $scanDirectory->textContent;
             }
 
-            $definitionProvider = $xpath->query('/ac:annotatedContainer/ac:definitionProvider/text()')[0]?->nodeValue;
-            if ($definitionProvider !== null) {
-                $definitionProviderType = trim($definitionProvider);
+            $vendorPackagesNodes = $xpath->query('/ac:annotatedContainer/ac:scanDirectories/ac:vendor/ac:package');
+            foreach ($vendorPackagesNodes as $vendorPackageNode) {
+                assert($vendorPackageNode instanceof DOMElement);
+
+                $name = $vendorPackageNode->getElementsByTagNameNS(
+                    'https://annotated-container.cspray.io/schema/annotated-container.xsd',
+                    'name'
+                )->item(0)?->nodeValue;
+
+                assert($name !== null);
+
+                $source = $vendorPackageNode->getElementsByTagNameNS(
+                    'https://annotated-container.cspray.io/schema/annotated-container.xsd',
+                    'source'
+                )->item(0);
+
+                assert($source instanceof DOMElement);
+
+                $dirs = $source->getElementsByTagNameNS(
+                    'https://annotated-container.cspray.io/schema/annotated-container.xsd',
+                    'dir'
+                );
+
+                foreach ($dirs as $dir) {
+                    assert($dir->nodeValue !== null);
+                    $vendorScanPath = sprintf(
+                        'vendor/%s/%s',
+                        trim($name),
+                        trim($dir->nodeValue)
+                    );
+                    $scanDirectories[] = $vendorScanPath;
+                }
+
+            }
+
+            $definitionProvider = null;
+            $definitionProviderNodes = $xpath->query('/ac:annotatedContainer/ac:definitionProviders/ac:definitionProvider/text()');
+            $definitionProviders = [];
+            foreach ($definitionProviderNodes as $definitionProviderNode) {
+                assert($definitionProviderNode->nodeValue !== null);
+                $definitionProviderType = trim($definitionProviderNode->nodeValue);
                 if (!class_exists($definitionProviderType) ||
                     !is_subclass_of($definitionProviderType, DefinitionProvider::class)) {
                     throw InvalidBootstrapConfiguration::fromConfiguredDefinitionProviderWrongType();
                 }
                 if (isset($this->definitionProviderFactory)) {
-                    $definitionProvider = $this->definitionProviderFactory->createProvider($definitionProviderType);
+                    $definitionProviders[] = $this->definitionProviderFactory->createProvider($definitionProviderType);
                 } else{
-                    $definitionProvider = new $definitionProviderType();
+                    $definitionProviders[] = new $definitionProviderType();
                 }
+            }
+
+            if ($definitionProviders !== []) {
+                $definitionProvider = new CompositeDefinitionProvider(...$definitionProviders);
             }
 
             $parameterStores = [];
@@ -166,7 +211,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     }
 
     #[SingleEntrypointDefinitionProvider]
-    public function getContainerDefinitionConsumer() : ?DefinitionProvider {
+    public function getContainerDefinitionProvider() : ?DefinitionProvider {
         return $this->definitionProvider;
     }
 

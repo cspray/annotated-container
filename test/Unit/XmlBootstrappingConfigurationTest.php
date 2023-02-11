@@ -7,6 +7,7 @@ use Cspray\AnnotatedContainer\Bootstrap\Observer;
 use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Compile\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
@@ -41,8 +42,8 @@ XML;
         VirtualFilesystem::newFile('annotated-container.xml')
             ->withContent($badXml)
             ->at($this->vfs);
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'Configuration file vfs://root/annotated-container.xml does not validate against the appropriate schema.'
         );
         new XmlBootstrappingConfiguration(
@@ -87,9 +88,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <definitionProvider>
-        Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider
-    </definitionProvider>
+    <definitionProviders>
+        <definitionProvider>Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider</definitionProvider>
+    </definitionProviders>
 </annotatedContainer>
 XML;
         VirtualFilesystem::newFile('annotated-container.xml')
@@ -100,9 +101,14 @@ XML;
             'vfs://root/annotated-container.xml',
             new FixtureBootstrappingDirectoryResolver()
         );
+        $provider = $configuration->getContainerDefinitionProvider();
         self::assertInstanceOf(
+            CompositeDefinitionProvider::class,
+            $provider
+        );
+        self::assertContainsOnlyInstancesOf(
             StubDefinitionProvider::class,
-            $configuration->getContainerDefinitionConsumer()
+            $provider->getDefinitionProviders()
         );
     }
 
@@ -115,9 +121,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <definitionProvider>
-        FooBar
-    </definitionProvider>
+    <definitionProviders>
+        <definitionProvider>FooBar</definitionProvider>
+    </definitionProviders>
 </annotatedContainer>
 XML;
 
@@ -125,8 +131,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in definitionProviders must be classes that implement ' . DefinitionProvider::class
         );
 
@@ -145,9 +151,9 @@ XML;
             <dir>src</dir>
         </source>
     </scanDirectories>
-    <definitionProvider>
-        Cspray\AnnotatedContainer\XmlBootstrappingConfiguration
-    </definitionProvider>
+    <definitionProviders>
+        <definitionProvider>Cspray\AnnotatedContainer\XmlBootstrappingConfiguration</definitionProvider>
+    </definitionProviders>
 </annotatedContainer>
 XML;
 
@@ -155,8 +161,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in definitionProviders must be classes that implement ' . DefinitionProvider::class
         );
 
@@ -187,7 +193,7 @@ XML;
             new FixtureBootstrappingDirectoryResolver()
         );
 
-        self::assertNull($config->getContainerDefinitionConsumer());
+        self::assertNull($config->getContainerDefinitionProvider());
     }
 
     public function testCacheDirNotSpecifiedReturnsNull() : void {
@@ -284,8 +290,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
         new XmlBootstrappingConfiguration(
@@ -313,8 +319,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
         new XmlBootstrappingConfiguration(
@@ -372,9 +378,9 @@ XML;
       <dir>src</dir>
     </source>
   </scanDirectories>
-  <definitionProvider>
-    Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies
-  </definitionProvider>
+  <definitionProviders>
+    <definitionProvider>Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies</definitionProvider>
+  </definitionProviders>
 </annotatedContainer>
 XML;
 
@@ -394,7 +400,9 @@ XML;
             definitionProviderFactory: $consumerFactory
         );
 
-        self::assertInstanceOf(StubDefinitionProviderWithDependencies::class, $config->getContainerDefinitionConsumer());
+        $provider = $config->getContainerDefinitionProvider();
+        self::assertInstanceOf(CompositeDefinitionProvider::class, $provider);
+        self::assertContainsOnlyInstancesOf(StubDefinitionProviderWithDependencies::class, $provider->getDefinitionProviders());
     }
 
     public function testLoggingFileConfigurationReturnsCorrectLogger() : void {
@@ -550,8 +558,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in observers must be classes that implement ' . Observer::class
         );
         new XmlBootstrappingConfiguration(
@@ -579,8 +587,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in observers must be classes that implement ' . Observer::class
         );
         new XmlBootstrappingConfiguration(
@@ -622,5 +630,47 @@ XML;
 
         self::assertCount(1, $config->getObservers());
         self::assertInstanceOf(StubBootstrapObserverWithDependencies::class, $config->getObservers()[0]);
+    }
+
+    public function testVendorScanDirectoriesIncludedInList() : void {
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>src</dir>
+            <dir>test/helper</dir>
+            <dir>lib</dir>
+        </source>
+        <vendor>
+          <package>
+            <name>package/one</name>
+            <source>
+              <dir>src</dir>
+              <dir>lib</dir>
+            </source>
+          </package>
+          <package>
+            <name>package/two</name>
+            <source>
+              <dir>other_src</dir>
+            </source>
+          </package>
+        </vendor>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+        $configuration = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+
+        self::assertSame(
+            ['src', 'test/helper', 'lib', 'vendor/package/one/src', 'vendor/package/one/lib', 'vendor/package/two/other_src'],
+            $configuration->getScanDirectories()
+        );
     }
 }

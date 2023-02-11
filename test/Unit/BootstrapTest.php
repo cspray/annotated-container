@@ -101,9 +101,9 @@ XML;
             <dir>ThirdPartyServices</dir>
         </source>
     </scanDirectories>
-    <definitionProvider>
-      Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider
-    </definitionProvider>
+    <definitionProviders>
+        <definitionProvider>Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider</definitionProvider>
+    </definitionProviders>
 </annotatedContainer>
 XML;
 
@@ -303,9 +303,9 @@ XML;
             <dir>ThirdPartyServices</dir>
         </source>
     </scanDirectories>
-    <definitionProvider>
-      Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies
-    </definitionProvider>
+    <definitionProviders>
+        <definitionProvider>Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies</definitionProvider>
+    </definitionProviders>
 </annotatedContainer>
 XML;
 

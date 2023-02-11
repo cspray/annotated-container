@@ -16,6 +16,8 @@ jobs:
       - name: Composer
         uses: php-actions/composer@v6
       - name: Tests
-        uses: php-actions/phpunit@v2
+        uses: php-actions/phpunit@v3
+        with:
+          version: 9.6
       - name: Static Analysis
         run: "vendor/bin/psalm"

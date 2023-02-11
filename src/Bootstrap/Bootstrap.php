@@ -66,10 +66,10 @@ final class Bootstrap {
 
         $scanPaths = [];
         foreach ($configuration->getScanDirectories() as $scanDirectory) {
-            $scanPaths[] = $this->directoryResolver->getSourceScanPath($scanDirectory);
+            $scanPaths[] = $this->directoryResolver->getPathFromRoot($scanDirectory);
         }
         $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanPaths);
-        $containerDefinitionConsumer = $configuration->getContainerDefinitionConsumer();
+        $containerDefinitionConsumer = $configuration->getContainerDefinitionProvider();
         if ($containerDefinitionConsumer !== null) {
             $compileOptions = $compileOptions->withDefinitionProvider($containerDefinitionConsumer);
         }

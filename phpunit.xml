@@ -29,9 +29,7 @@
         </exclude>
         <report>
             <text outputFile="php://stdout" showOnlySummary="true" />
-            <!--
             <html outputDirectory="build/code-coverage/html" />
-            -->
         </report>
     </coverage>
 </phpunit>

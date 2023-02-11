@@ -30,7 +30,7 @@ final class RootDirectoryBootstrappingDirectoryResolverTest extends TestCase {
 
         self::assertSame(
             '/root/path/src',
-            $subject->getSourceScanPath('src')
+            $subject->getPathFromRoot('src')
         );
     }
 
@@ -40,6 +40,15 @@ final class RootDirectoryBootstrappingDirectoryResolverTest extends TestCase {
         self::assertSame(
             '/root/path/ac.log',
             $subject->getLogPath('ac.log')
+        );
+    }
+
+    public function testVendorPath() : void {
+        $subject = new RootDirectoryBootstrappingDirectoryResolver('/root/path');
+
+        self::assertSame(
+            '/root/path/vendor',
+            $subject->getVendorPath()
         );
     }
 

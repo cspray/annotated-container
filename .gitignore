@@ -2,4 +2,4 @@
 ..
 .phpunit.cache
 build/
-vendor/
+/vendor
