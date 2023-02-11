@@ -365,12 +365,6 @@ SHELL;
         );
         foreach ($this->initializerProvider->getThirdPartyInitializers() as $thirdPartyInitializerClass) {
             $thirdPartyInitializer = new $thirdPartyInitializerClass();
-            assert($thirdPartyInitializer instanceof ThirdPartyInitializer);
-            $packageRelativeRootDirectory = sprintf(
-                'vendor/%s',
-                $thirdPartyInitializer->getPackageName()
-            );
-
             $packageRelativeScanDirectories = $thirdPartyInitializer->getRelativeScanDirectories();
             if (count($packageRelativeScanDirectories) > 0) {
                 $package = $vendor->appendChild(

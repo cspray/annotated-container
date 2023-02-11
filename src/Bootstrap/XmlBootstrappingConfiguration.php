@@ -88,8 +88,8 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                     'dir'
                 );
 
-                /** @var DOMElement $dir */
                 foreach ($dirs as $dir) {
+                    assert($dir->nodeValue !== null);
                     $vendorScanPath = sprintf(
                         'vendor/%s/%s',
                         trim($name),
@@ -104,6 +104,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             $definitionProviderNodes = $xpath->query('/ac:annotatedContainer/ac:definitionProviders/ac:definitionProvider/text()');
             $definitionProviders = [];
             foreach ($definitionProviderNodes as $definitionProviderNode) {
+                assert($definitionProviderNode->nodeValue !== null);
                 $definitionProviderType = trim($definitionProviderNode->nodeValue);
                 if (!class_exists($definitionProviderType) ||
                     !is_subclass_of($definitionProviderType, DefinitionProvider::class)) {

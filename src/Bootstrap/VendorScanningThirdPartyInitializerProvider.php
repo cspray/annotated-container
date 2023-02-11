@@ -22,6 +22,9 @@ final class VendorScanningThirdPartyInitializerProvider implements ThirdPartyIni
 
     private readonly Parser $parser;
 
+    /**
+     * @var list<class-string<ThirdPartyInitializer>>|null
+     */
     private ?array $initializers = null;
 
     public function __construct(
@@ -32,14 +35,17 @@ final class VendorScanningThirdPartyInitializerProvider implements ThirdPartyIni
 
     public function getThirdPartyInitializers() : array {
         if ($this->initializers === null) {
-            $this->initializers = iterator_to_array($this->scanVendorDirectoryForInitializers());
+            $this->initializers = $this->scanVendorDirectoryForInitializers();
             sort($this->initializers);
         }
 
         return $this->initializers;
     }
 
-    private function scanVendorDirectoryForInitializers() : Iterator {
+    /**
+     * @return list<class-string<ThirdPartyInitializer>>
+     */
+    private function scanVendorDirectoryForInitializers() : array {
         $nodeTraverser = new NodeTraverser();
         $nodeTraverser->addVisitor(new NodeConnectingVisitor());
         $nodeTraverser->addVisitor(new NameResolver());
@@ -55,12 +61,14 @@ final class VendorScanningThirdPartyInitializerProvider implements ThirdPartyIni
         foreach ($iterator as $file) {
             if ($file->getExtension() === 'php') {
                 $nodes = $this->parser->parse(file_get_contents($file->getPathname()));
-                $nodeTraverser->traverse($nodes);
-                unset($nodes);
+                if ($nodes !== null) {
+                    $nodeTraverser->traverse($nodes);
+                    unset($nodes);
+                }
             }
         }
 
-        yield from $data->targets;
+        return $data->targets;
     }
 
     private function getVisitor(Closure $callback) : NodeVisitor {
@@ -72,9 +80,9 @@ final class VendorScanningThirdPartyInitializerProvider implements ThirdPartyIni
 
             public function leaveNode(Node $node) {
                 if ($node instanceof Node\Stmt\Class_ &&
-                    is_a($node->namespacedName->toString(), ThirdPartyInitializer::class, true)
+                    is_a($node->namespacedName?->toString(), ThirdPartyInitializer::class, true)
                 ) {
-                    ($this->callback)($node->namespacedName->toString());
+                    ($this->callback)($node->namespacedName?->toString());
                 }
             }
         };

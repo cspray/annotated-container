@@ -8,8 +8,14 @@ abstract class ThirdPartyInitializer {
 
     abstract public function getPackageName() : string;
 
+    /**
+     * @return list<non-empty-string>
+     */
     abstract public function getRelativeScanDirectories() : array;
 
+    /**
+     * @return list<non-empty-string>
+     */
     abstract public function getObserverClasses() : array;
 
     abstract public function getDefinitionProviderClass() : ?string;
