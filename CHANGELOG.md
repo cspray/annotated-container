@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [v2.0.0-rc2](https://github.com/cspray/annotated-container/tree/v2.0.0-rc2) - 2023-02-11
+
+### Added
+
+- Added a `CompositeDefinitionProvider` to easily compose more than 1 `DefinitionProvider` while still providing a single entry point for Annotated Container.
+- Added a `ThirdPartyInitializer` and `ThirdPartyInitializerProvider` to allow libraries integrating with Annotated Container to specify how the XML configuration file should be altered during `./bin/annotated-container init`.
+- Added a default `ThirdPartyInitializerProvider` that will scan the `/vendor` directory and include any `ThirdPartyInitializer` configurations that are found.
+
+### Changed
+
+- Updated the XML configuration file to allow specifying more than 1 `DefinitionProvider`. Please note, this only changes the configuration; the actual code still accepts only a single DefinitionProvider.
+- Updated the XML configuration file to allow specifying that a set of directories in a vendor package should be scanned.
+- Changed the `Observer` interface to allow access to what `ActiveProfiles` are being used for the creation of this container.
+
+### Fixed
+
+- Fixed a bug where the `Bootstrap` had no capacity to accept an `ObserverFactory`, effectively preventing custom Observer creation during the boostrapping process.
+
 ## [v2.0.0-rc1](https://github.com/cspray/annotated-container/tree/v2.0.0-rc1) - 2023-01-26
 
 ### Fixed
