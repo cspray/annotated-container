@@ -63,7 +63,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 $nameTypeMap
             );
             $this->logFinishedCreatingContainer(objectType(Injector::class), $activeProfiles);
-            return $this->getAnnotatedContainer($injector, $nameTypeMap, $this->getActiveProfilesService($activeProfiles));
+            return $this->getAnnotatedContainer($injector, $nameTypeMap, $this->getActiveProfilesService());
         } catch (InvalidAlias $exception) {
             throw ContainerException::fromCaughtThrowable($exception);
         }

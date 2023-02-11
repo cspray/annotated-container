@@ -70,6 +70,7 @@ final class Bootstrap {
         );
         $activeProfiles = new class($profiles) implements ActiveProfiles {
             public function __construct(
+                /** @var list<string> */
                 private readonly array $profiles
             ) {}
 
