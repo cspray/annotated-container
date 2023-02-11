@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Cli\Command;
 
-use Cspray\AnnotatedContainer\Bootstrap\VendorScanningThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\ComposerJsonScanningThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Command\InitCommand;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
@@ -33,7 +33,7 @@ class InitCommandTest extends TestCase {
         VirtualFilesystem::newDirectory('vendor')->at($this->vfs);
         $this->subject = new InitCommand(
             $resolver = new FixtureBootstrappingDirectoryResolver(),
-            new VendorScanningThirdPartyInitializerProvider($resolver)
+            new ComposerJsonScanningThirdPartyInitializerProvider($resolver)
         );
         $this->stdout = new InMemoryOutput();
         $this->stderr = new InMemoryOutput();
@@ -266,7 +266,7 @@ SHELL;
         $input = new StubInput([], ['init']);
         $subject = new InitCommand(
             $resolver = new FixtureBootstrappingDirectoryResolver(true),
-            new VendorScanningThirdPartyInitializerProvider($resolver)
+            new ComposerJsonScanningThirdPartyInitializerProvider($resolver)
         );
         $exitCode = $subject->handle($input, $this->output);
 
