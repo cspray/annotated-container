@@ -81,11 +81,12 @@ final class VendorScanningThirdPartyInitializerProvider implements ThirdPartyIni
 
             public function leaveNode(Node $node) {
                 if ($node instanceof Node\Stmt\Class_) {
-                    $className = $node->namespacedName->toString();
+                    /** @var class-string|null $className */
+                    $className = $node->namespacedName?->toString();
                     assert($className !== null);
                     $reflection = new ReflectionClass($className);
                     if ($reflection->isSubclassOf(ThirdPartyInitializer::class)) {
-                        ($this->callback)($node->namespacedName?->toString());
+                        ($this->callback)($className);
                     }
                     unset($reflection);
                 }
