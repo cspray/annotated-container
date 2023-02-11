@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="4.30.0@d0bc6e25d89f649e4f36a534f330f8bb4643dd69">
+  <file src="src/Bootstrap/ComposerJsonScanningThirdPartyInitializerProvider.php">
+    <MixedArrayAccess occurrences="1">
+      <code>$composerData['extra']</code>
+    </MixedArrayAccess>
+    <MixedAssignment occurrences="4">
+      <code>$composerData</code>
+      <code>$initializers[]</code>
+      <code>$packageInitializer</code>
+      <code>$packageInitializers</code>
+    </MixedAssignment>
+    <MixedReturnTypeCoercion occurrences="2">
+      <code>$initializers</code>
+      <code>list&lt;class-string&lt;ThirdPartyInitializer&gt;&gt;</code>
+    </MixedReturnTypeCoercion>
+    <UndefinedMethod occurrences="1">
+      <code>isDot</code>
+    </UndefinedMethod>
+  </file>
   <file src="src/Bootstrap/ServiceWiringObserver.php">
     <LessSpecificReturnStatement occurrences="1">
       <code>$services</code>
@@ -7,11 +25,6 @@
     <MoreSpecificReturnType occurrences="1">
       <code>array</code>
     </MoreSpecificReturnType>
-  </file>
-  <file src="src/Bootstrap/VendorScanningThirdPartyInitializerProvider.php">
-    <MixedArrayAssignment occurrences="1">
-      <code>$data-&gt;targets[]</code>
-    </MixedArrayAssignment>
   </file>
   <file src="src/Cli/Command/BuildCommand.php">
     <MixedArrayAccess occurrences="1">
@@ -88,10 +101,6 @@
     <MixedArgumentTypeCoercion occurrences="1">
       <code>$activeProfiles</code>
     </MixedArgumentTypeCoercion>
-    <MixedReturnTypeCoercion occurrences="2">
-      <code>$this-&gt;profiles</code>
-      <code>array</code>
-    </MixedReturnTypeCoercion>
   </file>
   <file src="src/ContainerFactory/AurynContainerFactory.php">
     <MixedArgument occurrences="7">
