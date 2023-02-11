@@ -15,6 +15,7 @@ use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use SplFileInfo;
 use stdClass;
 
@@ -79,10 +80,14 @@ final class VendorScanningThirdPartyInitializerProvider implements ThirdPartyIni
             ) {}
 
             public function leaveNode(Node $node) {
-                if ($node instanceof Node\Stmt\Class_ &&
-                    is_a($node->namespacedName?->toString(), ThirdPartyInitializer::class, true)
-                ) {
-                    ($this->callback)($node->namespacedName?->toString());
+                if ($node instanceof Node\Stmt\Class_) {
+                    $className = $node->namespacedName->toString();
+                    assert($className !== null);
+                    $reflection = new ReflectionClass($className);
+                    if ($reflection->isSubclassOf(ThirdPartyInitializer::class)) {
+                        ($this->callback)($node->namespacedName?->toString());
+                    }
+                    unset($reflection);
                 }
             }
         };
