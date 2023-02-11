@@ -10,19 +10,19 @@ use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 
 abstract class ServiceWiringObserver implements Observer {
 
-    final public function beforeCompilation() : void {
+    final public function beforeCompilation(ActiveProfiles $activeProfiles) : void {
         // noop
     }
 
-    final public function afterCompilation(ContainerDefinition $containerDefinition) : void {
+    final public function afterCompilation(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition) : void {
         // noop
     }
 
-    final public function beforeContainerCreation(ContainerDefinition $containerDefinition) : void {
+    final public function beforeContainerCreation(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition) : void {
         // noop
     }
 
-    final public function afterContainerCreation(ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
+    final public function afterContainerCreation(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
         $serviceGatherer = new class($containerDefinition, $container) implements ServiceGatherer {
 
             private readonly ContainerDefinition $containerDefinition;

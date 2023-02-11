@@ -106,13 +106,13 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             foreach ($definitionProviderNodes as $definitionProviderNode) {
                 assert($definitionProviderNode->nodeValue !== null);
                 $definitionProviderType = trim($definitionProviderNode->nodeValue);
-                if (!class_exists($definitionProviderType) ||
-                    !is_subclass_of($definitionProviderType, DefinitionProvider::class)) {
-                    throw InvalidBootstrapConfiguration::fromConfiguredDefinitionProviderWrongType();
-                }
                 if (isset($this->definitionProviderFactory)) {
                     $definitionProviders[] = $this->definitionProviderFactory->createProvider($definitionProviderType);
                 } else{
+                    if (!class_exists($definitionProviderType) ||
+                        !is_subclass_of($definitionProviderType, DefinitionProvider::class)) {
+                        throw InvalidBootstrapConfiguration::fromConfiguredDefinitionProviderWrongType();
+                    }
                     $definitionProviders[] = new $definitionProviderType();
                 }
             }
@@ -127,12 +127,12 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 foreach ($parameterStoreNodes as $parameterStoreNode) {
                     assert(isset($parameterStoreNode->nodeValue));
                     $parameterStoreType = trim($parameterStoreNode->nodeValue);
-                    if (!class_exists($parameterStoreType) || !is_subclass_of($parameterStoreType, ParameterStore::class)) {
-                        throw InvalidBootstrapConfiguration::fromConfiguredParameterStoreWrongType();
-                    }
                     if (isset($this->parameterStoreFactory)) {
                         $parameterStore = $this->parameterStoreFactory->createParameterStore($parameterStoreType);
                     } else {
+                        if (!class_exists($parameterStoreType) || !is_subclass_of($parameterStoreType, ParameterStore::class)) {
+                            throw InvalidBootstrapConfiguration::fromConfiguredParameterStoreWrongType();
+                        }
                         $parameterStore = new $parameterStoreType();
                     }
                     $parameterStores[] = $parameterStore;
@@ -144,12 +144,12 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             if ($observerNodes instanceof DOMNodeList) {
                 foreach ($observerNodes as $observerNode) {
                     $observerClass = (string) $observerNode->nodeValue;
-                    if (!class_exists($observerClass) || !is_subclass_of($observerClass, Observer::class)) {
-                        throw InvalidBootstrapConfiguration::fromConfiguredObserverWrongType();
-                    }
                     if (isset($this->observerFactory)) {
                         $observer = $this->observerFactory->createObserver($observerClass);
                     } else {
+                        if (!class_exists($observerClass) || !is_subclass_of($observerClass, Observer::class)) {
+                            throw InvalidBootstrapConfiguration::fromConfiguredObserverWrongType();
+                        }
                         $observer = new $observerClass();
                     }
                     $observers[] = $observer;

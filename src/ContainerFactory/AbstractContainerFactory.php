@@ -20,6 +20,7 @@ use UnitEnum;
 
 abstract class AbstractContainerFactory implements ContainerFactory {
 
+    private readonly ActiveProfiles $activeProfiles;
     protected readonly AliasDefinitionResolver $aliasDefinitionResolver;
 
     private LoggerInterface $logger;
@@ -30,6 +31,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     private array $parameterStores = [];
 
     public function __construct(
+        ActiveProfiles $activeProfiles,
         AliasDefinitionResolver $aliasDefinitionResolver = null
     ) {
         // Injecting environment variables is something we have supported since early versions.
@@ -38,6 +40,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         $this->addParameterStore(new EnvironmentParameterStore());
         $this->aliasDefinitionResolver = $aliasDefinitionResolver ?? new StandardAliasDefinitionResolver();
         $this->logger = new NullLogger();
+        $this->activeProfiles = $activeProfiles;
     }
 
     /**
@@ -59,21 +62,8 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         return $this->parameterStores[$storeName] ?? null;
     }
 
-    final protected function getActiveProfilesService(array $activeProfiles) : ActiveProfiles {
-        return new class($activeProfiles) implements ActiveProfiles {
-
-            public function __construct(
-                private readonly array $profiles
-            ) {}
-
-            public function getProfiles() : array {
-                return $this->profiles;
-            }
-
-            public function isActive(string $profile) : bool {
-                return in_array($profile, $this->profiles);
-            }
-        };
+    final protected function getActiveProfilesService() : ActiveProfiles {
+        return $this->activeProfiles;
     }
 
     final protected function logCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {

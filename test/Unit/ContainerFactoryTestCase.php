@@ -46,7 +46,9 @@ use function Cspray\Typiphy\objectType;
 
 abstract class ContainerFactoryTestCase extends TestCase {
 
-    abstract protected function getContainerFactory() : ContainerFactory;
+    private ActiveProfiles $activeProfiles;
+
+    abstract protected function getContainerFactory(ActiveProfiles $activeProfiles) : ContainerFactory;
 
     abstract protected function getBackingContainerInstanceOf() : ObjectType;
 
@@ -76,7 +78,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
             $containerOptions = $containerOptions->withLogger($logger);
         }
 
-        $factory = $this->getContainerFactory();
+        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
+        $factory = $this->getContainerFactory($this->activeProfiles);
         if ($parameterStore !== null) {
             $factory->addParameterStore($parameterStore);
         }
@@ -180,9 +183,10 @@ abstract class ContainerFactoryTestCase extends TestCase {
                 AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete = objectType($concreteService))->build()
             )->build();
 
-        self::expectException(ContainerException::class);
-        self::expectExceptionMessage('An AliasDefinition has a concrete type, ' . $concrete->getName() . ', that is not a registered ServiceDefinition.');
-        $this->getContainerFactory()->createContainer($containerDefinition);
+        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
+        $this->expectException(ContainerException::class);
+        $this->expectExceptionMessage('An AliasDefinition has a concrete type, ' . $concrete->getName() . ', that is not a registered ServiceDefinition.');
+        $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition);
     }
 
     public function testMultipleServicePrepare() {
@@ -336,20 +340,26 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testBackingContainerInstanceOf() {
+        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
-        self::assertInstanceOf($this->getBackingContainerInstanceOf()->getName(), $this->getContainerFactory()->createContainer($containerDefinition)->getBackingContainer());
+        self::assertInstanceOf(
+            $this->getBackingContainerInstanceOf()->getName(),
+            $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition)->getBackingContainer()
+        );
     }
 
     public function testGettingAutowireableFactory() {
+        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
-        $container = $this->getContainerFactory()->createContainer($containerDefinition);
+        $container = $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition);
 
         self::assertSame($container, $container->get(AutowireableFactory::class));
     }
 
     public function testGettingAutowireableInvoker() {
+        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
-        $container = $this->getContainerFactory()->createContainer($containerDefinition);
+        $container = $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition);
 
         self::assertSame($container, $container->get(AutowireableInvoker::class));
     }
@@ -389,25 +399,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         /** @var ActiveProfiles $activeProfile */
         $activeProfile = $container->get(ActiveProfiles::class);
 
-        self::assertSame(['default', 'foo', 'bar'], $activeProfile->getProfiles());
-    }
-
-    public function testIsActiveProfileNotListed() : void {
-        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), ['default', 'foo', 'bar']);
-
-        /** @var ActiveProfiles $activeProfile */
-        $activeProfile = $container->get(ActiveProfiles::class);
-
-        self::assertFalse($activeProfile->isActive('baz'));
-    }
-
-    public function testIsActiveProfileListed() : void {
-        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), ['default', 'foo', 'bar']);
-
-        /** @var ActiveProfiles $activeProfile */
-        $activeProfile = $container->get(ActiveProfiles::class);
-
-        self::assertTrue($activeProfile->isActive('foo'));
+        self::assertSame($this->activeProfiles, $activeProfile);
     }
 
     public function testInvokeWithImplicitAlias() : void {
@@ -510,7 +502,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $serialized = $serializer->serialize($containerDefinition);
         $deserialize = $serializer->deserialize($serialized);
 
-        $containerFactory = $this->getContainerFactory();
+        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
+        $containerFactory = $this->getContainerFactory($this->activeProfiles);
 
         $assertions($containerFactory, $deserialize);
     }
