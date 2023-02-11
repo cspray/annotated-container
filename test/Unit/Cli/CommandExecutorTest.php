@@ -164,7 +164,7 @@ Unhandled exception executing "baz"!
 
 Type: Exception
 Message: An exception was thrown.
-Location: ${file}L#154
+Location: {$file}L#154
 Stack Trace:
 
 %a
