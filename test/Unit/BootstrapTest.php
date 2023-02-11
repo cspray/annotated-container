@@ -5,6 +5,8 @@ namespace Cspray\AnnotatedContainer\Unit;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Observer;
+use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
@@ -671,6 +673,39 @@ XML;
 
         self::assertSame($container, $observer->getAnnotatedContainer());
         self::assertEmpty($observer->getServices());
+    }
+
+    public function testObserverFactoryRespected() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+    <observers>
+      <observer>Passed to ObserverFactory</observer>
+    </observers>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $observerFactory = $this->getMockBuilder(ObserverFactory::class)->getMock();
+        $observerFactory->expects($this->once())
+            ->method('createObserver')
+            ->with('Passed to ObserverFactory')
+            ->willReturn($this->getMockBuilder(Observer::class)->getMock());
+
+        (new Bootstrap(
+            directoryResolver: $directoryResolver,
+            observerFactory: $observerFactory
+        ))->bootstrapContainer();
     }
 
 }

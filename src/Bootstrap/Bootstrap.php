@@ -15,6 +15,7 @@ use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\Exception\BackingContainerNotFound;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
+use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use DI\Container;
@@ -26,6 +27,7 @@ final class Bootstrap {
     private readonly ?LoggerInterface $logger;
     private readonly ?ParameterStoreFactory $parameterStoreFactory;
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;
+    private readonly ?ObserverFactory $observerFactory;
     /**
      * @var list<Observer>
      */
@@ -35,12 +37,14 @@ final class Bootstrap {
         BootstrappingDirectoryResolver $directoryResolver = null,
         LoggerInterface $logger = null,
         ParameterStoreFactory $parameterStoreFactory = null,
-        DefinitionProviderFactory $definitionProviderFactory = null
+        DefinitionProviderFactory $definitionProviderFactory = null,
+        ObserverFactory $observerFactory = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->getDefaultDirectoryResolver();
         $this->logger = $logger;
         $this->parameterStoreFactory = $parameterStoreFactory;
         $this->definitionProviderFactory = $definitionProviderFactory;
+        $this->observerFactory = $observerFactory;
     }
 
     public function addObserver(Observer $observer) : void {
@@ -61,8 +65,22 @@ final class Bootstrap {
             $configFile,
             directoryResolver: $this->directoryResolver,
             parameterStoreFactory: $this->parameterStoreFactory,
+            observerFactory: $this->observerFactory,
             definitionProviderFactory: $this->definitionProviderFactory
         );
+        $activeProfiles = new class($profiles) implements ActiveProfiles {
+            public function __construct(
+                private readonly array $profiles
+            ) {}
+
+            public function getProfiles() : array {
+                return $this->profiles;
+            }
+
+            public function isActive(string $profile) : bool {
+                return in_array($profile, $this->profiles, true);
+            }
+        };
 
         $scanPaths = [];
         foreach ($configuration->getScanDirectories() as $scanDirectory) {
@@ -91,18 +109,18 @@ final class Bootstrap {
         }
 
         foreach ($this->observers as $observer) {
-            $observer->beforeCompilation();
+            $observer->beforeCompilation($activeProfiles);
         }
 
         $containerDefinition = $this->getCompiler($cacheDir)->compile($compileOptions->build());
 
         foreach ($this->observers as $observer) {
-            $observer->afterCompilation($containerDefinition);
+            $observer->afterCompilation($activeProfiles, $containerDefinition);
         }
 
         $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
 
-        $containerFactory = $this->getContainerFactory();
+        $containerFactory = $this->getContainerFactory($activeProfiles);
 
         foreach ($configuration->getParameterStores() as $parameterStore) {
             $containerFactory->addParameterStore($parameterStore);
@@ -113,11 +131,11 @@ final class Bootstrap {
         }
 
         foreach ($this->observers as $observer) {
-            $observer->beforeContainerCreation($containerDefinition);
+            $observer->beforeContainerCreation($activeProfiles, $containerDefinition);
         }
         $container = $containerFactory->createContainer($containerDefinition, $factoryOptions->build());
         foreach ($this->observers as $observer) {
-            $observer->afterContainerCreation($containerDefinition, $container);
+            $observer->afterContainerCreation($activeProfiles, $containerDefinition, $container);
         }
         return $container;
     }
@@ -131,15 +149,16 @@ final class Bootstrap {
         return new RootDirectoryBootstrappingDirectoryResolver($rootDir);
     }
 
-    private function getContainerFactory() : ContainerFactory {
+    private function getContainerFactory(ActiveProfiles $activeProfiles) : ContainerFactory {
         if (class_exists(Injector::class)) {
-            return new AurynContainerFactory();
-
-        } else if (class_exists(Container::class)) {
-            return new PhpDiContainerFactory();
-        } else {
-            throw BackingContainerNotFound::fromMissingImplementation();
+            return new AurynContainerFactory($activeProfiles);
         }
+
+        if (class_exists(Container::class)) {
+            return new PhpDiContainerFactory($activeProfiles);
+        }
+
+        throw BackingContainerNotFound::fromMissingImplementation();
     }
 
     private function getCompiler(?string $cacheDir) : ContainerDefinitionCompiler {
