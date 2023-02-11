@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Cli\Command;
 
+use Cspray\AnnotatedContainer\Bootstrap\VendorScanningThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Command\InitCommand;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
@@ -29,8 +30,10 @@ class InitCommandTest extends TestCase {
     protected function setUp() : void {
         parent::setUp();
         $this->vfs = VirtualFilesystem::setup();
+        VirtualFilesystem::newDirectory('vendor')->at($this->vfs);
         $this->subject = new InitCommand(
-            new FixtureBootstrappingDirectoryResolver()
+            $resolver = new FixtureBootstrappingDirectoryResolver(),
+            new VendorScanningThirdPartyInitializerProvider($resolver)
         );
         $this->stdout = new InMemoryOutput();
         $this->stderr = new InMemoryOutput();
@@ -236,8 +239,8 @@ SHELL;
 
         $input = new StubInput([], ['init']);
 
-        self::expectException(ComposerAutoloadNotFound::class);
-        self::expectExceptionMessage('Did not find any directories to scan based on composer autoload configuration. Please ensure there is a PSR-4 or PSR-0 autoload or autoload-dev set in your composer.json and try again.');
+        $this->expectException(ComposerAutoloadNotFound::class);
+        $this->expectExceptionMessage('Did not find any directories to scan based on composer autoload configuration. Please ensure there is a PSR-4 or PSR-0 autoload or autoload-dev set in your composer.json and try again.');
         $this->subject->handle($input, $this->output);
 
     }
@@ -261,7 +264,11 @@ SHELL;
             ], JSON_THROW_ON_ERROR))->at($this->vfs);
 
         $input = new StubInput([], ['init']);
-        $exitCode = $this->subject->handle($input, $this->output);
+        $subject = new InitCommand(
+            $resolver = new FixtureBootstrappingDirectoryResolver(true),
+            new VendorScanningThirdPartyInitializerProvider($resolver)
+        );
+        $exitCode = $subject->handle($input, $this->output);
 
         self::assertSame(0, $exitCode);
 
@@ -275,7 +282,22 @@ SHELL;
       <dir>trunk</dir>
       <dir packagePrivate="true">test</dir>
     </source>
+    <vendor>
+      <package>
+        <name>cspray/package</name>
+        <source>
+          <dir>src</dir>
+          <dir>other_src</dir>
+        </source>
+      </package>
+    </vendor>
   </scanDirectories>
+  <definitionProviders>
+    <definitionProvider>Cspray\AnnotatedContainerFixture\VendorScanningInitializers\DependencyDefinitionProvider</definitionProvider>
+  </definitionProviders>
+  <observers>
+    <observer>Cspray\AnnotatedContainerFixture\VendorScanningInitializers\DependencyObserver</observer>
+  </observers>
   <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
@@ -330,7 +352,10 @@ XML;
       <dir>src</dir>
       <dir packagePrivate="true">lib</dir>
     </source>
+    <vendor/>
   </scanDirectories>
+  <definitionProviders/>
+  <observers/>
   <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
@@ -371,7 +396,10 @@ XML;
       <dir>src</dir>
       <dir packagePrivate="true">tests</dir>
     </source>
+    <vendor/>
   </scanDirectories>
+  <definitionProviders/>
+  <observers/>
   <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
@@ -392,8 +420,8 @@ XML;
             ->withContent('does not matter for this test')
             ->at($this->vfs);
 
-        self::expectException(PotentialConfigurationOverwrite::class);
-        self::expectExceptionMessage(
+        $this->expectException(PotentialConfigurationOverwrite::class);
+        $this->expectExceptionMessage(
             'The configuration file "composer-defined.xml" is already present and cannot be overwritten.'
         );
 
@@ -430,7 +458,10 @@ XML;
       <dir>src</dir>
       <dir packagePrivate="true">lib</dir>
     </source>
+    <vendor/>
   </scanDirectories>
+  <definitionProviders/>
+  <observers/>
   <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
@@ -468,7 +499,10 @@ XML;
       <dir>src</dir>
       <dir packagePrivate="true">tests</dir>
     </source>
+    <vendor/>
   </scanDirectories>
+  <definitionProviders/>
+  <observers/>
   <cacheDir>my-cache-dir</cacheDir>
 </annotatedContainer>
 
@@ -507,7 +541,10 @@ XML;
       <dir>src</dir>
       <dir packagePrivate="true">tests</dir>
     </source>
+    <vendor/>
   </scanDirectories>
+  <definitionProviders/>
+  <observers/>
   <cacheDir>path/cache/my-cache-dir</cacheDir>
 </annotatedContainer>
 
@@ -538,11 +575,13 @@ XML;
     <source>
       <dir>src</dir>
     </source>
+    <vendor/>
   </scanDirectories>
-  <cacheDir>.annotated-container-cache</cacheDir>
   <definitionProviders>
     <definitionProvider>ConsumerClass</definitionProvider>
   </definitionProviders>
+  <observers/>
+  <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
 XML;
@@ -571,11 +610,14 @@ XML;
     <source>
       <dir>src</dir>
     </source>
+    <vendor/>
   </scanDirectories>
-  <cacheDir>.annotated-container-cache</cacheDir>
+  <definitionProviders/>
   <parameterStores>
     <parameterStore>MyParameterStoreClass</parameterStore>
   </parameterStores>
+  <observers/>
+  <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
 XML;
@@ -604,12 +646,15 @@ XML;
     <source>
       <dir>src</dir>
     </source>
+    <vendor/>
   </scanDirectories>
-  <cacheDir>.annotated-container-cache</cacheDir>
+  <definitionProviders/>
   <parameterStores>
     <parameterStore>MyParameterStoreClassOne</parameterStore>
     <parameterStore>MyParameterStoreClassTwo</parameterStore>
   </parameterStores>
+  <observers/>
+  <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
 XML;
@@ -638,11 +683,13 @@ XML;
     <source>
       <dir>src</dir>
     </source>
+    <vendor/>
   </scanDirectories>
-  <cacheDir>.annotated-container-cache</cacheDir>
+  <definitionProviders/>
   <observers>
     <observer>MyObserverClass</observer>
   </observers>
+  <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
 XML;
@@ -671,12 +718,14 @@ XML;
     <source>
       <dir>src</dir>
     </source>
+    <vendor/>
   </scanDirectories>
-  <cacheDir>.annotated-container-cache</cacheDir>
+  <definitionProviders/>
   <observers>
     <observer>MyObserverClassOne</observer>
     <observer>MyObserverClassTwo</observer>
   </observers>
+  <cacheDir>.annotated-container-cache</cacheDir>
 </annotatedContainer>
 
 XML;

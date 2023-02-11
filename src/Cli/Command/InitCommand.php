@@ -3,6 +3,8 @@
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
 use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializer;
+use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Command;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
@@ -21,7 +23,8 @@ final class InitCommand implements Command {
     private const XML_SCHEMA = 'https://annotated-container.cspray.io/schema/annotated-container.xsd';
 
     public function __construct(
-        private readonly BootstrappingDirectoryResolver $directoryResolver
+        private readonly BootstrappingDirectoryResolver $directoryResolver,
+        private readonly ThirdPartyInitializerProvider $initializerProvider
     ) {}
 
     public function getName() : string {
@@ -325,18 +328,12 @@ SHELL;
             $source->appendChild($dirNode);
         }
 
-        /** @var string|null $cacheDirOpt */
-        $cacheDirOpt = $input->getOption('cache-dir');
-        $cacheName = $cacheDirOpt ?? '.annotated-container-cache';
-
-        $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'cacheDir', $cacheName));
-
+        $definitionProvidersNode = $root->appendChild(
+            $dom->createElementNS(self::XML_SCHEMA, 'definitionProviders')
+        );
         /** @var string|null $definitionProvider */
         $definitionProvider = $input->getOption('definition-provider');
         if (isset($definitionProvider)) {
-            $definitionProvidersNode = $root->appendChild(
-                $dom->createElementNS(self::XML_SCHEMA, 'definitionProviders')
-            );
             $definitionProvidersNode->appendChild(
                 $dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $definitionProvider)
             );
@@ -354,14 +351,64 @@ SHELL;
 
         /** @var string|array|null $observers */
         $observers = $input->getOption('observer');
+        $observersNode = $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'observers'));
         if ($observers !== null) {
             $observers = is_string($observers) ? [$observers] : $observers;
-            $observersNode = $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'observers'));
             /** @var string $observer */
             foreach ($observers as $observer) {
                 $observersNode->appendChild($dom->createElementNS(self::XML_SCHEMA, 'observer', $observer));
             }
         }
+
+        $vendor = $scanDirectories->appendChild(
+            $dom->createElementNS(self::XML_SCHEMA, 'vendor')
+        );
+        foreach ($this->initializerProvider->getThirdPartyInitializers() as $thirdPartyInitializerClass) {
+            $thirdPartyInitializer = new $thirdPartyInitializerClass();
+            assert($thirdPartyInitializer instanceof ThirdPartyInitializer);
+            $packageRelativeRootDirectory = sprintf(
+                'vendor/%s',
+                $thirdPartyInitializer->getPackageName()
+            );
+
+            $packageRelativeScanDirectories = $thirdPartyInitializer->getRelativeScanDirectories();
+            if (count($packageRelativeScanDirectories) > 0) {
+                $package = $vendor->appendChild(
+                    $dom->createElementNS(self::XML_SCHEMA, 'package')
+                );
+                $package->appendChild(
+                    $dom->createElementNS(self::XML_SCHEMA, 'name', $thirdPartyInitializer->getPackageName())
+                );
+                $packageSource = $package->appendChild(
+                    $dom->createElementNS(self::XML_SCHEMA, 'source')
+                );
+
+                foreach ($packageRelativeScanDirectories as $packageRelativeScanDirectory) {
+                    $packageSource->appendChild(
+                        $dom->createElementNS(self::XML_SCHEMA, 'dir', $packageRelativeScanDirectory)
+                    );
+                }
+            }
+
+            $providerClass = $thirdPartyInitializer->getDefinitionProviderClass();
+            if ($providerClass !== null) {
+                $definitionProvidersNode->appendChild(
+                    $dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $providerClass)
+                );
+            }
+
+            foreach ($thirdPartyInitializer->getObserverClasses() as $observerClass) {
+                $observersNode->appendChild(
+                    $dom->createElementNS(self::XML_SCHEMA, 'observer', $observerClass)
+                );
+            }
+        }
+
+        /** @var string|null $cacheDirOpt */
+        $cacheDirOpt = $input->getOption('cache-dir');
+        $cacheName = $cacheDirOpt ?? '.annotated-container-cache';
+
+        $root->appendChild($dom->createElementNS(self::XML_SCHEMA, 'cacheDir', $cacheName));
 
         $schemaPath = dirname(__DIR__, 3) . '/annotated-container.xsd';
         $dom->schemaValidate($schemaPath);

@@ -42,8 +42,8 @@ XML;
         VirtualFilesystem::newFile('annotated-container.xml')
             ->withContent($badXml)
             ->at($this->vfs);
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'Configuration file vfs://root/annotated-container.xml does not validate against the appropriate schema.'
         );
         new XmlBootstrappingConfiguration(
@@ -131,8 +131,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in definitionProviders must be classes that implement ' . DefinitionProvider::class
         );
 
@@ -161,8 +161,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in definitionProviders must be classes that implement ' . DefinitionProvider::class
         );
 
@@ -290,8 +290,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
         new XmlBootstrappingConfiguration(
@@ -319,8 +319,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in parameterStores must be classes that implement ' . ParameterStore::class
         );
         new XmlBootstrappingConfiguration(
@@ -558,8 +558,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in observers must be classes that implement ' . Observer::class
         );
         new XmlBootstrappingConfiguration(
@@ -587,8 +587,8 @@ XML;
             ->withContent($badXml)
             ->at($this->vfs);
 
-        self::expectException(InvalidBootstrapConfiguration::class);
-        self::expectExceptionMessage(
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage(
             'All entries in observers must be classes that implement ' . Observer::class
         );
         new XmlBootstrappingConfiguration(
@@ -630,5 +630,47 @@ XML;
 
         self::assertCount(1, $config->getObservers());
         self::assertInstanceOf(StubBootstrapObserverWithDependencies::class, $config->getObservers()[0]);
+    }
+
+    public function testVendorScanDirectoriesIncludedInList() : void {
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>src</dir>
+            <dir>test/helper</dir>
+            <dir>lib</dir>
+        </source>
+        <vendor>
+          <package>
+            <name>package/one</name>
+            <source>
+              <dir>src</dir>
+              <dir>lib</dir>
+            </source>
+          </package>
+          <package>
+            <name>package/two</name>
+            <source>
+              <dir>other_src</dir>
+            </source>
+          </package>
+        </vendor>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+        $configuration = new XmlBootstrappingConfiguration(
+            'vfs://root/annotated-container.xml',
+            new FixtureBootstrappingDirectoryResolver()
+        );
+
+        self::assertSame(
+            ['src', 'test/helper', 'lib', 'vendor/package/one/src', 'vendor/package/one/lib', 'vendor/package/two/other_src'],
+            $configuration->getScanDirectories()
+        );
     }
 }

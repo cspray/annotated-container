@@ -89,7 +89,7 @@ SHELL;
 
         $sourceDirs = [];
         foreach ($config->getScanDirectories() as $scanDirectory) {
-            $sourceDirs[] = $this->directoryResolver->getSourceScanPath($scanDirectory);
+            $sourceDirs[] = $this->directoryResolver->getPathFromRoot($scanDirectory);
         }
 
         sort($sourceDirs);

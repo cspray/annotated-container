@@ -12,6 +12,8 @@ use Cspray\AnnotatedContainer\Internal\FileLogger;
 use Cspray\AnnotatedContainer\Internal\StdoutLogger;
 use DateTimeImmutable;
 use DOMDocument;
+use DOMElement;
+use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 
@@ -61,6 +63,41 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             $scanDirectories = [];
             foreach ($scanDirectoriesNodes as $scanDirectory) {
                 $scanDirectories[] = $scanDirectory->textContent;
+            }
+
+            $vendorPackagesNodes = $xpath->query('/ac:annotatedContainer/ac:scanDirectories/ac:vendor/ac:package');
+            foreach ($vendorPackagesNodes as $vendorPackageNode) {
+                assert($vendorPackageNode instanceof DOMElement);
+
+                $name = $vendorPackageNode->getElementsByTagNameNS(
+                    'https://annotated-container.cspray.io/schema/annotated-container.xsd',
+                    'name'
+                )->item(0)?->nodeValue;
+
+                assert($name !== null);
+
+                $source = $vendorPackageNode->getElementsByTagNameNS(
+                    'https://annotated-container.cspray.io/schema/annotated-container.xsd',
+                    'source'
+                )->item(0);
+
+                assert($source instanceof DOMElement);
+
+                $dirs = $source->getElementsByTagNameNS(
+                    'https://annotated-container.cspray.io/schema/annotated-container.xsd',
+                    'dir'
+                );
+
+                /** @var DOMElement $dir */
+                foreach ($dirs as $dir) {
+                    $vendorScanPath = sprintf(
+                        'vendor/%s/%s',
+                        trim($name),
+                        trim($dir->nodeValue)
+                    );
+                    $scanDirectories[] = $vendorScanPath;
+                }
+
             }
 
             $definitionProvider = null;

@@ -92,7 +92,7 @@ SHELL;
         $cacheDir = $this->directoryResolver->getCachePath($cacheDir);
         $scanDirs = [];
         foreach ($config->getScanDirectories() as $scanDirectory) {
-            $scanDirs[] = $this->directoryResolver->getSourceScanPath($scanDirectory);
+            $scanDirs[] = $this->directoryResolver->getPathFromRoot($scanDirectory);
         }
 
         $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanDirs);
