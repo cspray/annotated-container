@@ -11,7 +11,7 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
 
     protected function assertServiceDefinitionsHaveTypes(array $expectedTypes, array $serviceDefinitions) : void {
         if (($countExpected = count($expectedTypes)) !== ($countActual = count($serviceDefinitions))) {
-            $this->fail("Expected ${countExpected} ServiceDefinitions but received ${countActual}");
+            $this->fail("Expected $countExpected ServiceDefinitions but received $countActual");
         }
 
         $actualTypes = [];
@@ -43,7 +43,7 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
 
     protected function assertAliasDefinitionsMap(array $expectedAliasMap, array $aliasDefinitions) : void {
         if (($countExpected = count($expectedAliasMap)) !== ($countActual = count($aliasDefinitions))) {
-            $this->fail("Expected ${countExpected} AliasDefinitions but received ${countActual}");
+            $this->fail("Expected $countExpected AliasDefinitions but received $countActual");
         }
 
         $actualMap = [];
@@ -62,7 +62,7 @@ trait ContainerDefinitionAssertionsTrait /** extends \PHPUnit\TestCase */ {
 
     protected function assertServicePrepareTypes(array $expectedServicePrepare, array $servicePrepareDefinitions) : void {
         if (($countExpected = count($expectedServicePrepare)) !== ($countActual = count($servicePrepareDefinitions))) {
-            $this->fail("Expected ${countExpected} ServicePrepareDefinition but received ${countActual}");
+            $this->fail("Expected $countExpected ServicePrepareDefinition but received $countActual");
         }
 
         $actualMap = [];
