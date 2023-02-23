@@ -18,7 +18,7 @@ If successful you'll get a configuration file named `annotated-container.xml` in
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">tests</dir>
+      <dir>tests</dir>
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
@@ -41,7 +41,7 @@ Bootstrapping allows logging to a file or logging to stdout. In our example the 
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">tests</dir>
+      <dir>tests</dir>
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
@@ -82,13 +82,13 @@ Now, upgrade the configuration to let bootstrapping know which class to use.
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">tests</dir>
+      <dir>tests</dir>
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
-  <definitionProvider>
-    Acme\Demo\ThirdPartyServicesProvider
-  </definitionProvider>
+  <definitionProviders>
+    <definitionProvider>Acme\Demo\ThirdPartyServicesProvider</definitionProvider>
+  </definitionProviders>
 </annotatedContainer>
 ```
 
@@ -128,7 +128,7 @@ Next, update your configuration.
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">tests</dir>
+      <dir>tests</dir>
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
@@ -138,7 +138,11 @@ Next, update your configuration.
 </annotatedContainer>
 ```
 
-### Step 5 - Create Your Container
+### Step 5 - Provide your Observers (optional)
+
+
+
+### Step 6 - Create Your Container
 
 Before completing this step go put some Attributes on the services in your codebase!
 
@@ -242,6 +246,8 @@ $container = (new Bootstrap(
     parameterStoreFactory: $parameterStoreFactory
 ))->bootstrapContainer();
 ```
+
+#### Constructing Observer
 
 #### Changing Resolved Paths
 
