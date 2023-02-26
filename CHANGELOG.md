@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+### Added
+
+- Added `cspray/annotated-container-adr` dependency for removed Architectural Decision Records.
+- Added `cspray/annotated-container-attribute` dependency for removed Attribute.
+
+### Removed
+
+- Removed Architectural Decision Records and provided Attributes, replaced in separate packages.
+
 ## [v2.0.0-rc2](https://github.com/cspray/annotated-container/tree/v2.0.0-rc2) - 2023-02-11
 
 ### Added
