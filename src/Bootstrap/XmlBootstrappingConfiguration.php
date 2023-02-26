@@ -37,7 +37,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     private readonly array $parameterStores;
 
     /**
-     * @var list<Observer>
+     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
      */
     private readonly array $observers;
 
@@ -147,7 +147,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                     if (isset($this->observerFactory)) {
                         $observer = $this->observerFactory->createObserver($observerClass);
                     } else {
-                        if (!class_exists($observerClass) || !is_subclass_of($observerClass, Observer::class)) {
+                        if (!$this->isObserverType($observerClass)) {
                             throw InvalidBootstrapConfiguration::fromConfiguredObserverWrongType();
                         }
                         $observer = new $observerClass();
@@ -204,6 +204,17 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             libxml_clear_errors();
             libxml_use_internal_errors(false);
         }
+    }
+
+    private function isObserverType(string $observerClass) : bool {
+        if (!class_exists($observerClass)) {
+            return false;
+        }
+
+        return is_subclass_of($observerClass, PreAnalysisObserver::class) ||
+            is_subclass_of($observerClass, PostAnalysisObserver::class) ||
+            is_subclass_of($observerClass, ContainerCreatedObserver::class);
+
     }
 
     public function getScanDirectories() : array {

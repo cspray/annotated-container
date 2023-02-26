@@ -25,7 +25,7 @@ interface BootstrappingConfiguration {
     public function getParameterStores() : array;
 
     /**
-     * @return list<Observer>
+     * @return list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
      */
     public function getObservers() : array;
 

@@ -29,7 +29,7 @@ final class Bootstrap {
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;
     private readonly ?ObserverFactory $observerFactory;
     /**
-     * @var list<Observer>
+     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
      */
     private array $observers = [];
 
@@ -47,7 +47,7 @@ final class Bootstrap {
         $this->observerFactory = $observerFactory;
     }
 
-    public function addObserver(Observer $observer) : void {
+    public function addObserver(PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver $observer) : void {
         $this->observers[] = $observer;
     }
 
@@ -110,13 +110,17 @@ final class Bootstrap {
         }
 
         foreach ($this->observers as $observer) {
-            $observer->beforeCompilation($activeProfiles);
+            if ($observer instanceof PreAnalysisObserver) {
+                $observer->notifyPreAnalysis($activeProfiles);
+            }
         }
 
         $containerDefinition = $this->getCompiler($cacheDir)->analyze($compileOptions->build());
 
         foreach ($this->observers as $observer) {
-            $observer->afterCompilation($activeProfiles, $containerDefinition);
+            if ($observer instanceof PostAnalysisObserver) {
+                $observer->notifyPostAnalysis($activeProfiles, $containerDefinition);
+            }
         }
 
         $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
@@ -131,12 +135,11 @@ final class Bootstrap {
             $factoryOptions = $factoryOptions->withLogger($logger);
         }
 
-        foreach ($this->observers as $observer) {
-            $observer->beforeContainerCreation($activeProfiles, $containerDefinition);
-        }
         $container = $containerFactory->createContainer($containerDefinition, $factoryOptions->build());
         foreach ($this->observers as $observer) {
-            $observer->afterContainerCreation($activeProfiles, $containerDefinition, $container);
+            if ($observer instanceof ContainerCreatedObserver) {
+                $observer->notifyContainerCreated($activeProfiles, $containerDefinition, $container);
+            }
         }
         return $container;
     }

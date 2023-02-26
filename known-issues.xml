@@ -26,6 +26,14 @@
       <code>array</code>
     </MoreSpecificReturnType>
   </file>
+  <file src="src/Bootstrap/XmlBootstrappingConfiguration.php">
+    <InvalidStringClass occurrences="1">
+      <code>new $observerClass()</code>
+    </InvalidStringClass>
+    <PropertyTypeCoercion occurrences="1">
+      <code>$observers</code>
+    </PropertyTypeCoercion>
+  </file>
   <file src="src/Cli/Command/BuildCommand.php">
     <MixedArrayAccess occurrences="1">
       <code>$composer['extra']['annotatedContainer']['configFile']</code>
