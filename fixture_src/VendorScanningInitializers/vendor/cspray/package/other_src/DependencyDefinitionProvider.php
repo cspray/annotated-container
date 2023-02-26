@@ -2,8 +2,8 @@
 
 namespace Cspray\AnnotatedContainerFixture\VendorScanningInitializers;
 
-use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
-use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext;
 use function Cspray\AnnotatedContainer\service;
 use function Cspray\Typiphy\objectType;
 

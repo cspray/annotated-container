@@ -4,11 +4,11 @@ namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Auryn\Injector;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\ContainerFactory\AurynContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
@@ -87,7 +87,7 @@ final class Bootstrap {
         foreach ($configuration->getScanDirectories() as $scanDirectory) {
             $scanPaths[] = $this->directoryResolver->getPathFromRoot($scanDirectory);
         }
-        $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanPaths);
+        $compileOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$scanPaths);
         $containerDefinitionConsumer = $configuration->getContainerDefinitionProvider();
         if ($containerDefinitionConsumer !== null) {
             $compileOptions = $compileOptions->withDefinitionProvider($containerDefinitionConsumer);
@@ -113,7 +113,7 @@ final class Bootstrap {
             $observer->beforeCompilation($activeProfiles);
         }
 
-        $containerDefinition = $this->getCompiler($cacheDir)->compile($compileOptions->build());
+        $containerDefinition = $this->getCompiler($cacheDir)->analyze($compileOptions->build());
 
         foreach ($this->observers as $observer) {
             $observer->afterCompilation($activeProfiles, $containerDefinition);
@@ -162,13 +162,13 @@ final class Bootstrap {
         throw BackingContainerNotFound::fromMissingImplementation();
     }
 
-    private function getCompiler(?string $cacheDir) : ContainerDefinitionCompiler {
-        $compiler = new AnnotatedTargetContainerDefinitionCompiler(
+    private function getCompiler(?string $cacheDir) : ContainerDefinitionAnalyzer {
+        $compiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter()
+            new AnnotatedTargetDefinitionConverter()
         );
         if ($cacheDir !== null) {
-            $compiler = new CacheAwareContainerDefinitionCompiler($compiler, new ContainerDefinitionSerializer(), $cacheDir);
+            $compiler = new CacheAwareContainerDefinitionAnalyzer($compiler, new ContainerDefinitionSerializer(), $cacheDir);
         }
 
         return $compiler;

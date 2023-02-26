@@ -8,9 +8,9 @@ use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
@@ -1774,15 +1774,15 @@ XML;
      * @dataProvider fixturesDirProvider
      */
     public function testScannedAndSerializedContainerDefinitionMatchesDeserialized(Fixture $fixture) : void {
-        $compiler = new AnnotatedTargetContainerDefinitionCompiler(
+        $compiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter()
+            new AnnotatedTargetDefinitionConverter()
         );
 
         $subject = new ContainerDefinitionSerializer();
 
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($fixture->getPath())->build()
+        $containerDefinition = $compiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($fixture->getPath())->build()
         );
 
         $expected = $subject->serialize($containerDefinition);

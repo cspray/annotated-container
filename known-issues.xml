@@ -81,16 +81,6 @@
       <code>$this-&gt;tagCodes['tags']</code>
     </MixedArgument>
   </file>
-  <file src="src/Compile/AnnotatedTargetContainerDefinitionCompiler.php">
-    <MixedArgument occurrences="1">
-      <code>$dirs</code>
-    </MixedArgument>
-    <MixedAssignment occurrences="3">
-      <code>$convertedValue</code>
-      <code>$convertedValue[$k]</code>
-      <code>$v</code>
-    </MixedAssignment>
-  </file>
   <file src="src/ContainerFactory/AbstractContainerFactory.php">
     <MixedArgument occurrences="4">
       <code>$inject-&gt;getValue()</code>
@@ -238,5 +228,19 @@
     <UndefinedPropertyFetch occurrences="1">
       <code>$xpath-&gt;query('@isPrimary', $serviceDefinition)[0]?-&gt;value</code>
     </UndefinedPropertyFetch>
+  </file>
+  <file src="src/StaticAnalysis/AnnotatedTargetContainerDefinitionAnalyzer.php">
+    <MixedAssignment occurrences="1">
+      <code>$convertedValue[$k]</code>
+    </MixedAssignment>
+  </file>
+  <file src="src/StaticAnalysis/ContainerDefinitionAnalysisOptionsBuilder.php">
+    <MixedPropertyTypeCoercion occurrences="1">
+      <code>$directories</code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnTypeCoercion occurrences="2">
+      <code>$this-&gt;directories</code>
+      <code>array</code>
+    </MixedReturnTypeCoercion>
   </file>
 </files>

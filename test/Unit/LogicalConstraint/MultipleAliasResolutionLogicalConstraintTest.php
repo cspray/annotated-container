@@ -2,10 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint;
 
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\LogicalConstraint\MultipleAliasResolutionLogicalConstraint;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -14,20 +14,20 @@ use PHPUnit\Framework\TestCase;
 
 class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
 
-    private ContainerDefinitionCompiler $containerDefinitionCompiler;
+    private ContainerDefinitionAnalyzer $containerDefinitionCompiler;
     private MultipleAliasResolutionLogicalConstraint $subject;
 
     protected function setUp(): void {
-        $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
+        $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter()
+            new AnnotatedTargetDefinitionConverter()
         );
         $this->subject = new MultipleAliasResolutionLogicalConstraint();
     }
 
     public function testMultipleAliasResolvedHasWarning() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::ambiguousAliasedServices()->getPath())->build()
+        $containerDefinition = $this->containerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::ambiguousAliasedServices()->getPath())->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
@@ -38,8 +38,8 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
     }
 
     public function testNoAliasResolvedHasNoViolations() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
+        $containerDefinition = $this->containerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);
@@ -48,8 +48,8 @@ class MultipleAliasResolutionLogicalConstraintTest extends TestCase {
     }
 
     public function testSingleAliasResolvedHasNoViolations() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::implicitAliasedServices()->getPath())->build()
+        $containerDefinition = $this->containerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::implicitAliasedServices()->getPath())->build()
         );
 
         $violations = $this->subject->getConstraintViolations($containerDefinition);

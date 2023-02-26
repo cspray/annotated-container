@@ -10,11 +10,12 @@ use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Input;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 
@@ -95,7 +96,7 @@ SHELL;
             $scanDirs[] = $this->directoryResolver->getPathFromRoot($scanDirectory);
         }
 
-        $compileOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$scanDirs);
+        $compileOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$scanDirs);
         $containerDefinitionConsumer = $config->getContainerDefinitionProvider();
         if ($containerDefinitionConsumer !== null) {
             $compileOptions = $compileOptions->withDefinitionProvider($containerDefinitionConsumer);
@@ -106,20 +107,20 @@ SHELL;
             $compileOptions = $compileOptions->withLogger($logger);
         }
 
-        $this->getCompiler($cacheDir)->compile($compileOptions->build());
+        $this->getCompiler($cacheDir)->analyze($compileOptions->build());
 
         $output->stdout->write('<fg:green>Successfully built and cached your Container!</fg:green>');
 
         return 0;
     }
 
-    private function getCompiler(?string $cacheDir) : ContainerDefinitionCompiler {
-        $compiler = new AnnotatedTargetContainerDefinitionCompiler(
+    private function getCompiler(?string $cacheDir) : ContainerDefinitionAnalyzer {
+        $compiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter()
+            new AnnotatedTargetDefinitionConverter()
         );
         if ($cacheDir !== null) {
-            $compiler = new CacheAwareContainerDefinitionCompiler($compiler, new ContainerDefinitionSerializer(), $cacheDir);
+            $compiler = new CacheAwareContainerDefinitionAnalyzer($compiler, new ContainerDefinitionSerializer(), $cacheDir);
         }
 
         return $compiler;

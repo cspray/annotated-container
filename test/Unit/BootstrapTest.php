@@ -11,7 +11,7 @@ use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceWiringObserver;
-use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapObserver;

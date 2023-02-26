@@ -7,10 +7,10 @@ use Cspray\AnnotatedContainer\Cli\Exception\CacheDirConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Unit\Helper\InMemoryOutput;
@@ -244,15 +244,15 @@ XML;
         $expectedKey = md5(Fixtures::thirdPartyServices()->getPath());
         self::assertFileExists('vfs://root/.annotated-container-cache/' . $expectedKey);
 
-        $containerDefinition = (new CacheAwareContainerDefinitionCompiler(
-            new AnnotatedTargetContainerDefinitionCompiler(
+        $containerDefinition = (new CacheAwareContainerDefinitionAnalyzer(
+            new AnnotatedTargetContainerDefinitionAnalyzer(
                 new PhpParserAnnotatedTargetParser(),
-                new DefaultAnnotatedTargetDefinitionConverter(),
+                new AnnotatedTargetDefinitionConverter(),
             ),
             new ContainerDefinitionSerializer(),
             'vfs://root/.annotated-container-cache'
-        ))->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::thirdPartyServices()->getPath())->build()
+        ))->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::thirdPartyServices()->getPath())->build()
         );
 
         self::assertCount(2, $containerDefinition->getServiceDefinitions());

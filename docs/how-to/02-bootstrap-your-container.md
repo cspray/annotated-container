@@ -62,8 +62,8 @@ Somewhere in your source code:
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
-use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext;
 
 class ThirdPartyServicesProvider implements DefinitionProvider {
 

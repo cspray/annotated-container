@@ -7,7 +7,7 @@ use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
@@ -27,7 +27,7 @@ abstract class AnnotatedTargetDefinitionConverterTestCase extends TestCase {
     protected ServiceDefinition|ServiceDelegateDefinition|ServicePrepareDefinition|InjectDefinition|ConfigurationDefinition $definition;
 
     protected function setUp() : void {
-        $subject = new DefaultAnnotatedTargetDefinitionConverter();
+        $subject = new AnnotatedTargetDefinitionConverter();
         $this->definition = $subject->convert($this->getSubjectTarget());
     }
 

@@ -2,35 +2,35 @@
 
 namespace Cspray\AnnotatedContainer\Unit;
 
-use Cspray\AnnotatedContainer\Compile\CallableDefinitionProvider;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\CallableDefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-class ContainerDefinitionCompileOptionsBuilderTest extends TestCase {
+class ContainerDefinitionAnalysisOptionsBuilderTest extends TestCase {
 
     public function testByDefaultDefinitionProviderIsNull() : void {
-        $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build();
+        $compilerOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build();
 
         self::assertNull($compilerOptions->getDefinitionProvider());
     }
 
     public function testByDefaultLoggerIsNull() : void {
-        $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build();
+        $compilerOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build();
 
         self::assertNull($compilerOptions->getLogger());
     }
 
     public function testWithDefinitionProviderImmutable() : void {
-        $a = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath());
+        $a = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath());
         $b = $a->withDefinitionProvider(new CallableDefinitionProvider(function() {}));
 
         self::assertNotSame($a, $b);
     }
 
     public function testWithDefinitionProviderReturnsCorrectInstance() : void {
-        $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())
+        $compilerOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())
             ->withDefinitionProvider($expected = new CallableDefinitionProvider(function() {}))
             ->build();
 
@@ -38,7 +38,7 @@ class ContainerDefinitionCompileOptionsBuilderTest extends TestCase {
     }
 
     public function testWithLoggerImmutable() : void {
-        $a = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath());
+        $a = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath());
         $b = $a->withLogger($this->getMockBuilder(LoggerInterface::class)->getMock());
 
         self::assertNotSame($a, $b);
@@ -47,7 +47,7 @@ class ContainerDefinitionCompileOptionsBuilderTest extends TestCase {
     public function testWithLoggerReturnsLogger() : void {
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
 
-        $compilerOptions = ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())
+        $compilerOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())
             ->withLogger($logger)
             ->build();
 

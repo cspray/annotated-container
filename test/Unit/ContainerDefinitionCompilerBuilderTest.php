@@ -2,8 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\Unit;
 
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompilerBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzerBuilder;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
@@ -18,20 +18,20 @@ final class ContainerDefinitionCompilerBuilderTest extends TestCase {
     }
 
     public function testInstanceWithoutCache() : void {
-        $compiler = ContainerDefinitionCompilerBuilder::withoutCache()->build();
+        $compiler = ContainerDefinitionAnalyzerBuilder::withoutCache()->build();
 
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build()
+        $containerDefinition = $compiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build()
         );
 
         self::assertCount(1, $containerDefinition->getServiceDefinitions());
     }
 
     public function testInstanceWithCache() : void {
-        $compiler = ContainerDefinitionCompilerBuilder::withCache('vfs://root')->build();
+        $compiler = ContainerDefinitionAnalyzerBuilder::withCache('vfs://root')->build();
 
-        $containerDefinition = $compiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build()
+        $containerDefinition = $compiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::singleConcreteService()->getPath())->build()
         );
 
         self::assertCount(1, $containerDefinition->getServiceDefinitions());

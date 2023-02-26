@@ -4,11 +4,11 @@ namespace Cspray\AnnotatedContainer\Unit;
 
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
 use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\CacheAwareContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Exception\InvalidCache;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Unit\Helper\TestLogger;
@@ -21,16 +21,16 @@ use Psr\Log\LogLevel;
 
 class CacheAwareContainerDefinitionCompilerTest extends TestCase {
 
-    private CacheAwareContainerDefinitionCompiler $cacheAwareContainerDefinitionCompiler;
-    private AnnotatedTargetContainerDefinitionCompiler $phpParserContainerDefinitionCompiler;
+    private CacheAwareContainerDefinitionAnalyzer $cacheAwareContainerDefinitionCompiler;
+    private AnnotatedTargetContainerDefinitionAnalyzer $phpParserContainerDefinitionCompiler;
     private ContainerDefinitionSerializer $containerDefinitionSerializer;
     private vfsStreamDirectory $root;
 
     protected function setUp(): void {
-        $this->cacheAwareContainerDefinitionCompiler = new CacheAwareContainerDefinitionCompiler(
-            $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
+        $this->cacheAwareContainerDefinitionCompiler = new CacheAwareContainerDefinitionAnalyzer(
+            $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
                 new PhpParserAnnotatedTargetParser(),
-                new DefaultAnnotatedTargetDefinitionConverter()
+                new AnnotatedTargetDefinitionConverter()
             ),
             $this->containerDefinitionSerializer = new ContainerDefinitionSerializer(),
             'vfs://root'
@@ -40,8 +40,8 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
 
     public function testFileDoesNotExistWritesFile() {
         $dir = Fixtures::singleConcreteService()->getPath();
-        $containerDefinition = $this->cacheAwareContainerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
+        $containerDefinition = $this->cacheAwareContainerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)->build()
         );
 
         $this->assertNotNull($this->root->getChild('root/' . md5($dir)));
@@ -54,23 +54,23 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
 
     public function testFileDoesExistDoesNotCallCompiler() {
         $dir = Fixtures::implicitAliasedServices()->getPath();
-        $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
+        $containerDefinition = $this->phpParserContainerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)->build()
         );
         $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
         vfsStream::newFile(md5($dir))->at($this->root)->setContent($serialized);
 
-        $mock = $this->getMockBuilder(ContainerDefinitionCompiler::class)->getMock();
-        $mock->expects($this->never())->method('compile');
-        $subject = new CacheAwareContainerDefinitionCompiler(
+        $mock = $this->getMockBuilder(ContainerDefinitionAnalyzer::class)->getMock();
+        $mock->expects($this->never())->method('analyze');
+        $subject = new CacheAwareContainerDefinitionAnalyzer(
             $mock,
             $this->containerDefinitionSerializer,
             'vfs://root'
         );
 
-        $containerDefinition = $subject->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
+        $containerDefinition = $subject->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)->build()
         );
         $actual = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
@@ -80,23 +80,23 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     public function testMultipleDirectoriesCachedRegardlessOfOrder() {
         $implicitDir = Fixtures::implicitAliasedServices()->getPath();
         $concreteDir = Fixtures::singleConcreteService()->getPath();
-        $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($concreteDir, $implicitDir)->build()
+        $containerDefinition = $this->phpParserContainerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($concreteDir, $implicitDir)->build()
         );
         $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
         vfsStream::newFile(md5($implicitDir . $concreteDir))->at($this->root)->setContent($serialized);
 
-        $mock = $this->getMockBuilder(ContainerDefinitionCompiler::class)->getMock();
-        $mock->expects($this->never())->method('compile');
-        $subject = new CacheAwareContainerDefinitionCompiler(
+        $mock = $this->getMockBuilder(ContainerDefinitionAnalyzer::class)->getMock();
+        $mock->expects($this->never())->method('analyze');
+        $subject = new CacheAwareContainerDefinitionAnalyzer(
             $mock,
             $this->containerDefinitionSerializer,
             'vfs://root'
         );
 
-        $containerDefinition = $subject->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($concreteDir, $implicitDir)->build()
+        $containerDefinition = $subject->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($concreteDir, $implicitDir)->build()
         );
         $actual = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
@@ -105,10 +105,10 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
 
     public function testFailingToWriteCacheFileThrowsException() {
         $dir = Fixtures::implicitAliasedServices()->getPath();
-        $subject = new CacheAwareContainerDefinitionCompiler(
-            $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
+        $subject = new CacheAwareContainerDefinitionAnalyzer(
+            $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
                 new PhpParserAnnotatedTargetParser(),
-                new DefaultAnnotatedTargetDefinitionConverter()
+                new AnnotatedTargetDefinitionConverter()
             ),
             $this->containerDefinitionSerializer,
             'vfs://cache'
@@ -118,30 +118,30 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $this->expectException(InvalidCache::class);
         $this->expectExceptionMessage('The cache directory, vfs://cache, could not be written to. Please ensure it exists and is writeable.');
 
-        $subject->compile(ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build());
+        $subject->analyze(ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)->build());
     }
 
     public function testFileDoesExistLogsOutput() {
         $dir = Fixtures::implicitAliasedServices()->getPath();
-        $containerDefinition = $this->phpParserContainerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)
+        $containerDefinition = $this->phpParserContainerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)
                 ->build()
         );
         $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
 
         vfsStream::newFile(md5($dir))->at($this->root)->setContent($serialized);
 
-        $mock = $this->getMockBuilder(ContainerDefinitionCompiler::class)->getMock();
-        $mock->expects($this->never())->method('compile');
-        $subject = new CacheAwareContainerDefinitionCompiler(
+        $mock = $this->getMockBuilder(ContainerDefinitionAnalyzer::class)->getMock();
+        $mock->expects($this->never())->method('analyze');
+        $subject = new CacheAwareContainerDefinitionAnalyzer(
             $mock,
             $this->containerDefinitionSerializer,
             'vfs://root'
         );
 
         $logger = new TestLogger();
-        $subject->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)
+        $subject->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)
                 ->withLogger($logger)
                 ->build()
         );
@@ -181,8 +181,8 @@ XML;
 
         vfsStream::newFile(md5($dir))->at($this->root)->setContent($oldXml);
 
-        $this->cacheAwareContainerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir)->build()
+        $this->cacheAwareContainerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)->build()
         );
 
         $version = AnnotatedContainerVersion::getVersion();

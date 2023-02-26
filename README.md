@@ -76,7 +76,7 @@ Be sure to review the generated configuration! A "normal" Composer setup might r
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">tests</dir>
+      <dir>tests</dir>
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>

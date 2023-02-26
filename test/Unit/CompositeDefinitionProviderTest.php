@@ -2,9 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\Unit;
 
-use Cspray\AnnotatedContainer\Compile\CompositeDefinitionProvider;
-use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
-use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
+use Cspray\AnnotatedContainer\StaticAnalysis\CompositeDefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext;
 use PHPUnit\Framework\TestCase;
 final class CompositeDefinitionProviderTest extends TestCase {
 
