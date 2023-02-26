@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
@@ -41,7 +41,7 @@ use function Cspray\Typiphy\objectType;
  *     configurationDefinitions: list<ConfigurationDefinition>
  * }
  */
-final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefinitionCompiler {
+final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefinitionAnalyzer {
 
     public function __construct(
         private readonly AnnotatedTargetParser $annotatedTargetCompiler,
@@ -53,14 +53,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
      * Will parse source code, according to the passed $containerDefinitionCompileOptions, and construct a ContainerDefinition
      * instance based off of the resultant parsing.
      *
-     * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
+     * @param ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
      * @throws InvalidArgumentException
      * @throws InvalidScanDirectories
      * @throws InvalidServiceDelegate
      * @throws InvalidServicePrepare
      */
-    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition {
+    public function analyze(ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions) : ContainerDefinition {
         $logger = $containerDefinitionCompileOptions->getLogger() ?? new NullLogger();
 
         $scanDirs = $containerDefinitionCompileOptions->getScanDirectories();
@@ -92,14 +92,14 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     }
 
     /**
-     * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
+     * @param ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions
      * @param LoggerInterface $logger
      * @return DefinitionsCollection
      * @throws InvalidArgumentException
      */
     private function parse(
-        ContainerDefinitionCompileOptions $containerDefinitionCompileOptions,
-        LoggerInterface $logger
+        ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions,
+        LoggerInterface                    $logger
     ) : array {
         $consumer = new stdClass();
         $consumer->serviceDefinitions = [];
@@ -312,17 +312,20 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     }
 
     private function convertValueToJsonifiable(mixed $value) : mixed {
-        $convertedValue = $value;
         if ($value instanceof \UnitEnum) {
-            $convertedValue = sprintf('%s::%s', $value::class, $value->name);
-        } else if (is_array($value)) {
+            return sprintf('%s::%s', $value::class, $value->name);
+        }
+
+        if (is_array($value)) {
             $convertedValue = [];
+            /** @var mixed $v */
             foreach ($value as $k => $v) {
                $convertedValue[$k] = $this->convertValueToJsonifiable($v);
             }
+            return $convertedValue;
         }
 
-        return $convertedValue;
+        return $value;
     }
 
     private function logConfigurationDefinition(
@@ -453,9 +456,9 @@ final class AnnotatedTargetContainerDefinitionCompiler implements ContainerDefin
     }
 
     private function addThirdPartyServices(
-        ContainerDefinitionCompileOptions $compileOptions,
-        ContainerDefinitionBuilder $builder,
-        LoggerInterface $logger
+        ContainerDefinitionAnalysisOptions $compileOptions,
+        ContainerDefinitionBuilder         $builder,
+        LoggerInterface                    $logger
     ) : ContainerDefinitionBuilder {
         $definitionProvider = $compileOptions->getDefinitionProvider();
         if ($definitionProvider !== null) {

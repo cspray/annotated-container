@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 /**
  * An interface that allows for making modifications to the ContainerDefinitionBuilder before the resultant

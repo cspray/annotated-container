@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
@@ -11,18 +11,18 @@ use Cspray\AnnotatedContainer\Exception\InvalidCache;
  * filesystem; this could potentially save time on very large codebase or be used when building production to not
  * require Container compilation on every request.
  */
-final class CacheAwareContainerDefinitionCompiler implements ContainerDefinitionCompiler {
+final class CacheAwareContainerDefinitionAnalyzer implements ContainerDefinitionAnalyzer {
 
-    private ContainerDefinitionCompiler $containerDefinitionCompiler;
+    private ContainerDefinitionAnalyzer $containerDefinitionCompiler;
     private ContainerDefinitionSerializer $containerDefinitionSerializer;
     private string $cacheDir;
 
     /**
-     * @param ContainerDefinitionCompiler $containerDefinitionCompiler The compiler to use if the cache file is not present
+     * @param ContainerDefinitionAnalyzer $containerDefinitionCompiler The compiler to use if the cache file is not present
      * @param ContainerDefinitionSerializer $containerDefinitionSerializer The serializer to serialize/deserialize the cached ContainerDefinition
      * @param string $cacheDir The directory that the cache files should be generated
      */
-    public function __construct(ContainerDefinitionCompiler $containerDefinitionCompiler, ContainerDefinitionSerializer $containerDefinitionSerializer, string $cacheDir) {
+    public function __construct(ContainerDefinitionAnalyzer $containerDefinitionCompiler, ContainerDefinitionSerializer $containerDefinitionSerializer, string $cacheDir) {
         $this->containerDefinitionCompiler = $containerDefinitionCompiler;
         $this->containerDefinitionSerializer = $containerDefinitionSerializer;
         $this->cacheDir = $cacheDir;
@@ -37,11 +37,11 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
      *
      * Please see bin/annotated-container compile --help for more information on pre-generating the cached ContainerDefinition.
      *
-     * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
+     * @param ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
      * @throws InvalidCache
      */
-    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions): ContainerDefinition {
+    public function analyze(ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions): ContainerDefinition {
         $cacheFile = $this->getCacheFile($containerDefinitionCompileOptions->getScanDirectories());
         if (is_file($cacheFile)) {
             $containerDefinition = $this->containerDefinitionSerializer->deserialize(file_get_contents($cacheFile));
@@ -57,7 +57,7 @@ final class CacheAwareContainerDefinitionCompiler implements ContainerDefinition
             }
         }
 
-        $containerDefinition = $this->containerDefinitionCompiler->compile($containerDefinitionCompileOptions);
+        $containerDefinition = $this->containerDefinitionCompiler->analyze($containerDefinitionCompileOptions);
         $serialized = $this->containerDefinitionSerializer->serialize($containerDefinition);
         $contentWritten = @file_put_contents($cacheFile, $serialized);
         if (!$contentWritten) {

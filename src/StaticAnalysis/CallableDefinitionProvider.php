@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 /**
  * A DefinitionProvider that allows you to pass in an anonymous function or some other callable without having to

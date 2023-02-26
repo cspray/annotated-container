@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Psr\Log\LoggerInterface;
@@ -8,12 +8,12 @@ use Psr\Log\LoggerInterface;
 /**
  * Represents configurable details for the compilation of a ContainerDefinition.
  */
-interface ContainerDefinitionCompileOptions {
+interface ContainerDefinitionAnalysisOptions {
 
     /**
      * Return a list of directories to scan for annotated services.
      *
-     * @return array
+     * @return list<string>
      */
     public function getScanDirectories() : array;
 

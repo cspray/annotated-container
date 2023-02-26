@@ -7,10 +7,10 @@ use Cspray\AnnotatedContainer\Attribute\Inject;
 use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
-use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
@@ -30,52 +30,52 @@ use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
 
-class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
+class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
 
     use ContainerDefinitionAssertionsTrait;
 
-    private AnnotatedTargetContainerDefinitionCompiler $subject;
+    private AnnotatedTargetContainerDefinitionAnalyzer $subject;
     private TestLogger $logger;
 
     public function setUp() : void {
         $this->logger = new TestLogger();
-        $this->subject = new AnnotatedTargetContainerDefinitionCompiler(
+        $this->subject = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter($this->logger)
         );
     }
 
-    private function runCompileDirectory(
+    private function runAnalysisDirectory(
         array|string $dir,
         DefinitionProvider $consumer = null
     ) : ContainerDefinition {
         if (is_string($dir)) {
             $dir = [$dir];
         }
-        $options = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dir)
+        $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$dir)
             ->withLogger($this->logger);
 
         if ($consumer !== null) {
             $options = $options->withDefinitionProvider($consumer);
         }
 
-        return $this->subject->compile($options->build());
+        return $this->subject->analyze($options->build());
     }
 
     public function testEmptyScanDirectoriesThrowsException() : void {
         $this->expectException(InvalidScanDirectories::class);
-        $this->expectExceptionMessage('ContainerDefinitionCompileOptions must include at least 1 directory to scan, but none were provided.');
-        $this->runCompileDirectory([]);
+        $this->expectExceptionMessage('ContainerDefinitionAnalysisOptions must include at least 1 directory to scan, but none were provided.');
+        $this->runAnalysisDirectory([]);
     }
 
     public function testLogEmptyScanDirectories() : void {
         try {
-            $this->runCompileDirectory([]);
+            $this->runAnalysisDirectory([]);
         } catch (InvalidScanDirectories $exception) {
             // noop, we expect this
         } finally {
             $expected = [
-                'message' => 'ContainerDefinitionCompileOptions must include at least 1 directory to scan, but none were provided.',
+                'message' => 'ContainerDefinitionAnalysisOptions must include at least 1 directory to scan, but none were provided.',
                 'context' => []
             ];
             self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::ERROR));
@@ -88,12 +88,12 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             'Service preparation defined on %s::postConstruct, but that class is not a service.',
             LogicalErrorApps\ServicePrepareNotService\FooImplementation::class
         ));
-        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
+        $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
     }
 
     public function testLogServicePrepareNotOnService() : void {
         try {
-            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
+            $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ServicePrepareNotService');
         }  catch (InvalidServicePrepare $exception) {
             // noop, we expect this
         } finally {
@@ -110,8 +110,8 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
     public function testDuplicateScanDirectoriesThrowsException() {
         $this->expectException(InvalidScanDirectories::class);
-        $this->expectExceptionMessage('ContainerDefinitionCompileOptions includes duplicate scan directories. Please pass a distinct set of directories to scan.');
-        $this->runCompileDirectory([
+        $this->expectExceptionMessage('ContainerDefinitionAnalysisOptions includes duplicate scan directories. Please pass a distinct set of directories to scan.');
+        $this->runAnalysisDirectory([
             Fixtures::singleConcreteService()->getPath(),
             Fixtures::ambiguousAliasedServices()->getPath(),
             Fixtures::singleConcreteService()->getPath()
@@ -120,7 +120,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
 
     public function testLogScanDuplicateDirectories() : void {
         try {
-            $this->runCompileDirectory([
+            $this->runAnalysisDirectory([
                 Fixtures::singleConcreteService()->getPath(),
                 Fixtures::singleConcreteService()->getPath(),
                 Fixtures::configurationServices()->getPath()
@@ -129,7 +129,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             // noop, we expect this
         } finally {
             $expected = [
-                'message' => 'ContainerDefinitionCompileOptions includes duplicate scan directories. Please pass a distinct set of directories to scan.',
+                'message' => 'ContainerDefinitionAnalysisOptions includes duplicate scan directories. Please pass a distinct set of directories to scan.',
                 'context' => [
                     'sourcePaths' => [
                         Fixtures::singleConcreteService()->getPath(),
@@ -148,12 +148,12 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateNoType\FooFactory::class . '::create does not declare a service in the Attribute or as a return type of the method.'
         );
 
-        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateNoType');
+        $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateNoType');
     }
 
     public function testLogImplicitServiceDelegateHasNoReturnType() : void {
         try {
-            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateNoType');
+            $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateNoType');
         }  catch (InvalidServiceDelegate $exception) {
             // noop, we expect this
         } finally {
@@ -171,12 +171,12 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateScalarType\FooFactory::class . '::create declares a scalar value as a service type.'
         );
 
-        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateScalarType');
+        $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateScalarType');
     }
 
     public function testLogImplicitServiceDelegateHasScalarReturnType() : void {
         try {
-            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateScalarType');
+            $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateScalarType');
         } catch (InvalidServiceDelegate $exception) {
             // noop, we expect this
         } finally {
@@ -194,12 +194,12 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateIntersectionType\FooFactory::class . '::create declares an unsupported intersection as a service type.'
         );
 
-        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateIntersectionType');
+        $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateIntersectionType');
     }
 
     public function testLogImplicitServiceDelegateHasIntersectionReturnType() : void {
         try {
-            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateIntersectionType');
+            $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateIntersectionType');
         } catch (InvalidServiceDelegate $exception) {
             // noop we expect this
         } finally {
@@ -217,12 +217,12 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
             'The #[ServiceDelegate] Attribute on ' . LogicalErrorApps\ImplicitServiceDelegateUnionType\FooFactory::class . '::create declares an unsupported union as a service type.'
         );
 
-        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
+        $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
     }
 
     public function testLogImplicitServiceDelegateHasUnionReturnType() {
         try {
-            $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
+            $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
         } catch (InvalidServiceDelegate $exception) {
             // noop, we expect this
         } finally {
@@ -234,8 +234,8 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         }
     }
 
-    public function testLoggingCompileLifecycleStarted() : void {
-        $this->runCompileDirectory([
+    public function testLoggingAnalysisLifecycleStarted() : void {
+        $this->runAnalysisDirectory([
             $path1 = Fixtures::singleConcreteService()->getPath(),
             $path2 = Fixtures::ambiguousAliasedServices()->getPath()
         ]);
@@ -257,7 +257,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingServiceDefinition() : void {
-        $this->runCompileDirectory(Fixtures::singleConcreteService()->getPath());
+        $this->runAnalysisDirectory(Fixtures::singleConcreteService()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -285,7 +285,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingServiceDelegateTarget() : void {
-        $this->runCompileDirectory(Fixtures::delegatedService()->getPath());
+        $this->runAnalysisDirectory(Fixtures::delegatedService()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -312,7 +312,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingServicePrepareTarget() : void {
-        $this->runCompileDirectory(Fixtures::classOnlyPrepareServices()->getPath());
+        $this->runAnalysisDirectory(Fixtures::classOnlyPrepareServices()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -338,7 +338,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingConfigurationTarget() : void {
-        $this->runCompileDirectory(Fixtures::configurationServices()->getPath());
+        $this->runAnalysisDirectory(Fixtures::configurationServices()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -363,7 +363,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingInjectMethodParameter() : void {
-        $this->runCompileDirectory(Fixtures::injectConstructorServices()->getPath());
+        $this->runAnalysisDirectory(Fixtures::injectConstructorServices()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -397,7 +397,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingInjectConfigurationProperty() : void {
-        $this->runCompileDirectory(Fixtures::configurationServices()->getPath());
+        $this->runAnalysisDirectory(Fixtures::configurationServices()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -428,7 +428,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingAddAliasDefinitions() : void {
-        $this->runCompileDirectory(Fixtures::implicitAliasedServices()->getPath());
+        $this->runAnalysisDirectory(Fixtures::implicitAliasedServices()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -446,7 +446,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingNoThirdPartyServices() : void {
-        $this->runCompileDirectory(Fixtures::singleConcreteService()->getPath());
+        $this->runAnalysisDirectory(Fixtures::singleConcreteService()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -460,7 +460,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingThirdPartyServices() : void {
-        $this->runCompileDirectory(
+        $this->runAnalysisDirectory(
             Fixtures::singleConcreteService()->getPath(),
             new StubDefinitionProvider()
         );
@@ -479,7 +479,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLastLoggingMessageIsCompilingFinished() : void {
-        $this->runCompileDirectory(
+        $this->runAnalysisDirectory(
             Fixtures::singleConcreteService()->getPath(),
         );
 
@@ -505,12 +505,12 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
         self::expectException(InvalidServiceDelegate::class);
         self::expectExceptionMessage($message);
 
-        $this->runCompileDirectory(__DIR__ . '/LogicalErrorApps/ServiceDelegateNotService');
+        $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ServiceDelegateNotService');
     }
 
     public function testLogCustomAttribute() : void {
 
-        $this->runCompileDirectory(Fixtures::customServiceAttribute()->getPath());
+        $this->runAnalysisDirectory(Fixtures::customServiceAttribute()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -538,7 +538,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingInjectConfigurationPropertyEnum() : void {
-        $this->runCompileDirectory(Fixtures::configurationWithEnum()->getPath());
+        $this->runAnalysisDirectory(Fixtures::configurationWithEnum()->getPath());
 
         $expected = [
             'message' => sprintf(
@@ -568,7 +568,7 @@ class AnnotatedTargetContainerDefinitionCompilerTest extends TestCase {
     }
 
     public function testLoggingInjectArrayConfigurationPropertyEnum() : void {
-        $this->runCompileDirectory(Fixtures::configurationWithArrayEnum()->getPath());
+        $this->runAnalysisDirectory(Fixtures::configurationWithArrayEnum()->getPath());
 
         $expected = [
             'message' => sprintf(

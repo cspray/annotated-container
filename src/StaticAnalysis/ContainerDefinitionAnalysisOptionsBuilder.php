@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Psr\Log\LoggerInterface;
@@ -8,8 +8,9 @@ use Psr\Log\LoggerInterface;
 /**
  * The preferred method for constructing ContainerDefinitionCompileOptions
  */
-final class ContainerDefinitionCompileOptionsBuilder {
+final class ContainerDefinitionAnalysisOptionsBuilder {
 
+    /** @var list<string> */
     private array $directories = [];
 
     private ?DefinitionProvider $consumer = null;
@@ -49,12 +50,12 @@ final class ContainerDefinitionCompileOptionsBuilder {
         return $instance;
     }
 
-    public function build() : ContainerDefinitionCompileOptions {
+    public function build() : ContainerDefinitionAnalysisOptions {
         return new class(
             $this->directories,
             $this->consumer,
             $this->logger
-        ) implements ContainerDefinitionCompileOptions {
+        ) implements ContainerDefinitionAnalysisOptions {
             public function __construct(
                 private readonly array               $directories,
                 private readonly ?DefinitionProvider $consumer,

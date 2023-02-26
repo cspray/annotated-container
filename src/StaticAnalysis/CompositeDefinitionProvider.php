@@ -1,6 +1,6 @@
 <?php
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 final class CompositeDefinitionProvider implements DefinitionProvider {
 

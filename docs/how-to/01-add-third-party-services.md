@@ -32,13 +32,13 @@ class MonologLoggerFactory {
 }
 ```
 
-## Step 3 - Define a DefinitionProvider 
+## Step 3 - Define a DefinitionProvider
 
 ```php
 <?php
 
-use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
-use Cspray\AnnotatedContainer\Compile\DefinitionProviderContext;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext;
 use function Cspray\AnnotatedContainer\service;
 use function Cspray\AnnotatedContainer\serviceDelegate;
 use function Cspray\AnnotatedContainer\servicePrepare;

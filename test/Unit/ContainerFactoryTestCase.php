@@ -4,10 +4,10 @@ namespace Cspray\AnnotatedContainer\Unit;
 
 use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasResolutionReason;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
@@ -52,8 +52,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
     abstract protected function getBackingContainerInstanceOf() : ObjectType;
 
-    private function getContainerDefinitionCompiler() : ContainerDefinitionCompiler {
-        return new AnnotatedTargetContainerDefinitionCompiler(
+    private function getContainerDefinitionCompiler() : ContainerDefinitionAnalyzer {
+        return new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
@@ -66,8 +66,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
         LoggerInterface $logger = null
     ) : AnnotatedContainer {
         $compiler = $this->getContainerDefinitionCompiler();
-        $optionsBuilder = ContainerDefinitionCompileOptionsBuilder::scanDirectories($dir);
-        $containerDefinition = $compiler->compile($optionsBuilder->build());
+        $optionsBuilder = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir);
+        $containerDefinition = $compiler->analyze($optionsBuilder->build());
         if (!empty($profiles)) {
             $containerOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
         } else {
@@ -495,8 +495,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
      */
     public function testDeserializingContainerWithInjectAllowsServiceCreation(Fixture $fixture, callable $assertions) {
         $serializer = new ContainerDefinitionSerializer();
-        $containerDefinition = $this->getContainerDefinitionCompiler()->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories($fixture->getPath())->build()
+        $containerDefinition = $this->getContainerDefinitionCompiler()->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($fixture->getPath())->build()
         );
 
         $serialized = $serializer->serialize($containerDefinition);

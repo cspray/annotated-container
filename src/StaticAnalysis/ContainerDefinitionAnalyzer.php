@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
@@ -8,7 +8,7 @@ use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 /**
  * An object that knows how to create a ContainerDefinition instance from a given set of options.
  */
-interface ContainerDefinitionCompiler {
+interface ContainerDefinitionAnalyzer {
 
     /**
      * Generate a ContainerDefinition defined by the $containerDefinitionCompileOptions.
@@ -19,9 +19,9 @@ interface ContainerDefinitionCompiler {
      * Throw an InvalidAnnotationException if some source code is annotated in such a way that a compilation error
      * occurs.
      *
-     * @param ContainerDefinitionCompileOptions $containerDefinitionCompileOptions
+     * @param ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions
      * @return ContainerDefinition
      */
-    public function compile(ContainerDefinitionCompileOptions $containerDefinitionCompileOptions) : ContainerDefinition;
+    public function analyze(ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions) : ContainerDefinition;
 
 }

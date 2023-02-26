@@ -2,10 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionCompilerTests;
 
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
-use Cspray\AnnotatedContainer\Compile\DefinitionProvider;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\ContainerDefinitionAssertionsTrait;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainerFixture\Fixture;
@@ -24,7 +24,7 @@ abstract class AnnotatedTargetContainerDefinitionCompilerTestCase extends TestCa
     abstract protected function getFixtures() : array|Fixture;
 
     protected function setUp() : void {
-        $compiler = new AnnotatedTargetContainerDefinitionCompiler(
+        $compiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
@@ -38,13 +38,13 @@ abstract class AnnotatedTargetContainerDefinitionCompilerTestCase extends TestCa
             $dirs[] = $fixture->getPath();
         }
 
-        $builder = ContainerDefinitionCompileOptionsBuilder::scanDirectories(...$dirs);
+        $builder = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$dirs);
         $consumer = $this->getDefinitionProvider();
         if (!is_null($consumer)) {
             $builder = $builder->withDefinitionProvider($consumer);
         }
 
-        $this->subject = $compiler->compile($builder->build());
+        $this->subject = $compiler->analyze($builder->build());
     }
 
     protected function getDefinitionProvider() : ?DefinitionProvider {

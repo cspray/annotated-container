@@ -2,10 +2,10 @@
 
 namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint;
 
-use Cspray\AnnotatedContainer\Compile\AnnotatedTargetContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompileOptionsBuilder;
-use Cspray\AnnotatedContainer\Compile\ContainerDefinitionCompiler;
-use Cspray\AnnotatedContainer\Compile\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\DefaultAnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\LogicalConstraint\NoAbstractServiceAliasLogicalConstraint;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -14,11 +14,11 @@ use PHPUnit\Framework\TestCase;
 
 class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
-    private ContainerDefinitionCompiler $containerDefinitionCompiler;
+    private ContainerDefinitionAnalyzer $containerDefinitionCompiler;
     private NoAbstractServiceAliasLogicalConstraint $subject;
 
     protected function setUp(): void {
-        $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionCompiler(
+        $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
@@ -26,8 +26,8 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     }
 
     public function testViolationsForNoInterfaceServiceAlias() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
+        $containerDefinition = $this->containerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
@@ -43,8 +43,8 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     }
 
     public function testViolationsForNoAbstractServiceAlias() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoAbstractServiceAlias')->build()
+        $containerDefinition = $this->containerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoAbstractServiceAlias')->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 
@@ -60,8 +60,8 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     }
 
     public function testNoViolationsForInterfaceWithServiceAlias() {
-        $containerDefinition = $this->containerDefinitionCompiler->compile(
-            ContainerDefinitionCompileOptionsBuilder::scanDirectories(Fixtures::implicitAliasedServices()->getPath())->build()
+        $containerDefinition = $this->containerDefinitionCompiler->analyze(
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::implicitAliasedServices()->getPath())->build()
         );
         $violations = $this->subject->getConstraintViolations($containerDefinition);
 

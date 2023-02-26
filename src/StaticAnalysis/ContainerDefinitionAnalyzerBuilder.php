@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Compile;
+namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -8,7 +8,7 @@ use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 /**
  * A convenience builder to allow easily getting a ContainerDefinitionCompiler instance.
  */
-final class ContainerDefinitionCompilerBuilder {
+final class ContainerDefinitionAnalyzerBuilder {
 
     private ?string $cacheDir = null;
 
@@ -45,21 +45,21 @@ final class ContainerDefinitionCompilerBuilder {
     /**
      * Return the configured ContainerDefinitionCompiler
      *
-     * @return ContainerDefinitionCompiler
+     * @return ContainerDefinitionAnalyzer
      */
-    public function build() : ContainerDefinitionCompiler {
-        return $this->getCacheAppropriateCompiler();
+    public function build() : ContainerDefinitionAnalyzer {
+        return $this->getCacheAppropriateAnalyzer();
     }
 
-    private function getCacheAppropriateCompiler() : ContainerDefinitionCompiler {
-        $phpParserCompiler = new AnnotatedTargetContainerDefinitionCompiler(
+    private function getCacheAppropriateAnalyzer() : ContainerDefinitionAnalyzer {
+        $phpParserCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
             new DefaultAnnotatedTargetDefinitionConverter()
         );
         if (!isset($this->cacheDir)) {
             return $phpParserCompiler;
         }
-        return new CacheAwareContainerDefinitionCompiler(
+        return new CacheAwareContainerDefinitionAnalyzer(
             $phpParserCompiler,
             new ContainerDefinitionSerializer(),
             $this->cacheDir

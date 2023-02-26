@@ -11,7 +11,7 @@ This document lists the functions for each purpose.
 
 ```php
 \Cspray\AnnotatedContainer\service(
-    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
+    \Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     ?string $name = null,
     array $profiles = [],
@@ -19,26 +19,26 @@ This document lists the functions for each purpose.
 ) : \Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 
 \Cspray\AnnotatedContainer\alias(
-    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
+    \Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $abstract,
     \Cspray\Typiphy\ObjectType $concrete
 ) : \Cspray\AnnotatedContainer\Definition\AliasDefinition;
 
 \Cspray\AnnotatedContainer\serviceDelegate(
-    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
+    \Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     \Cspray\Typiphy\ObjectType $factoryClass,
     string $factoryMethod
 ) : \Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 
 \Cspray\AnnotatedContainer\servicePrepare(
-    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
+    \Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     string $method
 ) : \Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 
 \Cspray\AnnotatedContainer\injectMethodParam(
-    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
+    \Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     string $method,
     string $paramName,
@@ -49,7 +49,7 @@ This document lists the functions for each purpose.
 ) : \Cspray\AnnotatedContainer\Definition\InjectDefinition;
 
 \Cspray\AnnotatedContainer\injectProperty(
-    \Cspray\AnnotatedContainer\Compile\DefinitionProviderContext $context,
+    \Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext $context,
     \Cspray\Typiphy\ObjectType $service,
     string $property,
     \Cspray\Typiphy\Type|\Cspray\Typiphy\TypeUnion|\Cspray\Typiphy\TypeIntersect $type,
