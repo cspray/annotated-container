@@ -11,11 +11,14 @@
 7. [Using Configuration Objects](./tutorials/07-using-configuration-objects.md)
 8. [Autowire Aware Factory](./tutorials/08-autowire-aware-factory.md)
 9. [Autowire aware Invoker](./tutorials/09-autowire-aware-invoker.md)
+10. [Annotated Container Observer](./tutorials/10-annotated-container-observers.md)
 
 ## How To
 
 1. [Add Third-Party Services](./how-to/01-add-third-party-services.md)
+2. [Bootstrap Your Container](./how-to/02-bootstrap-your-container.md)
 
 ## References
 
 1. [Attributes List](./references/01-attributes-list.md)
+2. [Functional API](./references/02-functional-api.md)

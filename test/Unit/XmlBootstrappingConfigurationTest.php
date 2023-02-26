@@ -2,10 +2,13 @@
 
 namespace Cspray\AnnotatedContainer\Unit;
 
+use Cspray\AnnotatedContainer\Bootstrap\ContainerCreatedObserver;
 use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
 use Cspray\AnnotatedContainer\Bootstrap\Observer;
 use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\PostAnalysisObserver;
+use Cspray\AnnotatedContainer\Bootstrap\PreAnalysisObserver;
 use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\StaticAnalysis\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
@@ -559,9 +562,12 @@ XML;
             ->at($this->vfs);
 
         $this->expectException(InvalidBootstrapConfiguration::class);
-        $this->expectExceptionMessage(
-            'All entries in observers must be classes that implement ' . Observer::class
-        );
+        $this->expectExceptionMessage(sprintf(
+            'All entries in observers must be classes that implement %s, %s, or %s',
+            PreAnalysisObserver::class,
+            PostAnalysisObserver::class,
+            ContainerCreatedObserver::class
+        ));
         new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
             new FixtureBootstrappingDirectoryResolver()
@@ -588,9 +594,12 @@ XML;
             ->at($this->vfs);
 
         $this->expectException(InvalidBootstrapConfiguration::class);
-        $this->expectExceptionMessage(
-            'All entries in observers must be classes that implement ' . Observer::class
-        );
+        $this->expectExceptionMessage(sprintf(
+            'All entries in observers must be classes that implement %s, %s, or %s',
+            PreAnalysisObserver::class,
+            PostAnalysisObserver::class,
+            ContainerCreatedObserver::class
+        ));
         new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
             new FixtureBootstrappingDirectoryResolver()
@@ -613,7 +622,7 @@ XML;
 XML;
 
         $observerFactory = new class implements ObserverFactory {
-            public function createObserver(string $observer) : Observer {
+            public function createObserver(string $observer) : PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver {
                 return new $observer('from observer factory');
             }
         };

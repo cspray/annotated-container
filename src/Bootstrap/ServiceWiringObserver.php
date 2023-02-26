@@ -8,21 +8,9 @@ use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 
-abstract class ServiceWiringObserver implements Observer {
+abstract class ServiceWiringObserver implements ContainerCreatedObserver {
 
-    final public function beforeCompilation(ActiveProfiles $activeProfiles) : void {
-        // noop
-    }
-
-    final public function afterCompilation(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition) : void {
-        // noop
-    }
-
-    final public function beforeContainerCreation(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition) : void {
-        // noop
-    }
-
-    final public function afterContainerCreation(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
+    final public function notifyContainerCreated(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
         $serviceGatherer = new class($containerDefinition, $container) implements ServiceGatherer {
 
             private readonly ContainerDefinition $containerDefinition;

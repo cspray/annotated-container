@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `cspray/annotated-container-adr` dependency for removed Architectural Decision Records.
 - Added `cspray/annotated-container-attribute` dependency for removed Attribute.
+- Added `Bootstrap\PreAnalysisObserver`, `Bootstrap\PostAnalysisObserver`, and `Bootstrap\ContainerCreatedObserver`.
 
 ### Changed
 
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed Architectural Decision Records and provided Attributes, replaced in separate packages.
 - Removed `DefaultAnnotatedTargetDefinitionConverter`, this implementation was moved to the interface it implemented.
+- Removed the `Bootstrap\Observer` interface. Use the more granular implementations added instead.
 
 ## [v2.0.0-rc2](https://github.com/cspray/annotated-container/tree/v2.0.0-rc2) - 2023-02-11
 

@@ -138,11 +138,7 @@ Next, update your configuration.
 </annotatedContainer>
 ```
 
-### Step 5 - Provide your Observers (optional)
-
-
-
-### Step 6 - Create Your Container
+### Step 5 - Create Your Container
 
 Before completing this step go put some Attributes on the services in your codebase!
 
@@ -246,8 +242,6 @@ $container = (new Bootstrap(
     parameterStoreFactory: $parameterStoreFactory
 ))->bootstrapContainer();
 ```
-
-#### Constructing Observer
 
 #### Changing Resolved Paths
 

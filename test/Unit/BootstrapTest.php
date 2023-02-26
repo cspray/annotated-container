@@ -8,6 +8,7 @@ use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
 use Cspray\AnnotatedContainer\Bootstrap\Observer;
 use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\PreAnalysisObserver;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceWiringObserver;
@@ -396,12 +397,11 @@ XML;
 
         $bootstrap->bootstrapContainer();
 
-        self::assertCount(4, $subject->getInvokedMethods());
+        self::assertCount(3, $subject->getInvokedMethods());
         self::assertSame([
-            [sprintf('%s::%s', StubBootstrapObserver::class, 'beforeCompilation')],
-            [sprintf('%s::%s', StubBootstrapObserver::class, 'afterCompilation')],
-            [sprintf('%s::%s', StubBootstrapObserver::class, 'beforeContainerCreation')],
-            [sprintf('%s::%s', StubBootstrapObserver::class, 'afterContainerCreation')]
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'notifyPreAnalysis')],
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'notifyPostAnalysis')],
+            [sprintf('%s::%s', StubBootstrapObserver::class, 'notifyContainerCreated')]
         ], $subject->getInvokedMethods());
     }
 
@@ -431,9 +431,9 @@ XML;
 
         $bootstrap->bootstrapContainer();
 
-        self::assertCount(4, $one->getInvokedMethods());
-        self::assertCount(4, $two->getInvokedMethods());
-        self::assertCount(4, $three->getInvokedMethods());
+        self::assertCount(3, $one->getInvokedMethods());
+        self::assertCount(3, $two->getInvokedMethods());
+        self::assertCount(3, $three->getInvokedMethods());
     }
 
     public function testObserversAddedFromConfiguration() : void {
@@ -464,7 +464,7 @@ XML;
 
         self::assertCount(1, $observers);
         self::assertInstanceOf(StubBootstrapObserver::class, $observers[0]);
-        self::assertCount(4, $observers[0]->getInvokedMethods());
+        self::assertCount(3, $observers[0]->getInvokedMethods());
     }
 
     public function testServiceWiringObserver() : void {
@@ -700,7 +700,7 @@ XML;
         $observerFactory->expects($this->once())
             ->method('createObserver')
             ->with('Passed to ObserverFactory')
-            ->willReturn($this->getMockBuilder(Observer::class)->getMock());
+            ->willReturn($this->getMockBuilder(PreAnalysisObserver::class)->getMock());
 
         (new Bootstrap(
             directoryResolver: $directoryResolver,

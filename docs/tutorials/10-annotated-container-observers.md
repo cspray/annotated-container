@@ -1,35 +1,32 @@
 # Annotated Container Observers
 
-Annotated Container has a boostrapping observer system that allows you to get access to pertinent information during [Annotated Container's lifecycle](../references/02-annotated-container-lifecycle.md). This system could be used to gather information about the compilation process, perform action on the Container post creation, or some other action that might be necessary. Below we'll talk about how to register listeners and perform actions.
+Annotated Container has a boostrapping observer system that allows you to get access to pertinent information during the creation of your container. This system could be used to gather information about the compilation process, perform action on the Container post creation, or some other action that might be necessary. Below we'll talk about how to take advantage of this system to bring more complex functionality to applications powered by Annotated Container.
 
 ## Registering Observers
 
- First, you'll need to create a `Cspray\AnnotatedContainer\Boostrap\Observer` implementation. 
+ First, you'll need to decide on what type of observer you want to implement. The example will implement all possible interfaces, to show what's possible. You do not have to implement all 3 in your project; you can choose any of them to implement.
 
 ```php
 <?php declare(strict_types=1);
 
 namespace Acme\Demo;
 
+use Cspray\AnnotatedContainer\Bootstrap\ContainerCreatedObserver;
+use Cspray\AnnotatedContainer\Bootstrap\PostAnalysisObserver;
+use Cspray\AnnotatedContainer\Bootstrap\PreAnalysisObserver;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
-use Cspray\AnnotatedContainer\Bootstrap\Observer;
 
-final class MyContainerObserver implements Observer {
+final class MyContainerObserver implements PreAnalysisObserver, PostAnalysisObserver, ContainerCreatedObserver {
 
-    public function beforeCompilation(ActiveProfiles $profiles) : void {
+    public function notifyPreAnalysis(ActiveProfiles $profiles) : void {
         // do something before the source code is analyzed and the ContainerDefinition is compiled
     }
 
-    public function afterCompilation(ActiveProfiles $profiles, ContainerDefinition $containerDefinition) : void {
+    public function notifyPostAnalysis(ActiveProfiles $profiles, ContainerDefinition $containerDefinition) : void {
         // do something after the source is analyzed and the ContainerDefinition is compiled
     }
 
-    public function beforeContainerCreation(ActiveProfiles $profiles, ContainerDefinition $containerDefinition) : void {
-        // do something after the ContainerDefinition is compiled, and the ConatinerFactory has been created with all 
-        // configured ParameterStores
-    }
-
-    public function afterContainerCreation(ActiveProfiles $profiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
+    public function notifyContainerCreated(ActiveProfiles $profiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
         // do something after the AnnotatedContainer has been created based off of the given ContainerDefinition 
     }
 
