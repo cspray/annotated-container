@@ -47,16 +47,8 @@
 
   <xs:complexType name="sourceDirsType">
     <xs:sequence minOccurs="1" maxOccurs="unbounded">
-      <xs:element name="dir" type="sourceDirType"/>
+      <xs:element name="dir" type="xs:token"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="sourceDirType">
-    <xs:simpleContent>
-      <xs:extension base="xs:token">
-        <xs:attribute name="packagePrivate" type="xs:boolean" default="false" />
-      </xs:extension>
-    </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="vendorPackagesType">

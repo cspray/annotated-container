@@ -71,7 +71,9 @@ class ThirdPartyServicesProvider implements DefinitionProvider {
     </source>
   </scanDirectories>
   <cacheDir>.annotated-container-cache</cacheDir>
-  <definitionProvider>ThirdPartyServicesProvider</definitionProvider>
+  <definitionProviders>
+    <definitionProvider>ThirdPartyServicesProvider</definitionProvider>
+  </definitionProviders>
 </annotatedContainer>
 ```
 

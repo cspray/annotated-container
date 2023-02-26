@@ -280,7 +280,7 @@ SHELL;
       <dir>src</dir>
       <dir>lib</dir>
       <dir>trunk</dir>
-      <dir packagePrivate="true">test</dir>
+      <dir>test</dir>
     </source>
     <vendor>
       <package>
@@ -350,7 +350,7 @@ XML;
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">lib</dir>
+      <dir>lib</dir>
     </source>
     <vendor/>
   </scanDirectories>
@@ -394,7 +394,7 @@ XML;
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">tests</dir>
+      <dir>tests</dir>
     </source>
     <vendor/>
   </scanDirectories>
@@ -456,7 +456,7 @@ XML;
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">lib</dir>
+      <dir>lib</dir>
     </source>
     <vendor/>
   </scanDirectories>
@@ -497,7 +497,7 @@ XML;
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">tests</dir>
+      <dir>tests</dir>
     </source>
     <vendor/>
   </scanDirectories>
@@ -539,7 +539,7 @@ XML;
   <scanDirectories>
     <source>
       <dir>src</dir>
-      <dir packagePrivate="true">tests</dir>
+      <dir>tests</dir>
     </source>
     <vendor/>
   </scanDirectories>

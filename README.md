@@ -121,7 +121,8 @@ Uses the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) Injector.
 composer require php-di/php-di
 ```
 
-Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. This library only supports necessary 8.1 features 7.0+.
+Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. This library only supports necessary 8.1 features 
+in 7.0+.
 
 ## Documentation
 

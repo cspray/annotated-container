@@ -11,24 +11,25 @@ Annotated Container has a boostrapping observer system that allows you to get ac
 
 namespace Acme\Demo;
 
+use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\Bootstrap\Observer;
 
 final class MyContainerObserver implements Observer {
 
-    public function beforeCompilation() : void {
+    public function beforeCompilation(ActiveProfiles $profiles) : void {
         // do something before the source code is analyzed and the ContainerDefinition is compiled
     }
 
-    public function afterCompilation(ContainerDefinition $containerDefinition) : void {
+    public function afterCompilation(ActiveProfiles $profiles, ContainerDefinition $containerDefinition) : void {
         // do something after the source is analyzed and the ContainerDefinition is compiled
     }
 
-    public function beforeContainerCreation(ContainerDefinition $containerDefinition) : void {
+    public function beforeContainerCreation(ActiveProfiles $profiles, ContainerDefinition $containerDefinition) : void {
         // do something after the ContainerDefinition is compiled, and the ConatinerFactory has been created with all 
         // configured ParameterStores
     }
 
-    public function afterContainerCreation(ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
+    public function afterContainerCreation(ActiveProfiles $profiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
         // do something after the AnnotatedContainer has been created based off of the given ContainerDefinition 
     }
 

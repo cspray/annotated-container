@@ -271,7 +271,7 @@ SHELL;
     }
 
     /**
-     * @return list<array{dir: string, packagePrivate: bool}>
+     * @return list<string>
      */
     private function getComposerDirectories(array $composer) : array {
         $autoloadPsr4 = $composer['autoload']['psr-4'] ?? [];
@@ -291,17 +291,11 @@ SHELL;
         $dirs = [];
 
         foreach (new RecursiveIteratorIterator(new RecursiveArrayIterator($composerDirs)) as $composerDir) {
-            $dirs[] = [
-                'dir' => (string) $composerDir,
-                'packagePrivate' => false
-            ];
+            $dirs[] = (string) $composerDir;
         }
 
         foreach (new RecursiveIteratorIterator(new RecursiveArrayIterator($composerDevDirs)) as $composerDevDir) {
-            $dirs[] = [
-                'dir' => (string) $composerDevDir,
-                'packagePrivate' => true
-            ];
+            $dirs[] = (string) $composerDevDir;
         }
 
         return $dirs;
@@ -321,10 +315,7 @@ SHELL;
         $source = $scanDirectories->appendChild($dom->createElementNS(self::XML_SCHEMA, 'source'));
 
         foreach ($composerDirectories as $composerDirectory) {
-            $dirNode = $dom->createElementNS(self::XML_SCHEMA, 'dir', $composerDirectory['dir']);
-            if ($composerDirectory['packagePrivate']) {
-                $dirNode->setAttribute('packagePrivate', 'true');
-            }
+            $dirNode = $dom->createElementNS(self::XML_SCHEMA, 'dir', $composerDirectory);
             $source->appendChild($dirNode);
         }
 
