@@ -10,7 +10,7 @@ use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
-use Cspray\AnnotatedContainer\StaticAnalysis\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
@@ -1776,7 +1776,7 @@ XML;
     public function testScannedAndSerializedContainerDefinitionMatchesDeserialized(Fixture $fixture) : void {
         $compiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter()
+            new AnnotatedTargetDefinitionConverter()
         );
 
         $subject = new ContainerDefinitionSerializer();

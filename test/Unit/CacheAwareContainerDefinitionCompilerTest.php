@@ -8,7 +8,7 @@ use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionA
 use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\StaticAnalysis\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\Exception\InvalidCache;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Unit\Helper\TestLogger;
@@ -30,7 +30,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $this->cacheAwareContainerDefinitionCompiler = new CacheAwareContainerDefinitionAnalyzer(
             $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
                 new PhpParserAnnotatedTargetParser(),
-                new DefaultAnnotatedTargetDefinitionConverter()
+                new AnnotatedTargetDefinitionConverter()
             ),
             $this->containerDefinitionSerializer = new ContainerDefinitionSerializer(),
             'vfs://root'
@@ -108,7 +108,7 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
         $subject = new CacheAwareContainerDefinitionAnalyzer(
             $this->phpParserContainerDefinitionCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
                 new PhpParserAnnotatedTargetParser(),
-                new DefaultAnnotatedTargetDefinitionConverter()
+                new AnnotatedTargetDefinitionConverter()
             ),
             $this->containerDefinitionSerializer,
             'vfs://cache'

@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\StaticAnalysis\DefaultAnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\LogicalConstraint\NoAbstractServiceAliasLogicalConstraint;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -20,7 +20,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
     protected function setUp(): void {
         $this->containerDefinitionCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter()
+            new AnnotatedTargetDefinitionConverter()
         );
         $this->subject = new NoAbstractServiceAliasLogicalConstraint();
     }

@@ -54,7 +54,7 @@ final class ContainerDefinitionAnalyzerBuilder {
     private function getCacheAppropriateAnalyzer() : ContainerDefinitionAnalyzer {
         $phpParserCompiler = new AnnotatedTargetContainerDefinitionAnalyzer(
             new PhpParserAnnotatedTargetParser(),
-            new DefaultAnnotatedTargetDefinitionConverter()
+            new AnnotatedTargetDefinitionConverter()
         );
         if (!isset($this->cacheDir)) {
             return $phpParserCompiler;
