@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [v2.0.0-rc4](https://github.com/cspray/annotated-container/tree/v2.0.0-rc4) - 2023-03-04
+
 ### Added
 
 - Added `cspray/annotated-container-adr` dependency for removed Architectural Decision Records.
@@ -23,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed Architectural Decision Records and provided Attributes, replaced in separate packages.
 - Removed `DefaultAnnotatedTargetDefinitionConverter`, this implementation was moved to the interface it implemented.
 - Removed the `Bootstrap\Observer` interface. Use the more granular implementations added instead.
+
+## [v2.0.0-rc3](https://github.com/cspray/annotated-container/tree/v2.0.0-rc3) - 2023-02-11
+
+### Changed
+
+- Updated `ThirdPartyInitializerProvider` to read explicit class names from `composer.json` instead of scanning the entire vendor directory which is very resource intensive.
 
 ## [v2.0.0-rc2](https://github.com/cspray/annotated-container/tree/v2.0.0-rc2) - 2023-02-11
 
