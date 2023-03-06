@@ -2,17 +2,14 @@
 
 namespace Cspray\AnnotatedContainer;
 
-final class AnnotatedContainerVersion {
+use PackageVersions\Versions;
 
-    private static ?string $version = null;
+final class AnnotatedContainerVersion {
 
     private function __construct() {}
 
     public static function getVersion() : string {
-        if (self::$version === null) {
-            self::$version = trim(file_get_contents(dirname(__DIR__) . '/VERSION'));
-        }
-        return self::$version;
+        return Versions::getVersion('cspray/annotated-container');
     }
 
 }
