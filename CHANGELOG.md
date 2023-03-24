@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+### Added
+
+- Added the `ocramius/package-versions` package to take care of retrieving Annotated Container version. This ensures a much less error-prone method for determining the package version.
+
+### Removed
+
+- Removed the VERSION file as its functionality was replaced by `ocramius/package-versions`.
+
 ## [v2.0.0-rc4](https://github.com/cspray/annotated-container/tree/v2.0.0-rc4) - 2023-03-04
 
 ### Added
