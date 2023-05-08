@@ -15,6 +15,7 @@
     "php": "^8.1",
     "ext-dom": "*",
     "ext-libxml": "*",
+    "composer-runtime-api": "^2",
     "brick/varexporter": "^0.3.7",
     "cspray/annotated-target": "^0.2",
     "cspray/annotated-container-adr": "^1.0",
