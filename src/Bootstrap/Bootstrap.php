@@ -64,7 +64,7 @@ final class Bootstrap {
     }
 
     /**
-     * @param list<string> $profiles
+     * @param list<non-empty-string> $profiles
      * @throws BackingContainerNotFound
      * @throws InvalidBootstrapConfiguration
      */
@@ -109,10 +109,14 @@ final class Bootstrap {
         );
     }
 
+    /**
+     * @param list<non-empty-string> $profiles
+     * @return ActiveProfiles
+     */
     private function activeProfiles(array $profiles) : ActiveProfiles {
         return new class($profiles) implements ActiveProfiles {
             public function __construct(
-                /** @var list<string> */
+                /** @var list<non-empty-string> */
                 private readonly array $profiles
             ) {}
 
