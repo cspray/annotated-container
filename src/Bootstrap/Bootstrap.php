@@ -4,8 +4,10 @@ namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Auryn\Injector;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
@@ -28,6 +30,7 @@ final class Bootstrap {
     private readonly ?ParameterStoreFactory $parameterStoreFactory;
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;
     private readonly ?ObserverFactory $observerFactory;
+
     /**
      * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
      */
@@ -38,13 +41,22 @@ final class Bootstrap {
         LoggerInterface $logger = null,
         ParameterStoreFactory $parameterStoreFactory = null,
         DefinitionProviderFactory $definitionProviderFactory = null,
-        ObserverFactory $observerFactory = null
+        ObserverFactory $observerFactory = null,
     ) {
-        $this->directoryResolver = $directoryResolver ?? $this->getDefaultDirectoryResolver();
+        $this->directoryResolver = $directoryResolver ?? $this->defaultDirectoryResolver();
         $this->logger = $logger;
         $this->parameterStoreFactory = $parameterStoreFactory;
         $this->definitionProviderFactory = $definitionProviderFactory;
         $this->observerFactory = $observerFactory;
+    }
+
+    private function defaultDirectoryResolver() : BootstrappingDirectoryResolver {
+        $rootDir = dirname(__DIR__);
+        if (!file_exists($rootDir . '/vendor/autoload.php')) {
+            $rootDir = dirname(__DIR__, 5);
+        }
+
+        return new RootDirectoryBootstrappingDirectoryResolver($rootDir);
     }
 
     public function addObserver(PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver $observer) : void {
@@ -60,15 +72,45 @@ final class Bootstrap {
         array $profiles = ['default'],
         string $configurationFile = 'annotated-container.xml'
     ) : AnnotatedContainer {
+
+        $configuration = $this->bootstrappingConfiguration($configurationFile);
+        $activeProfiles = $this->activeProfiles($profiles);
+        $analysisOptions = $this->analysisOptions($configuration, $activeProfiles);
+
+        foreach ($configuration->getObservers() as $observer) {
+            $this->addObserver($observer);
+        }
+
+        $this->notifyPreAnalysis($activeProfiles);
+
+        $containerDefinition = $this->runStaticAnalysis($configuration, $analysisOptions);
+        $this->notifyPostAnalysis($activeProfiles, $containerDefinition);
+
+        $container = $this->createContainer(
+            $configuration,
+            $activeProfiles,
+            $containerDefinition,
+            $analysisOptions->getLogger()
+        );
+
+        $this->notifyContainerCreated($activeProfiles, $containerDefinition, $container);
+
+        return $container;
+    }
+
+    private function bootstrappingConfiguration(string $configurationFile) : BootstrappingConfiguration {
         $configFile = $this->directoryResolver->getConfigurationPath($configurationFile);
-        $configuration = new XmlBootstrappingConfiguration(
+        return new XmlBootstrappingConfiguration(
             $configFile,
             directoryResolver: $this->directoryResolver,
             parameterStoreFactory: $this->parameterStoreFactory,
             observerFactory: $this->observerFactory,
             definitionProviderFactory: $this->definitionProviderFactory
         );
-        $activeProfiles = new class($profiles) implements ActiveProfiles {
+    }
+
+    private function activeProfiles(array $profiles) : ActiveProfiles {
+        return new class($profiles) implements ActiveProfiles {
             public function __construct(
                 /** @var list<string> */
                 private readonly array $profiles
@@ -82,78 +124,90 @@ final class Bootstrap {
                 return in_array($profile, $this->profiles, true);
             }
         };
+    }
 
+    private function analysisOptions(BootstrappingConfiguration $configuration, ActiveProfiles $activeProfiles) : ContainerDefinitionAnalysisOptions {
         $scanPaths = [];
         foreach ($configuration->getScanDirectories() as $scanDirectory) {
             $scanPaths[] = $this->directoryResolver->getPathFromRoot($scanDirectory);
         }
-        $compileOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$scanPaths);
+        $analysisOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$scanPaths);
         $containerDefinitionConsumer = $configuration->getContainerDefinitionProvider();
         if ($containerDefinitionConsumer !== null) {
-            $compileOptions = $compileOptions->withDefinitionProvider($containerDefinitionConsumer);
+            $analysisOptions = $analysisOptions->withDefinitionProvider($containerDefinitionConsumer);
         }
 
-        $profilesAllowLogging = count(array_intersect($profiles, $configuration->getLoggingExcludedProfiles())) === 0;
+        $profilesAllowLogging = count(array_intersect($activeProfiles->getProfiles(), $configuration->getLoggingExcludedProfiles())) === 0;
         $logger = $this->logger ?? $configuration->getLogger();
         if ($logger !== null && $profilesAllowLogging) {
-            $compileOptions = $compileOptions->withLogger($logger);
+            $analysisOptions = $analysisOptions->withLogger($logger);
         }
 
-        $cacheDir = null;
-        $configuredCacheDir = $configuration->getCacheDirectory();
-        if ($configuredCacheDir !== null) {
-            $cacheDir = $this->directoryResolver->getCachePath($configuredCacheDir);
-        }
+        return $analysisOptions->build();
+    }
 
-        foreach ($configuration->getObservers() as $observer) {
-            $this->addObserver($observer);
-        }
-
+    private function notifyPreAnalysis(ActiveProfiles $activeProfiles) : void {
         foreach ($this->observers as $observer) {
             if ($observer instanceof PreAnalysisObserver) {
                 $observer->notifyPreAnalysis($activeProfiles);
             }
         }
+    }
 
-        $containerDefinition = $this->getCompiler($cacheDir)->analyze($compileOptions->build());
+    private function runStaticAnalysis(
+        BootstrappingConfiguration $configuration,
+        ContainerDefinitionAnalysisOptions $analysisOptions
+    ) : ContainerDefinition {
+        $cacheDir = null;
+        $configuredCacheDir = $configuration->getCacheDirectory();
+        if ($configuredCacheDir !== null) {
+            $cacheDir = $this->directoryResolver->getCachePath($configuredCacheDir);
+        }
+        return $this->containerDefinitionAnalyzer($cacheDir)->analyze($analysisOptions);
+    }
 
+    private function containerDefinitionAnalyzer(?string $cacheDir) : ContainerDefinitionAnalyzer {
+        $compiler = new AnnotatedTargetContainerDefinitionAnalyzer(
+            new PhpParserAnnotatedTargetParser(),
+            new AnnotatedTargetDefinitionConverter()
+        );
+        if ($cacheDir !== null) {
+            $compiler = new CacheAwareContainerDefinitionAnalyzer($compiler, new ContainerDefinitionSerializer(), $cacheDir);
+        }
+
+        return $compiler;
+    }
+
+    private function notifyPostAnalysis(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition) : void {
         foreach ($this->observers as $observer) {
             if ($observer instanceof PostAnalysisObserver) {
                 $observer->notifyPostAnalysis($activeProfiles, $containerDefinition);
             }
         }
+    }
 
-        $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
+    private function createContainer(
+        BootstrappingConfiguration $configuration,
+        ActiveProfiles $activeProfiles,
+        ContainerDefinition $containerDefinition,
+        ?LoggerInterface $logger
+    ) : AnnotatedContainer {
+        $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$activeProfiles->getProfiles());
 
-        $containerFactory = $this->getContainerFactory($activeProfiles);
+        $containerFactory = $this->containerFactory($activeProfiles);
 
         foreach ($configuration->getParameterStores() as $parameterStore) {
             $containerFactory->addParameterStore($parameterStore);
         }
 
-        if ($logger !== null && $profilesAllowLogging) {
+        if ($logger !== null) {
             $factoryOptions = $factoryOptions->withLogger($logger);
         }
 
-        $container = $containerFactory->createContainer($containerDefinition, $factoryOptions->build());
-        foreach ($this->observers as $observer) {
-            if ($observer instanceof ContainerCreatedObserver) {
-                $observer->notifyContainerCreated($activeProfiles, $containerDefinition, $container);
-            }
-        }
-        return $container;
+        return $containerFactory->createContainer($containerDefinition, $factoryOptions->build());
     }
 
-    private function getDefaultDirectoryResolver() : BootstrappingDirectoryResolver {
-        $rootDir = dirname(__DIR__);
-        if (!file_exists($rootDir . '/vendor/autoload.php')) {
-            $rootDir = dirname(__DIR__, 5);
-        }
-
-        return new RootDirectoryBootstrappingDirectoryResolver($rootDir);
-    }
-
-    private function getContainerFactory(ActiveProfiles $activeProfiles) : ContainerFactory {
+    private function containerFactory(ActiveProfiles $activeProfiles) : ContainerFactory {
         if (class_exists(Injector::class)) {
             return new AurynContainerFactory($activeProfiles);
         }
@@ -165,16 +219,16 @@ final class Bootstrap {
         throw BackingContainerNotFound::fromMissingImplementation();
     }
 
-    private function getCompiler(?string $cacheDir) : ContainerDefinitionAnalyzer {
-        $compiler = new AnnotatedTargetContainerDefinitionAnalyzer(
-            new PhpParserAnnotatedTargetParser(),
-            new AnnotatedTargetDefinitionConverter()
-        );
-        if ($cacheDir !== null) {
-            $compiler = new CacheAwareContainerDefinitionAnalyzer($compiler, new ContainerDefinitionSerializer(), $cacheDir);
+    private function notifyContainerCreated(
+        ActiveProfiles $activeProfiles,
+        ContainerDefinition $containerDefinition,
+        AnnotatedContainer $container
+    ) : void {
+        foreach ($this->observers as $observer) {
+            if ($observer instanceof ContainerCreatedObserver) {
+                $observer->notifyContainerCreated($activeProfiles, $containerDefinition, $container);
+            }
         }
-
-        return $compiler;
     }
 
 }
