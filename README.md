@@ -13,8 +13,6 @@ A Dependency Injection framework for creating an autowired, feature-rich, [PSR-1
 - Easily include third-party services that cannot be easily annotated
 - Bring Your Own Container!
 
-> This README refers to functionality available in v2.0.0-beta1+. For information on v1 functionality please check out the 1.6.0 tag.
-
 ## Quick Start
 
 This quick start is intended to get you familiar with Annotated Container's core functionality and get a working Container created. First, a simple example showing how an interface can be aliased to a concrete Service. After that we'll show you how to get a Container to create the Service.
