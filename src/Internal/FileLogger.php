@@ -42,7 +42,7 @@ final class FileLogger extends AbstractLogger {
         $format = '[%s] annotated-container.%s: %s %s' . PHP_EOL;
         $contents = sprintf(
             $format,
-            ($this->dateTimeProvider)()->format(DateTime::ATOM),
+            ($this->dateTimeProvider)()->format('Y-m-d\TH:i:s.uP'),
             strtoupper((string) $level),
             (string) $message,
             json_encode((object) $context)
