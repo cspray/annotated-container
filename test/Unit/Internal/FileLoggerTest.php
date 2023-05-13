@@ -49,7 +49,7 @@ class FileLoggerTest extends TestCase {
             ['foo' => 'bar', 'bar' => 'baz', 'baz' => 'qux']
         );
 
-        $time = $dateTime->format(DateTime::ATOM);
+        $time = $dateTime->format('Y-m-d\TH:i:s.uP');
         $expected = <<<FILE
 [$time] annotated-container.INFO: This is a message that got passed. {"foo":"bar","bar":"baz","baz":"qux"}
 
@@ -68,7 +68,7 @@ FILE;
         );
         $logger->info('Second message.');
 
-        $time = $dateTime->format(DateTime::ATOM);
+        $time = $dateTime->format('Y-m-d\TH:i:s.uP');
         $expected = <<<FILE
 [$time] annotated-container.INFO: This is a message that got passed. {"foo":"bar","bar":"baz","baz":"qux"}
 [$time] annotated-container.INFO: Second message. {}
