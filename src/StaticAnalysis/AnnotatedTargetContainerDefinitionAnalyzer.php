@@ -478,7 +478,7 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
             $logger->info(
                 sprintf('Added services from %s to ContainerDefinition.', $definitionProvider::class),
                 [
-                    'containerDefinitionBuilderConsumer' => $definitionProvider::class
+                    'definitionProvider' => $definitionProvider::class
                 ]
             );
             return $context->getBuilder();

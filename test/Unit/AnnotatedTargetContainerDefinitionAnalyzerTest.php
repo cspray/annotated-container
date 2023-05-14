@@ -471,7 +471,7 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
                 StubDefinitionProvider::class
             ),
             'context' => [
-                'containerDefinitionBuilderConsumer' => StubDefinitionProvider::class
+                'definitionProvider' => StubDefinitionProvider::class
             ]
         ];
 
