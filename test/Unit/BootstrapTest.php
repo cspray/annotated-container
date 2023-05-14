@@ -19,6 +19,7 @@ use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Unit\Helper\StubAnalyticsObserver;
 use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapObserver;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStoreWithDependencies;
@@ -840,6 +841,38 @@ XML;
                 'container_wired_time_in_ms' => 1.0e-6
             ]
         ], $logs);
+    }
+
+    public function testContainerAnalyticsObserverInConfigurationRespected() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+    <observers>
+      <observer>Cspray\AnnotatedContainer\Unit\Helper\StubAnalyticsObserver</observer>
+    </observers>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $subject = new Bootstrap(
+            directoryResolver: $directoryResolver,
+        );
+
+        StubAnalyticsObserver::$analytics = null;
+
+        $subject->bootstrapContainer();
+
+        self::assertNotNull(StubAnalyticsObserver::$analytics);
     }
 
 }
