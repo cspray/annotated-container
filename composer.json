@@ -19,6 +19,7 @@
     "brick/varexporter": "^0.3.7",
     "cspray/annotated-container-adr": "^1",
     "cspray/annotated-container-attribute": "^1",
+    "cspray/annotated-target": "^v0.3",
     "cspray/precision-stopwatch": "^0.2.0",
     "cspray/typiphy": "^0.2",
     "nikic/php-parser": "^4.10",
