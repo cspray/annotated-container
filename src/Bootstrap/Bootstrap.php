@@ -112,8 +112,15 @@ final class Bootstrap {
         $analytics = $this->createAnalytics($metrics, $analysisPrepped, $analysisCompleted);
         $this->notifyAnalytics($analytics);
 
+        $message = sprintf(
+            'Took %fms to analyze and create your container. %fms was spent preparing for analysis. %fms was spent statically analyzing your codebase. %fms was spent wiring your container.',
+            $analytics->totalTime->timeTakenInMilliseconds(),
+            $analytics->timePreppingForAnalysis->timeTakenInMilliseconds(),
+            $analytics->timeTakenForAnalysis->timeTakenInMilliseconds(),
+            $analytics->timeTakenCreatingContainer->timeTakenInMilliseconds()
+        );
         $analysisOptions->getLogger()?->info(
-            'Took {total_time_in_ms}ms to analyze and create your container. {pre_analysis_time_in_ms}ms was spent preparing for analysis. {post_analysis_time_in_ms}ms was spent statically analyzing your codebase. {container_wired_time_in_ms}ms was spent wiring your container.',
+            $message,
             [
                 'total_time_in_ms' => $analytics->totalTime->timeTakenInMilliseconds(),
                 'pre_analysis_time_in_ms' => $analytics->timePreppingForAnalysis->timeTakenInMilliseconds(),
