@@ -20,6 +20,9 @@ use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
+use Cspray\PrecisionStopwatch\Marker;
+use Cspray\PrecisionStopwatch\Metrics;
+use Cspray\PrecisionStopwatch\Stopwatch;
 use DI\Container;
 use Psr\Log\LoggerInterface;
 
@@ -31,8 +34,10 @@ final class Bootstrap {
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;
     private readonly ?ObserverFactory $observerFactory;
 
+    private readonly Stopwatch $stopwatch;
+
     /**
-     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
+     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
      */
     private array $observers = [];
 
@@ -42,12 +47,14 @@ final class Bootstrap {
         ParameterStoreFactory $parameterStoreFactory = null,
         DefinitionProviderFactory $definitionProviderFactory = null,
         ObserverFactory $observerFactory = null,
+        Stopwatch $stopwatch = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->defaultDirectoryResolver();
         $this->logger = $logger;
         $this->parameterStoreFactory = $parameterStoreFactory;
         $this->definitionProviderFactory = $definitionProviderFactory;
         $this->observerFactory = $observerFactory;
+        $this->stopwatch = $stopwatch ?? new Stopwatch();
     }
 
     private function defaultDirectoryResolver() : BootstrappingDirectoryResolver {
@@ -59,7 +66,7 @@ final class Bootstrap {
         return new RootDirectoryBootstrappingDirectoryResolver($rootDir);
     }
 
-    public function addObserver(PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver $observer) : void {
+    public function addObserver(PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver $observer) : void {
         $this->observers[] = $observer;
     }
 
@@ -73,6 +80,8 @@ final class Bootstrap {
         string $configurationFile = 'annotated-container.xml'
     ) : AnnotatedContainer {
 
+        $this->stopwatch->start();
+
         $configuration = $this->bootstrappingConfiguration($configurationFile);
         $activeProfiles = $this->activeProfiles($profiles);
         $analysisOptions = $this->analysisOptions($configuration, $activeProfiles);
@@ -83,8 +92,12 @@ final class Bootstrap {
 
         $this->notifyPreAnalysis($activeProfiles);
 
+        $analysisPrepped = $this->stopwatch->mark();
+
         $containerDefinition = $this->runStaticAnalysis($configuration, $analysisOptions);
         $this->notifyPostAnalysis($activeProfiles, $containerDefinition);
+
+        $analysisCompleted = $this->stopwatch->mark();
 
         $container = $this->createContainer(
             $configuration,
@@ -95,6 +108,19 @@ final class Bootstrap {
 
         $this->notifyContainerCreated($activeProfiles, $containerDefinition, $container);
 
+        $metrics = $this->stopwatch->stop();
+        $analytics = $this->createAnalytics($metrics, $analysisPrepped, $analysisCompleted);
+        $this->notifyAnalytics($analytics);
+
+        $analysisOptions->getLogger()?->info(
+            'Took {total_time_in_ms}ms to analyze and create your container. {pre_analysis_time_in_ms}ms was spent preparing for analysis. {post_analysis_time_in_ms}ms was spent statically analyzing your codebase. {container_wired_time_in_ms}ms was spent wiring your container.',
+            [
+                'total_time_in_ms' => $analytics->totalTime->timeTakenInMilliseconds(),
+                'pre_analysis_time_in_ms' => $analytics->timePreppingForAnalysis->timeTakenInMilliseconds(),
+                'post_analysis_time_in_ms' => $analytics->timeTakenForAnalysis->timeTakenInMilliseconds(),
+                'container_wired_time_in_ms' => $analytics->timeTakenCreatingContainer->timeTakenInMilliseconds()
+            ]
+        );
         return $container;
     }
 
@@ -231,6 +257,27 @@ final class Bootstrap {
         foreach ($this->observers as $observer) {
             if ($observer instanceof ContainerCreatedObserver) {
                 $observer->notifyContainerCreated($activeProfiles, $containerDefinition, $container);
+            }
+        }
+    }
+
+    private function createAnalytics(
+        Metrics $metrics,
+        Marker $prepCompleted,
+        Marker $analysisCompleted
+    ) : ContainerAnalytics {
+        return new ContainerAnalytics(
+            $metrics->getTotalDuration(),
+            $metrics->getDurationBetweenMarkers($metrics->getStartMarker(), $prepCompleted),
+            $metrics->getDurationBetweenMarkers($prepCompleted, $analysisCompleted),
+            $metrics->getDurationBetweenMarkers($analysisCompleted, $metrics->getEndMarker())
+        );
+    }
+
+    private function notifyAnalytics(ContainerAnalytics $analytics) : void {
+        foreach ($this->observers as $observer) {
+            if ($observer instanceof ContainerAnalyticsObserver) {
+                $observer->notifyAnalytics($analytics);
             }
         }
     }

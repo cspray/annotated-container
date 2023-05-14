@@ -4,6 +4,9 @@ namespace Cspray\AnnotatedContainer\Unit;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
+use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalytics;
+use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalyticsObserver;
+use Cspray\AnnotatedContainer\Bootstrap\ContainerCreatedObserver;
 use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ObserverFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
@@ -11,6 +14,8 @@ use Cspray\AnnotatedContainer\Bootstrap\PreAnalysisObserver;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceWiringObserver;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
@@ -20,6 +25,8 @@ use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStoreWithDependencies;
 use Cspray\AnnotatedContainer\Unit\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\CustomServiceAttribute\Repository;
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\PrecisionStopwatch\KnownIncrementingPreciseTime;
+use Cspray\PrecisionStopwatch\Stopwatch;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
 use PHPUnit\Framework\TestCase;
@@ -705,6 +712,134 @@ XML;
             directoryResolver: $directoryResolver,
             observerFactory: $observerFactory
         ))->bootstrapContainer();
+    }
+
+    public function testContainerAnalyticsObserverNotifiedAfterContainerCreated() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $observer = new class implements ContainerCreatedObserver, ContainerAnalyticsObserver {
+            private array $calls = [];
+
+            public function notifyAnalytics(ContainerAnalytics $analytics) : void {
+                $this->calls[] = __FUNCTION__;
+            }
+
+            public function notifyContainerCreated(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
+                $this->calls[] = __FUNCTION__;
+            }
+
+            public function getCalls() : array {
+                return $this->calls;
+            }
+        };
+
+        $subject = new Bootstrap($directoryResolver);
+        $subject->addObserver($observer);
+
+        $subject->bootstrapContainer();
+
+        self::assertSame(['notifyContainerCreated', 'notifyAnalytics'], $observer->getCalls());
+    }
+
+    public function testContainerAnalyticsHasExpectedTotalDuration() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $observer = new class implements ContainerAnalyticsObserver {
+            private ?ContainerAnalytics $analytics = null;
+
+            public function notifyAnalytics(ContainerAnalytics $analytics) : void {
+                $this->analytics = $analytics;
+            }
+
+            public function getAnalytics() : ?ContainerAnalytics {
+                return $this->analytics;
+            }
+        };
+
+        $subject = new Bootstrap(
+            directoryResolver: $directoryResolver,
+            stopwatch: new Stopwatch(new KnownIncrementingPreciseTime())
+        );
+        $subject->addObserver($observer);
+
+        $subject->bootstrapContainer();
+
+        $analytics = $observer->getAnalytics();
+        self::assertNotNull($analytics);
+
+        self::assertSame(3, $analytics->totalTime->timeTakenInNanoseconds());
+        self::assertSame(1, $analytics->timePreppingForAnalysis->timeTakenInNanoseconds());
+        self::assertSame(1, $analytics->timeTakenForAnalysis->timeTakenInNanoseconds());
+        self::assertSame(1, $analytics->timeTakenCreatingContainer->timeTakenInNanoseconds());
+    }
+
+    public function testTimeTakenInMillisecondsLoggedIfLoggerPresent() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $logger = new TestLogger();
+        $subject = new Bootstrap(
+            directoryResolver: $directoryResolver,
+            logger: $logger,
+            stopwatch: new Stopwatch(new KnownIncrementingPreciseTime())
+        );
+
+        $subject->bootstrapContainer();
+
+        $logs = $logger->getLogsForLevel(LogLevel::INFO);
+        self::assertContainsEquals([
+            'message' => 'Took {total_time_in_ms}ms to analyze and create your container. {pre_analysis_time_in_ms}ms was spent preparing for analysis. {post_analysis_time_in_ms}ms was spent statically analyzing your codebase. {container_wired_time_in_ms}ms was spent wiring your container.',
+            'context' => [
+                'total_time_in_ms' => 3.0e-6,
+                'pre_analysis_time_in_ms' => 1.0e-6,
+                'post_analysis_time_in_ms' => 1.0e-6,
+                'container_wired_time_in_ms' => 1.0e-6
+            ]
+        ], $logs);
     }
 
 }
