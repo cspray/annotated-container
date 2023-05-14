@@ -217,7 +217,8 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
 
         return is_subclass_of($observerClass, PreAnalysisObserver::class) ||
             is_subclass_of($observerClass, PostAnalysisObserver::class) ||
-            is_subclass_of($observerClass, ContainerCreatedObserver::class);
+            is_subclass_of($observerClass, ContainerCreatedObserver::class) ||
+            is_subclass_of($observerClass, ContainerAnalyticsObserver::class);
 
     }
 

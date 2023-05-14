@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
+use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalyticsObserver;
 use Cspray\AnnotatedContainer\Bootstrap\ContainerCreatedObserver;
 use Cspray\AnnotatedContainer\Bootstrap\PostAnalysisObserver;
 use Cspray\AnnotatedContainer\Bootstrap\PreAnalysisObserver;
@@ -37,10 +38,11 @@ final class InvalidBootstrapConfiguration extends Exception {
 
     public static function fromConfiguredObserverWrongType() : self {
         return new self(sprintf(
-            'All entries in observers must be classes that implement %s, %s, or %s',
+            'All entries in observers must be classes that implement %s, %s, %s or %s',
             PreAnalysisObserver::class,
             PostAnalysisObserver::class,
-            ContainerCreatedObserver::class
+            ContainerCreatedObserver::class,
+            ContainerAnalyticsObserver::class
         ));
     }
 

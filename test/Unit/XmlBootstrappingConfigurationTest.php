@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit;
 
+use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalyticsObserver;
 use Cspray\AnnotatedContainer\Bootstrap\ContainerCreatedObserver;
 use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
 use Cspray\AnnotatedContainer\Bootstrap\Observer;
@@ -564,10 +565,11 @@ XML;
 
         $this->expectException(InvalidBootstrapConfiguration::class);
         $this->expectExceptionMessage(sprintf(
-            'All entries in observers must be classes that implement %s, %s, or %s',
+            'All entries in observers must be classes that implement %s, %s, %s or %s',
             PreAnalysisObserver::class,
             PostAnalysisObserver::class,
-            ContainerCreatedObserver::class
+            ContainerCreatedObserver::class,
+            ContainerAnalyticsObserver::class
         ));
         new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
@@ -596,10 +598,11 @@ XML;
 
         $this->expectException(InvalidBootstrapConfiguration::class);
         $this->expectExceptionMessage(sprintf(
-            'All entries in observers must be classes that implement %s, %s, or %s',
+            'All entries in observers must be classes that implement %s, %s, %s or %s',
             PreAnalysisObserver::class,
             PostAnalysisObserver::class,
-            ContainerCreatedObserver::class
+            ContainerCreatedObserver::class,
+            ContainerAnalyticsObserver::class
         ));
         new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
