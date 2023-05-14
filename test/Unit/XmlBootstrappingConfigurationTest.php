@@ -26,6 +26,7 @@ use Cspray\AnnotatedContainerFixture\Fixtures;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Util\Xml;
 use function Cspray\Typiphy\stringType;
 
 class XmlBootstrappingConfigurationTest extends TestCase {
@@ -680,6 +681,16 @@ XML;
         self::assertSame(
             ['src', 'test/helper', 'lib', 'vendor/package/one/src', 'vendor/package/one/lib', 'vendor/package/two/other_src'],
             $configuration->getScanDirectories()
+        );
+    }
+
+    public function testConfigurationFileNotPresentThrowsException() : void {
+        $this->expectException(InvalidBootstrapConfiguration::class);
+        $this->expectExceptionMessage('Provided configuration file vfs://root/not-found does not exist.');
+
+        new XmlBootstrappingConfiguration(
+            'vfs://root/not-found',
+            new FixtureBootstrappingDirectoryResolver()
         );
     }
 }
