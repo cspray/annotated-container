@@ -90,6 +90,10 @@
     </MixedArgument>
   </file>
   <file src="src/ContainerFactory/AbstractContainerFactory.php">
+    <DeprecatedClass occurrences="2">
+      <code>ConfigurationDefinition</code>
+      <code>ConfigurationDefinition</code>
+    </DeprecatedClass>
     <MixedArgument occurrences="4">
       <code>$inject-&gt;getValue()</code>
       <code>$inject-&gt;getValue()</code>
@@ -206,6 +210,49 @@
       <code>$item-&gt;getType() === $objectType ? $item : $carry</code>
     </MixedReturnStatement>
   </file>
+  <file src="src/Definition/ConfigurationDefinition.php">
+    <DeprecatedClass occurrences="1">
+      <code>?ConfigurationAttribute</code>
+    </DeprecatedClass>
+    <UndefinedAttributeClass occurrences="1">
+      <code>Deprecated</code>
+    </UndefinedAttributeClass>
+  </file>
+  <file src="src/Definition/ConfigurationDefinitionBuilder.php">
+    <DeprecatedClass occurrences="5">
+      <code>?ConfigurationAttribute</code>
+      <code>?ConfigurationAttribute</code>
+      <code>ConfigurationAttribute</code>
+      <code>ConfigurationDefinition</code>
+      <code>private</code>
+    </DeprecatedClass>
+    <DeprecatedInterface occurrences="1">
+      <code>class($this-&gt;classType, $this-&gt;name, $this-&gt;attribute) implements ConfigurationDefinition {</code>
+    </DeprecatedInterface>
+    <UndefinedAttributeClass occurrences="1">
+      <code>Deprecated</code>
+    </UndefinedAttributeClass>
+  </file>
+  <file src="src/Definition/ContainerDefinition.php">
+    <DeprecatedClass occurrences="1">
+      <code>list&lt;ConfigurationDefinition&gt;</code>
+    </DeprecatedClass>
+  </file>
+  <file src="src/Definition/ContainerDefinitionBuilder.php">
+    <DeprecatedClass occurrences="5">
+      <code>ConfigurationDefinition</code>
+      <code>ConfigurationDefinition[]</code>
+      <code>array</code>
+      <code>list&lt;ConfigurationDefinition&gt;</code>
+      <code>private array $configurationDefinitions = [];</code>
+    </DeprecatedClass>
+  </file>
+  <file src="src/Definition/ProfilesAwareContainerDefinition.php">
+    <DeprecatedClass occurrences="2">
+      <code>?ConfigurationDefinition</code>
+      <code>ServiceDefinition|InjectDefinition|ConfigurationDefinition $definition</code>
+    </DeprecatedClass>
+  </file>
   <file src="src/Function/definitions.php">
     <MixedArgument occurrences="2">
       <code>$profiles</code>
@@ -216,6 +263,9 @@
     <ArgumentTypeCoercion occurrences="1">
       <code>$serializedDefinition</code>
     </ArgumentTypeCoercion>
+    <DeprecatedClass occurrences="1">
+      <code>ConfigurationDefinitionBuilder::forClass(objectType($type))</code>
+    </DeprecatedClass>
     <InvalidArgument occurrences="1">
       <code>$serviceProfiles</code>
     </InvalidArgument>
@@ -238,9 +288,23 @@
     </UndefinedPropertyFetch>
   </file>
   <file src="src/StaticAnalysis/AnnotatedTargetContainerDefinitionAnalyzer.php">
+    <DeprecatedClass occurrences="4">
+      <code>$consumer</code>
+      <code>ConfigurationDefinition</code>
+      <code>DefinitionsCollection</code>
+      <code>DefinitionsCollection</code>
+    </DeprecatedClass>
     <MixedAssignment occurrences="1">
       <code>$convertedValue[$k]</code>
     </MixedAssignment>
+  </file>
+  <file src="src/StaticAnalysis/AnnotatedTargetDefinitionConverter.php">
+    <DeprecatedClass occurrences="4">
+      <code>ConfigurationDefinition</code>
+      <code>ConfigurationDefinitionBuilder::forClass(objectType($target-&gt;getTargetReflection()-&gt;getName()))</code>
+      <code>ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition</code>
+      <code>ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition</code>
+    </DeprecatedClass>
   </file>
   <file src="src/StaticAnalysis/ContainerDefinitionAnalysisOptionsBuilder.php">
     <MixedPropertyTypeCoercion occurrences="1">

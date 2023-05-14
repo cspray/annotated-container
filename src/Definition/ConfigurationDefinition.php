@@ -3,15 +3,21 @@
 namespace Cspray\AnnotatedContainer\Definition;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\ConfigurationCannotBeAssignedProfiles;
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateConfigurationInFavorOfCustomServiceAttribute;
 use Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute;
 use Cspray\Typiphy\ObjectType;
+use JetBrains\PhpStorm\Deprecated;
 
 /**
  * Defines a Configuration object.
  *
  * @see ConfigurationDefinitionBuilder
  */
-#[ConfigurationCannotBeAssignedProfiles]
+#[
+    ConfigurationCannotBeAssignedProfiles,
+    DeprecateConfigurationInFavorOfCustomServiceAttribute,
+    Deprecated('See ADR record DeprecatedConfigurationInFavorOfCustomServiceAttribute')
+]
 interface ConfigurationDefinition {
 
     /**
