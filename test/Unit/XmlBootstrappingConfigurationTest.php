@@ -138,7 +138,7 @@ XML;
 
         $this->expectException(InvalidBootstrapConfiguration::class);
         $this->expectExceptionMessage(
-            'All entries in definitionProviders must be classes that implement ' . DefinitionProvider::class
+            'The entry FooBar in definitionProviders does not implement the ' . DefinitionProvider::class . ' interface.'
         );
 
         new XmlBootstrappingConfiguration(
@@ -168,7 +168,7 @@ XML;
 
         $this->expectException(InvalidBootstrapConfiguration::class);
         $this->expectExceptionMessage(
-            'All entries in definitionProviders must be classes that implement ' . DefinitionProvider::class
+            'The entry Cspray\AnnotatedContainer\XmlBootstrappingConfiguration in definitionProviders does not implement the ' . DefinitionProvider::class . ' interface.'
         );
 
         new XmlBootstrappingConfiguration(
@@ -297,7 +297,7 @@ XML;
 
         $this->expectException(InvalidBootstrapConfiguration::class);
         $this->expectExceptionMessage(
-            'All entries in parameterStores must be classes that implement ' . ParameterStore::class
+            'The entry something not a class in parameterStores does not implement the ' . ParameterStore::class . ' interface.'
         );
         new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
@@ -326,7 +326,7 @@ XML;
 
         $this->expectException(InvalidBootstrapConfiguration::class);
         $this->expectExceptionMessage(
-            'All entries in parameterStores must be classes that implement ' . ParameterStore::class
+            'The entry Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider in parameterStores does not implement the ' . ParameterStore::class . ' interface.'
         );
         new XmlBootstrappingConfiguration(
             'vfs://root/annotated-container.xml',
@@ -565,7 +565,7 @@ XML;
 
         $this->expectException(InvalidBootstrapConfiguration::class);
         $this->expectExceptionMessage(sprintf(
-            'All entries in observers must be classes that implement %s, %s, %s or %s',
+            'The entry something not a class in observers does not implement one of the following interfaces %s, %s, %s or %s',
             PreAnalysisObserver::class,
             PostAnalysisObserver::class,
             ContainerCreatedObserver::class,
@@ -598,7 +598,7 @@ XML;
 
         $this->expectException(InvalidBootstrapConfiguration::class);
         $this->expectExceptionMessage(sprintf(
-            'All entries in observers must be classes that implement %s, %s, %s or %s',
+            'The entry Cspray\AnnotatedContainer\Helper\StubDefinitionProvider in observers does not implement one of the following interfaces %s, %s, %s or %s',
             PreAnalysisObserver::class,
             PostAnalysisObserver::class,
             ContainerCreatedObserver::class,

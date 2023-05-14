@@ -20,25 +20,28 @@ final class InvalidBootstrapConfiguration extends Exception {
         return new self($message);
     }
 
-    public static function fromConfiguredDefinitionProviderWrongType() : self {
+    public static function fromConfiguredDefinitionProviderWrongType(string $class) : self {
         $message = sprintf(
-            'All entries in definitionProviders must be classes that implement %s',
+            'The entry %s in definitionProviders does not implement the %s interface.',
+            $class,
             DefinitionProvider::class
         );
         return new self($message);
     }
 
-    public static function fromConfiguredParameterStoreWrongType() : self {
+    public static function fromConfiguredParameterStoreWrongType(string $class) : self {
         $message = sprintf(
-            'All entries in parameterStores must be classes that implement %s',
+            'The entry %s in parameterStores does not implement the %s interface.',
+            $class,
             ParameterStore::class
         );
         return new self($message);
     }
 
-    public static function fromConfiguredObserverWrongType() : self {
+    public static function fromConfiguredObserverWrongType(string $class) : self {
         return new self(sprintf(
-            'All entries in observers must be classes that implement %s, %s, %s or %s',
+            'The entry %s in observers does not implement one of the following interfaces %s, %s, %s or %s',
+            $class,
             PreAnalysisObserver::class,
             PostAnalysisObserver::class,
             ContainerCreatedObserver::class,

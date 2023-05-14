@@ -115,7 +115,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 } else{
                     if (!class_exists($definitionProviderType) ||
                         !is_subclass_of($definitionProviderType, DefinitionProvider::class)) {
-                        throw InvalidBootstrapConfiguration::fromConfiguredDefinitionProviderWrongType();
+                        throw InvalidBootstrapConfiguration::fromConfiguredDefinitionProviderWrongType($definitionProviderType);
                     }
                     $definitionProviders[] = new $definitionProviderType();
                 }
@@ -135,7 +135,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                         $parameterStore = $this->parameterStoreFactory->createParameterStore($parameterStoreType);
                     } else {
                         if (!class_exists($parameterStoreType) || !is_subclass_of($parameterStoreType, ParameterStore::class)) {
-                            throw InvalidBootstrapConfiguration::fromConfiguredParameterStoreWrongType();
+                            throw InvalidBootstrapConfiguration::fromConfiguredParameterStoreWrongType($parameterStoreType);
                         }
                         $parameterStore = new $parameterStoreType();
                     }
@@ -152,7 +152,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                         $observer = $this->observerFactory->createObserver($observerClass);
                     } else {
                         if (!$this->isObserverType($observerClass)) {
-                            throw InvalidBootstrapConfiguration::fromConfiguredObserverWrongType();
+                            throw InvalidBootstrapConfiguration::fromConfiguredObserverWrongType($observerClass);
                         }
                         $observer = new $observerClass();
                     }
