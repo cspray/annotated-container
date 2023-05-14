@@ -832,7 +832,7 @@ XML;
 
         $logs = $logger->getLogsForLevel(LogLevel::INFO);
         self::assertContainsEquals([
-            'message' => 'Took {total_time_in_ms}ms to analyze and create your container. {pre_analysis_time_in_ms}ms was spent preparing for analysis. {post_analysis_time_in_ms}ms was spent statically analyzing your codebase. {container_wired_time_in_ms}ms was spent wiring your container.',
+            'message' => 'Took 0.000003ms to analyze and create your container. 0.000001ms was spent preparing for analysis. 0.000001ms was spent statically analyzing your codebase. 0.000001ms was spent wiring your container.',
             'context' => [
                 'total_time_in_ms' => 3.0e-6,
                 'pre_analysis_time_in_ms' => 1.0e-6,
