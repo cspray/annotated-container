@@ -475,10 +475,17 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
                 }
             };
             $definitionProvider->consume($context);
+
+            // We are doing this because adding a proper DefinitionProvider::toString method to the interface would
+            // require a BC break. Instead, we will make a check for this specific use case to ensure useful information
+            // gets logged without requiring a major version release
+            // TODO In v3 implement a proper DefinitionProvider::toString method and deprecate CompositeDefinitionProvider::__toString
+            $definitionProviderName = $definitionProvider instanceof CompositeDefinitionProvider ? (string) $definitionProvider : $definitionProvider::class;
+
             $logger->info(
-                sprintf('Added services from %s to ContainerDefinition.', $definitionProvider::class),
+                sprintf('Added services from %s to ContainerDefinition.', $definitionProviderName),
                 [
-                    'definitionProvider' => $definitionProvider::class
+                    'definitionProvider' => $definitionProviderName
                 ]
             );
             return $context->getBuilder();
