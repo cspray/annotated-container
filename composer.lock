@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ebeecbe87642d97b9955ff82cad0e6b5",
+    "content-hash": "c4e8dc0c0d45972a4a34c2a2958bef01",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -57,20 +57,21 @@
         },
         {
             "name": "cspray/annotated-container-adr",
-            "version": "1.1.0",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-container-adr.git",
-                "reference": "071bf923af7795babdbf881cab6ff0571ec049d3"
+                "reference": "18006e499e70aa3506835f0cf6218d90cb661601"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-adr/zipball/071bf923af7795babdbf881cab6ff0571ec049d3",
-                "reference": "071bf923af7795babdbf881cab6ff0571ec049d3",
+                "url": "https://api.github.com/repos/cspray/annotated-container-adr/zipball/18006e499e70aa3506835f0cf6218d90cb661601",
+                "reference": "18006e499e70aa3506835f0cf6218d90cb661601",
                 "shasum": ""
             },
             "require": {
-                "cspray/architectural-decision": "^1.2",
+                "cspray/architectural-decision": "^1.3",
+                "ext-dom": "*",
                 "php": "^8.1"
             },
             "type": "library",
@@ -83,26 +84,26 @@
             "description": "Architectural Decision Records for Annotated Container and its associated libraries.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-container-adr/issues",
-                "source": "https://github.com/cspray/annotated-container-adr/tree/1.1.0"
+                "source": "https://github.com/cspray/annotated-container-adr/tree/2.2.0"
             },
-            "time": "2023-05-14T02:04:15+00:00"
+            "time": "2023-05-14T15:06:59+00:00"
         },
         {
             "name": "cspray/annotated-container-attribute",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/annotated-container-attribute.git",
-                "reference": "6cfa0e15e7567a5ea4dba56693b3f74a41b97637"
+                "reference": "5b1cda88275fc1428fc8874cc76072d5adb558bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/annotated-container-attribute/zipball/6cfa0e15e7567a5ea4dba56693b3f74a41b97637",
-                "reference": "6cfa0e15e7567a5ea4dba56693b3f74a41b97637",
+                "url": "https://api.github.com/repos/cspray/annotated-container-attribute/zipball/5b1cda88275fc1428fc8874cc76072d5adb558bc",
+                "reference": "5b1cda88275fc1428fc8874cc76072d5adb558bc",
                 "shasum": ""
             },
             "require": {
-                "cspray/annotated-container-adr": "^1.0",
+                "cspray/annotated-container-adr": "^2",
                 "php": "^8.1"
             },
             "type": "library",
@@ -118,9 +119,9 @@
             "description": "Attributes used by Annotated Container, to configure an autowired PSR-11 dependency injection container.",
             "support": {
                 "issues": "https://github.com/cspray/annotated-container-attribute/issues",
-                "source": "https://github.com/cspray/annotated-container-attribute/tree/1.0.0"
+                "source": "https://github.com/cspray/annotated-container-attribute/tree/1.1.0"
             },
-            "time": "2023-02-26T15:01:53+00:00"
+            "time": "2023-05-14T13:50:42+00:00"
         },
         {
             "name": "cspray/annotated-target",
@@ -174,16 +175,16 @@
         },
         {
             "name": "cspray/architectural-decision",
-            "version": "v1.2.0",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cspray/architectural-decision.git",
-                "reference": "5775465c4d69fc0d79d144bdbb3c785a8a9302f1"
+                "reference": "972339dcc89d3e559e808bef63c8052cffdd89cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cspray/architectural-decision/zipball/5775465c4d69fc0d79d144bdbb3c785a8a9302f1",
-                "reference": "5775465c4d69fc0d79d144bdbb3c785a8a9302f1",
+                "url": "https://api.github.com/repos/cspray/architectural-decision/zipball/972339dcc89d3e559e808bef63c8052cffdd89cb",
+                "reference": "972339dcc89d3e559e808bef63c8052cffdd89cb",
                 "shasum": ""
             },
             "require": {
@@ -213,9 +214,9 @@
             "description": "A library to keep track of architectural decisions with PHP annotations.",
             "support": {
                 "issues": "https://github.com/cspray/architectural-decision/issues",
-                "source": "https://github.com/cspray/architectural-decision/tree/v1.2.0"
+                "source": "https://github.com/cspray/architectural-decision/tree/v1.3.0"
             },
-            "time": "2023-05-14T01:54:58+00:00"
+            "time": "2023-05-14T14:26:45+00:00"
         },
         {
             "name": "cspray/precision-stopwatch",
