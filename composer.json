@@ -17,15 +17,14 @@
     "ext-libxml": "*",
     "composer-runtime-api": "^2",
     "brick/varexporter": "^0.3.7",
-    "cspray/annotated-target": "^0.2",
-    "cspray/annotated-container-adr": "^1.0",
-    "cspray/annotated-container-attribute": "^1.0",
+    "cspray/annotated-container-adr": "^1",
+    "cspray/annotated-container-attribute": "^1",
+    "cspray/precision-stopwatch": "^0.2.0",
     "cspray/typiphy": "^0.2",
     "nikic/php-parser": "^4.10",
     "ocramius/package-versions": "^2.7",
     "psr/container": "^2.0",
-    "psr/log": "^2 || ^3",
-    "cspray/precision-stopwatch": "^0.2.0"
+    "psr/log": "^2 || ^3"
   },
   "require-dev": {
     "cspray/phinal": "^1.0",
