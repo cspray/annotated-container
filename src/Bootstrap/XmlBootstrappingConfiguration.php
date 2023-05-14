@@ -48,6 +48,10 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         private readonly ?ObserverFactory $observerFactory = null,
         private readonly ?DefinitionProviderFactory $definitionProviderFactory = null
     ) {
+        if (!file_exists($this->xmlFile)) {
+            throw InvalidBootstrapConfiguration::fromFileMissing($this->xmlFile);
+        }
+
         try{
             $schemaFile = dirname(__DIR__, 2) . '/annotated-container.xsd';
             $dom = new DOMDocument();
