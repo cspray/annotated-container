@@ -24,7 +24,8 @@
     "nikic/php-parser": "^4.10",
     "ocramius/package-versions": "^2.7",
     "psr/container": "^2.0",
-    "psr/log": "^2 || ^3"
+    "psr/log": "^2 || ^3",
+    "cspray/precision-stopwatch": "^0.2.0"
   },
   "require-dev": {
     "cspray/phinal": "^1.0",

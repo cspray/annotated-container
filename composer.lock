@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cf60f2d608167e016f03110a70761b35",
+    "content-hash": "0e03100dd65ba7741d87577000997f6b",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -216,6 +216,51 @@
                 "source": "https://github.com/cspray/architectural-decision/tree/v1.1.0"
             },
             "time": "2022-08-11T13:32:57+00:00"
+        },
+        {
+            "name": "cspray/precision-stopwatch",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cspray/precision-stopwatch.git",
+                "reference": "8740db31df8cab333d584c59048e1b74cb627338"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cspray/precision-stopwatch/zipball/8740db31df8cab333d584c59048e1b74cb627338",
+                "reference": "8740db31df8cab333d584c59048e1b74cb627338",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "cspray/phinal": "^2.0",
+                "phpunit/phpunit": "^10.1",
+                "vimeo/psalm": "^5.11"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cspray\\PrecisionStopwatch\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Charles Sprayberry",
+                    "homepage": "https://cspray.io"
+                }
+            ],
+            "description": "A small library for keeping track of the duration between precise points in time.",
+            "support": {
+                "issues": "https://github.com/cspray/precision-stopwatch/issues",
+                "source": "https://github.com/cspray/precision-stopwatch/tree/0.2.0"
+            },
+            "time": "2023-05-13T18:36:49+00:00"
         },
         {
             "name": "cspray/typiphy",

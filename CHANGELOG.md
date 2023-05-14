@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+### Added
+
+- Added the `cspray/precision-stopwatch` library to facilitate timing how long bootstrapping takes.
+- Added a `ContainerAnalyticsObserver` to bootstrapping that is notified with how long it took to create your container.
+
+### Changed
+
+- Updated the default bootstrap logger to output time with microseconds included.
+
 ## [v2.0.0](https://github.com/cspray/annotated-container/tree/v2.0.0)
 
 ### Added
