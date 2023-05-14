@@ -28,4 +28,12 @@ final class CompositeDefinitionProvider implements DefinitionProvider {
     public function getDefinitionProviders() : array {
         return $this->providers;
     }
+
+    public function __toString() : string {
+        $classes = array_map(
+            static fn(DefinitionProvider $provider) => $provider::class,
+            $this->getDefinitionProviders()
+        );
+        return sprintf('Composite<%s>', implode(', ', $classes));
+    }
 }

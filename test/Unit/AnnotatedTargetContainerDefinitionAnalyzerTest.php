@@ -8,6 +8,7 @@ use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
@@ -20,6 +21,7 @@ use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Exception\InvalidScanDirectories;
 use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepare;
+use Cspray\AnnotatedContainer\Unit\Helper\AnotherDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\TestLogger;
 use Cspray\AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum;
@@ -471,7 +473,34 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
                 StubDefinitionProvider::class
             ),
             'context' => [
-                'containerDefinitionBuilderConsumer' => StubDefinitionProvider::class
+                'definitionProvider' => StubDefinitionProvider::class
+            ]
+        ];
+
+        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
+    }
+
+    public function testLoggingFromCompositeDefinitionProvider() : void {
+        $this->runAnalysisDirectory(
+            Fixtures::singleConcreteService()->getPath(),
+            new CompositeDefinitionProvider(
+                new StubDefinitionProvider(),
+                new AnotherDefinitionProvider()
+            )
+        );
+
+        $expectedProvider = sprintf(
+            'Composite<%s, %s>',
+            StubDefinitionProvider::class,
+            AnotherDefinitionProvider::class
+        );
+        $expected = [
+            'message' => sprintf(
+                'Added services from %s to ContainerDefinition.',
+                $expectedProvider
+            ),
+            'context' => [
+                'definitionProvider' => $expectedProvider
             ]
         ];
 
