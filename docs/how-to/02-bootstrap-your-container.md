@@ -53,7 +53,7 @@ Bootstrapping allows logging to a file or logging to stdout. In our example the 
 
 ## Step 3 - Setup Third Party Services (optional)
 
-To define services that can't be annotated you can make use of a `Cspray\AnnotatedContainer\Compile\DefinitionProvider` implementation. Implementing this interface allows you to use the [functional API](../references/03-functional-api.md) to augment your ContainerDefinition without using Attributes. Out-of-the-box, it is expected this implementation will have a zero-argument constructor. Later on in this document I will discuss ways that you can override construction if your implementation has dependencies. Primarily this should be used to integrate third-party libraries that can't have Attributes assigned to them.
+To define services that can't be annotated you can make use of a `Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider` implementation. Implementing this interface allows you to use the [functional API](../references/03-functional-api.md) to augment your ContainerDefinition without using Attributes. Out-of-the-box, it is expected this implementation will have a zero-argument constructor. Later on in this document I will discuss ways that you can override construction if your implementation has dependencies. Primarily this should be used to integrate third-party libraries that can't have Attributes assigned to them.
 
 Somewhere in your source code:
 
