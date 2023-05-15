@@ -34,6 +34,8 @@ final class Bootstrap {
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;
     private readonly ?ObserverFactory $observerFactory;
 
+    private readonly ?ContainerFactory $containerFactory;
+
     private readonly Stopwatch $stopwatch;
 
     /**
@@ -47,7 +49,8 @@ final class Bootstrap {
         ParameterStoreFactory $parameterStoreFactory = null,
         DefinitionProviderFactory $definitionProviderFactory = null,
         ObserverFactory $observerFactory = null,
-        Stopwatch $stopwatch = null
+        Stopwatch $stopwatch = null,
+        ContainerFactory $containerFactory = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->defaultDirectoryResolver();
         $this->logger = $logger;
@@ -55,6 +58,7 @@ final class Bootstrap {
         $this->definitionProviderFactory = $definitionProviderFactory;
         $this->observerFactory = $observerFactory;
         $this->stopwatch = $stopwatch ?? new Stopwatch();
+        $this->containerFactory = $containerFactory;
     }
 
     private function defaultDirectoryResolver() : BootstrappingDirectoryResolver {
@@ -245,6 +249,10 @@ final class Bootstrap {
     }
 
     private function containerFactory(ActiveProfiles $activeProfiles) : ContainerFactory {
+        if ($this->containerFactory !== null) {
+            return $this->containerFactory;
+        }
+
         if (class_exists(Injector::class)) {
             return new AurynContainerFactory($activeProfiles);
         }

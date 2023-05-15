@@ -14,6 +14,7 @@ use Cspray\AnnotatedContainer\Bootstrap\PreAnalysisObserver;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
 use Cspray\AnnotatedContainer\Bootstrap\ServiceWiringObserver;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
@@ -873,6 +874,39 @@ XML;
         $subject->bootstrapContainer();
 
         self::assertNotNull(StubAnalyticsObserver::$analytics);
+    }
+
+    public function testContainerFactoryPassedToConstructorTakesPriority() : void {
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($goodXml)
+            ->at($this->vfs);
+
+        $containerFactory = $this->getMockBuilder(ContainerFactory::class)->getMock();
+        $containerFactory->expects($this->once())
+            ->method('createContainer')
+            ->willReturn($container = $this->getMockBuilder(AnnotatedContainer::class)->getMock());
+
+        $subject = new Bootstrap(
+            directoryResolver: $directoryResolver,
+            containerFactory: $containerFactory
+        );
+
+        $actual = $subject->bootstrapContainer();
+
+        self::assertSame($container, $actual);
     }
 
 }
