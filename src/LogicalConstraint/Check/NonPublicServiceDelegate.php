@@ -8,7 +8,7 @@ use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolation;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationCollection;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 
-class NonPublicServiceDelegate implements LogicalConstraint {
+final class NonPublicServiceDelegate implements LogicalConstraint {
 
     public function getConstraintViolations(ContainerDefinition $containerDefinition, array $profiles) : LogicalConstraintViolationCollection {
         $violations = new LogicalConstraintViolationCollection();
