@@ -178,4 +178,8 @@ final class Fixtures {
         return new AliasedConfigurationFixture();
     }
 
+    public static function duplicateNamedServiceDifferentProfiles() : DuplicateNamedServiceDifferentProfilesFixture {
+        return new DuplicateNamedServiceDifferentProfilesFixture();
+    }
+
 }
