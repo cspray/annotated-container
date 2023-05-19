@@ -15,8 +15,12 @@ interface LogicalConstraint {
      * collection with each violation that the implemented constraint checks.
      *
      * @param ContainerDefinition $containerDefinition
+     * @param list<non-empty-string> $profiles
      * @return LogicalConstraintViolationCollection
      */
-    public function getConstraintViolations(ContainerDefinition $containerDefinition) : LogicalConstraintViolationCollection;
+    public function getConstraintViolations(
+        ContainerDefinition $containerDefinition,
+        array $profiles
+    ) : LogicalConstraintViolationCollection;
 
 }

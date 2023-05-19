@@ -1,16 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\LogicalConstraint;
+namespace Cspray\AnnotatedContainer\LogicalConstraint\Check;
 
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraint;
+use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolation;
+use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationCollection;
+use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 
 /**
  * A LogicalConstraint that will check each abstract Service to ensure that at least 1 concrete Service is aliased for it.
  */
 final class NoAbstractServiceAliasLogicalConstraint implements LogicalConstraint {
 
-    public function getConstraintViolations(ContainerDefinition $containerDefinition): LogicalConstraintViolationCollection {
+    public function getConstraintViolations(ContainerDefinition $containerDefinition, array $profiles): LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();
         foreach ($containerDefinition->getServiceDefinitions() as $sharedServiceDefinition) {
             if ($sharedServiceDefinition->isAbstract()) {

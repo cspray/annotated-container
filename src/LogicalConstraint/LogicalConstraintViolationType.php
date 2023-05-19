@@ -7,6 +7,7 @@ namespace Cspray\AnnotatedContainer\LogicalConstraint;
  * go wrong.
  */
 enum LogicalConstraintViolationType {
+    case Critical;
     case Warning;
     case Notice;
 }
