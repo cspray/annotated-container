@@ -9,7 +9,6 @@ use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\PrivateServiceDelegateMethod\PrivateFooServiceFactory;
-use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\ProtectedServiceDelegateMethod\FooService;
 use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\ProtectedServiceDelegateMethod\ProtectedFooServiceFactory;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -35,7 +34,7 @@ final class NonPublicServiceDelegateTest extends TestCase {
 
         $definition = $this->analyzer->analyze($options);
 
-        $violations = $this->subject->getConstraintViolations($definition);
+        $violations = $this->subject->getConstraintViolations($definition, ['default']);
 
         self::assertCount(0, $violations);
     }
@@ -47,7 +46,7 @@ final class NonPublicServiceDelegateTest extends TestCase {
 
         $definition = $this->analyzer->analyze($options);
 
-        $violations = $this->subject->getConstraintViolations($definition);
+        $violations = $this->subject->getConstraintViolations($definition, ['default']);
 
         self::assertCount(1, $violations);
         self::assertSame(LogicalConstraintViolationType::Critical, $violations->get(0)->violationType);
@@ -64,7 +63,7 @@ final class NonPublicServiceDelegateTest extends TestCase {
 
         $definition = $this->analyzer->analyze($options);
 
-        $violations = $this->subject->getConstraintViolations($definition);
+        $violations = $this->subject->getConstraintViolations($definition, ['default']);
 
         self::assertCount(1, $violations);
         self::assertSame(LogicalConstraintViolationType::Critical, $violations->get(0)->violationType);

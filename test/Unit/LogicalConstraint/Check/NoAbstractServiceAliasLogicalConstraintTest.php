@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint;
+namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint\Check;
 
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\NoAbstractServiceAliasLogicalConstraint;
+use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
-use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
-use Cspray\AnnotatedContainer\LogicalConstraint\NoAbstractServiceAliasLogicalConstraint;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
@@ -27,9 +27,9 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
     public function testViolationsForNoInterfaceServiceAlias() {
         $containerDefinition = $this->containerDefinitionCompiler->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(dirname(__DIR__, 2) . '/LogicalErrorApps/NoInterfaceServiceAlias')->build()
         );
-        $violations = $this->subject->getConstraintViolations($containerDefinition);
+        $violations = $this->subject->getConstraintViolations($containerDefinition, ['default']);
 
         $this->assertCount(1, $violations);
         $this->assertSame(
@@ -44,9 +44,9 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
 
     public function testViolationsForNoAbstractServiceAlias() {
         $containerDefinition = $this->containerDefinitionCompiler->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(dirname(__DIR__) . '/LogicalErrorApps/NoAbstractServiceAlias')->build()
+            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(dirname(__DIR__, 2) . '/LogicalErrorApps/NoAbstractServiceAlias')->build()
         );
-        $violations = $this->subject->getConstraintViolations($containerDefinition);
+        $violations = $this->subject->getConstraintViolations($containerDefinition, ['default']);
 
         $this->assertCount(1, $violations);
         $this->assertSame(
@@ -63,7 +63,7 @@ class NoAbstractServiceAliasLogicalConstraintTest extends TestCase {
         $containerDefinition = $this->containerDefinitionCompiler->analyze(
             ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(Fixtures::implicitAliasedServices()->getPath())->build()
         );
-        $violations = $this->subject->getConstraintViolations($containerDefinition);
+        $violations = $this->subject->getConstraintViolations($containerDefinition, ['default']);
 
         $this->assertCount(0, $violations);
     }
