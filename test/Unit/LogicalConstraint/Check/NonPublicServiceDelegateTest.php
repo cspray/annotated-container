@@ -4,26 +4,20 @@ namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint\Check;
 
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
-use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\PrivateServiceDelegateMethod\PrivateFooServiceFactory;
 use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\ProtectedServiceDelegateMethod\ProtectedFooServiceFactory;
 use Cspray\AnnotatedContainerFixture\Fixtures;
-use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use PHPUnit\Framework\TestCase;
 
-final class NonPublicServiceDelegateTest extends TestCase {
+final class NonPublicServiceDelegateTest extends LogicalConstraintTestCase {
 
     private ContainerDefinitionAnalyzer $analyzer;
     private NonPublicServiceDelegate $subject;
 
     protected function setUp(): void {
-        $this->analyzer = new AnnotatedTargetContainerDefinitionAnalyzer(
-            new PhpParserAnnotatedTargetParser(),
-            new AnnotatedTargetDefinitionConverter()
-        );
+        $this->analyzer = $this->getAnalyzer();
         $this->subject = new NonPublicServiceDelegate();
     }
 
