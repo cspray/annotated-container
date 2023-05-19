@@ -32,7 +32,7 @@ class LogicalConstraintValidatorTest extends TestCase {
         )->build());
         $violations = $this->subject->validate($containerDefinition);
 
-        $this->assertCount(2, $violations);
+        $this->assertCount(1, $violations);
     }
 
     public function testValidatorHasCorrectViolationMessages() {
@@ -42,8 +42,8 @@ class LogicalConstraintValidatorTest extends TestCase {
         $violations = $this->subject->validate($containerDefinition);
 
         $this->assertCount(1, $violations);
-        $this->assertSame('The abstract, ' . \Cspray\AnnotatedContainer\Unit\LogicalErrorApps\NoInterfaceServiceAlias\FooInterface::class . ', does not have an alias. Create a concrete class that implements this type and annotate it with a #[Service] Attribute.', $violations->get(0)->getMessage());
-        $this->assertSame(LogicalConstraintViolationType::Warning, $violations->get(0)->getViolationType());
+        $this->assertSame('The abstract, ' . \Cspray\AnnotatedContainer\Unit\LogicalErrorApps\NoInterfaceServiceAlias\FooInterface::class . ', does not have an alias. Create a concrete class that implements this type and annotate it with a #[Service] Attribute.', $violations->get(0)->message);
+        $this->assertSame(LogicalConstraintViolationType::Warning, $violations->get(0)->violationType);
     }
 
 

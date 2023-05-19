@@ -13,7 +13,6 @@ final class LogicalConstraintValidator {
     private array $logicalConstraints = [];
 
     public function __construct() {
-        $this->logicalConstraints[] = new MultipleAliasResolutionLogicalConstraint();
         $this->logicalConstraints[] = new NoAbstractServiceAliasLogicalConstraint();
     }
 

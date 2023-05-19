@@ -17,6 +17,8 @@ interface LogicalConstraint {
      * @param ContainerDefinition $containerDefinition
      * @return LogicalConstraintViolationCollection
      */
-    public function getConstraintViolations(ContainerDefinition $containerDefinition) : LogicalConstraintViolationCollection;
+    public function getConstraintViolations(
+        ContainerDefinition $containerDefinition
+    ) : LogicalConstraintViolationCollection;
 
 }
