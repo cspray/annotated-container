@@ -146,26 +146,6 @@ final class Bootstrap {
         );
     }
 
-    /**
-     * @param list<non-empty-string> $profiles
-     * @return ActiveProfiles
-     */
-    private function activeProfiles(array $profiles) : ActiveProfiles {
-        return new class($profiles) implements ActiveProfiles {
-            public function __construct(
-                /** @var list<non-empty-string> */
-                private readonly array $profiles
-            ) {}
-
-            public function getProfiles() : array {
-                return $this->profiles;
-            }
-
-            public function isActive(string $profile) : bool {
-                return in_array($profile, $this->profiles, true);
-            }
-        };
-    }
 
     private function analysisOptions(BootstrappingConfiguration $configuration, ActiveProfiles $activeProfiles) : ContainerDefinitionAnalysisOptions {
         $scanPaths = [];

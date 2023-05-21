@@ -9,8 +9,14 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
+use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
@@ -18,6 +24,7 @@ use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\Typiphy\ObjectType;
+use stdClass;
 use UnitEnum;
 use function Cspray\Typiphy\objectType;
 
@@ -32,49 +39,156 @@ if (!class_exists(Injector::class)) {
  */
 final class AurynContainerFactory extends AbstractContainerFactory implements ContainerFactory {
 
-    /**
-     * Returns a PSR ContainerInterface that uses an Auryn\Injector to create services.
-     *
-     * Because Auryn does not provide a PSR compatible Container we wrap the injector in an anonymous class that
-     * implements the PSR ContainerInterface. Auryn has the capacity to recursively autowire Services at time of
-     * construction and does not necessarily need to have the Service defined ahead of time if the constructor
-     * dependencies can be reliably determined. This fact makes the has() method for this particular Container a little
-     * tricky in that a service could be successfully constructed but if we don't have something specifically defined
-     * stating how to construct some aspect of it we can't reliably determine whether or not the Container "has" the
-     * Service.
-     *
-     * This limitation should be short-lived as the Auryn Injector is being migrated to a new organization and codebase.
-     * Once that migration has been completed a new ContainerFactory using that implementation will be used and this
-     * implementation will be deprecated.
-     */
-    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
-        $this->setLoggerFromOptions($containerFactoryOptions);
-        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
+    protected function getBackingContainerType() : ObjectType {
+        return objectType(Injector::class);
+    }
 
-        try {
-            $nameTypeMap = [];
-            $this->logCreatingContainer(objectType(Injector::class), $activeProfiles);
-            $this->logServicesNotMatchingProfiles(
-                $containerDefinition,
-                $activeProfiles
-            );
-            $injector = $this->createInjector(
-                new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles),
-                $nameTypeMap
-            );
-            $this->logFinishedCreatingContainer(objectType(Injector::class), $activeProfiles);
-            return $this->getAnnotatedContainer($injector, $nameTypeMap, $this->getActiveProfilesService());
-        } catch (InvalidAlias $exception) {
-            throw ContainerException::fromCaughtThrowable($exception);
+    /**
+     * @param stdClass $state
+     * @return void
+     */
+    protected function startCreatingBackingContainer(stdClass $state) : void {
+        $state->injector = new Injector();
+        $state->nameTypeMap = [];
+        $state->methodInject = [];
+        $state->propertyInject = [];
+        $state->servicePrepares = [];
+    }
+
+    /**
+     * @param stdClass{injector: Injector, nameTypeMap: array} $state
+     * @param ServiceDefinition $definition
+     * @return void
+     */
+    protected function handleServiceDefinition(stdClass $state, ServiceDefinition $definition) : void {
+        $state->injector->share($definition->getType()->getName());
+        if ($definition->getName() !== null) {
+            $state->nameTypeMap[$definition->getName()] = $definition->getType();
         }
     }
 
-    private function getAnnotatedContainer(
-        Injector $injector,
-        array $nameTypeMap,
-        ActiveProfiles $activeProfiles
-    ) : AnnotatedContainer {
-        return new class($injector, $nameTypeMap, $activeProfiles) implements AnnotatedContainer {
+    protected function handleAliasDefinition(stdClass $state, AliasDefinitionResolution $resolution) : void {
+        if ($resolution->getAliasDefinition() !== null) {
+            $state->injector->alias(
+                $resolution->getAliasDefinition()->getAbstractService()->getName(),
+                $resolution->getAliasDefinition()->getConcreteService()->getName()
+            );
+        }
+    }
+
+    public function handleServiceDelegateDefinition(stdClass $state, ServiceDelegateDefinition $definition) : void {
+        $delegateType = $definition->getDelegateType()->getName();
+        $delegateMethod = $definition->getDelegateMethod();
+
+        $parameters = $state->methodInject[$delegateType][$delegateMethod] ?? [];
+        $state->injector->delegate(
+            $definition->getServiceType()->getName(),
+            static fn() => $state->injector->execute([$delegateType, $delegateMethod], $parameters)
+        );
+    }
+
+    public function handleServicePrepareDefinition(stdClass $state, ServicePrepareDefinition $definition) : void {
+        $serviceType = $definition->getService()->getName();
+
+        $state->servicePrepares[$serviceType] ??= [];
+        $state->servicePrepares[$serviceType][] = $definition->getMethod();
+    }
+
+    public function handleInjectDefinition(stdClass $state, InjectDefinition $definition) : void {
+        $injectTargetType = $definition->getTargetIdentifier()->getClass()->getName();
+
+        if ($definition->getTargetIdentifier()->isMethodParameter()) {
+            $method = $definition->getTargetIdentifier()->getMethodName();
+            $parameterName = $definition->getTargetIdentifier()->getName();
+
+            $value = $definition->getValue();
+            if ($definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)) {
+                $key = $parameterName;
+                if (isset($state->nameTypeMap[$value])) {
+                    $value = $state->nameTypeMap[$value]->getName();
+                }
+            } else {
+                $key = ':' . $parameterName;
+            }
+
+            $store = $definition->getStoreName();
+            if ($store !== null) {
+                $parameterStore = $this->getParameterStore($store);
+                if ($parameterStore === null) {
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
+                }
+                $value = $parameterStore->fetch($definition->getType(), $value);
+            }
+
+            $state->methodInject[$injectTargetType] ??= [];
+            $state->methodInject[$injectTargetType][$method] ??= [];
+            $state->methodInject[$injectTargetType][$method][$key] = $value;
+        } else {
+            $property = $definition->getTargetIdentifier()->getName();
+            $value = $definition->getValue();
+
+            $store = $definition->getStoreName();
+            if ($store !== null) {
+                $parameterStore = $this->getParameterStore($store);
+                if ($parameterStore === null) {
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
+                }
+                $value = $parameterStore->fetch($definition->getType(), $value);
+            }
+
+            $state->propertyInject[$injectTargetType] ??= [];
+            $state->propertyInject[$injectTargetType][$property] = $value;
+        }
+
+    }
+
+    public function handleConfigurationDefinition(stdClass $state, ConfigurationDefinition $definition) : void {
+        $state->injector->share($definition->getClass()->getName());
+        if ($definition->getName() !== null) {
+            $state->nameTypeMap[$definition->getName()] = $definition->getClass();
+        }
+
+        if (!method_exists($definition->getClass()->getName(), '__construct')) {
+            $state->injector->delegate($definition->getClass()->getName(), static function() use($definition, $state) {
+                $configReflection = (new \ReflectionClass($definition->getClass()->getName()));
+                $configInstance = $configReflection->newInstanceWithoutConstructor();
+                $properties = $state->propertyInject[$definition->getClass()->getName()] ?? [];
+                foreach ($properties as $prop => $value) {
+                    $reflectionProperty = $configReflection->getProperty($prop);
+                    $reflectionProperty->setValue($configInstance, $value);
+                }
+                return $configInstance;
+            });
+        }
+    }
+
+    protected function createAnnotatedContainer(stdClass $state, ActiveProfiles $activeProfiles) : AnnotatedContainer {
+        $injector = $state->injector;
+        assert($injector instanceof Injector);
+
+        foreach ($state->methodInject as $service => $methods) {
+            if (array_key_exists('__construct', $methods)) {
+                $injector->define($service, $methods['__construct']);
+            }
+        }
+
+        /**
+         * @var class-string $serviceType
+         * @var list<string> $methods
+         */
+        foreach ($state->servicePrepares as $serviceType => $methods) {
+            $injector->prepare(
+                $serviceType,
+                static function(object $object) use($injector, $state, $methods) : void {
+                    foreach ($methods as $method) {
+                        $params = $state->methodInject[$object::class][$method] ?? [];
+                        $injector->execute([$object, $method], $params);
+                    }
+                }
+            );
+        }
+
+        return new class($state->injector, $state->nameTypeMap, $activeProfiles) implements AnnotatedContainer {
 
             public function __construct(
                 private readonly Injector $injector,
@@ -144,184 +258,4 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
             }
         };
     }
-
-    private function createInjector(ContainerDefinition $containerDefinition, array &$nameTypeMap) : Injector {
-        $injector = new Injector();
-
-        $servicePrepareDefinitions = $containerDefinition->getServicePrepareDefinitions();
-        $serviceDelegateDefinitions = $containerDefinition->getServiceDelegateDefinitions();
-
-        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            $injector->share($serviceDefinition->getType()->getName());
-            $this->logServiceShared($serviceDefinition);
-            $name = $serviceDefinition->getName();
-            if (!is_null($name)) {
-                $nameTypeMap[$name] = $serviceDefinition->getType();
-                $this->logServiceNamed($serviceDefinition);
-            }
-        }
-
-        foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
-            $injector->share($configurationDefinition->getClass()->getName());
-            $this->logConfigurationShared($configurationDefinition);
-            $name = $configurationDefinition->getName();
-            if (!is_null($name)) {
-                $nameTypeMap[$name] = $configurationDefinition->getClass();
-                $this->logConfigurationNamed($configurationDefinition);
-            }
-            $injectPropertyMap = [];
-            foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
-                if ($injectDefinition->getTargetIdentifier()->isMethodParameter() ||
-                    $injectDefinition->getTargetIdentifier()->getClass() !== $configurationDefinition->getClass()) {
-                    continue;
-                }
-
-                $this->logInjectingProperty($injectDefinition);
-
-                $value = $injectDefinition->getValue();
-                $storeName = $injectDefinition->getStoreName();
-                if ($storeName !== null) {
-                    $store = $this->getParameterStore($storeName);
-                    if ($store === null) {
-                        throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($storeName);
-                    }
-                    $value = $store->fetch($injectDefinition->getType(), $value);
-                }
-
-                $injectPropertyMap[$injectDefinition->getTargetIdentifier()->getName()] = $value;
-
-            }
-
-            /** @var class-string $configurationClass */
-            $configurationClass = $configurationDefinition->getClass()->getName();
-            // If the Congifuration class has a __construct method defined on it then we should let the Container create
-            // the instance and rely on autowiring and #[Inject] Attributes defined in method parameters to provide correct values
-            if (!method_exists($configurationClass, '__construct')) {
-                $injector->delegate($configurationDefinition->getClass()->getName(), function() use ($configurationClass, $injectPropertyMap) {
-                    $configReflection = (new \ReflectionClass($configurationClass));
-                    $configInstance = $configReflection->newInstanceWithoutConstructor();
-                    foreach ($injectPropertyMap as $prop => $value) {
-                        $reflectionProperty = $configReflection->getProperty($prop);
-                        $reflectionProperty->setValue($configInstance, $value);
-                    }
-                    return $configInstance;
-                });
-            }
-        }
-
-        // We need to keep track of which abstract types we have aliased
-        // It is possible that there are multiple alias definitions for the
-        // abstract service. In that case we only want to attempt a resolution
-        // one time. Attempting to resolve the abstract class many times over
-        // could have untindended consequences and is a waste of cycles
-        $aliasedTypes = [];
-        $aliasDefinitions = $containerDefinition->getAliasDefinitions();
-        foreach ($aliasDefinitions as $aliasDefinition) {
-            if (!in_array($aliasDefinition->getAbstractService(), $aliasedTypes)) {
-                $resolution = $this->aliasDefinitionResolver->resolveAlias(
-                    $containerDefinition, $aliasDefinition->getAbstractService()
-                );
-                $this->logAliasingService($resolution, $aliasDefinition->getAbstractService());
-
-                $aliasDefinition = $resolution->getAliasDefinition();
-                if (isset($aliasDefinition)) {
-                    $injector->alias(
-                        $aliasDefinition->getAbstractService()->getName(),
-                        $aliasDefinition->getConcreteService()->getName()
-                    );
-                }
-            }
-        }
-        unset($aliasedTypes);
-
-        $definitionMap = $this->mapInjectDefinitions($containerDefinition, $nameTypeMap);
-        foreach ($definitionMap as $service => $methods) {
-            if (array_key_exists('__construct', $methods)) {
-                $injector->define($service, $methods['__construct']);
-            }
-        }
-
-        $preparedTypes = [];
-        foreach ($servicePrepareDefinitions as $servicePrepareDefinition) {
-            $type = $servicePrepareDefinition->getService();
-            if (!in_array($type, $preparedTypes)) {
-                $injector->prepare(
-                    $type->getName(),
-                    function(object $object) use($servicePrepareDefinitions, $servicePrepareDefinition, $injector, $type, $definitionMap) {
-                        $methods = $this->mapTypesServicePrepares($type, $servicePrepareDefinitions);
-                        foreach ($methods as $method) {
-                            $params = $definitionMap[$type->getName()][$method] ?? [];
-                            $injector->execute([$object, $method], $params);
-                        }
-                    }
-                );
-                $this->logServicePrepare($servicePrepareDefinition);
-                $preparedTypes[] = $type;
-            }
-        }
-        unset($preparedTypes);
-
-        foreach ($serviceDelegateDefinitions as $serviceDelegateDefinition) {
-            $injector->delegate(
-                $serviceDelegateDefinition->getServiceType()->getName(),
-                [$serviceDelegateDefinition->getDelegateType()->getName(), $serviceDelegateDefinition->getDelegateMethod()]
-            );
-            $this->logServiceDelegate($serviceDelegateDefinition);
-        }
-
-        return $injector;
-    }
-
-    private function mapInjectDefinitions(ContainerDefinition $containerDefinition, array $nameTypeMap) : array {
-        $definitionMap = [];
-        foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
-            $method = $injectDefinition->getTargetIdentifier()->getMethodName();
-            if (is_null($method)) {
-                continue;
-            }
-
-            $serviceType = $injectDefinition->getTargetIdentifier()->getClass()->getName();
-            if (!isset($definitionMap[$serviceType])) {
-                $definitionMap[$serviceType] = [];
-            }
-
-            if (!isset($definitionMap[$serviceType][$method])) {
-                $definitionMap[$serviceType][$method] = [];
-            }
-
-            $value = $injectDefinition->getValue();
-            if ($injectDefinition->getType() instanceof ObjectType && !is_a($injectDefinition->getType()->getName(), UnitEnum::class, true)) {
-                $key = $injectDefinition->getTargetIdentifier()->getName();
-                if (isset($nameTypeMap[$value])) {
-                    $value = $nameTypeMap[$value]->getName();
-                }
-            } else {
-                $key = ':' . $injectDefinition->getTargetIdentifier()->getName();
-            }
-
-            $storeName = $injectDefinition->getStoreName();
-            if (!is_null($storeName)) {
-                $parameterStore = $this->getParameterStore($storeName);
-                if (is_null($parameterStore)) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($storeName);
-                }
-                $value = $parameterStore->fetch($injectDefinition->getType(), $value);
-            }
-            $definitionMap[$serviceType][$method][$key] = $value;
-            $this->logInjectingMethodParameter($injectDefinition);
-        }
-        return $definitionMap;
-    }
-
-    private function mapTypesServicePrepares(ObjectType $type, array $servicePreparesDefinition) : array {
-        $methods = [];
-        /** @var ServicePrepareDefinition $servicePrepareDefinition */
-        foreach ($servicePreparesDefinition as $servicePrepareDefinition) {
-            if ($servicePrepareDefinition->getService() === $type) {
-                $methods[] = $servicePrepareDefinition->getMethod();
-            }
-        }
-        return $methods;
-    }
-
 }
