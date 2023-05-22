@@ -396,7 +396,9 @@ final class ContainerDefinitionSerializer {
             $serviceProfiles = [];
             foreach ($profiles as $profile) {
                 assert($profile instanceof DOMElement);
-                $serviceProfiles[] = $profile->nodeValue;
+                $value = $profile->nodeValue;
+                assert($value !== '');
+                $serviceProfiles[] = $value;
             }
 
             $serviceBuilder = $serviceBuilder->withProfiles($serviceProfiles);
@@ -503,7 +505,9 @@ final class ContainerDefinitionSerializer {
 
             $injectProfiles = [];
             foreach ($profiles as $profile) {
-                $injectProfiles[] = $profile->nodeValue;
+                $value = $profile->nodeValue;
+                assert($value !== '');
+                $injectProfiles[] = $value;
             }
 
             $injectBuilder = $injectBuilder->withProfiles(...$injectProfiles);

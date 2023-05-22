@@ -7,12 +7,15 @@ use Cspray\Typiphy\ObjectType;
 
 final class ServiceDefinitionBuilder {
 
+    /**
+     * @var ?non-empty-string
+     */
     private ?string $name = null;
     private ObjectType $type;
     private bool $isAbstract;
     private ?ServiceAttribute $attribute = null;
     /**
-     * @var list<string>
+     * @var list<non-empty-string>
      */
     private array $profiles = [];
     private bool $isPrimary = false;
@@ -34,6 +37,10 @@ final class ServiceDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * @param non-empty-string $name
+     * @return $this
+     */
     public function withName(string $name) : self {
         $instance = clone $this;
         $instance->name = $name;
@@ -41,7 +48,7 @@ final class ServiceDefinitionBuilder {
     }
 
     /**
-     * @param list<string> $profiles
+     * @param list<non-empty-string> $profiles
      * @return $this
      */
     public function withProfiles(array $profiles) : self {
@@ -64,24 +71,21 @@ final class ServiceDefinitionBuilder {
         return new class($this->name, $this->type, $this->isAbstract, $profiles, $this->isPrimary, $this->attribute) implements ServiceDefinition {
 
             /**
-             * @param string|null $name
-             * @param ObjectType $type
-             * @param bool $isAbstract
-             * @param list<string> $profiles
-             * @param bool $isPrimary
+             * @param ?non-empty-string $name
+             * @param list<non-empty-string> $profiles
              */
             public function __construct(
                 private readonly ?string $name,
                 private readonly ObjectType $type,
                 private readonly bool $isAbstract,
-                /**
-                 * @var list<string> $profiles
-                 */
                 private readonly array $profiles,
                 private readonly bool $isPrimary,
                 private readonly ?ServiceAttribute $attribute
             ) {}
 
+            /**
+             * @return ?non-empty-string
+             */
             public function getName() : ?string {
                 return $this->name;
             }
@@ -91,7 +95,7 @@ final class ServiceDefinitionBuilder {
             }
 
             /**
-             * @return list<string>
+             * @return list<non-empty-string>
              */
             public function getProfiles() : array {
                 return $this->profiles;

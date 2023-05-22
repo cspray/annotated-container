@@ -60,16 +60,16 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
         $state = $this->createContainerState($containerDefinition, $activeProfiles);
 
+        $container = $this->createAnnotatedContainer($state, $this->createActiveProfilesService($activeProfiles));
+
         $this->logFinishedCreatingContainer($containerType, $activeProfiles);
 
-        return $this->createAnnotatedContainer($state, $this->createActiveProfilesService($activeProfiles));
+        return $container;
     }
 
-    private function createContainerState(ContainerDefinition $containerDefinition, array $activeProfiles) : stdClass {
+    private function createContainerState(ContainerDefinition $containerDefinition, array $activeProfiles) : ContainerFactoryState {
         $definition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles);
-        $state = new stdClass();
-
-        $this->startCreatingBackingContainer($state);
+        $state = $this->getContainerFactoryState();
 
         foreach ($definition->getServiceDefinitions() as $serviceDefinition) {
             $this->handleServiceDefinition($state, $serviceDefinition);
@@ -457,20 +457,20 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     abstract protected function getBackingContainerType() : ObjectType;
 
-    abstract protected function startCreatingBackingContainer(stdClass $state) : void;
+    abstract protected function getContainerFactoryState() : ContainerFactoryState;
 
-    abstract protected function handleServiceDefinition(stdClass $state, ServiceDefinition $definition) : void;
+    abstract protected function handleServiceDefinition(ContainerFactoryState $state, ServiceDefinition $definition) : void;
 
-    abstract protected function handleAliasDefinition(stdClass $state, AliasDefinitionResolution $resolution) : void;
+    abstract protected function handleAliasDefinition(ContainerFactoryState $state, AliasDefinitionResolution $resolution) : void;
 
-    abstract public function handleServiceDelegateDefinition(stdClass $state, ServiceDelegateDefinition $definition) : void;
+    abstract protected function handleServiceDelegateDefinition(ContainerFactoryState $state, ServiceDelegateDefinition $definition) : void;
 
-    abstract public function handleServicePrepareDefinition(stdClass $state, ServicePrepareDefinition $definition) : void;
+    abstract protected function handleServicePrepareDefinition(ContainerFactoryState $state, ServicePrepareDefinition $definition) : void;
 
-    abstract public function handleInjectDefinition(stdClass $state, InjectDefinition $definition) : void;
+    abstract protected function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition) : void;
 
-    abstract public function handleConfigurationDefinition(stdClass $state, ConfigurationDefinition $definition) : void;
+    abstract protected function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void;
 
-    abstract protected function createAnnotatedContainer(stdClass $state, ActiveProfiles $activeProfiles) : AnnotatedContainer;
+    abstract protected function createAnnotatedContainer(ContainerFactoryState $state, ActiveProfiles $activeProfiles) : AnnotatedContainer;
 
 }

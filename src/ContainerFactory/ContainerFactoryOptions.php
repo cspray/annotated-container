@@ -14,7 +14,7 @@ interface ContainerFactoryOptions {
     /**
      * A list of profiles that should be considered active.
      *
-     * @return string[]
+     * @return list<non-empty-string>
      */
     public function getActiveProfiles() : array;
 

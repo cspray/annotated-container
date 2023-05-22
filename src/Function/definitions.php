@@ -24,13 +24,12 @@ use ReflectionException;
  * @param DefinitionProviderContext $context
  * @param ObjectType $type
  * @param string|null $name
- * @param list<string> $profiles
+ * @param list<non-empty-string> $profiles
  * @param bool $isPrimary
  * @return ServiceDefinition
  * @throws ReflectionException
  */
 function service(DefinitionProviderContext $context, ObjectType $type, ?string $name = null, array $profiles = [], bool $isPrimary = false) : ServiceDefinition {
-    /** @psalm-var class-string $typeName */
     $typeName = $type->getName();
     $reflection = new ReflectionClass($typeName);
     $methodArgs = [$type];

@@ -87,12 +87,26 @@ final class Bootstrap {
         $this->stopwatch->start();
 
         $configuration = $this->bootstrappingConfiguration($configurationFile);
-        $activeProfiles = $this->activeProfiles($profiles);
-        $analysisOptions = $this->analysisOptions($configuration, $activeProfiles);
+        $analysisOptions = $this->analysisOptions($configuration, $profiles);
 
         foreach ($configuration->getObservers() as $observer) {
             $this->addObserver($observer);
         }
+
+        $activeProfiles = new class($profiles) implements ActiveProfiles {
+            public function __construct(
+                /** @var list<non-empty-string> */
+                private readonly array $profiles
+            ) {}
+
+            public function getProfiles() : array {
+                return $this->profiles;
+            }
+
+            public function isActive(string $profile) : bool {
+                return in_array($profile, $this->profiles, true);
+            }
+        };
 
         $this->notifyPreAnalysis($activeProfiles);
 
@@ -147,7 +161,7 @@ final class Bootstrap {
     }
 
 
-    private function analysisOptions(BootstrappingConfiguration $configuration, ActiveProfiles $activeProfiles) : ContainerDefinitionAnalysisOptions {
+    private function analysisOptions(BootstrappingConfiguration $configuration, array $activeProfiles) : ContainerDefinitionAnalysisOptions {
         $scanPaths = [];
         foreach ($configuration->getScanDirectories() as $scanDirectory) {
             $scanPaths[] = $this->directoryResolver->getPathFromRoot($scanDirectory);
@@ -158,7 +172,7 @@ final class Bootstrap {
             $analysisOptions = $analysisOptions->withDefinitionProvider($containerDefinitionConsumer);
         }
 
-        $profilesAllowLogging = count(array_intersect($activeProfiles->getProfiles(), $configuration->getLoggingExcludedProfiles())) === 0;
+        $profilesAllowLogging = count(array_intersect($activeProfiles, $configuration->getLoggingExcludedProfiles())) === 0;
         $logger = $this->logger ?? $configuration->getLogger();
         if ($logger !== null && $profilesAllowLogging) {
             $analysisOptions = $analysisOptions->withLogger($logger);
@@ -213,14 +227,13 @@ final class Bootstrap {
         ContainerDefinition $containerDefinition,
         ?LoggerInterface $logger
     ) : AnnotatedContainer {
-        $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$activeProfiles->getProfiles());
-
-        $containerFactory = $this->containerFactory($activeProfiles);
+        $containerFactory = $this->containerFactory();
 
         foreach ($configuration->getParameterStores() as $parameterStore) {
             $containerFactory->addParameterStore($parameterStore);
         }
 
+        $factoryOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$activeProfiles->getProfiles());
         if ($logger !== null) {
             $factoryOptions = $factoryOptions->withLogger($logger);
         }
@@ -228,17 +241,17 @@ final class Bootstrap {
         return $containerFactory->createContainer($containerDefinition, $factoryOptions->build());
     }
 
-    private function containerFactory(ActiveProfiles $activeProfiles) : ContainerFactory {
+    private function containerFactory() : ContainerFactory {
         if ($this->containerFactory !== null) {
             return $this->containerFactory;
         }
 
         if (class_exists(Injector::class)) {
-            return new AurynContainerFactory($activeProfiles);
+            return new AurynContainerFactory();
         }
 
         if (class_exists(Container::class)) {
-            return new PhpDiContainerFactory($activeProfiles);
+            return new PhpDiContainerFactory();
         }
 
         throw BackingContainerNotFound::fromMissingImplementation();

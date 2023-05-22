@@ -90,7 +90,8 @@
     </MixedArgument>
   </file>
   <file src="src/ContainerFactory/AbstractContainerFactory.php">
-    <DeprecatedClass occurrences="2">
+    <DeprecatedClass occurrences="3">
+      <code>ConfigurationDefinition</code>
       <code>ConfigurationDefinition</code>
       <code>ConfigurationDefinition</code>
     </DeprecatedClass>
@@ -105,35 +106,89 @@
     </MixedArgumentTypeCoercion>
   </file>
   <file src="src/ContainerFactory/AurynContainerFactory.php">
-    <MixedArgument occurrences="7">
-      <code>$definitions</code>
+    <ArgumentTypeCoercion occurrences="5">
       <code>$id</code>
-      <code>$methods</code>
-      <code>$methods['__construct']</code>
-      <code>$params</code>
+      <code>$id</code>
+      <code>$key</code>
+      <code>$method</code>
+      <code>$method</code>
+    </ArgumentTypeCoercion>
+    <DeprecatedClass occurrences="1">
+      <code>ConfigurationDefinition</code>
+    </DeprecatedClass>
+    <MixedArgument occurrences="4">
+      <code>$definitions</code>
+      <code>$value</code>
       <code>$value</code>
       <code>$value</code>
     </MixedArgument>
-    <MixedArgumentTypeCoercion occurrences="2">
-      <code>$activeProfiles</code>
-      <code>$service</code>
+    <MixedArgumentTypeCoercion occurrences="1">
+      <code>$prop</code>
     </MixedArgumentTypeCoercion>
-    <MixedArrayAccess occurrences="1">
-      <code>$definitionMap[$type-&gt;getName()][$method]</code>
-    </MixedArrayAccess>
-    <MixedArrayOffset occurrences="2">
-      <code>$definitionMap[$type-&gt;getName()][$method]</code>
-      <code>$nameTypeMap[$value]</code>
-    </MixedArrayOffset>
-    <MixedAssignment occurrences="14">
-      <code>$definitionMap[$serviceType][$method][$key]</code>
+    <MixedAssignment occurrences="7">
       <code>$definitions</code>
-      <code>$id</code>
-      <code>$injectPropertyMap[$injectDefinition-&gt;getTargetIdentifier()-&gt;getName()]</code>
+      <code>$params[$name]</code>
+      <code>$value</code>
+      <code>$value</code>
+      <code>$value</code>
+      <code>$value</code>
+      <code>$value</code>
+    </MixedAssignment>
+    <MixedInferredReturnType occurrences="1">
+      <code>object</code>
+    </MixedInferredReturnType>
+    <MixedMethodCall occurrences="1">
+      <code>getName</code>
+    </MixedMethodCall>
+    <MixedReturnStatement occurrences="1"/>
+    <PossiblyNullArgument occurrences="2">
+      <code>$definition-&gt;getName()</code>
+      <code>$method</code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/ContainerFactory/ContainerFactoryOptionsBuilder.php">
+    <MixedReturnTypeCoercion occurrences="2">
+      <code>$this-&gt;activeProfiles</code>
+      <code>array</code>
+    </MixedReturnTypeCoercion>
+  </file>
+  <file src="src/ContainerFactory/HasPropertyInjectState.php">
+    <PropertyTypeCoercion occurrences="2">
+      <code>$this-&gt;propertyInject</code>
+      <code>$this-&gt;propertyInject</code>
+    </PropertyTypeCoercion>
+  </file>
+  <file src="src/ContainerFactory/HasServicePrepareState.php">
+    <PropertyTypeCoercion occurrences="2">
+      <code>$this-&gt;servicePrepares</code>
+      <code>$this-&gt;servicePrepares</code>
+    </PropertyTypeCoercion>
+  </file>
+  <file src="src/ContainerFactory/PhpDiContainerFactory.php">
+    <ArgumentTypeCoercion occurrences="2">
+      <code>$method</code>
+      <code>$parameter</code>
+    </ArgumentTypeCoercion>
+    <DeprecatedClass occurrences="1">
+      <code>ConfigurationDefinition</code>
+    </DeprecatedClass>
+    <MissingClosureReturnType occurrences="1">
+      <code>static fn(Container $container) =&gt; $container-&gt;call(</code>
+    </MissingClosureReturnType>
+    <MixedArgument occurrences="6">
+      <code>$method</code>
+      <code>$parameter-&gt;getValue()-&gt;getName()</code>
+      <code>$value</code>
+      <code>$value</code>
+      <code>$value</code>
+      <code>$value</code>
+    </MixedArgument>
+    <MixedAssignment occurrences="11">
       <code>$method</code>
       <code>$methods</code>
-      <code>$params</code>
-      <code>$params[$name]</code>
+      <code>$param</code>
+      <code>$param</code>
+      <code>$params[$parameter-&gt;getName()]</code>
       <code>$value</code>
       <code>$value</code>
       <code>$value</code>
@@ -145,69 +200,24 @@
       <code>object</code>
     </MixedInferredReturnType>
     <MixedMethodCall occurrences="3">
+      <code>constructorParameter</code>
       <code>getName</code>
-      <code>getName</code>
-      <code>getName</code>
+      <code>property</code>
     </MixedMethodCall>
     <MixedReturnStatement occurrences="1"/>
-    <UnusedVariable occurrences="1">
-      <code>$servicePrepareDefinition</code>
-    </UnusedVariable>
-  </file>
-  <file src="src/ContainerFactory/ContainerFactoryOptionsBuilder.php">
-    <MixedReturnTypeCoercion occurrences="2">
-      <code>$this-&gt;activeProfiles</code>
-      <code>array</code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="src/ContainerFactory/PhpDiContainerFactory.php">
-    <MixedArgument occurrences="7">
-      <code>$injectDefinition-&gt;getValue()</code>
-      <code>$param</code>
-      <code>$parameter-&gt;getValue()-&gt;getName()</code>
-      <code>$params</code>
-      <code>$property</code>
-      <code>$value</code>
-      <code>$value</code>
-    </MixedArgument>
-    <MixedArgumentTypeCoercion occurrences="1">
-      <code>$activeProfiles</code>
-    </MixedArgumentTypeCoercion>
-    <MixedArrayAccess occurrences="1">
-      <code>$methodInjectMap[$servicePrepareDefinition-&gt;getService()-&gt;getName()][$servicePrepareDefinition-&gt;getMethod()]</code>
-    </MixedArrayAccess>
-    <MixedAssignment occurrences="20">
-      <code>$map[$className][$methodName][$injectDefinition-&gt;getTargetIdentifier()-&gt;getName()]</code>
-      <code>$map[$className][$propertyName]</code>
-      <code>$map[$servicePrepareDefinition-&gt;getService()-&gt;getName()][$servicePrepareDefinition-&gt;getMethod()]</code>
+    <PossiblyNullArgument occurrences="4">
+      <code>$definition-&gt;getName()</code>
+      <code>$definition-&gt;getName()</code>
       <code>$method</code>
-      <code>$methodName</code>
-      <code>$methodParams</code>
-      <code>$methods</code>
-      <code>$param</code>
-      <code>$param</code>
-      <code>$params</code>
-      <code>$params</code>
-      <code>$params[$parameter-&gt;getName()]</code>
-      <code>$properties</code>
-      <code>$property</code>
-      <code>$value</code>
-      <code>$value</code>
-      <code>$value</code>
-      <code>$value</code>
-      <code>$value</code>
-      <code>$value</code>
-    </MixedAssignment>
-    <MixedInferredReturnType occurrences="2">
-      <code>?ServiceDefinition</code>
-      <code>object</code>
+      <code>$state-&gt;getServiceKey($aliasDefinition-&gt;getAbstractService()-&gt;getName())</code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/ContainerFactory/PhpDiContainerFactoryState.php">
+    <MixedInferredReturnType occurrences="1">
+      <code>?string</code>
     </MixedInferredReturnType>
-    <MixedMethodCall occurrences="2">
-      <code>getName</code>
-      <code>getType</code>
-    </MixedMethodCall>
-    <MixedReturnStatement occurrences="2">
-      <code>$item-&gt;getType() === $objectType ? $item : $carry</code>
+    <MixedReturnStatement occurrences="1">
+      <code>$this-&gt;serviceKeys[$serviceType] ?? null</code>
     </MixedReturnStatement>
   </file>
   <file src="src/Definition/ConfigurationDefinition.php">
@@ -229,6 +239,12 @@
     <DeprecatedInterface occurrences="1">
       <code>class($this-&gt;classType, $this-&gt;name, $this-&gt;attribute) implements ConfigurationDefinition {</code>
     </DeprecatedInterface>
+    <LessSpecificReturnStatement occurrences="1">
+      <code>$this-&gt;name</code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType occurrences="1">
+      <code>?string</code>
+    </MoreSpecificReturnType>
     <UndefinedAttributeClass occurrences="1">
       <code>Deprecated</code>
     </UndefinedAttributeClass>
@@ -247,20 +263,40 @@
       <code>private array $configurationDefinitions = [];</code>
     </DeprecatedClass>
   </file>
+  <file src="src/Definition/InjectDefinitionBuilder.php">
+    <LessSpecificReturnStatement occurrences="1">
+      <code>$this-&gt;store</code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType occurrences="1">
+      <code>?string</code>
+    </MoreSpecificReturnType>
+  </file>
   <file src="src/Definition/ProfilesAwareContainerDefinition.php">
     <DeprecatedClass occurrences="2">
       <code>?ConfigurationDefinition</code>
       <code>ServiceDefinition|InjectDefinition|ConfigurationDefinition $definition</code>
     </DeprecatedClass>
   </file>
+  <file src="src/Definition/ServiceDelegateDefinitionBuilder.php">
+    <LessSpecificReturnStatement occurrences="1">
+      <code>$this-&gt;delegateMethod</code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType occurrences="1">
+      <code>string</code>
+    </MoreSpecificReturnType>
+  </file>
   <file src="src/Function/definitions.php">
+    <ArgumentTypeCoercion occurrences="1">
+      <code>$name</code>
+    </ArgumentTypeCoercion>
     <MixedArgument occurrences="2">
       <code>$profiles</code>
       <code>$profiles</code>
     </MixedArgument>
   </file>
   <file src="src/Serializer/ContainerDefinitionSerializer.php">
-    <ArgumentTypeCoercion occurrences="1">
+    <ArgumentTypeCoercion occurrences="2">
+      <code>$name</code>
       <code>$serializedDefinition</code>
     </ArgumentTypeCoercion>
     <DeprecatedClass occurrences="1">
@@ -299,6 +335,11 @@
     </MixedAssignment>
   </file>
   <file src="src/StaticAnalysis/AnnotatedTargetDefinitionConverter.php">
+    <ArgumentTypeCoercion occurrences="3">
+      <code>$attribute-&gt;getName()</code>
+      <code>$profiles</code>
+      <code>$profiles</code>
+    </ArgumentTypeCoercion>
     <DeprecatedClass occurrences="4">
       <code>ConfigurationDefinition</code>
       <code>ConfigurationDefinitionBuilder::forClass(objectType($target-&gt;getTargetReflection()-&gt;getName()))</code>

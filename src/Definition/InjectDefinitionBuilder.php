@@ -23,7 +23,7 @@ final class InjectDefinitionBuilder {
     private ?InjectAttribute $attribute = null;
 
     /**
-     * @var list<string>
+     * @var list<non-empty-string>
      */
     private array $profiles = [];
     private ?string $store = null;
@@ -58,6 +58,10 @@ final class InjectDefinitionBuilder {
         return $instance;
     }
 
+    /**
+     * @param non-empty-string $profile
+     * @param non-empty-string ...$additionalProfiles
+     */
     public function withProfiles(string $profile, string... $additionalProfiles) : self {
         $instance = clone $this;
         $instance->profiles[] = $profile;
@@ -108,7 +112,7 @@ final class InjectDefinitionBuilder {
              * @param Type|TypeUnion|TypeIntersect $type
              * @param mixed $annotationValue
              * @param string|null $store
-             * @param list<string> $profiles
+             * @param list<non-empty-string> $profiles
              */
             public function __construct(
                 private readonly InjectTargetIdentifier $targetIdentifier,

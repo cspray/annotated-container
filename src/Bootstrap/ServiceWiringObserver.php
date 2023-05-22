@@ -32,7 +32,6 @@ abstract class ServiceWiringObserver implements ContainerCreatedObserver {
                         continue;
                     }
 
-                    /** @var class-string $serviceType */
                     $serviceType = $serviceDefinition->getType()->getName();
                     if (is_a($serviceType, $type, true)) {
                         $service = $this->container->get($serviceType);
