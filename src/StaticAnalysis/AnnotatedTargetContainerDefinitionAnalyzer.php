@@ -419,9 +419,7 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
         foreach ($concretePrepareDefinitions as $concretePrepareDefinition) {
             $hasAbstractPrepare = false;
             foreach ($abstractPrepareDefinitions as $abstractPrepareDefinition) {
-                /** @var class-string $concreteServiceName */
                 $concreteServiceName = $concretePrepareDefinition->getService()->getName();
-                /** @var class-string $abstractServiceName */
                 $abstractServiceName = $abstractPrepareDefinition->getService()->getName();
                 if (is_subclass_of($concreteServiceName, $abstractServiceName)) {
                     $hasAbstractPrepare = true;
@@ -517,7 +515,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
 
         foreach ($abstractTypes as $abstractType) {
             foreach ($concreteTypes as $concreteType) {
-                /** @var class-string $abstractTypeString */
                 $abstractTypeString = $abstractType->getName();
                 if (is_subclass_of($concreteType->getName(), $abstractTypeString)) {
                     $aliasDefinition = AliasDefinitionBuilder::forAbstract($abstractType)

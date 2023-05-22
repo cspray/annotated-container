@@ -26,7 +26,7 @@ interface ServiceDelegateDefinition {
      * The method can accept Services or otherwise inject values from the Container. The Container will be used to
      * execute the factory method.
      *
-     * @return string
+     * @return non-empty-string
      */
     public function getDelegateMethod() : string;
 

@@ -13,7 +13,7 @@ use Cspray\Typiphy\ObjectType;
 interface ServiceDefinition {
 
     /**
-     * @return string|null
+     * @return non-empty-string|null
      */
     public function getName() : ?string;
 
@@ -30,7 +30,7 @@ interface ServiceDefinition {
      * A ServiceDefinition MUST have at least 1 profile; if a profile is not explicitly set for a given Service it should
      * be given the 'default' profile.
      *
-     * @return list<string>
+     * @return list<non-empty-string>
      */
     public function getProfiles() : array;
 

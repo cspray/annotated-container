@@ -30,7 +30,7 @@ interface ConfigurationDefinition {
     /**
      * An optional "friendly" name used to identify the configuration.
      *
-     * @return string|null
+     * @return non-empty-string|null
      */
     public function getName() : ?string;
 

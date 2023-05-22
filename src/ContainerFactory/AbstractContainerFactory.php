@@ -3,24 +3,30 @@
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Brick\VarExporter\VarExporter;
+use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\StandardAliasDefinitionResolver;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
+use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
+use Cspray\AnnotatedContainer\Profiles\ActiveProfilesBuilder;
 use Cspray\Typiphy\ObjectType;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use stdClass;
+use Throwable;
 use UnitEnum;
 
 abstract class AbstractContainerFactory implements ContainerFactory {
 
-    private readonly ActiveProfiles $activeProfiles;
     protected readonly AliasDefinitionResolver $aliasDefinitionResolver;
 
     private LoggerInterface $logger;
@@ -31,7 +37,6 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     private array $parameterStores = [];
 
     public function __construct(
-        ActiveProfiles $activeProfiles,
         AliasDefinitionResolver $aliasDefinitionResolver = null
     ) {
         // Injecting environment variables is something we have supported since early versions.
@@ -40,7 +45,96 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         $this->addParameterStore(new EnvironmentParameterStore());
         $this->aliasDefinitionResolver = $aliasDefinitionResolver ?? new StandardAliasDefinitionResolver();
         $this->logger = new NullLogger();
-        $this->activeProfiles = $activeProfiles;
+    }
+
+    final public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
+        $this->setLoggerFromOptions($containerFactoryOptions);
+        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
+        $containerType = $this->getBackingContainerType();
+
+        $this->logCreatingContainer($containerType, $activeProfiles);
+        $this->logServicesNotMatchingProfiles(
+            $containerDefinition,
+            $activeProfiles
+        );
+
+        $state = $this->createContainerState($containerDefinition, $activeProfiles);
+
+        $container = $this->createAnnotatedContainer($state, $this->createActiveProfilesService($activeProfiles));
+
+        $this->logFinishedCreatingContainer($containerType, $activeProfiles);
+
+        return $container;
+    }
+
+    private function createContainerState(ContainerDefinition $containerDefinition, array $activeProfiles) : ContainerFactoryState {
+        $definition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles);
+        $state = $this->getContainerFactoryState();
+
+        foreach ($definition->getServiceDefinitions() as $serviceDefinition) {
+            $this->handleServiceDefinition($state, $serviceDefinition);
+            $this->logServiceShared($serviceDefinition);
+            if ($serviceDefinition->getName() !== null) {
+                $this->logServiceNamed($serviceDefinition);
+            }
+        }
+
+        // We're doing inject definitions first because these could influence the way a service is created
+        foreach ($definition->getInjectDefinitions() as $injectDefinition) {
+            $this->handleInjectDefinition($state, $injectDefinition);
+            if ($injectDefinition->getTargetIdentifier()->isMethodParameter()) {
+                $this->logInjectingMethodParameter($injectDefinition);
+            } else {
+                $this->logInjectingProperty($injectDefinition);
+            }
+        }
+
+        foreach ($definition->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
+            $this->handleServiceDelegateDefinition($state, $serviceDelegateDefinition);
+            $this->logServiceDelegate($serviceDelegateDefinition);
+        }
+
+        foreach ($definition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
+            $this->handleServicePrepareDefinition($state, $servicePrepareDefinition);
+            $this->logServicePrepare($servicePrepareDefinition);
+        }
+
+        foreach ($definition->getConfigurationDefinitions() as $configurationDefinition) {
+            $this->handleConfigurationDefinition($state, $configurationDefinition);
+            $this->logConfigurationShared($configurationDefinition);
+            if ($configurationDefinition->getName() !== null) {
+                $this->logConfigurationNamed($configurationDefinition);
+            }
+        }
+
+        foreach ($definition->getAliasDefinitions() as $aliasDefinition) {
+            $resolution = $this->aliasDefinitionResolver->resolveAlias($definition, $aliasDefinition->getAbstractService());
+            $this->handleAliasDefinition($state, $resolution);
+            $this->logAliasingService($resolution, $aliasDefinition->getAbstractService());
+        }
+
+        return $state;
+    }
+
+    /**
+     * @param list<non-empty-string> $profiles
+     * @return ActiveProfiles
+     */
+    private function createActiveProfilesService(array $profiles) : ActiveProfiles {
+        return new class($profiles) implements ActiveProfiles {
+            public function __construct(
+                /** @var list<non-empty-string> */
+                private readonly array $profiles
+            ) {}
+
+            public function getProfiles() : array {
+                return $this->profiles;
+            }
+
+            public function isActive(string $profile) : bool {
+                return in_array($profile, $this->profiles, true);
+            }
+        };
     }
 
     /**
@@ -60,10 +154,6 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     final protected function getParameterStore(string $storeName) : ?ParameterStore {
         return $this->parameterStores[$storeName] ?? null;
-    }
-
-    final protected function getActiveProfilesService() : ActiveProfiles {
-        return $this->activeProfiles;
     }
 
     final protected function logCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {
@@ -364,5 +454,23 @@ abstract class AbstractContainerFactory implements ContainerFactory {
             );
         }
     }
+
+    abstract protected function getBackingContainerType() : ObjectType;
+
+    abstract protected function getContainerFactoryState() : ContainerFactoryState;
+
+    abstract protected function handleServiceDefinition(ContainerFactoryState $state, ServiceDefinition $definition) : void;
+
+    abstract protected function handleAliasDefinition(ContainerFactoryState $state, AliasDefinitionResolution $resolution) : void;
+
+    abstract protected function handleServiceDelegateDefinition(ContainerFactoryState $state, ServiceDelegateDefinition $definition) : void;
+
+    abstract protected function handleServicePrepareDefinition(ContainerFactoryState $state, ServicePrepareDefinition $definition) : void;
+
+    abstract protected function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition) : void;
+
+    abstract protected function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void;
+
+    abstract protected function createAnnotatedContainer(ContainerFactoryState $state, ActiveProfiles $activeProfiles) : AnnotatedContainer;
 
 }

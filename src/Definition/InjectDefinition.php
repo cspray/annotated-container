@@ -40,14 +40,14 @@ interface InjectDefinition {
     /**
      * A list of profiles that have to be active for this InjectDefinition to be valid.
      *
-     * @return list<string>
+     * @return list<non-empty-string>
      */
     public function getProfiles() : array;
 
     /**
      * The store name to retrieve the value from, or null if getValue() should be used directly.
      *
-     * @return string|null
+     * @return non-empty-string|null
      */
     public function getStoreName() : ?string;
 

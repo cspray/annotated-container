@@ -13,7 +13,7 @@ use function Cspray\Typiphy\objectType;
 class AurynContainerFactoryTest extends ContainerFactoryTestCase {
 
     protected function getContainerFactory(ActiveProfiles $activeProfiles) : ContainerFactory {
-        return new AurynContainerFactory($activeProfiles);
+        return new AurynContainerFactory();
     }
 
     protected function getBackingContainerInstanceOf() : ObjectType {

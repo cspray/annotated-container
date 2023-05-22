@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer\Unit;
 
 use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
+use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
@@ -184,7 +185,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
             )->build();
 
         $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
-        $this->expectException(ContainerException::class);
+        $this->expectException(InvalidAlias::class);
         $this->expectExceptionMessage('An AliasDefinition has a concrete type, ' . $concrete->getName() . ', that is not a registered ServiceDefinition.');
         $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition);
     }
@@ -399,7 +400,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         /** @var ActiveProfiles $activeProfile */
         $activeProfile = $container->get(ActiveProfiles::class);
 
-        self::assertSame($this->activeProfiles, $activeProfile);
+        self::assertSame(['default', 'foo', 'bar'], $activeProfile->getProfiles());
     }
 
     public function testInvokeWithImplicitAlias() : void {

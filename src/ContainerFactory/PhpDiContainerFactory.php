@@ -7,22 +7,20 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
-use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
-use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
-use Cspray\AnnotatedContainer\Exception\InvalidAlias;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use DI\Container;
-use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\Typiphy\ObjectType;
 use DI\ContainerBuilder;
-use DI\Definition\Helper\AutowireDefinitionHelper;
 use UnitEnum;
 use function Cspray\Typiphy\objectType;
-use function DI\autowire;
 use function DI\decorate;
 use function DI\get;
 
@@ -38,64 +36,119 @@ if (!class_exists(Container::class)) {
  */
 final class PhpDiContainerFactory extends AbstractContainerFactory implements ContainerFactory {
 
-    public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
-        $this->setLoggerFromOptions($containerFactoryOptions);
-        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
+    protected function getBackingContainerType() : ObjectType {
+        return objectType(Container::class);
+    }
 
-        try {
-            $this->logCreatingContainer(objectType(Container::class), $activeProfiles);
-            $this->logServicesNotMatchingProfiles($containerDefinition, $activeProfiles);
-            $container =  $this->createDiContainer($containerDefinition, $activeProfiles);
-            $this->logFinishedCreatingContainer(objectType(Container::class), $activeProfiles);
-            return $container;
-        } catch (InvalidAlias $exception) {
-            throw ContainerException::fromCaughtThrowable($exception);
+    protected function getContainerFactoryState() : ContainerFactoryState {
+        return new PhpDiContainerFactoryState();
+    }
+
+    protected function handleServiceDefinition(ContainerFactoryState $state, ServiceDefinition $definition) : void {
+        assert($state instanceof PhpDiContainerFactoryState);
+        $serviceType = $definition->getType()->getName();
+        $state->addService($serviceType);
+        $state->autowireService($serviceType);
+        $key = $serviceType;
+        $name = $definition->getName();
+        if ($name !== null) {
+            $state->addService($name);
+            $state->referenceService($name, $definition->getType()->getName());
+            $key = $name;
+        }
+        $state->setServiceKey($serviceType, $key);
+    }
+
+    protected function handleAliasDefinition(ContainerFactoryState $state, AliasDefinitionResolution $resolution) : void {
+        assert($state instanceof PhpDiContainerFactoryState);
+        $aliasDefinition = $resolution->getAliasDefinition();
+        if ($aliasDefinition !== null) {
+            $state->referenceService(
+                $state->getServiceKey($aliasDefinition->getAbstractService()->getName()),
+                $aliasDefinition->getConcreteService()->getName()
+            );
         }
     }
 
-    private function createDiContainer(ContainerDefinition $containerDefinition, array $activeProfiles) : AnnotatedContainer {
+    public function handleServiceDelegateDefinition(ContainerFactoryState $state, ServiceDelegateDefinition $definition) : void {
+        assert($state instanceof PhpDiContainerFactoryState);
+        $serviceName = $definition->getServiceType()->getName();
+        $state->factoryService($serviceName, static fn(Container $container) => $container->call(
+            [$definition->getDelegateType()->getName(), $definition->getDelegateMethod()]
+        ));
+    }
+
+    public function handleServicePrepareDefinition(ContainerFactoryState $state, ServicePrepareDefinition $definition) : void {
+        assert($state instanceof PhpDiContainerFactoryState);
+
+        $state->addServicePrepare($definition->getService()->getName(), $definition->getMethod());
+    }
+
+    public function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition) : void {
+        assert($state instanceof PhpDiContainerFactoryState);
+        $targetClass = $definition->getTargetIdentifier()->getClass()->getName();
+        if ($definition->getTargetIdentifier()->isMethodParameter()) {
+            $method = $definition->getTargetIdentifier()->getMethodName();
+            $parameter = $definition->getTargetIdentifier()->getName();
+
+            $value = $definition->getValue();
+            $store = $definition->getStoreName();
+            if ($store !== null) {
+                $parameterStore = $this->getParameterStore($store);
+                if ($parameterStore === null) {
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
+                }
+                $value = $parameterStore->fetch($definition->getType(), $value);
+            }
+
+            $param = $definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)
+                ? get($value)
+                : $value;
+
+            $state->addMethodInject($targetClass, $method, $parameter, $param);
+        } else {
+            $property = $definition->getTargetIdentifier()->getName();
+
+            $value = $definition->getValue();
+            $store = $definition->getStoreName();
+            if ($store !== null) {
+                $parameterStore = $this->getParameterStore($store);
+                if ($parameterStore === null) {
+                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
+                }
+                $value = $parameterStore->fetch($definition->getType(), $value);
+            }
+
+            $param = $definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)
+                ? get($value)
+                : $value;
+
+            $state->addPropertyInject($targetClass, $property, $param);
+        }
+
+    }
+
+    public function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void {
+        assert($state instanceof PhpDiContainerFactoryState);
+        $configName = is_null($definition->getName()) ? $definition->getClass()->getName() : $definition->getName();
+        $state->addService($definition->getClass()->getName());
+        if (!is_null($definition->getName())) {
+            $state->addService($definition->getName());
+            $state->referenceService($definition->getName(), $definition->getClass()->getName());
+        }
+        assert(!is_null($configName));
+        $state->autowireService($definition->getClass()->getName());
+    }
+
+    protected function createAnnotatedContainer(ContainerFactoryState $state, ActiveProfiles $activeProfiles) : AnnotatedContainer {
+        assert($state instanceof PhpDiContainerFactoryState);
         $containerBuilder = new ContainerBuilder();
-        $definitions = [];
-        // We have to maintain a set of known services to let our Container comply with PSR-11
-        $serviceTypes = [AutowireableFactory::class, ActiveProfiles::class, AutowireableInvoker::class];
-        $definitions[ActiveProfiles::class] = function() : ActiveProfiles {
-            return $this->getActiveProfilesService();
-        };
 
-        $containerDefinition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles);
-        foreach ($containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-            $serviceTypes[] = $serviceDefinition->getType()->getName();
-            $definitions[$serviceDefinition->getType()->getName()] = autowire();
-            $this->logServiceShared($serviceDefinition);
-            $name = $serviceDefinition->getName();
-            if (!is_null($name)) {
-                $serviceTypes[] = $name;
-                $definitions[$name] = get($serviceDefinition->getType()->getName());
-                $this->logServiceNamed($serviceDefinition);
-            }
-        }
+        $definitions = $state->getDefinitions();
 
-        foreach ($containerDefinition->getConfigurationDefinitions() as $configurationDefinition) {
-            $configName = is_null($configurationDefinition->getName()) ? $configurationDefinition->getClass()->getName() : $configurationDefinition->getName();
-            $serviceTypes[] = $configurationDefinition->getClass()->getName();
-            $this->logConfigurationShared($configurationDefinition);
-            if (!is_null($configurationDefinition->getName())) {
-                $serviceTypes[] = $configurationDefinition->getName();
-                $this->logConfigurationNamed($configurationDefinition);
-            }
-            assert(!is_null($configName));
-            $definitions[$configName] = autowire($configurationDefinition->getClass()->getName());
-        }
-
-        $methodInjectMap = $this->mapMethodInjectDefinitions($containerDefinition);
-        foreach ($methodInjectMap as $service => $methods) {
-            if (!isset($definitions[$service])) {
-                $definitions[$service] = autowire();
-            }
-            assert($definitions[$service] instanceof AutowireDefinitionHelper);
-            // This covers constructor injection, setting injection for service prepare methods happens with service prepare configuration
-            foreach ($methods as $methodName => $params) {
-                if ($methodName === '__construct') {
+        foreach ($state->getMethodInject() as $service => $methods) {
+            foreach ($methods as $method => $params) {
+                if ($method === '__construct') {
                     foreach ($params as $param => $value) {
                         $definitions[$service]->constructorParameter($param, $value);
                     }
@@ -103,57 +156,17 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             }
         }
 
-        $propertyInjectMap = $this->mapPropertyInjectDefinitions($containerDefinition);
-        foreach ($propertyInjectMap as $service => $properties) {
-            if (!isset($definitions[$service])) {
-                $definitions[$service] = autowire();
-            }
-            assert($definitions[$service] instanceof AutowireDefinitionHelper);
+        foreach ($state->getPropertyInject() as $service => $properties) {
             foreach ($properties as $property => $value) {
                 $definitions[$service]->property($property, $value);
             }
         }
 
-        $aliasedTypes = [];
-        $aliasDefinitions = $containerDefinition->getAliasDefinitions();
-        foreach ($aliasDefinitions as $aliasDefinition) {
-            if (!in_array($aliasDefinition->getAbstractService()->getName(), $aliasedTypes)) {
-                $resolution = $this->aliasDefinitionResolver->resolveAlias(
-                    $containerDefinition, $aliasDefinition->getAbstractService()
-                );
-                $this->logAliasingService($resolution, $aliasDefinition->getAbstractService());
-
-                $aliasDefinition = $resolution->getAliasDefinition();
-                if ($aliasDefinition !== null) {
-                    $abstractDefinition = $this->getServiceDefinition($containerDefinition, $aliasDefinition->getAbstractService());
-                    assert(!is_null($abstractDefinition));
-
-                    $abstractName = is_null($abstractDefinition->getName()) ? $abstractDefinition->getType()->getName() : $abstractDefinition->getName();
-                    assert(!is_null($abstractName));
-
-                    $definitions[$abstractName] = get($aliasDefinition->getConcreteService()->getName());
-                }
-            }
-        }
-
-
-        foreach ($containerDefinition->getServiceDelegateDefinitions() as $serviceDelegateDefinition) {
-            $serviceName = $serviceDelegateDefinition->getServiceType()->getName();
-            $definitions[$serviceName] = function(Container $container) use($serviceDelegateDefinition) : mixed {
-                return $container->call([$serviceDelegateDefinition->getDelegateType()->getName(), $serviceDelegateDefinition->getDelegateMethod()]);
-            };
-            $this->logServiceDelegate($serviceDelegateDefinition);
-        }
-
         $servicePrepareDefinitions = [];
-        $servicePrepareMap = $this->mapServicePrepareDefinitions($containerDefinition, $methodInjectMap);
-        foreach ($servicePrepareMap as $service => $methodParams) {
-            if (!isset($definitions[$service])) {
-                $definitions[$service] = autowire();
-            }
-
-            $servicePrepareDefinitions[$service] = decorate(function(object $service, Container $container) use($methodParams) : object {
-                foreach ($methodParams as $method => $params) {
+        foreach ($state->getServicePrepares() as $service => $methods) {
+            $servicePrepareDefinitions[$service] = decorate(static function (object $service, Container $container) use($state, $methods) {
+                foreach ($methods as $method) {
+                    $params = $state->parametersForMethod($service::class, $method);
                     $container->call([$service, $method], $params);
                 }
                 return $service;
@@ -162,15 +175,17 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
         $containerBuilder->addDefinitions($definitions);
         $containerBuilder->addDefinitions($servicePrepareDefinitions);
-        $container = $containerBuilder->build();
-        return new class($container, $serviceTypes) implements AnnotatedContainer {
+
+        return new class($containerBuilder->build(), $state->getServices(), $activeProfiles) implements AnnotatedContainer {
 
             public function __construct(
                 private readonly Container $container,
-                private readonly array $serviceTypes
+                private readonly array $serviceTypes,
+                ActiveProfiles $activeProfiles
             ) {
                 $this->container->set(AutowireableFactory::class, $this);
                 $this->container->set(AutowireableInvoker::class, $this);
+                $this->container->set(ActiveProfiles::class, $activeProfiles);
             }
 
             public function make(string $classType, AutowireableParameterSet $parameters = null) : object {
@@ -213,94 +228,5 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
                 return $params;
             }
         };
-    }
-
-    private function mapMethodInjectDefinitions(ContainerDefinition $containerDefinition) : array {
-        $map = [];
-        foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
-            if ($injectDefinition->getTargetIdentifier()->isClassProperty()) {
-                continue;
-            }
-
-            $className = $injectDefinition->getTargetIdentifier()->getClass()->getName();
-            $methodName = $injectDefinition->getTargetIdentifier()->getMethodName();
-            if (!isset($map[$className])) {
-                $map[$className] = [];
-            }
-            assert(!is_null($methodName));
-
-            if (!isset($map[$className][$methodName])) {
-                $map[$className][$methodName] = [];
-            }
-
-            $injectStore = $injectDefinition->getStoreName();
-            $value = $injectDefinition->getValue();
-            if ($injectStore !== null) {
-                $parameterStore = $this->getParameterStore($injectStore);
-                if ($parameterStore === null) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($injectStore);
-                }
-
-                $value = $parameterStore->fetch($injectDefinition->getType(), $value);
-            }
-
-            $param = $injectDefinition->getType() instanceof ObjectType && !is_a($injectDefinition->getType()->getName(), UnitEnum::class, true)
-                ? get($injectDefinition->getValue())
-                : $value;
-            $map[$className][$methodName][$injectDefinition->getTargetIdentifier()->getName()] = $param;
-            $this->logInjectingMethodParameter($injectDefinition);
-        }
-        return $map;
-    }
-
-    private function mapPropertyInjectDefinitions(ContainerDefinition $containerDefinition) : array {
-        $map = [];
-        foreach ($containerDefinition->getInjectDefinitions() as $injectDefinition) {
-            if ($injectDefinition->getTargetIdentifier()->isMethodParameter()) {
-                continue;
-            }
-
-            $className = $injectDefinition->getTargetIdentifier()->getClass()->getName();
-            $propertyName = $injectDefinition->getTargetIdentifier()->getName();
-            if (!isset($map[$className])) {
-                $map[$className] = [];
-            }
-
-            $injectStore = $injectDefinition->getStoreName();
-            $value = $injectDefinition->getValue();
-            if (!is_null($injectStore)) {
-                $parameterStore = $this->getParameterStore($injectStore);
-                if ($parameterStore === null) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($injectStore);
-                }
-
-                $value = $parameterStore->fetch($injectDefinition->getType(), $value);
-            }
-
-            $map[$className][$propertyName] = $value;
-            $this->logInjectingProperty($injectDefinition);
-        }
-        return $map;
-    }
-
-    private function mapServicePrepareDefinitions(ContainerDefinition $containerDefinition, array $methodInjectMap) : array {
-        $map = [];
-        foreach ($containerDefinition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
-            if (!isset($map[$servicePrepareDefinition->getService()->getName()])) {
-                $map[$servicePrepareDefinition->getService()->getName()] = [];
-            }
-
-            $map[$servicePrepareDefinition->getService()->getName()][$servicePrepareDefinition->getMethod()] = $methodInjectMap[$servicePrepareDefinition->getService()->getName()][$servicePrepareDefinition->getMethod()] ?? [];
-            $this->logServicePrepare($servicePrepareDefinition);
-        }
-
-        return $map;
-    }
-
-    private function getServiceDefinition(ContainerDefinition $containerDefinition, ObjectType $objectType) : ?ServiceDefinition {
-        return array_reduce(
-            $containerDefinition->getServiceDefinitions(),
-            fn($carry, $item) : ?ServiceDefinition => $item->getType() === $objectType ? $item : $carry
-        );
     }
 }

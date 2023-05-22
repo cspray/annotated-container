@@ -13,7 +13,7 @@ use function Cspray\Typiphy\objectType;
 class PhpDiContainerFactoryTest extends ContainerFactoryTestCase {
 
     protected function getContainerFactory(ActiveProfiles $activeProfiles) : ContainerFactory {
-        return new PhpDiContainerFactory($activeProfiles);
+        return new PhpDiContainerFactory();
     }
 
     protected function getBackingContainerInstanceOf() : ObjectType {
