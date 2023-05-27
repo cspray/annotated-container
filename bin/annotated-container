@@ -3,6 +3,7 @@
 
 use Cspray\AnnotatedContainer\Bootstrap\RootDirectoryBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Bootstrap\ComposerJsonScanningThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Cli\Command\AnalyzeCommand;
 use Cspray\AnnotatedContainer\Cli\Command\BuildCommand;
 use Cspray\AnnotatedContainer\Cli\Command\CacheClearCommand;
 use Cspray\AnnotatedContainer\Cli\Command\HelpCommand;
@@ -26,6 +27,7 @@ $commandExecutor->setDefaultCommand(new HelpCommand($commandExecutor));
 $commandExecutor->addCommand(new InitCommand($directoryResolver, new ComposerJsonScanningThirdPartyInitializerProvider($directoryResolver)));
 $commandExecutor->addCommand(new BuildCommand($directoryResolver));
 $commandExecutor->addCommand(new CacheClearCommand($directoryResolver));
+$commandExecutor->addCommand(new AnalyzeCommand($directoryResolver));
 
 $input = (new InputParser())->parse($argv);
 $terminalOutput = new TerminalOutput();

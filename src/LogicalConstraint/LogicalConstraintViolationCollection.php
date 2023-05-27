@@ -9,6 +9,8 @@ use Traversable;
 
 /**
  * Returns a collection where elements are guaranteed to be instances of LogicalConstraintViolation.
+ *
+ * @implements IteratorAggregate<int, LogicalConstraintViolation>
  */
 final class LogicalConstraintViolationCollection implements Countable, IteratorAggregate {
 

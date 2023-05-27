@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Unit\LogicalErrorApps\ProtectedServiceDelegateMethod;
+namespace Cspray\AnnotatedContainerFixture\LogicalConstraints\ProtectedServiceDelegateMethod;
 
 use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 
