@@ -3,7 +3,6 @@
 namespace Cspray\AnnotatedContainer\LogicalConstraint;
 
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
-use Cspray\AnnotatedContainer\LogicalConstraint\Check\NoAbstractServiceAliasLogicalConstraint;
 
 /**
  * A class that ensures a ContainerDefinition adheres to the LogicalConstraints we have defined.
@@ -11,10 +10,12 @@ use Cspray\AnnotatedContainer\LogicalConstraint\Check\NoAbstractServiceAliasLogi
 final class LogicalConstraintValidator {
 
     /** @var LogicalConstraint[] */
-    private array $logicalConstraints = [];
+    private array $logicalConstraints;
 
-    public function __construct() {
-        $this->logicalConstraints[] = new NoAbstractServiceAliasLogicalConstraint();
+    public function __construct(
+        LogicalConstraint... $logicalConstraints
+    ) {
+        $this->logicalConstraints = $logicalConstraints;
     }
 
     /**
@@ -28,13 +29,13 @@ final class LogicalConstraintValidator {
     public function validate(ContainerDefinition $containerDefinition, array $profiles) : LogicalConstraintViolationCollection {
         $collection = new LogicalConstraintViolationCollection();
 
-        foreach ($this->logicalConstraints as $logicalConstraint) {
-            $collection->addAll($logicalConstraint->getConstraintViolations($containerDefinition, $profiles));
+        foreach ($this->logicalConstraints as $constraint) {
+            $collection->addAll(
+                $constraint->getConstraintViolations($containerDefinition, $profiles)
+            );
         }
 
         return $collection;
     }
-
-
 
 }

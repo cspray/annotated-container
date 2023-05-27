@@ -6,9 +6,10 @@ use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\DuplicateServiceName\BarService;
-use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\DuplicateServiceName\FooService;
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\DuplicateServiceName\BarService;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\DuplicateServiceName\FooService;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\LogicalConstraintFixtures;
 
 final class DuplicateServiceNameTest extends LogicalConstraintTestCase {
 
@@ -23,7 +24,7 @@ final class DuplicateServiceNameTest extends LogicalConstraintTestCase {
 
     public function testServiceWithMultipleNamesReturnsCorrectViolation() : void {
         $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-            dirname(__DIR__, 2) . '/LogicalErrorApps/DuplicateServiceName'
+            LogicalConstraintFixtures::duplicateServiceName()->getPath()
         )->build();
 
         $definition = $this->analyzer->analyze($options);

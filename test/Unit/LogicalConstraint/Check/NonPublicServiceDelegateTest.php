@@ -6,10 +6,10 @@ use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\PrivateServiceDelegateMethod\PrivateFooServiceFactory;
-use Cspray\AnnotatedContainer\Unit\LogicalErrorApps\ProtectedServiceDelegateMethod\ProtectedFooServiceFactory;
 use Cspray\AnnotatedContainerFixture\Fixtures;
-use PHPUnit\Framework\TestCase;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\LogicalConstraintFixtures;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\PrivateServiceDelegateMethod\PrivateFooServiceFactory;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\ProtectedServiceDelegateMethod\ProtectedFooServiceFactory;
 
 final class NonPublicServiceDelegateTest extends LogicalConstraintTestCase {
 
@@ -35,7 +35,7 @@ final class NonPublicServiceDelegateTest extends LogicalConstraintTestCase {
 
     public function testServiceDelegateIsProtectedMethodHasCorrectLogicalConstraint() : void {
         $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-            dirname(__DIR__, 2) . '/LogicalErrorApps/ProtectedServiceDelegateMethod'
+            LogicalConstraintFixtures::protectedServiceDelegate()->getPath()
         )->build();
 
         $definition = $this->analyzer->analyze($options);
@@ -52,7 +52,7 @@ final class NonPublicServiceDelegateTest extends LogicalConstraintTestCase {
 
     public function testServiceDelegateIsPrivateMethodHasCorrectLogicalConstraint() : void {
         $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-            dirname(__DIR__, 2) . '/LogicalErrorApps/PrivateServiceDelegateMethod'
+            LogicalConstraintFixtures::privateServiceDelegate()->getPath()
         )->build();
 
         $definition = $this->analyzer->analyze($options);
