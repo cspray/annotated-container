@@ -18,6 +18,7 @@ use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Exception\UnsupportedOperation;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintValidator;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 
@@ -114,7 +115,8 @@ TEXT;
 
         $logicalConstraints = [
             new DuplicateServiceName(),
-            new NonPublicServiceDelegate()
+            new NonPublicServiceDelegate(),
+            new NonPublicServicePrepare()
         ];
 
         $validator = new LogicalConstraintValidator(...$logicalConstraints);

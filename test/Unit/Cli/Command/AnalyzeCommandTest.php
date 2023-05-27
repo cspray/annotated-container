@@ -101,6 +101,7 @@ Logical Constraints:
 
 - Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName
 - Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate
+- Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare
 
 \033[32mNo logical constraint violations were found!\033[0m
 
@@ -138,6 +139,7 @@ Logical Constraints:
 
 - Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName
 - Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate
+- Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare
 
 Violation #1 - \033[31mCritical\033[0m
 $banner
