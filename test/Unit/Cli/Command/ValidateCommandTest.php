@@ -2,12 +2,14 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Cli\Command;
 
+use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Cli\Command\ValidateCommand;
 use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Unit\Helper\InMemoryOutput;
 use Cspray\AnnotatedContainer\Unit\Helper\StubInput;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\DuplicateServiceType\DummyService;
 use Cspray\AnnotatedContainerFixture\LogicalConstraints\LogicalConstraintFixtures;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
@@ -113,11 +115,8 @@ XML;
 Annotated Container Validation
 
 Configuration file: vfs://root/annotated-container.xml
-Logical Constraints:
 
-- Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName
-- Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate
-- Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare
+To view validations ran, execute "annotated-container validate --list-constraints"
 
 \033[32mNo logical constraint violations were found!\033[0m
 
@@ -151,11 +150,8 @@ XML;
 Annotated Container Validation
 
 Configuration file: vfs://root/annotated-container.xml
-Logical Constraints:
 
-- Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName
-- Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate
-- Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare
+To view validations ran, execute "annotated-container validate --list-constraints"
 
 Violation #1 - \033[31mCritical\033[0m
 $banner
@@ -164,6 +160,53 @@ There are multiple services with the name "foo". The service types are:
 
 - $barService
 - $fooService
+
+\033[1m\033[31mERROR!\033[0m\033[22m Total violations found: \033[1m1\033[22m
+
+TEXT;
+
+        $this->subject->handle(new StubInput([], []), $this->output);
+
+        self::assertSame($expected, $this->stdout->getContentsAsString());
+    }
+
+    public function testViolationWithWarningHasCorrectColorEncoded() : void {
+        $config = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>LogicalConstraints/DuplicateServiceType</dir>
+    </source>
+  </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($config)
+            ->at($this->vfs);
+
+        $banner = str_repeat('*', 80);
+        $service = LogicalConstraintFixtures::duplicateServiceType()->fooService()->getName();
+        $serviceAttr = Service::class;
+        $dummyAttr = DummyService::class;
+        $expected = <<<TEXT
+Annotated Container Validation
+
+Configuration file: vfs://root/annotated-container.xml
+
+To view validations ran, execute "annotated-container validate --list-constraints"
+
+Violation #1 - \033[33mWarning\033[0m
+$banner
+
+The type "$service" has been defined multiple times!
+
+- Attributed with $serviceAttr
+- Attributed with $dummyAttr
+
+This will result in undefined behavior, determined by the backing container, and 
+should be avoided.
 
 \033[1m\033[31mERROR!\033[0m\033[22m Total violations found: \033[1m1\033[22m
 

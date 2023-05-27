@@ -53,7 +53,7 @@ class LogicalConstraintValidatorTest extends TestCase {
         );
 
         $coll1 = new LogicalConstraintViolationCollection();
-        $coll1->add(new LogicalConstraintViolation('message one', LogicalConstraintViolationType::Critical));
+        $coll1->add(LogicalConstraintViolation::critical('message one'));
         $mock1 = $this->getMockBuilder(LogicalConstraint::class)->getMock();
         $mock1->expects($this->once())
             ->method('getConstraintViolations')
@@ -61,7 +61,7 @@ class LogicalConstraintValidatorTest extends TestCase {
             ->willReturn($coll1);
 
         $coll2 = new LogicalConstraintViolationCollection();
-        $coll2->add(new LogicalConstraintViolation('message two', LogicalConstraintViolationType::Warning));
+        $coll2->add(LogicalConstraintViolation::warning('message two'));
         $mock2 = $this->getMockBuilder(LogicalConstraint::class)->getMock();
         $mock2->expects($this->once())
             ->method('getConstraintViolations')
@@ -78,6 +78,5 @@ class LogicalConstraintValidatorTest extends TestCase {
         self::assertSame('message two', $results->get(1)->message);
         self::assertSame(LogicalConstraintViolationType::Warning, $results->get(1)->violationType);
     }
-
 
 }

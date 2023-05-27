@@ -39,12 +39,7 @@ There are multiple services with the name "$name". The service types are:
 - {$services}
 TEXT;
 
-                $violations->add(
-                    new LogicalConstraintViolation(
-                        trim($message),
-                        LogicalConstraintViolationType::Critical
-                    )
-                );
+                $violations->add(LogicalConstraintViolation::critical(trim($message)));
             }
         }
 
