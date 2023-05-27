@@ -18,33 +18,50 @@ use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Exception\UnsupportedOperation;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintValidator;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 
-final class AnalyzeCommand implements Command {
+final class ValidateCommand implements Command {
 
     public function __construct(
         private readonly BootstrappingDirectoryResolver $directoryResolver
     ) {}
 
     public function getName() : string {
-        return 'analyze';
+        return 'validate';
     }
 
     public function getHelp() : string {
         return <<<TEXT
 NAME
 
-    analyze - Ensure container definition validates against all logical constraints.
+    validate - Ensure container definition validates against all logical constraints.
     
 SYNOPSIS
 
-    <bold>analyze</bold> [OPTION]...
+    <bold>validate</bold> [OPTION]...
 
 DESCRIPTION
 
-    <bold>analyze</bold> will analyze your codebase and create a ContainerDefinition. 
-    All logical constraints will be run and results will be output to the terminal.
+    <bold>validate</bold> will analyze your codebase, run a series of Logical Constraint 
+    checks, and output any violations found.
+    
+    Violations are split into three different types:
+    
+    - Critical
+        These errors are highly indicative of a problem that will result in an exception 
+        at runtime. It is HIGHLY recommended that these violations are fixed immediately.
+        
+    - Warning
+        These errors are likely indicative of a problem that will result in an exception 
+        or error at runtime, but may not based on various conditions. It is recommended 
+        that these violations are fixed as soon as possible.
+        
+    - Notice
+        These errors will not cause an exception or error at runtime, but are likely 
+        indicative of some problem or misunderstanding in your dependency injection 
+        configuration. You should try to fix these violations when possible.
 
 OPTIONS
 
@@ -114,7 +131,8 @@ TEXT;
 
         $logicalConstraints = [
             new DuplicateServiceName(),
-            new NonPublicServiceDelegate()
+            new NonPublicServiceDelegate(),
+            new NonPublicServicePrepare()
         ];
 
         $validator = new LogicalConstraintValidator(...$logicalConstraints);
@@ -123,7 +141,7 @@ TEXT;
         assert($containerDefinition !== null);
         $results = $validator->validate($containerDefinition, ['default']);
 
-        $output->stdout->write('Annotated Container Analysis');
+        $output->stdout->write('Annotated Container Validation');
         $output->stdout->br();
         $output->stdout->write('Configuration file: ' . $configFile);
         $output->stdout->write('Logical Constraints:');

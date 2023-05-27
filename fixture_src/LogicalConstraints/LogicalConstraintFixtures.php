@@ -18,4 +18,12 @@ final class LogicalConstraintFixtures {
         return new ProtectedServiceDelegateFixture();
     }
 
+    public static function privateServicePrepare() : PrivateServicePrepareFixture {
+        return new PrivateServicePrepareFixture();
+    }
+
+    public static function protectedServicePrepare() : ProtectedServicePrepareFixture {
+        return new ProtectedServicePrepareFixture();
+    }
+
 }

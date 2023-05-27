@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Cli\Command;
 
-use Cspray\AnnotatedContainer\Cli\Command\AnalyzeCommand;
+use Cspray\AnnotatedContainer\Cli\Command\ValidateCommand;
 use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
@@ -13,11 +13,11 @@ use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
 
-final class AnalyzeCommandTest extends TestCase {
+final class ValidateCommandTest extends TestCase {
 
     private VirtualDirectory $vfs;
 
-    private AnalyzeCommand $subject;
+    private ValidateCommand $subject;
 
     private InMemoryOutput $stdout;
 
@@ -26,7 +26,7 @@ final class AnalyzeCommandTest extends TestCase {
 
     protected function setUp() : void {
         $this->vfs = VirtualFilesystem::setup();
-        $this->subject = new AnalyzeCommand(
+        $this->subject = new ValidateCommand(
             new FixtureBootstrappingDirectoryResolver()
         );
 
@@ -38,23 +38,39 @@ final class AnalyzeCommandTest extends TestCase {
     public function testGetCommandName() : void {
         $actual = $this->subject->getName();
 
-        self::assertSame('analyze', $actual);
+        self::assertSame('validate', $actual);
     }
 
     public function testGetCommandHelp() : void {
         $expected = <<<TEXT
 NAME
 
-    analyze - Ensure container definition validates against all logical constraints.
+    validate - Ensure container definition validates against all logical constraints.
     
 SYNOPSIS
 
-    <bold>analyze</bold> [OPTION]...
+    <bold>validate</bold> [OPTION]...
 
 DESCRIPTION
 
-    <bold>analyze</bold> will analyze your codebase and create a ContainerDefinition. 
-    All logical constraints will be run and results will be output to the terminal.
+    <bold>validate</bold> will analyze your codebase, run a series of Logical Constraint 
+    checks, and output any violations found.
+    
+    Violations are split into three different types:
+    
+    - Critical
+        These errors are highly indicative of a problem that will result in an exception 
+        at runtime. It is HIGHLY recommended that these violations are fixed immediately.
+        
+    - Warning
+        These errors are likely indicative of a problem that will result in an exception 
+        or error at runtime, but may not based on various conditions. It is recommended 
+        that these violations are fixed as soon as possible.
+        
+    - Notice
+        These errors will not cause an exception or error at runtime, but are likely 
+        indicative of some problem or misunderstanding in your dependency injection 
+        configuration. You should try to fix these violations when possible.
 
 OPTIONS
 
@@ -94,13 +110,14 @@ XML;
             ->at($this->vfs);
 
         $expected = <<<TEXT
-Annotated Container Analysis
+Annotated Container Validation
 
 Configuration file: vfs://root/annotated-container.xml
 Logical Constraints:
 
 - Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName
 - Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate
+- Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare
 
 \033[32mNo logical constraint violations were found!\033[0m
 
@@ -131,13 +148,14 @@ XML;
         $barService = LogicalConstraintFixtures::duplicateServiceName()->getBarService()->getName();
         $fooService = LogicalConstraintFixtures::duplicateServiceName()->getFooService()->getName();
         $expected = <<<TEXT
-Annotated Container Analysis
+Annotated Container Validation
 
 Configuration file: vfs://root/annotated-container.xml
 Logical Constraints:
 
 - Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName
 - Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate
+- Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare
 
 Violation #1 - \033[31mCritical\033[0m
 $banner
