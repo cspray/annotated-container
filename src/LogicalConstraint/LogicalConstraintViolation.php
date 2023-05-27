@@ -7,9 +7,21 @@ namespace Cspray\AnnotatedContainer\LogicalConstraint;
  */
 final class LogicalConstraintViolation {
 
-    public function __construct(
+    private function __construct(
         public readonly string $message,
         public readonly LogicalConstraintViolationType $violationType
     ) {}
+
+    public static function critical(string $message) : self {
+        return new LogicalConstraintViolation($message, LogicalConstraintViolationType::Critical);
+    }
+
+    public static function warning(string $message) : self {
+        return new LogicalConstraintViolation($message, LogicalConstraintViolationType::Warning);
+    }
+
+    public static function notice(string $message) : self {
+        return new LogicalConstraintViolation($message, LogicalConstraintViolationType::Notice);
+    }
 
 }

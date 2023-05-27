@@ -17,9 +17,11 @@ use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Exception\UnsupportedOperation;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceType;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintValidator;
+use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 
 final class ValidateCommand implements Command {
@@ -131,6 +133,7 @@ TEXT;
 
         $logicalConstraints = [
             new DuplicateServiceName(),
+            new DuplicateServiceType(),
             new NonPublicServiceDelegate(),
             new NonPublicServicePrepare()
         ];
@@ -144,13 +147,8 @@ TEXT;
         $output->stdout->write('Annotated Container Validation');
         $output->stdout->br();
         $output->stdout->write('Configuration file: ' . $configFile);
-        $output->stdout->write('Logical Constraints:');
         $output->stdout->br();
-
-        foreach ($logicalConstraints as $logicalConstraint) {
-            $output->stdout->write('- ' . $logicalConstraint::class);
-        }
-
+        $output->stdout->write('To view validations ran, execute "annotated-container validate --list-constraints"');
         $output->stdout->br();
 
         $banner = str_repeat('*', 80);
@@ -159,10 +157,16 @@ TEXT;
         } else {
             foreach ($results as $index => $result) {
                 $violationType = $result->violationType->name;
-                $violationMessage = $result->message;
+                $violationMessage = trim($result->message);
+
+                $violationColor = match ($result->violationType) {
+                    LogicalConstraintViolationType::Critical => 'red',
+                    LogicalConstraintViolationType::Warning => 'yellow',
+                    default => 'red'
+                };
 
                 $index++;
-                $output->stdout->write(sprintf('Violation #%d - <fg:red>%s</fg:red>', $index, $violationType));
+                $output->stdout->write(sprintf('Violation #%1$d - <fg:%2$s>%3$s</fg:%2$s>', $index, $violationColor, $violationType));
                 $output->stdout->write($banner);
                 $output->stdout->br();
                 $output->stdout->write($violationMessage);

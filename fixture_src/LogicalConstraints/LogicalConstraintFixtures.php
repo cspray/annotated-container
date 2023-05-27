@@ -2,12 +2,18 @@
 
 namespace Cspray\AnnotatedContainerFixture\LogicalConstraints;
 
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceType;
+
 final class LogicalConstraintFixtures {
 
     private function __construct() {}
 
     public static function duplicateServiceName() : DuplicateServiceNameFixture{
         return new DuplicateServiceNameFixture();
+    }
+
+    public static function duplicateServiceType() : DuplicateServiceTypeFixture {
+        return new DuplicateServiceTypeFixture();
     }
 
     public static function privateServiceDelegate() : PrivateServiceDelegateFixture {

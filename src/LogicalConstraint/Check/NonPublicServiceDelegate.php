@@ -17,15 +17,16 @@ final class NonPublicServiceDelegate implements LogicalConstraint {
             $reflection = new \ReflectionMethod(sprintf('%s::%s', $delegateDefinition->getDelegateType()->getName(), $delegateDefinition->getDelegateMethod()));
             if ($reflection->isProtected() || $reflection->isPrivate()) {
                 $protectedOrPrivate = $reflection->isProtected() ? 'protected' : 'private';
-                $violations->add(new LogicalConstraintViolation(
-                    sprintf(
-                        'A %s method, %s::%s, is marked as a service delegate. Service delegates MUST be marked public.',
-                        $protectedOrPrivate,
-                        $delegateDefinition->getDelegateType()->getName(),
-                        $delegateDefinition->getDelegateMethod()
-                    ),
-                    LogicalConstraintViolationType::Critical
-                ));
+                $violations->add(
+                    LogicalConstraintViolation::critical(
+                        sprintf(
+                            'A %s method, %s::%s, is marked as a service delegate. Service delegates MUST be marked public.',
+                            $protectedOrPrivate,
+                            $delegateDefinition->getDelegateType()->getName(),
+                            $delegateDefinition->getDelegateMethod()
+                        )
+                    )
+                );
             }
         }
 
