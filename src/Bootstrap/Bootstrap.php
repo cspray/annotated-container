@@ -30,7 +30,7 @@ final class Bootstrap {
 
     private readonly BootstrappingDirectoryResolver $directoryResolver;
     private readonly ?LoggerInterface $logger;
-    private readonly ?ParameterStoreFactory $parameterStoreFactory;
+    private readonly ParameterStoreFactory $parameterStoreFactory;
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;
     private readonly ?ObserverFactory $observerFactory;
 
@@ -54,7 +54,7 @@ final class Bootstrap {
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->defaultDirectoryResolver();
         $this->logger = $logger;
-        $this->parameterStoreFactory = $parameterStoreFactory;
+        $this->parameterStoreFactory = $parameterStoreFactory ?? new DefaultParameterStoreFactory();
         $this->definitionProviderFactory = $definitionProviderFactory;
         $this->observerFactory = $observerFactory;
         $this->stopwatch = $stopwatch ?? new Stopwatch();
