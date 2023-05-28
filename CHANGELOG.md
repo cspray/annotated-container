@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased Changes
+
+### Added
+
+- Added a set of `ParameterStoreFactory` implementations to facilitate creating custom `ParameterStore` implementations.
+
 ## [v2.1.0](https://github.com/cspray/annotated-container/tree/v2.1.0) - 2023-05-18
 
 ### Added
