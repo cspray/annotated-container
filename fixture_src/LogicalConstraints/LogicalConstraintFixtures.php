@@ -20,6 +20,10 @@ final class LogicalConstraintFixtures {
         return new DuplicateServicePrepareFixture();
     }
 
+    public static function duplicateServiceDelegate() : DuplicateServiceDelegateFixture {
+        return new DuplicateServiceDelegateFixture();
+    }
+
     public static function privateServiceDelegate() : PrivateServiceDelegateFixture {
         return new PrivateServiceDelegateFixture();
     }

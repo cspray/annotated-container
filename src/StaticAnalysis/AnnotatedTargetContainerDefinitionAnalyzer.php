@@ -78,6 +78,8 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
         $consumer = $this->parse($containerDefinitionCompileOptions, $logger);
+        // We need to add services from the DefinitionProvider first to ensure that any services required
+        // to be defined, e.g. to satisfy a ServiceDelegate, are added to the container definition
         $containerDefinitionBuilder = $this->addThirdPartyServices(
             $containerDefinitionCompileOptions,
             $containerDefinitionBuilder,
