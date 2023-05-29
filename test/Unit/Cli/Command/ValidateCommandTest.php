@@ -6,6 +6,13 @@ use Cspray\AnnotatedContainer\Attribute\Service;
 use Cspray\AnnotatedContainer\Cli\Command\ValidateCommand;
 use Cspray\AnnotatedContainer\Cli\Exception\ConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\TerminalOutput;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceDelegate;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServicePrepare;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceType;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\MultiplePrimaryForAbstractService;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Unit\Helper\InMemoryOutput;
 use Cspray\AnnotatedContainer\Unit\Helper\StubInput;
@@ -80,6 +87,12 @@ OPTIONS
 
         Set the name of the configuration file to be used. If not provided the
         default value will be "annotated-container.xml".
+        
+    --list-constraints
+    
+        Show which logical constraints will be used to validate your container 
+        definition. Passing this options will only list constraints, validation 
+        will NOT run with this option passed. 
 
 TEXT;
 
@@ -213,6 +226,35 @@ should be avoided.
 TEXT;
 
         $this->subject->handle(new StubInput([], []), $this->output);
+
+        self::assertSame($expected, $this->stdout->getContentsAsString());
+    }
+
+    public function testWithListConstraintsOptionProvidedShowsCorrectOutput() : void {
+        $dupeDelegate = DuplicateServiceDelegate::class;
+        $dupeName = DuplicateServiceName::class;
+        $dupePrepare = DuplicateServicePrepare::class;
+        $dupeType = DuplicateServiceType::class;
+        $multiplePrimary = MultiplePrimaryForAbstractService::class;
+        $nonPublicDelegate = NonPublicServiceDelegate::class;
+        $nonPublicPrepare = NonPublicServicePrepare::class;
+
+        $expected = <<<TEXT
+Annotated Container Validation
+
+The following constraints will be checked when validate is ran:
+
+- $dupeDelegate
+- $dupeName
+- $dupePrepare
+- $dupeType
+- $multiplePrimary
+- $nonPublicDelegate
+- $nonPublicPrepare
+
+TEXT;
+
+        $this->subject->handle(new StubInput(['list-constraints' => true], []), $this->output);
 
         self::assertSame($expected, $this->stdout->getContentsAsString());
     }
