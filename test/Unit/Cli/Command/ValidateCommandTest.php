@@ -10,6 +10,7 @@ use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceType;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\MultiplePrimaryForAbstractService;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
@@ -234,6 +235,7 @@ TEXT;
         $dupeName = DuplicateServiceName::class;
         $dupePrepare = DuplicateServicePrepare::class;
         $dupeType = DuplicateServiceType::class;
+        $multiplePrimary = MultiplePrimaryForAbstractService::class;
         $nonPublicDelegate = NonPublicServiceDelegate::class;
         $nonPublicPrepare = NonPublicServicePrepare::class;
 
@@ -246,6 +248,7 @@ The following constraints will be checked when validate is ran:
 - $dupeName
 - $dupePrepare
 - $dupeType
+- $multiplePrimary
 - $nonPublicDelegate
 - $nonPublicPrepare
 

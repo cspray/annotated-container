@@ -20,6 +20,7 @@ use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceType;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\MultiplePrimaryForAbstractService;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraint;
@@ -44,6 +45,7 @@ final class ValidateCommand implements Command {
             new DuplicateServiceName(),
             new DuplicateServicePrepare(),
             new DuplicateServiceType(),
+            new MultiplePrimaryForAbstractService(),
             new NonPublicServiceDelegate(),
             new NonPublicServicePrepare()
         ];
