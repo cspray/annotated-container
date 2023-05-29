@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a set of `ParameterStoreFactory` implementations to facilitate creating custom `ParameterStore` implementations. See `DelegatedParameterStoreFactory` to use this new functionality.
-- A `validate` command that will run a series of checks against your container definition to find potential logical errors.
+- A set of `ParameterStoreFactory` implementations to facilitate creating custom `ParameterStore` implementations. See `DelegatedParameterStoreFactory` to use this new functionality.
+- A `validate` command that will run a series of checks against your container definition to find potential logical errors. Run `validate --list-constraints` to see what checks are ran.
 - Adds support for [illuminate/container](https://github.com/illuminate/container), paving the way for Laravel framework support.
 
 ### Changed
