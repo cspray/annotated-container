@@ -7,4 +7,6 @@ use Cspray\AnnotatedContainer\Attribute\Service;
 #[Service]
 class FooImplementation {
 
+    public function postConstruct() : void {}
+
 }
