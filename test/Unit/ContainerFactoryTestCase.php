@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer\Unit;
 
 use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
+use Cspray\AnnotatedContainer\ContainerFactory\IlluminateContainerFactory;
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
@@ -35,6 +36,7 @@ use Cspray\Typiphy\ObjectType;
 use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
+use Illuminate\Contracts\Container\Container;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -375,6 +377,12 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testInjectingNamedServices() : void {
+        if ($this->getBackingContainerInstanceOf()->getName() === Container::class) {
+            $this->markTestSkipped(
+                IlluminateContainerFactory::class . ' does not support injecting multiple named services.'
+            );
+        }
+
         $container = $this->getContainer(Fixtures::injectNamedServices()->getPath());
 
         /** @var AnnotatedContainerFixture\InjectNamedServices\ServiceConsumer $service */

@@ -94,40 +94,23 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
             $method = $definition->getTargetIdentifier()->getMethodName();
             $parameterName = $definition->getTargetIdentifier()->getName();
 
-            $value = $definition->getValue();
-            if ($definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)) {
+            $value = $this->getInjectDefinitionValue($definition);
+            if ($value instanceof ContainerReference) {
                 $key = $parameterName;
-                $nameType = $state->getTypeForName($value);
+                $nameType = $state->getTypeForName($value->name);
                 if ($nameType !== null) {
                     $value = $nameType->getName();
+                } else {
+                    $value = $value->name;
                 }
             } else {
                 $key = ':' . $parameterName;
             }
 
-            $store = $definition->getStoreName();
-            if ($store !== null) {
-                $parameterStore = $this->getParameterStore($store);
-                if ($parameterStore === null) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
-                }
-                $value = $parameterStore->fetch($definition->getType(), $value);
-            }
-
             $state->addMethodInject($injectTargetType, $method, $key, $value);
         } else {
             $property = $definition->getTargetIdentifier()->getName();
-            $value = $definition->getValue();
-
-            $store = $definition->getStoreName();
-            if ($store !== null) {
-                $parameterStore = $this->getParameterStore($store);
-                if ($parameterStore === null) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
-                }
-                $value = $parameterStore->fetch($definition->getType(), $value);
-            }
-
+            $value = $this->getInjectDefinitionValue($definition);
             $state->addPropertyInject($injectTargetType, $property, $value);
         }
 

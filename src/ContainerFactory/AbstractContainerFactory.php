@@ -16,6 +16,7 @@ use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Exception\ContainerException;
+use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfilesBuilder;
 use Cspray\Typiphy\ObjectType;
@@ -154,6 +155,25 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     final protected function getParameterStore(string $storeName) : ?ParameterStore {
         return $this->parameterStores[$storeName] ?? null;
+    }
+
+    final protected function getInjectDefinitionValue(InjectDefinition $definition) : mixed {
+        $value = $definition->getValue();
+        $store = $definition->getStoreName();
+        if ($store !== null) {
+            $parameterStore = $this->getParameterStore($store);
+            if ($parameterStore === null) {
+                throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
+            }
+            $value = $parameterStore->fetch($definition->getType(), $value);
+        }
+
+        $type = $definition->getType();
+        if ($type instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)) {
+            $value = new ContainerReference($value, $type);
+        }
+
+        return $value;
     }
 
     final protected function logCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {
