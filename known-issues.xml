@@ -75,6 +75,20 @@
       <code>$parameterStore</code>
     </MixedAssignment>
   </file>
+  <file src="src/Cli/Command/ValidateCommand.php">
+    <ArgumentTypeCoercion occurrences="1">
+      <code>$profiles</code>
+    </ArgumentTypeCoercion>
+    <PossiblyInvalidArgument occurrences="3">
+      <code>$configOption</code>
+      <code>$configOption</code>
+      <code>$profiles</code>
+    </PossiblyInvalidArgument>
+    <PossiblyInvalidCast occurrences="2">
+      <code>$configOption</code>
+      <code>$configOption</code>
+    </PossiblyInvalidCast>
+  </file>
   <file src="src/Cli/InputParser.php">
     <ArgumentTypeCoercion occurrences="1">
       <code>$arguments</code>
@@ -432,11 +446,6 @@
     </MixedAssignment>
   </file>
   <file src="src/StaticAnalysis/AnnotatedTargetDefinitionConverter.php">
-    <ArgumentTypeCoercion occurrences="3">
-      <code>$attribute-&gt;getName()</code>
-      <code>$profiles</code>
-      <code>$profiles</code>
-    </ArgumentTypeCoercion>
     <DeprecatedClass occurrences="4">
       <code>ConfigurationDefinition</code>
       <code>ConfigurationDefinitionBuilder::forClass(objectType($target-&gt;getTargetReflection()-&gt;getName()))</code>

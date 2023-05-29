@@ -109,18 +109,23 @@ composer require cspray/annotated-container
 
 AnnotatedContainer does not provide any of the actual Container functionality. We provide Attributes and definition objects that can determine how actual implementations are intended to be setup. AnnotatedContainer currently supports the following backing Containers:
 
+#### [rdlowrey/auryn](https://github.com/rdlowrey/auryn)
+
 ```
 composer require rdlowrey/auryn
 ```
 
-Uses the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) Injector.
+#### [php-di/php-di](https://github.com/php-di/php-di)
 
 ```
 composer require php-di/php-di
 ```
 
-Uses the [php-di/php-di](https://github.com/php-di/php-di) Container. This library only supports necessary 8.1 features 
-in 7.0+.
+#### [illuminate/container](https://github.com/illuminate/container)
+
+```
+composer require illuminate/container
+```
 
 ## Documentation
 
@@ -147,10 +152,10 @@ The Roadmap can be found in the [annotated-container Project page](https://githu
 
 - [Introducing Annotated Container - Part 1](https://www.cspray.io/blog/introducing-annotated-container-part-1/)
 - [Introducing Annotated Container - Part 2](https://www.cspray.io/blog/introducing-annotated-container-part-2/)
-- [Introducing Annotated Container - Part 3](https://www.cspray.io/blog/introducing-annotatedcontainer-part-3/)
+- [Introducing Annotated Container - Part 3](https://www.cspray.io/blog/introducing-annotated-container-part-3/)
 - [Annotated Container, Why Attributes?](https://www.cspray.io/blog/annotated-container-why-attributes/)
+- [Autowiring Annotated Container](https://www.cspray.io/blog/autowiring-and-annotated-container/)
 
-### Demo Apps
+### Demos
 
-- [cspray/annotated-container-doctrine-demo](https://github.com/cspray/annotated-container-doctrine-demo) A Symfony Console app with working database interactions using Doctrine and Sqlite3.
-- [cspray/annotated-container-amp-http-server-demo](https://github.com/cspray/annotated-container-amp-http-server-demo) An Amp http-server app with controller autowiring, routing through attributes, and controller DTO injection.
+- [cspray/annotated-container-microframework](https://github.com/cspray/annotated-container-microframework)

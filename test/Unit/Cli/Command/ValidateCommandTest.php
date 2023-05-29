@@ -93,6 +93,11 @@ OPTIONS
         Show which logical constraints will be used to validate your container 
         definition. Passing this options will only list constraints, validation 
         will NOT run with this option passed. 
+        
+    --profile
+    
+        Set the active profiles that are used when validating the Container. This 
+        option can be provided multiple times to set more than 1 profile.
 
 TEXT;
 
@@ -128,6 +133,7 @@ XML;
 Annotated Container Validation
 
 Configuration file: vfs://root/annotated-container.xml
+Active Profiles: default
 
 To view validations ran, execute "annotated-container validate --list-constraints"
 
@@ -163,6 +169,7 @@ XML;
 Annotated Container Validation
 
 Configuration file: vfs://root/annotated-container.xml
+Active Profiles: default
 
 To view validations ran, execute "annotated-container validate --list-constraints"
 
@@ -207,6 +214,7 @@ XML;
 Annotated Container Validation
 
 Configuration file: vfs://root/annotated-container.xml
+Active Profiles: default
 
 To view validations ran, execute "annotated-container validate --list-constraints"
 
@@ -255,6 +263,105 @@ The following constraints will be checked when validate is ran:
 TEXT;
 
         $this->subject->handle(new StubInput(['list-constraints' => true], []), $this->output);
+
+        self::assertSame($expected, $this->stdout->getContentsAsString());
+    }
+
+    public function testConfigFileOptionPassedRespected() : void {
+        $config = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>SingleConcreteService</dir>
+    </source>
+  </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('custom-config.xml')
+            ->withContent($config)
+            ->at($this->vfs);
+
+        $expected = <<<TEXT
+Annotated Container Validation
+
+Configuration file: vfs://root/custom-config.xml
+Active Profiles: default
+
+To view validations ran, execute "annotated-container validate --list-constraints"
+
+\033[32mNo logical constraint violations were found!\033[0m
+
+TEXT;
+
+        $this->subject->handle(new StubInput(['config-file' => 'custom-config.xml'], []), $this->output);
+
+        self::assertSame($expected, $this->stdout->getContentsAsString());
+    }
+
+    public function testProfilesRespectedInOutputAndContainerAnalysis() : void {
+        $config = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>SingleConcreteService</dir>
+    </source>
+  </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($config)
+            ->at($this->vfs);
+
+        $expected = <<<TEXT
+Annotated Container Validation
+
+Configuration file: vfs://root/annotated-container.xml
+Active Profiles: default, dev
+
+To view validations ran, execute "annotated-container validate --list-constraints"
+
+\033[32mNo logical constraint violations were found!\033[0m
+
+TEXT;
+
+        $this->subject->handle(new StubInput(['profile' => ['default', 'dev']], []), $this->output);
+
+        self::assertSame($expected, $this->stdout->getContentsAsString());
+    }
+
+    public function testSingleProfileRespected() : void {
+        $config = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>SingleConcreteService</dir>
+    </source>
+  </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('annotated-container.xml')
+            ->withContent($config)
+            ->at($this->vfs);
+
+        $expected = <<<TEXT
+Annotated Container Validation
+
+Configuration file: vfs://root/annotated-container.xml
+Active Profiles: dev
+
+To view validations ran, execute "annotated-container validate --list-constraints"
+
+\033[32mNo logical constraint violations were found!\033[0m
+
+TEXT;
+
+        $this->subject->handle(new StubInput(['profile' => 'dev'], []), $this->output);
 
         self::assertSame($expected, $this->stdout->getContentsAsString());
     }

@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
+use Closure;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
@@ -27,6 +28,7 @@ use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraint;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintValidator;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
+use DI\Container;
 
 final class ValidateCommand implements Command {
 
@@ -100,6 +102,11 @@ OPTIONS
         Show which logical constraints will be used to validate your container 
         definition. Passing this options will only list constraints, validation 
         will NOT run with this option passed. 
+        
+    --profile
+    
+        Set the active profiles that are used when validating the Container. This 
+        option can be provided multiple times to set more than 1 profile.
 
 TEXT;
     }
@@ -109,68 +116,39 @@ TEXT;
             $this->listConstraints($output);
             return 0;
         }
-        $configFile = $this->directoryResolver->getConfigurationPath('annotated-container.xml');
+        $configOption = $input->getOption('config-file')  ?? 'annotated-container.xml';
+        $configFile = $this->directoryResolver->getConfigurationPath($configOption);
         if (!is_file($configFile)) {
-            throw ConfigurationNotFound::fromMissingFile($this->directoryResolver->getConfigurationPath('annotated-container.xml'));
+            throw ConfigurationNotFound::fromMissingFile($configFile);
         }
-
-        $infoCapturingObserver = new class implements PostAnalysisObserver {
-            public ?ActiveProfiles $activeProfiles = null;
-
-            public ?ContainerDefinition $containerDefinition = null;
-
-            public function notifyPostAnalysis(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition) : void {
-                $this->activeProfiles = $activeProfiles;
-                $this->containerDefinition = $containerDefinition;
-            }
-        };
-
-        $noOpContainerFactory = new class implements ContainerFactory {
-            public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
-                return new class implements AnnotatedContainer {
-
-                    public function getBackingContainer() : object {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
-                    }
-
-                    public function make(string $classType, AutowireableParameterSet $parameters = null) : object {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
-                    }
-
-                    public function invoke(callable $callable, AutowireableParameterSet $parameters = null) : mixed {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
-                    }
-
-                    public function get(string $id) {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
-                    }
-
-                    public function has(string $id) : bool {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
-                    }
-                };
-            }
-
-            public function addParameterStore(ParameterStore $parameterStore) : void {
-            }
-        };
 
         $bootstrap = new Bootstrap(
             directoryResolver: $this->directoryResolver,
-            containerFactory: $noOpContainerFactory
+            containerFactory: $this->noOpContainerFactory()
         );
 
+        $containerDefinition = null;
+
+        $infoCapturingObserver = $this->infoCapturingObserver(static function(ContainerDefinition $definition) use(&$containerDefinition) {
+            $containerDefinition = $definition;
+        });
         $bootstrap->addObserver($infoCapturingObserver);
 
-        $bootstrap->bootstrapContainer();
+        $bootstrap->bootstrapContainer(
+            configurationFile: $configOption
+        );
+        assert($containerDefinition instanceof ContainerDefinition);
 
-        $containerDefinition = $infoCapturingObserver->containerDefinition;
-        assert($containerDefinition !== null);
-        $results = $this->validator->validate($containerDefinition, ['default']);
+        $profiles = $input->getOption('profile') ?? ['default'];
+        if (is_string($profiles)) {
+            $profiles = [$profiles];
+        }
+        $results = $this->validator->validate($containerDefinition, $profiles);
 
         $output->stdout->write('Annotated Container Validation');
         $output->stdout->br();
         $output->stdout->write('Configuration file: ' . $configFile);
+        $output->stdout->write('Active Profiles: ' . implode(', ', $profiles));
         $output->stdout->br();
         $output->stdout->write('To view validations ran, execute "annotated-container validate --list-constraints"');
         $output->stdout->br();
@@ -201,6 +179,57 @@ TEXT;
         }
 
         return 0;
+    }
+
+    private function noOpContainerFactory() : ContainerFactory {
+        return new class implements ContainerFactory {
+            public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
+                return new class implements AnnotatedContainer {
+
+                    public function getBackingContainer() : object {
+                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                    }
+
+                    public function make(string $classType, AutowireableParameterSet $parameters = null) : object {
+                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                    }
+
+                    public function invoke(callable $callable, AutowireableParameterSet $parameters = null) : mixed {
+                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                    }
+
+                    public function get(string $id) {
+                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                    }
+
+                    public function has(string $id) : bool {
+                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                    }
+                };
+            }
+
+            public function addParameterStore(ParameterStore $parameterStore) : void {
+            }
+        };
+    }
+
+    /**
+     * @param Closure(ContainerDefinition):void $closure
+     * @return PostAnalysisObserver
+     */
+    private function infoCapturingObserver(Closure $closure) : PostAnalysisObserver {
+        return new class($closure) implements PostAnalysisObserver {
+            /**
+             * @param Closure(ContainerDefinition):void $closure
+             */
+            public function __construct(
+                private readonly Closure $closure
+            ) {}
+
+            public function notifyPostAnalysis(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition) : void {
+                ($this->closure)($containerDefinition);
+            }
+        };
     }
 
     private function listConstraints(TerminalOutput $output) : void {
