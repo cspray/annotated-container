@@ -16,19 +16,40 @@ use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Exception\UnsupportedOperation;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
+use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceType;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare;
+use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraint;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintValidator;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 
 final class ValidateCommand implements Command {
 
+    /**
+     * @var list<LogicalConstraint>
+     */
+    private readonly array $logicalConstraints;
+
+    private readonly LogicalConstraintValidator $validator;
+
     public function __construct(
         private readonly BootstrappingDirectoryResolver $directoryResolver
-    ) {}
+    ) {
+        $this->logicalConstraints = [
+            new DuplicateServiceDelegate(),
+            new DuplicateServiceName(),
+            new DuplicateServicePrepare(),
+            new DuplicateServiceType(),
+            new NonPublicServiceDelegate(),
+            new NonPublicServicePrepare()
+        ];
+
+        $this->validator = new LogicalConstraintValidator(...$this->logicalConstraints);
+    }
 
     public function getName() : string {
         return 'validate';
@@ -71,11 +92,21 @@ OPTIONS
 
         Set the name of the configuration file to be used. If not provided the
         default value will be "annotated-container.xml".
+        
+    --list-constraints
+    
+        Show which logical constraints will be used to validate your container 
+        definition. Passing this options will only list constraints, validation 
+        will NOT run with this option passed. 
 
 TEXT;
     }
 
     public function handle(Input $input, TerminalOutput $output) : int {
+        if ($input->getOption('list-constraints') === true) {
+            $this->listConstraints($output);
+            return 0;
+        }
         $configFile = $this->directoryResolver->getConfigurationPath('annotated-container.xml');
         if (!is_file($configFile)) {
             throw ConfigurationNotFound::fromMissingFile($this->directoryResolver->getConfigurationPath('annotated-container.xml'));
@@ -131,18 +162,9 @@ TEXT;
 
         $bootstrap->bootstrapContainer();
 
-        $logicalConstraints = [
-            new DuplicateServiceName(),
-            new DuplicateServiceType(),
-            new NonPublicServiceDelegate(),
-            new NonPublicServicePrepare()
-        ];
-
-        $validator = new LogicalConstraintValidator(...$logicalConstraints);
-
         $containerDefinition = $infoCapturingObserver->containerDefinition;
         assert($containerDefinition !== null);
-        $results = $validator->validate($containerDefinition, ['default']);
+        $results = $this->validator->validate($containerDefinition, ['default']);
 
         $output->stdout->write('Annotated Container Validation');
         $output->stdout->br();
@@ -177,5 +199,16 @@ TEXT;
         }
 
         return 0;
+    }
+
+    private function listConstraints(TerminalOutput $output) : void {
+        $output->stdout->write('Annotated Container Validation');
+        $output->stdout->br();
+        $output->stdout->write('The following constraints will be checked when validate is ran:');
+        $output->stdout->br();
+
+        foreach ($this->logicalConstraints as $logicalConstraint) {
+            $output->stdout->write('- ' . $logicalConstraint::class);
+        }
     }
 }
