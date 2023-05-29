@@ -2,10 +2,14 @@
 
 namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint\Check;
 
+use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServicePrepare;
+use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainerFixture\Fixtures;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\DuplicateServicePrepare\DummyPrepare;
+use Cspray\AnnotatedContainerFixture\LogicalConstraints\LogicalConstraintFixtures;
 use PHPUnit\Framework\TestCase;
 
 final class DuplicateServicePrepareTest extends LogicalConstraintTestCase {
@@ -33,13 +37,36 @@ final class DuplicateServicePrepareTest extends LogicalConstraintTestCase {
     public function testDuplicatePreparesHasViolation() : void {
         $definition = $this->analyzer->analyze(
             ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::multiplePrepareServices()->getPath()
+                LogicalConstraintFixtures::duplicateServicePrepare()->getPath()
             )->build()
         );
 
         $results = $this->subject->getConstraintViolations($definition, ['default']);
 
+        self::assertCount(1, $results);
 
+        $violation = $results->get(0);
+        $service = LogicalConstraintFixtures::duplicateServicePrepare()->fooService()->getName();
+        $prepareAttr = ServicePrepare::class;
+        $dummyAttr = DummyPrepare::class;
+
+        $expected = <<<TEXT
+The method "$service::postConstruct" has been defined to prepare multiple times!
+
+- Attributed with $prepareAttr
+- Attributed with $dummyAttr
+
+This will result in undefined behavior, determined by the backing container, and 
+should be avoided.
+
+TEXT;
+
+
+        self::assertSame(LogicalConstraintViolationType::Warning, $violation->violationType);
+        self::assertSame(
+            $expected,
+            $violation->message
+        );
     }
 
 }
