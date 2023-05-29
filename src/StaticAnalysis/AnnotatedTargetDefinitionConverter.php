@@ -166,7 +166,7 @@ final class AnnotatedTargetDefinitionConverter {
         $prepareType = $reflection->getDeclaringClass()->getName();
         $method = $reflection->getName();
         $attribute = $target->getAttributeInstance();
-        assert($attribute instanceof ServicePrepare);
+        assert($attribute instanceof ServicePrepareAttribute);
 
         return ServicePrepareDefinitionBuilder::forMethod(objectType($prepareType), $method)
             ->withAttribute($attribute)
