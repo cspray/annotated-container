@@ -30,7 +30,7 @@ final class DuplicateServicePrepare implements LogicalConstraint {
         foreach ($servicePrepareMap as $classMethod => $attributes) {
             if (count($attributes) > 1) {
                 $attributeTypes = trim(implode('- ', array_map(
-                    static fn(?ServicePrepareAttribute $attribute) => 'Attributed with ' . $attribute::class . PHP_EOL,
+                    static fn(?ServicePrepareAttribute $attribute) => ($attribute === null ? 'Call to servicePrepare() in DefinitionProvider' : 'Attributed with ' . $attribute::class) . PHP_EOL,
                     $attributes
                 )));
                 $message = <<<TEXT
