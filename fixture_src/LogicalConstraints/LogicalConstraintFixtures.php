@@ -24,6 +24,10 @@ final class LogicalConstraintFixtures {
         return new DuplicateServiceDelegateFixture();
     }
 
+    public static function multiplePrimaryService() : MultiplePrimaryServiceFixture {
+        return new MultiplePrimaryServiceFixture();
+    }
+
     public static function privateServiceDelegate() : PrivateServiceDelegateFixture {
         return new PrivateServiceDelegateFixture();
     }
