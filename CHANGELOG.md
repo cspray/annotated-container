@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased Changes
+## [v2.2.0](https://github.com/cspray/annotated-container/tree/v2.2.0) - 2023-05-29
 
 ### Added
 
-- Added a set of `ParameterStoreFactory` implementations to facilitate creating custom `ParameterStore` implementations.
+- Added a set of `ParameterStoreFactory` implementations to facilitate creating custom `ParameterStore` implementations. See `DelegatedParameterStoreFactory` to use this new functionality.
+- A `validate` command that will run a series of checks against your container definition to find potential logical errors.
+- Adds support for [illuminate/container](https://github.com/illuminate/container), paving the way for Laravel framework support.
+
+### Changed
+
+- Updated the `AbstractContainerFactory` and implementations to be more consistent with how containers are created and information is logged.
 
 ## [v2.1.0](https://github.com/cspray/annotated-container/tree/v2.1.0) - 2023-05-18
 

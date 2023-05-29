@@ -259,4 +259,36 @@ TEXT;
         self::assertSame($expected, $this->stdout->getContentsAsString());
     }
 
+    public function testConfigFileOptionPassedRespected() : void {
+        $config = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd">
+  <scanDirectories>
+    <source>
+      <dir>SingleConcreteService</dir>
+    </source>
+  </scanDirectories>
+</annotatedContainer>
+XML;
+
+        VirtualFilesystem::newFile('custom-config.xml')
+            ->withContent($config)
+            ->at($this->vfs);
+
+        $expected = <<<TEXT
+Annotated Container Validation
+
+Configuration file: vfs://root/custom-config.xml
+
+To view validations ran, execute "annotated-container validate --list-constraints"
+
+\033[32mNo logical constraint violations were found!\033[0m
+
+TEXT;
+
+        $this->subject->handle(new StubInput(['config-file' => 'custom-config.xml'], []), $this->output);
+
+        self::assertSame($expected, $this->stdout->getContentsAsString());
+    }
+
 }

@@ -109,9 +109,10 @@ TEXT;
             $this->listConstraints($output);
             return 0;
         }
-        $configFile = $this->directoryResolver->getConfigurationPath('annotated-container.xml');
+        $configOption = $input->getOption('config-file')  ?? 'annotated-container.xml';
+        $configFile = $this->directoryResolver->getConfigurationPath($configOption);
         if (!is_file($configFile)) {
-            throw ConfigurationNotFound::fromMissingFile($this->directoryResolver->getConfigurationPath('annotated-container.xml'));
+            throw ConfigurationNotFound::fromMissingFile($configFile);
         }
 
         $infoCapturingObserver = new class implements PostAnalysisObserver {
@@ -162,7 +163,9 @@ TEXT;
 
         $bootstrap->addObserver($infoCapturingObserver);
 
-        $bootstrap->bootstrapContainer();
+        $bootstrap->bootstrapContainer(
+            configurationFile: $configOption
+        );
 
         $containerDefinition = $infoCapturingObserver->containerDefinition;
         assert($containerDefinition !== null);
