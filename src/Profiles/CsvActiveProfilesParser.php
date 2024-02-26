@@ -4,6 +4,8 @@ namespace Cspray\AnnotatedContainer\Profiles;
 
 /**
  * An ActiveProfilesParser that will take a comma-separated string and turn it into a list of active profiles.
+ *
+ * @deprecated
  */
 final class CsvActiveProfilesParser implements ActiveProfilesParser {
 

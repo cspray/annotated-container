@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\Profiles;
 use InvalidArgumentException;
 
 /**
- * The preferred mechanism for creating a list of active profiles when creating a Container.
+ * @deprecated
  */
 final class ActiveProfilesBuilder {
 

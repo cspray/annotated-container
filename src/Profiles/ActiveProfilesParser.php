@@ -7,6 +7,8 @@ namespace Cspray\AnnotatedContainer\Profiles;
  *
  * It is recommended to use this type of implementation over ActiveProfilesBuilder when your list of active profiles is
  * stored on the running environment. For example, in an environment variable or some other hard-coded string.
+ *
+ * @deprecated
  */
 interface ActiveProfilesParser {
 
