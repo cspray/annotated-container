@@ -5,6 +5,8 @@ namespace Cspray\AnnotatedContainer\Profiles;
 /**
  * An implicitly shared Service provided by Annotated Container that provides the list of active profiles when the
  * Container was created.
+ *
+ * @deprecated
  */
 interface ActiveProfiles {
 
