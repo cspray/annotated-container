@@ -1,15 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="4.30.0@d0bc6e25d89f649e4f36a534f330f8bb4643dd69">
   <file src="src/Bootstrap/Bootstrap.php">
-    <DeprecatedClass occurrences="4">
-      <code>ActiveProfiles</code>
-      <code>ActiveProfiles</code>
-      <code>ActiveProfiles</code>
-      <code>ActiveProfiles</code>
+    <DeprecatedClass occurrences="5">
+      <code>?ObserverFactory</code>
+      <code>ObserverFactory</code>
+      <code>PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver $observer</code>
+      <code>array</code>
+      <code>private array $observers = [];</code>
     </DeprecatedClass>
-    <DeprecatedInterface occurrences="1">
-      <code>class($profiles) implements ActiveProfiles {</code>
-    </DeprecatedInterface>
+    <DeprecatedMethod occurrences="7">
+      <code>getLogger</code>
+      <code>getLogger</code>
+      <code>getLogger</code>
+      <code>getLoggingExcludedProfiles</code>
+      <code>getObservers</code>
+      <code>withLogger</code>
+      <code>withLogger</code>
+    </DeprecatedMethod>
+    <DeprecatedProperty occurrences="2">
+      <code>$this-&gt;logger</code>
+      <code>$this-&gt;logger</code>
+    </DeprecatedProperty>
+  </file>
+  <file src="src/Bootstrap/BootstrappingConfiguration.php">
+    <DeprecatedClass occurrences="1">
+      <code>list&lt;PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver&gt;</code>
+    </DeprecatedClass>
   </file>
   <file src="src/Bootstrap/ComposerJsonScanningThirdPartyInitializerProvider.php">
     <MixedArrayAccess occurrences="1">
@@ -29,25 +45,15 @@
       <code>isDot</code>
     </UndefinedMethod>
   </file>
-  <file src="src/Bootstrap/ContainerCreatedObserver.php">
+  <file src="src/Bootstrap/ObserverFactory.php">
     <DeprecatedClass occurrences="1">
-      <code>ActiveProfiles</code>
-    </DeprecatedClass>
-  </file>
-  <file src="src/Bootstrap/PostAnalysisObserver.php">
-    <DeprecatedClass occurrences="1">
-      <code>ActiveProfiles</code>
-    </DeprecatedClass>
-  </file>
-  <file src="src/Bootstrap/PreAnalysisObserver.php">
-    <DeprecatedClass occurrences="1">
-      <code>ActiveProfiles</code>
+      <code>PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver</code>
     </DeprecatedClass>
   </file>
   <file src="src/Bootstrap/ServiceWiringObserver.php">
-    <DeprecatedClass occurrences="1">
-      <code>ActiveProfiles</code>
-    </DeprecatedClass>
+    <DeprecatedInterface occurrences="1">
+      <code>ServiceWiringObserver</code>
+    </DeprecatedInterface>
     <LessSpecificReturnStatement occurrences="1">
       <code>$services</code>
     </LessSpecificReturnStatement>
@@ -56,14 +62,36 @@
     </MoreSpecificReturnType>
   </file>
   <file src="src/Bootstrap/XmlBootstrappingConfiguration.php">
+    <DeprecatedClass occurrences="8">
+      <code>array</code>
+      <code>list&lt;PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver&gt;</code>
+      <code>new CompositeLogger($fileLogger, $stdoutLogger)</code>
+      <code>new FileLogger($dateTimeProvider, $loggingFilePath)</code>
+      <code>new FileLogger($dateTimeProvider, $loggingFilePath)</code>
+      <code>new StdoutLogger($dateTimeProvider)</code>
+      <code>new StdoutLogger($dateTimeProvider)</code>
+      <code>private</code>
+    </DeprecatedClass>
+    <DeprecatedMethod occurrences="2">
+      <code>getLogPath</code>
+      <code>getLogPath</code>
+    </DeprecatedMethod>
     <InvalidStringClass occurrences="1">
       <code>new $observerClass()</code>
     </InvalidStringClass>
+    <MixedReturnTypeCoercion occurrences="2">
+      <code>$this-&gt;excludedProfiles</code>
+      <code>array</code>
+    </MixedReturnTypeCoercion>
     <PropertyTypeCoercion occurrences="1">
       <code>$observers</code>
     </PropertyTypeCoercion>
   </file>
   <file src="src/Cli/Command/BuildCommand.php">
+    <DeprecatedMethod occurrences="2">
+      <code>getLogger</code>
+      <code>withLogger</code>
+    </DeprecatedMethod>
     <MixedArrayAccess occurrences="1">
       <code>$composer['extra']['annotatedContainer']['configFile']</code>
     </MixedArrayAccess>
@@ -84,6 +112,9 @@
     </MixedAssignment>
   </file>
   <file src="src/Cli/Command/InitCommand.php">
+    <DeprecatedMethod occurrences="1">
+      <code>getObserverClasses</code>
+    </DeprecatedMethod>
     <MixedArgument occurrences="3">
       <code>$composer</code>
       <code>$configName</code>
@@ -105,16 +136,17 @@
     </MixedAssignment>
   </file>
   <file src="src/Cli/Command/ValidateCommand.php">
-    <ArgumentTypeCoercion occurrences="1">
-      <code>$profiles</code>
-    </ArgumentTypeCoercion>
-    <DeprecatedClass occurrences="1">
-      <code>ActiveProfiles</code>
+    <DeprecatedClass occurrences="2">
+      <code>PostAnalysisObserver</code>
+      <code>PostAnalysisObserver</code>
     </DeprecatedClass>
+    <DeprecatedInterface occurrences="1">
+      <code>class($closure) implements PostAnalysisObserver {</code>
+    </DeprecatedInterface>
     <PossiblyInvalidArgument occurrences="3">
       <code>$configOption</code>
       <code>$configOption</code>
-      <code>$profiles</code>
+      <code>$inputProfiles</code>
     </PossiblyInvalidArgument>
     <PossiblyInvalidCast occurrences="2">
       <code>$configOption</code>
@@ -136,17 +168,27 @@
     </MixedArgument>
   </file>
   <file src="src/ContainerFactory/AbstractContainerFactory.php">
-    <DeprecatedClass occurrences="6">
-      <code>ActiveProfiles</code>
-      <code>ActiveProfiles</code>
-      <code>ActiveProfiles</code>
+    <DeprecatedClass occurrences="3">
       <code>ConfigurationDefinition</code>
       <code>ConfigurationDefinition</code>
       <code>ConfigurationDefinition</code>
     </DeprecatedClass>
-    <DeprecatedInterface occurrences="1">
-      <code>class($profiles) implements ActiveProfiles {</code>
-    </DeprecatedInterface>
+    <DeprecatedMethod occurrences="14">
+      <code>getLogger</code>
+      <code>logAliasingService</code>
+      <code>logConfigurationNamed</code>
+      <code>logConfigurationShared</code>
+      <code>logCreatingContainer</code>
+      <code>logFinishedCreatingContainer</code>
+      <code>logInjectingMethodParameter</code>
+      <code>logInjectingProperty</code>
+      <code>logServiceDelegate</code>
+      <code>logServiceNamed</code>
+      <code>logServicePrepare</code>
+      <code>logServiceShared</code>
+      <code>logServicesNotMatchingProfiles</code>
+      <code>setLoggerFromOptions</code>
+    </DeprecatedMethod>
     <MixedArgument occurrences="6">
       <code>$inject-&gt;getValue()</code>
       <code>$inject-&gt;getValue()</code>
@@ -155,9 +197,6 @@
       <code>$value</code>
       <code>$value</code>
     </MixedArgument>
-    <MixedArgumentTypeCoercion occurrences="1">
-      <code>$activeProfiles</code>
-    </MixedArgumentTypeCoercion>
     <MixedAssignment occurrences="2">
       <code>$value</code>
       <code>$value</code>
@@ -172,9 +211,7 @@
       <code>$method</code>
       <code>$value-&gt;name</code>
     </ArgumentTypeCoercion>
-    <DeprecatedClass occurrences="3">
-      <code>ActiveProfiles</code>
-      <code>ActiveProfiles</code>
+    <DeprecatedClass occurrences="1">
       <code>ConfigurationDefinition</code>
     </DeprecatedClass>
     <MixedArgument occurrences="1">
@@ -202,12 +239,6 @@
       <code>$method</code>
     </PossiblyNullArgument>
   </file>
-  <file src="src/ContainerFactory/ContainerFactoryOptionsBuilder.php">
-    <MixedReturnTypeCoercion occurrences="2">
-      <code>$this-&gt;activeProfiles</code>
-      <code>array</code>
-    </MixedReturnTypeCoercion>
-  </file>
   <file src="src/ContainerFactory/HasPropertyInjectState.php">
     <PropertyTypeCoercion occurrences="2">
       <code>$this-&gt;propertyInject</code>
@@ -226,8 +257,7 @@
       <code>$definition-&gt;getTargetIdentifier()-&gt;getName()</code>
       <code>$method</code>
     </ArgumentTypeCoercion>
-    <DeprecatedClass occurrences="2">
-      <code>ActiveProfiles</code>
+    <DeprecatedClass occurrences="1">
       <code>ConfigurationDefinition</code>
     </DeprecatedClass>
     <InternalProperty occurrences="8">
@@ -321,9 +351,7 @@
       <code>$method</code>
       <code>$parameter</code>
     </ArgumentTypeCoercion>
-    <DeprecatedClass occurrences="3">
-      <code>ActiveProfiles</code>
-      <code>ActiveProfiles</code>
+    <DeprecatedClass occurrences="1">
       <code>ConfigurationDefinition</code>
     </DeprecatedClass>
     <MissingClosureReturnType occurrences="1">
@@ -430,6 +458,9 @@
       <code>?ConfigurationDefinition</code>
       <code>ServiceDefinition|InjectDefinition|ConfigurationDefinition $definition</code>
     </DeprecatedClass>
+    <InvalidScalarArgument occurrences="1">
+      <code>$definition-&gt;getProfiles()</code>
+    </InvalidScalarArgument>
   </file>
   <file src="src/Definition/ServiceDelegateDefinitionBuilder.php">
     <LessSpecificReturnStatement occurrences="1">
@@ -447,11 +478,6 @@
       <code>$profiles</code>
       <code>$profiles</code>
     </MixedArgument>
-  </file>
-  <file src="src/Profiles/CsvActiveProfilesParser.php">
-    <DeprecatedInterface occurrences="1">
-      <code>CsvActiveProfilesParser</code>
-    </DeprecatedInterface>
   </file>
   <file src="src/Serializer/ContainerDefinitionSerializer.php">
     <ArgumentTypeCoercion occurrences="2">
@@ -489,6 +515,9 @@
       <code>DefinitionsCollection</code>
       <code>DefinitionsCollection</code>
     </DeprecatedClass>
+    <DeprecatedMethod occurrences="1">
+      <code>getLogger</code>
+    </DeprecatedMethod>
     <MixedAssignment occurrences="1">
       <code>$convertedValue[$k]</code>
     </MixedAssignment>
@@ -500,6 +529,11 @@
       <code>ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition</code>
       <code>ServiceDefinition|ServicePrepareDefinition|ServiceDelegateDefinition|InjectDefinition|ConfigurationDefinition</code>
     </DeprecatedClass>
+  </file>
+  <file src="src/StaticAnalysis/CacheAwareContainerDefinitionAnalyzer.php">
+    <DeprecatedMethod occurrences="1">
+      <code>getLogger</code>
+    </DeprecatedMethod>
   </file>
   <file src="src/StaticAnalysis/ContainerDefinitionAnalysisOptionsBuilder.php">
     <MixedPropertyTypeCoercion occurrences="1">

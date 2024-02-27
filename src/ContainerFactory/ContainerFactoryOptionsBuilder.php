@@ -2,21 +2,25 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Cspray\AnnotatedContainer\Profiles;
 use Psr\Log\LoggerInterface;
 
 final class ContainerFactoryOptionsBuilder {
 
-    private array $activeProfiles;
+    private Profiles $activeProfiles;
     private ?LoggerInterface $logger = null;
 
     private function __construct() {}
 
-    public static function forActiveProfiles(string $profile, string... $additionalProfiles) : self {
+    public static function forProfiles(Profiles $profiles) : self {
         $instance = new self;
-        $instance->activeProfiles = [$profile, ...$additionalProfiles];
+        $instance->activeProfiles = $profiles;
         return $instance;
     }
 
+    /**
+     * @deprecated
+     */
     public function withLogger(LoggerInterface $logger) : self {
         $instance = clone $this;
         $instance->logger = $logger;
@@ -26,11 +30,11 @@ final class ContainerFactoryOptionsBuilder {
     public function build() : ContainerFactoryOptions {
         return new class($this->activeProfiles, $this->logger) implements ContainerFactoryOptions {
             public function __construct(
-                private readonly array $activeProfiles,
+                private readonly Profiles $activeProfiles,
                 private readonly ?LoggerInterface $logger
             ) {}
 
-            public function getActiveProfiles(): array {
+            public function getProfiles(): Profiles {
                 return $this->activeProfiles;
             }
 

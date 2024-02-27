@@ -7,7 +7,6 @@ use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\StandardAliasDefinitionResolver;
-use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
@@ -15,15 +14,11 @@ use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
-use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
-use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
-use Cspray\AnnotatedContainer\Profiles\ActiveProfilesBuilder;
+use Cspray\AnnotatedContainer\Profiles;
 use Cspray\Typiphy\ObjectType;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use stdClass;
-use Throwable;
 use UnitEnum;
 
 abstract class AbstractContainerFactory implements ContainerFactory {
@@ -50,7 +45,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     final public function createContainer(ContainerDefinition $containerDefinition, ContainerFactoryOptions $containerFactoryOptions = null) : AnnotatedContainer {
         $this->setLoggerFromOptions($containerFactoryOptions);
-        $activeProfiles = $containerFactoryOptions?->getActiveProfiles() ?? ['default'];
+        $activeProfiles = $containerFactoryOptions?->getProfiles() ?? Profiles::fromList(['default']);
         $containerType = $this->getBackingContainerType();
 
         $this->logCreatingContainer($containerType, $activeProfiles);
@@ -61,14 +56,14 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
         $state = $this->createContainerState($containerDefinition, $activeProfiles);
 
-        $container = $this->createAnnotatedContainer($state, $this->createActiveProfilesService($activeProfiles));
+        $container = $this->createAnnotatedContainer($state, $activeProfiles);
 
         $this->logFinishedCreatingContainer($containerType, $activeProfiles);
 
         return $container;
     }
 
-    private function createContainerState(ContainerDefinition $containerDefinition, array $activeProfiles) : ContainerFactoryState {
+    private function createContainerState(ContainerDefinition $containerDefinition, Profiles $activeProfiles) : ContainerFactoryState {
         $definition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles);
         $state = $this->getContainerFactoryState();
 
@@ -118,27 +113,6 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     }
 
     /**
-     * @param list<non-empty-string> $profiles
-     * @return ActiveProfiles
-     */
-    private function createActiveProfilesService(array $profiles) : ActiveProfiles {
-        return new class($profiles) implements ActiveProfiles {
-            public function __construct(
-                /** @var list<non-empty-string> */
-                private readonly array $profiles
-            ) {}
-
-            public function getProfiles() : array {
-                return $this->profiles;
-            }
-
-            public function isActive(string $profile) : bool {
-                return in_array($profile, $this->profiles, true);
-            }
-        };
-    }
-
-    /**
      * Add a custom ParameterStore, allowing you to Inject arbitrary values into your Services.
      *
      * @param ParameterStore $parameterStore
@@ -149,6 +123,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         $this->parameterStores[$parameterStore->getName()] = $parameterStore;
     }
 
+    /**
+     * @deprecated
+     */
     final protected function setLoggerFromOptions(?ContainerFactoryOptions $options) : void {
         $this->logger = $options?->getLogger() ?? new NullLogger();
     }
@@ -176,30 +153,39 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         return $value;
     }
 
-    final protected function logCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {
+    /**
+     * @deprecated
+     */
+    final protected function logCreatingContainer(ObjectType $backingImplementation, Profiles $activeProfiles) : void {
         $this->logger->info(
             sprintf(
                 'Started wiring AnnotatedContainer with %s backing implementation and "%s" active profiles.',
                 $backingImplementation->getName(),
-                implode(', ', $activeProfiles)
+                implode(', ', $activeProfiles->toArray())
             ),
             [
                 'backingImplementation' => $backingImplementation->getName(),
-                'activeProfiles' => $activeProfiles
+                'activeProfiles' => $activeProfiles->toArray()
             ]
         );
     }
 
-    final protected function logFinishedCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {
+    /**
+     * @deprecated
+     */
+    final protected function logFinishedCreatingContainer(ObjectType $backingImplementation, Profiles $activeProfiles) : void {
         $this->logger->info(
             'Finished wiring AnnotatedContainer.',
             [
                 'backingImplementation' => $backingImplementation->getName(),
-                'activeProfiles' => $activeProfiles
+                'activeProfiles' => $activeProfiles->toArray()
             ]
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logServiceShared(ServiceDefinition $service) : void {
         $this->logger->info(
             sprintf('Shared service %s.', $service->getType()->getName()),
@@ -209,6 +195,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logConfigurationShared(ConfigurationDefinition $configuration) : void {
         $this->logger->info(
             sprintf('Shared configuration %s.', $configuration->getClass()->getName()),
@@ -218,6 +207,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logServiceNamed(ServiceDefinition $service) : void {
         $this->logger->info(
             sprintf('Aliased name "%s" to service %s.', (string) $service->getName(), $service->getType()->getName()),
@@ -228,6 +220,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logConfigurationNamed(ConfigurationDefinition $configuration) : void {
         $this->logger->info(
             sprintf('Aliased name "%s" to configuration %s.', (string) $configuration->getName(), $configuration->getClass()->getName()),
@@ -238,6 +233,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logServiceDelegate(ServiceDelegateDefinition $delegate) : void {
         $this->logger->info(
             sprintf(
@@ -254,6 +252,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logServicePrepare(ServicePrepareDefinition $prepare) : void {
         $this->logger->info(
             sprintf(
@@ -268,6 +269,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logAliasingService(AliasDefinitionResolution $resolution, ObjectType $abstractService) : void {
         $aliasDefinition = $resolution->getAliasDefinition();
         if ($aliasDefinition !== null) {
@@ -300,6 +304,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         }
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logInjectingMethodParameter(InjectDefinition $inject) : void {
         $storeName = $inject->getStoreName();
         $methodName = $inject->getTargetIdentifier()->getMethodName();
@@ -379,6 +386,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         }
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logInjectingProperty(InjectDefinition $inject) : void {
         $storeName = $inject->getStoreName();
         if ($storeName === null) {
@@ -449,16 +459,14 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     }
 
     /**
-     * @param ContainerDefinition $definition
-     * @param list<string> $profiles
-     * @return void
+     * @deprecated
      */
     final protected function logServicesNotMatchingProfiles(
         ContainerDefinition $definition,
-        array $profiles
-    ) {
+        Profiles $profiles
+    ) : void {
         foreach ($definition->getServiceDefinitions() as $serviceDefinition) {
-            if (count(array_intersect($profiles, $serviceDefinition->getProfiles())) >= 1) {
+            if (count(array_intersect($profiles->toArray(), $serviceDefinition->getProfiles())) >= 1) {
                 continue;
             }
 
@@ -491,6 +499,6 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     abstract protected function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void;
 
-    abstract protected function createAnnotatedContainer(ContainerFactoryState $state, ActiveProfiles $activeProfiles) : AnnotatedContainer;
+    abstract protected function createAnnotatedContainer(ContainerFactoryState $state, Profiles $activeProfiles) : AnnotatedContainer;
 
 }

@@ -37,7 +37,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     private readonly array $parameterStores;
 
     /**
-     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
+     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
      */
     private readonly array $observers;
 
@@ -242,14 +242,24 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         return $this->cacheDir;
     }
 
+    /**
+     * @deprecated
+     */
     public function getLogger() : ?LoggerInterface {
         return $this->logger;
     }
 
+    /**
+     * @deprecated
+     */
     public function getLoggingExcludedProfiles() : array {
         return $this->excludedProfiles;
     }
 
+    /**
+     * @return list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
+     * @deprecated
+     */
     public function getObservers() : array {
         return $this->observers;
     }
