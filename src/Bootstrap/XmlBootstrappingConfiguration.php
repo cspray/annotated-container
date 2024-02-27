@@ -37,7 +37,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     private readonly array $parameterStores;
 
     /**
-     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
+     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
      */
     private readonly array $observers;
 
@@ -257,7 +257,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     }
 
     /**
-     * @return array|ContainerCreatedObserver[]|PostAnalysisObserver[]|PreAnalysisObserver[]
+     * @return list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
      * @deprecated
      */
     public function getObservers() : array {

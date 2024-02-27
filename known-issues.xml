@@ -31,7 +31,7 @@
   </file>
   <file src="src/Bootstrap/BootstrappingConfiguration.php">
     <DeprecatedClass occurrences="1">
-      <code>list&lt;PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver&gt;</code>
+      <code>list&lt;PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver&gt;</code>
     </DeprecatedClass>
   </file>
   <file src="src/Bootstrap/ComposerJsonScanningThirdPartyInitializerProvider.php">
@@ -87,8 +87,9 @@
     </MoreSpecificReturnType>
   </file>
   <file src="src/Bootstrap/XmlBootstrappingConfiguration.php">
-    <DeprecatedClass occurrences="7">
+    <DeprecatedClass occurrences="8">
       <code>array</code>
+      <code>list&lt;PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver&gt;</code>
       <code>new CompositeLogger($fileLogger, $stdoutLogger)</code>
       <code>new FileLogger($dateTimeProvider, $loggingFilePath)</code>
       <code>new FileLogger($dateTimeProvider, $loggingFilePath)</code>
