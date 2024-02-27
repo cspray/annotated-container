@@ -3,14 +3,14 @@
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
-use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
+use Cspray\AnnotatedContainer\Profiles;
 
 /**
  * @deprecated
  */
 interface PostAnalysisObserver {
 
-    public function notifyPostAnalysis(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition) : void;
+    public function notifyPostAnalysis(Profiles $activeProfiles, ContainerDefinition $containerDefinition) : void;
 
 
 }

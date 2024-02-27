@@ -2,13 +2,13 @@
 
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
-use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
+use Cspray\AnnotatedContainer\Profiles;
 
 /**
  * @deprecated
  */
 interface PreAnalysisObserver {
 
-    public function notifyPreAnalysis(ActiveProfiles $activeProfiles) : void;
+    public function notifyPreAnalysis(Profiles $activeProfiles) : void;
 
 }

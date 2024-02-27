@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\ContainerFactory\IlluminateContainerFactory;
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
+use Cspray\AnnotatedContainer\Profiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
@@ -18,9 +19,7 @@ use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
-use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
-use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;
 use Cspray\AnnotatedContainer\Unit\Helper\TestLogger;
@@ -49,9 +48,9 @@ use function Cspray\Typiphy\objectType;
 
 abstract class ContainerFactoryTestCase extends TestCase {
 
-    private ActiveProfiles $activeProfiles;
+    private Profiles $activeProfiles;
 
-    abstract protected function getContainerFactory(ActiveProfiles $activeProfiles) : ContainerFactory;
+    abstract protected function getContainerFactory() : ContainerFactory;
 
     abstract protected function getBackingContainerInstanceOf() : ObjectType;
 
@@ -64,25 +63,20 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
     private function getContainer(
         string $dir,
-        array $profiles = [],
+        Profiles $profiles = null,
         ParameterStore $parameterStore = null,
         LoggerInterface $logger = null
     ) : AnnotatedContainer {
         $compiler = $this->getContainerDefinitionCompiler();
         $optionsBuilder = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir);
         $containerDefinition = $compiler->analyze($optionsBuilder->build());
-        if (!empty($profiles)) {
-            $containerOptions = ContainerFactoryOptionsBuilder::forActiveProfiles(...$profiles);
-        } else {
-            $containerOptions = ContainerFactoryOptionsBuilder::forActiveProfiles('default');
-        }
+        $containerOptions = ContainerFactoryOptionsBuilder::forProfiles($profiles ?? Profiles::fromList(['default']));
 
         if ($logger !== null) {
             $containerOptions = $containerOptions->withLogger($logger);
         }
 
-        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
-        $factory = $this->getContainerFactory($this->activeProfiles);
+        $factory = $this->getContainerFactory();
         if ($parameterStore !== null) {
             $factory->addParameterStore($parameterStore);
         }
@@ -150,7 +144,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testProfileResolvedServices() {
-        $container = $this->getContainer(Fixtures::profileResolvedServices()->getPath(), ['default', 'dev']);
+        $container = $this->getContainer(Fixtures::profileResolvedServices()->getPath(), Profiles::fromList(['default', 'dev']));
 
         $instance = $container->get(Fixtures::profileResolvedServices()->fooInterface()->getName());
 
@@ -186,10 +180,9 @@ abstract class ContainerFactoryTestCase extends TestCase {
                 AliasDefinitionBuilder::forAbstract($abstract)->withConcrete($concrete = objectType($concreteService))->build()
             )->build();
 
-        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
         $this->expectException(InvalidAlias::class);
         $this->expectExceptionMessage('An AliasDefinition has a concrete type, ' . $concrete->getName() . ', that is not a registered ServiceDefinition.');
-        $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition);
+        $this->getContainerFactory()->createContainer($containerDefinition);
     }
 
     public function testMultipleServicePrepare() {
@@ -281,16 +274,16 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
     public function profilesProvider() : array {
         return [
-            ['from-prod', ['default', 'prod']],
-            ['from-test', ['default', 'test']],
-            ['from-dev', ['default', 'dev']]
+            ['from-prod', Profiles::fromList(['default', 'prod'])],
+            ['from-test', Profiles::fromList(['default', 'test'])],
+            ['from-dev', Profiles::fromList(['default', 'dev'])],
         ];
     }
 
     /**
      * @dataProvider profilesProvider
      */
-    public function testInjectProfilesMethodParam(string $expected, array $profiles)  {
+    public function testInjectProfilesMethodParam(string $expected, Profiles $profiles)  {
         $container = $this->getContainer(Fixtures::injectConstructorServices()->getPath(), $profiles);
         $subject = $container->get(Fixtures::injectConstructorServices()->injectProfilesStringService()->getName());
 
@@ -298,7 +291,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testConfigurationSharedInstance() {
-        $container = $this->getContainer(Fixtures::configurationServices()->getPath(), ['default', 'dev']);
+        $container = $this->getContainer(Fixtures::configurationServices()->getPath(), Profiles::fromList(['default', 'dev']));
 
         self::assertSame(
             $container->get(Fixtures::configurationServices()->myConfig()->getName()),
@@ -307,7 +300,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testConfigurationValues() {
-        $container = $this->getContainer(Fixtures::configurationServices()->getPath(), ['default', 'dev']);
+        $container = $this->getContainer(Fixtures::configurationServices()->getPath(), Profiles::fromList(['default', 'dev']));
         /** @var AnnotatedContainerFixture\ConfigurationServices\MyConfig $subject */
         $subject = $container->get(Fixtures::configurationServices()->myConfig()->getName());
 
@@ -343,26 +336,23 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testBackingContainerInstanceOf() {
-        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
         self::assertInstanceOf(
             $this->getBackingContainerInstanceOf()->getName(),
-            $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition)->getBackingContainer()
+            $this->getContainerFactory()->createContainer($containerDefinition)->getBackingContainer()
         );
     }
 
     public function testGettingAutowireableFactory() {
-        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
-        $container = $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition);
+        $container = $this->getContainerFactory()->createContainer($containerDefinition);
 
         self::assertSame($container, $container->get(AutowireableFactory::class));
     }
 
     public function testGettingAutowireableInvoker() {
-        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
         $containerDefinition = ContainerDefinitionBuilder::newDefinition()->build();
-        $container = $this->getContainerFactory($this->activeProfiles)->createContainer($containerDefinition);
+        $container = $this->getContainerFactory()->createContainer($containerDefinition);
 
         self::assertSame($container, $container->get(AutowireableInvoker::class));
     }
@@ -392,23 +382,23 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertInstanceOf(Fixtures::injectNamedServices()->barImplementation()->getName(), $service->bar);
     }
 
-    public function testGettingActiveProfilesImplicitlyShared() : void {
+    public function testGettingProfilesImplicitlyShared() : void {
         $container = $this->getContainer(Fixtures::singleConcreteService()->getPath());
 
-        $a = $container->get(ActiveProfiles::class);
-        $b = $container->get(ActiveProfiles::class);
+        $a = $container->get(Profiles::class);
+        $b = $container->get(Profiles::class);
 
-        self::assertInstanceOf(ActiveProfiles::class, $a);
+        self::assertInstanceOf(Profiles::class, $a);
         self::assertSame($a, $b);
     }
 
-    public function testGettingActiveProfilesHasCorrectList() : void {
-        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), ['default', 'foo', 'bar']);
+    public function testGettingProfilesHasCorrectList() : void {
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), Profiles::fromList(['default', 'foo', 'bar']));
 
-        /** @var ActiveProfiles $activeProfile */
-        $activeProfile = $container->get(ActiveProfiles::class);
+        $activeProfile = $container->get(Profiles::class);
 
-        self::assertSame(['default', 'foo', 'bar'], $activeProfile->getProfiles());
+        self::assertInstanceOf(Profiles::class, $activeProfile);
+        self::assertSame(['default', 'foo', 'bar'], $activeProfile->toArray());
     }
 
     public function testInvokeWithImplicitAlias() : void {
@@ -453,7 +443,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testServiceProfileNotActiveNotShared() : void {
-        $container = $this->getContainer(Fixtures::profileResolvedServices()->getPath(), ['default', 'dev']);
+        $container = $this->getContainer(Fixtures::profileResolvedServices()->getPath(), Profiles::fromList(['default', 'dev']));
 
         self::assertTrue($container->has(Fixtures::profileResolvedServices()->fooInterface()->getName()));
         self::assertTrue($container->has(Fixtures::profileResolvedServices()->devImplementation()->getName()));
@@ -462,7 +452,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testNamedServiceProfileNotActiveNotShared() : void {
-        $container = $this->getContainer(Fixtures::namedProfileResolvedServices()->getPath(), ['default', 'prod']);
+        $container = $this->getContainer(Fixtures::namedProfileResolvedServices()->getPath(), Profiles::fromList(['default', 'prod']));
 
         self::assertTrue($container->has(Fixtures::namedProfileResolvedServices()->fooInterface()->getName()));
         self::assertTrue($container->has('prod-foo'));
@@ -511,15 +501,14 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $serialized = $serializer->serialize($containerDefinition);
         $deserialize = $serializer->deserialize($serialized);
 
-        $this->activeProfiles = $this->getMockBuilder(ActiveProfiles::class)->getMock();
-        $containerFactory = $this->getContainerFactory($this->activeProfiles);
+        $containerFactory = $this->getContainerFactory();
 
         $assertions($containerFactory, $deserialize);
     }
 
-    public function testLoggingCreatingContainerWithActiveProfiles() : void {
+    public function testLoggingCreatingContainerWithProfiles() : void {
         $logger = new TestLogger();
-        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), profiles: ['default', 'foo', 'bar'], logger: $logger);
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), profiles: Profiles::fromList(['default', 'foo', 'bar']), logger: $logger);
 
         $expected = [
             'message' => sprintf(
@@ -538,7 +527,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
     public function testLoggingCreatingContainerFinished() : void {
         $logger = new TestLogger();
-        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), profiles: ['default', 'foo', 'bar'], logger: $logger);
+        $container = $this->getContainer(Fixtures::singleConcreteService()->getPath(), profiles: Profiles::fromList(['default', 'foo', 'bar']), logger: $logger);
 
         $expected = [
             'message' => 'Finished wiring AnnotatedContainer.',
@@ -898,7 +887,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $logger = new TestLogger();
         $this->getContainer(
             Fixtures::profileResolvedServices()->getPath(),
-            profiles: ['default', 'dev'],
+            profiles: Profiles::fromList(['default', 'dev']),
             logger: $logger
         );
 

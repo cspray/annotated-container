@@ -6,14 +6,14 @@ use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
-use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
+use Cspray\AnnotatedContainer\Profiles;
 
 /**
  * @deprecated
  */
 abstract class ServiceWiringObserver implements ContainerCreatedObserver {
 
-    final public function notifyContainerCreated(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
+    final public function notifyContainerCreated(Profiles $activeProfiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
         $serviceGatherer = new class($containerDefinition, $container) implements ServiceGatherer {
 
             private readonly ContainerDefinition $containerDefinition;
@@ -22,9 +22,9 @@ abstract class ServiceWiringObserver implements ContainerCreatedObserver {
                 ContainerDefinition $containerDefinition,
                 private readonly AnnotatedContainer $container
             ) {
-                $activeProfiles = $container->get(ActiveProfiles::class);
-                assert($activeProfiles instanceof ActiveProfiles);
-                $this->containerDefinition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles->getProfiles());
+                $activeProfiles = $container->get(Profiles::class);
+                assert($activeProfiles instanceof Profiles);
+                $this->containerDefinition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles);
             }
 
             public function getServicesForType(string $type) : array {
