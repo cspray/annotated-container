@@ -256,6 +256,10 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         return $this->excludedProfiles;
     }
 
+    /**
+     * @return array|ContainerCreatedObserver[]|PostAnalysisObserver[]|PreAnalysisObserver[]
+     * @deprecated
+     */
     public function getObservers() : array {
         return $this->observers;
     }
