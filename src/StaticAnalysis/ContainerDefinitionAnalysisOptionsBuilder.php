@@ -44,6 +44,9 @@ final class ContainerDefinitionAnalysisOptionsBuilder {
         return $instance;
     }
 
+    /**
+     * @deprecated
+     */
     public function withLogger(LoggerInterface $logger) : self {
         $instance = clone $this;
         $instance->logger = $logger;

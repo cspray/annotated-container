@@ -29,6 +29,9 @@ use Psr\Log\LoggerInterface;
 final class Bootstrap {
 
     private readonly BootstrappingDirectoryResolver $directoryResolver;
+    /**
+     * @deprecated
+     */
     private readonly ?LoggerInterface $logger;
     private readonly ParameterStoreFactory $parameterStoreFactory;
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;

@@ -25,11 +25,20 @@ interface BootstrappingConfiguration {
     public function getParameterStores() : array;
 
     /**
-     * @return list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
+     * @return list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
+     * @deprecated
      */
     public function getObservers() : array;
 
+    /**
+     * @return LoggerInterface|null
+     * @deprecated
+     */
     public function getLogger() : ?LoggerInterface;
 
+    /**
+     * @return list<string>
+     * @deprecated
+     */
     public function getLoggingExcludedProfiles() : array;
 }

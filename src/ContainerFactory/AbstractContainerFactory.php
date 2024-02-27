@@ -149,6 +149,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         $this->parameterStores[$parameterStore->getName()] = $parameterStore;
     }
 
+    /**
+     * @deprecated
+     */
     final protected function setLoggerFromOptions(?ContainerFactoryOptions $options) : void {
         $this->logger = $options?->getLogger() ?? new NullLogger();
     }
@@ -176,6 +179,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         return $value;
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {
         $this->logger->info(
             sprintf(
@@ -190,6 +196,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logFinishedCreatingContainer(ObjectType $backingImplementation, array $activeProfiles) : void {
         $this->logger->info(
             'Finished wiring AnnotatedContainer.',
@@ -200,6 +209,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logServiceShared(ServiceDefinition $service) : void {
         $this->logger->info(
             sprintf('Shared service %s.', $service->getType()->getName()),
@@ -209,6 +221,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logConfigurationShared(ConfigurationDefinition $configuration) : void {
         $this->logger->info(
             sprintf('Shared configuration %s.', $configuration->getClass()->getName()),
@@ -218,6 +233,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logServiceNamed(ServiceDefinition $service) : void {
         $this->logger->info(
             sprintf('Aliased name "%s" to service %s.', (string) $service->getName(), $service->getType()->getName()),
@@ -228,6 +246,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logConfigurationNamed(ConfigurationDefinition $configuration) : void {
         $this->logger->info(
             sprintf('Aliased name "%s" to configuration %s.', (string) $configuration->getName(), $configuration->getClass()->getName()),
@@ -238,6 +259,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logServiceDelegate(ServiceDelegateDefinition $delegate) : void {
         $this->logger->info(
             sprintf(
@@ -254,6 +278,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logServicePrepare(ServicePrepareDefinition $prepare) : void {
         $this->logger->info(
             sprintf(
@@ -268,6 +295,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         );
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logAliasingService(AliasDefinitionResolution $resolution, ObjectType $abstractService) : void {
         $aliasDefinition = $resolution->getAliasDefinition();
         if ($aliasDefinition !== null) {
@@ -300,6 +330,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         }
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logInjectingMethodParameter(InjectDefinition $inject) : void {
         $storeName = $inject->getStoreName();
         $methodName = $inject->getTargetIdentifier()->getMethodName();
@@ -379,6 +412,9 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         }
     }
 
+    /**
+     * @deprecated
+     */
     final protected function logInjectingProperty(InjectDefinition $inject) : void {
         $storeName = $inject->getStoreName();
         if ($storeName === null) {
@@ -452,6 +488,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
      * @param ContainerDefinition $definition
      * @param list<string> $profiles
      * @return void
+     * @deprecated
      */
     final protected function logServicesNotMatchingProfiles(
         ContainerDefinition $definition,

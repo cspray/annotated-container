@@ -18,6 +18,9 @@ interface ContainerFactoryOptions {
      */
     public function getActiveProfiles() : array;
 
+    /**
+     * @deprecated
+     */
     public function getLogger() : ?LoggerInterface;
 
 }

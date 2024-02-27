@@ -8,6 +8,9 @@ use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 
+/**
+ * @deprecated
+ */
 abstract class ServiceWiringObserver implements ContainerCreatedObserver {
 
     final public function notifyContainerCreated(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
