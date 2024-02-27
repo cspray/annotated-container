@@ -26,10 +26,19 @@ interface BootstrappingConfiguration {
 
     /**
      * @return list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver>
+     * @deprecated
      */
     public function getObservers() : array;
 
+    /**
+     * @return LoggerInterface|null
+     * @deprecated
+     */
     public function getLogger() : ?LoggerInterface;
 
+    /**
+     * @return list<string>
+     * @deprecated
+     */
     public function getLoggingExcludedProfiles() : array;
 }

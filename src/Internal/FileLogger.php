@@ -11,6 +11,7 @@ use Stringable;
 
 /**
  * @Internal
+ * @deprecated
  */
 final class FileLogger extends AbstractLogger {
 

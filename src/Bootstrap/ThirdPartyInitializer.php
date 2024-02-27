@@ -15,6 +15,7 @@ abstract class ThirdPartyInitializer {
 
     /**
      * @return list<non-empty-string>
+     * @deprecated
      */
     abstract public function getObserverClasses() : array;
 

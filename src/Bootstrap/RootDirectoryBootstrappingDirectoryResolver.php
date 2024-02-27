@@ -20,6 +20,9 @@ final class RootDirectoryBootstrappingDirectoryResolver implements Bootstrapping
         return sprintf('%s/%s', $this->rootDir, $subPath);
     }
 
+    /**
+     * @deprecated
+     */
     public function getLogPath(string $subPath) : string {
         return sprintf('%s/%s', $this->rootDir, $subPath);
     }

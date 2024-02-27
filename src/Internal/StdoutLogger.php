@@ -7,6 +7,9 @@ use DateTimeImmutable;
 use Psr\Log\AbstractLogger;
 use Stringable;
 
+/**
+ * @deprecated
+ */
 final class StdoutLogger extends AbstractLogger {
 
     /**

@@ -242,10 +242,16 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         return $this->cacheDir;
     }
 
+    /**
+     * @deprecated
+     */
     public function getLogger() : ?LoggerInterface {
         return $this->logger;
     }
 
+    /**
+     * @deprecated
+     */
     public function getLoggingExcludedProfiles() : array {
         return $this->excludedProfiles;
     }

@@ -5,6 +5,9 @@ namespace Cspray\AnnotatedContainer\Internal;
 use Psr\Log\LoggerInterface;
 use Stringable;
 
+/**
+ * @deprecated
+ */
 final class CompositeLogger implements LoggerInterface {
 
     /** @var list<LoggerInterface> */

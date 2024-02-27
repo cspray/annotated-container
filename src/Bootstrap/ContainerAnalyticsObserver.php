@@ -2,6 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
+/**
+ * @deprecated
+ */
 interface ContainerAnalyticsObserver {
 
     public function notifyAnalytics(ContainerAnalytics $analytics) : void;
