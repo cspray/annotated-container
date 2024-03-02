@@ -13,7 +13,6 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceProfiles;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceType;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoAliasDefinitionsTrait;
-use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoConfigurationDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoInjectDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
@@ -32,8 +31,7 @@ class ThirdPartyDelegatedServicesTest extends AnnotatedTargetContainerDefinition
 
     use HasNoAliasDefinitionsTrait,
         HasNoServicePrepareDefinitionsTrait,
-        HasNoInjectDefinitionsTrait,
-        HasNoConfigurationDefinitionsTrait;
+        HasNoInjectDefinitionsTrait;
 
     protected function getFixtures() : Fixture {
         return new ThirdPartyDelegatedServicesFixture();

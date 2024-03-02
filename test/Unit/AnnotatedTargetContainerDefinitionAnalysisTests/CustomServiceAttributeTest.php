@@ -9,7 +9,6 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceProfiles;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceType;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoAliasDefinitionsTrait;
-use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoConfigurationDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoInjectDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
@@ -21,8 +20,7 @@ class CustomServiceAttributeTest extends AnnotatedTargetContainerDefinitionAnaly
 
     use HasServiceDefinitionTestsTrait;
 
-    use HasNoConfigurationDefinitionsTrait,
-        HasNoServicePrepareDefinitionsTrait,
+    use HasNoServicePrepareDefinitionsTrait,
         HasNoServiceDelegateDefinitionsTrait,
         HasNoInjectDefinitionsTrait,
         HasNoAliasDefinitionsTrait;

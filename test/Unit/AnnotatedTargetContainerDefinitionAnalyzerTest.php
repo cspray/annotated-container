@@ -125,7 +125,6 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
             $this->runAnalysisDirectory([
                 Fixtures::singleConcreteService()->getPath(),
                 Fixtures::singleConcreteService()->getPath(),
-                Fixtures::configurationServices()->getPath()
             ]);
         } catch (InvalidScanDirectories $exception) {
             // noop, we expect this
@@ -136,7 +135,6 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
                     'sourcePaths' => [
                         Fixtures::singleConcreteService()->getPath(),
                         Fixtures::singleConcreteService()->getPath(),
-                        Fixtures::configurationServices()->getPath()
                     ]
                 ]
             ];
@@ -220,10 +218,6 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
         );
 
         $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
-    }
-
-    public function testAnalysisEventsEmittedInCorrectOrder() : void {
-
     }
 
     public function testLogImplicitServiceDelegateHasUnionReturnType() {
@@ -343,31 +337,6 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
         self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
     }
 
-    public function testLoggingConfigurationTarget() : void {
-        $this->runAnalysisDirectory(Fixtures::configurationServices()->getPath());
-
-        $expected = [
-            'message' => sprintf(
-                'Parsed ConfigurationDefinition from #[%s] Attribute on %s.',
-                Configuration::class,
-                Fixtures::configurationServices()->myConfig()->getName()
-            ),
-            'context' => [
-                'attribute' => Configuration::class,
-                'target' => [
-                    'class' => Fixtures::configurationServices()->myConfig()->getName(),
-                ],
-                'definition' => [
-                    'type' => ConfigurationDefinition::class,
-                    'configurationType' => Fixtures::configurationServices()->myConfig()->getName(),
-                    'name' => null
-                ]
-            ]
-        ];
-
-        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
-    }
-
     public function testLoggingInjectMethodParameter() : void {
         $this->runAnalysisDirectory(Fixtures::injectConstructorServices()->getPath());
 
@@ -394,37 +363,6 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
                     'parameter' => 'val',
                     'value' => 'foobar',
                     'store' => null,
-                    'profiles' => ['default']
-                ]
-            ]
-        ];
-
-        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
-    }
-
-    public function testLoggingInjectConfigurationProperty() : void {
-        $this->runAnalysisDirectory(Fixtures::configurationServices()->getPath());
-
-        $expected = [
-            'message' => sprintf(
-                'Parsed InjectDefinition from #[%s] Attribute on %s::%s.',
-                Inject::class,
-                Fixtures::configurationServices()->myConfig()->getName(),
-                'user'
-            ),
-            'context' => [
-                'attribute' => Inject::class,
-                'target' => [
-                    'class' => Fixtures::configurationServices()->myConfig()->getName(),
-                    'property' => 'user'
-                ],
-                'definition' => [
-                    'type' => InjectDefinition::class,
-                    'serviceType' => Fixtures::configurationServices()->myConfig()->getName(),
-                    'property' => 'user',
-                    'propertyType' => 'string',
-                    'value' => 'USER',
-                    'store' => 'env',
                     'profiles' => ['default']
                 ]
             ]
@@ -570,63 +508,4 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
         self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
     }
 
-    public function testLoggingInjectConfigurationPropertyEnum() : void {
-        $this->runAnalysisDirectory(Fixtures::configurationWithEnum()->getPath());
-
-        $expected = [
-            'message' => sprintf(
-                'Parsed InjectDefinition from #[%s] Attribute on %s::enum.',
-                Inject::class,
-                Fixtures::configurationWithEnum()->configuration()->getName(),
-            ),
-            'context' => [
-                'attribute' => Inject::class,
-                'target' => [
-                    'class' => Fixtures::configurationWithEnum()->configuration()->getName(),
-                    'property' => 'enum'
-                ],
-                'definition' => [
-                    'type' => InjectDefinition::class,
-                    'serviceType' => Fixtures::configurationWithEnum()->configuration()->getName(),
-                    'property' => 'enum',
-                    'propertyType' => MyEnum::class,
-                    'value' => MyEnum::class . '::Foo',
-                    'store' => null,
-                    'profiles' => ['default']
-                ]
-            ]
-        ];
-
-        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
-    }
-
-    public function testLoggingInjectArrayConfigurationPropertyEnum() : void {
-        $this->runAnalysisDirectory(Fixtures::configurationWithArrayEnum()->getPath());
-
-        $expected = [
-            'message' => sprintf(
-                'Parsed InjectDefinition from #[%s] Attribute on %s::cases.',
-                Inject::class,
-                Fixtures::configurationWithArrayEnum()->myConfiguration()->getName(),
-            ),
-            'context' => [
-                'attribute' => Inject::class,
-                'target' => [
-                    'class' => Fixtures::configurationWithArrayEnum()->myConfiguration()->getName(),
-                    'property' => 'cases'
-                ],
-                'definition' => [
-                    'type' => InjectDefinition::class,
-                    'serviceType' => Fixtures::configurationWithArrayEnum()->myConfiguration()->getName(),
-                    'property' => 'cases',
-                    'propertyType' => 'array',
-                    'value' => [FooEnum::class . '::Bar', FooEnum::class . '::Qux'],
-                    'store' => null,
-                    'profiles' => ['default']
-                ]
-            ]
-        ];
-
-        self::assertContains($expected, $this->logger->getLogsForLevel(LogLevel::INFO));
-    }
 }

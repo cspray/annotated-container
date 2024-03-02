@@ -13,7 +13,6 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceType;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasAliasDefinitionTestsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasInjectDefinitionTestsTrait;
-use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoConfigurationDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasServicePrepareDefinitionTestsTrait;
@@ -30,8 +29,7 @@ class InjectPrepareServicesTest extends AnnotatedTargetContainerDefinitionAnalyz
         HasInjectDefinitionTestsTrait,
         HasAliasDefinitionTestsTrait;
 
-    use HasNoServiceDelegateDefinitionsTrait,
-        HasNoConfigurationDefinitionsTrait;
+    use HasNoServiceDelegateDefinitionsTrait;
 
     protected function getFixtures() : array|Fixture {
         return Fixtures::injectPrepareServices();

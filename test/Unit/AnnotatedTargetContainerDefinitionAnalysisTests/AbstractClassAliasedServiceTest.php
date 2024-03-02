@@ -10,7 +10,6 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceProfiles;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceType;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasAliasDefinitionTestsTrait;
-use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoConfigurationDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoInjectDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
@@ -19,16 +18,14 @@ use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEvents;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
-class AbstractClassAliasedServiceTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
+final class AbstractClassAliasedServiceTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasAliasDefinitionTestsTrait;
 
     use HasNoServicePrepareDefinitionsTrait,
         HasNoServiceDelegateDefinitionsTrait,
-        HasNoInjectDefinitionsTrait,
-        HasNoConfigurationDefinitionsTrait;
-
+        HasNoInjectDefinitionsTrait;
 
     protected function getFixtures() : array|Fixture {
         return Fixtures::abstractClassAliasedService();

@@ -4,7 +4,6 @@ namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
 use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
-use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
@@ -39,7 +38,6 @@ use function Cspray\Typiphy\objectType;
  *     servicePrepareDefinitions: list<ServicePrepareDefinition>,
  *     serviceDelegateDefinitions: list<ServiceDelegateDefinition>,
  *     injectDefinitions: list<InjectDefinition>,
- *     configurationDefinitions: list<ConfigurationDefinition>
  * }
  */
 final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefinitionAnalyzer {
@@ -116,7 +114,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
         $consumer->servicePrepareDefinitions = [];
         $consumer->serviceDelegateDefinitions = [];
         $consumer->injectDefinitions = [];
-        $consumer->configurationDefinitions = [];
         $attributeTypes = array_map(
             static fn(AttributeType $attributeType) => objectType($attributeType->value), AttributeType::cases()
         );
@@ -152,9 +149,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
                 } else {
                     $this->logPropertyInjectDefinition($target, $definition, $logger);
                 }
-            } else if ($definition instanceof ConfigurationDefinition) {
-                $consumer->configurationDefinitions[] = $definition;
-                $this->logConfigurationDefinition($target, $definition, $logger);
             }
         }
 
@@ -342,33 +336,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
         return $value;
     }
 
-    private function logConfigurationDefinition(
-        AnnotatedTarget $target,
-        ConfigurationDefinition $definition,
-        LoggerInterface $logger
-    ) : void {
-        $targetReflection = $target->getTargetReflection();
-        assert($targetReflection instanceof ReflectionClass);
-        $logger->info(
-            sprintf(
-                'Parsed ConfigurationDefinition from #[%s] Attribute on %s.',
-                $target->getAttributeReflection()->getName(),
-                $targetReflection->getName()
-            ),
-            [
-                'attribute' => $target->getAttributeReflection()->getName(),
-                'target' => [
-                    'class' => $targetReflection->getName()
-                ],
-                'definition' => [
-                    'type' => ConfigurationDefinition::class,
-                    'configurationType' => $definition->getClass()->getName(),
-                    'name' => $definition->getName()
-                ]
-            ]
-        );
-    }
-
     private function logAliasDefinition(AliasDefinition $aliasDefinition, LoggerInterface $logger) : void {
         $logger->info(
             sprintf(
@@ -449,10 +416,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
             $containerDefinitionBuilder = $containerDefinitionBuilder->withInjectDefinition($injectDefinition);
         }
 
-        foreach ($consumer['configurationDefinitions'] as $configurationDefinition) {
-            $containerDefinitionBuilder = $containerDefinitionBuilder->withConfigurationDefinition($configurationDefinition);
-        }
-
         return $containerDefinitionBuilder;
     }
 
@@ -521,10 +484,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
             } else {
                 $concreteTypes[] = $serviceDefinition->getType();
             }
-        }
-
-        foreach ($containerDefinitionBuilder->getConfigurationDefinitions() as $configurationDefinition) {
-            $concreteTypes[] = $configurationDefinition->getClass();
         }
 
         foreach ($abstractTypes as $abstractType) {

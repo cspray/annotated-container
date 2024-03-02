@@ -32,11 +32,6 @@ final class ContainerDefinitionBuilder {
      */
     private array $serviceDelegateDefinitions = [];
 
-    /**
-     * @var list<ConfigurationDefinition>
-     */
-    private array $configurationDefinitions = [];
-
     private function __construct() {}
 
     /**
@@ -76,24 +71,11 @@ final class ContainerDefinitionBuilder {
         return $instance;
     }
 
-    public function withConfigurationDefinition(ConfigurationDefinition $configurationDefinition) : self {
-        $instance = clone $this;
-        $instance->configurationDefinitions[] = $configurationDefinition;
-        return $instance;
-    }
-
     /**
      * @return list<ServiceDefinition>
      */
     public function getServiceDefinitions() : array {
         return $this->serviceDefinitions;
-    }
-
-    /**
-     * @return ConfigurationDefinition[]
-     */
-    public function getConfigurationDefinitions() : array {
-        return $this->configurationDefinitions;
     }
 
     public function build() : ContainerDefinition {
@@ -103,7 +85,6 @@ final class ContainerDefinitionBuilder {
             $this->servicePrepareDefinitions,
             $this->injectDefinitions,
             $this->serviceDelegateDefinitions,
-            $this->configurationDefinitions
         ) implements ContainerDefinition {
 
             /**
@@ -112,7 +93,6 @@ final class ContainerDefinitionBuilder {
              * @param list<ServicePrepareDefinition> $servicePrepareDefinitions
              * @param list<InjectDefinition> $injectDefinitions
              * @param list<ServiceDelegateDefinition> $serviceDelegateDefinitions
-             * @param list<ConfigurationDefinition> $configurationDefinitions
              */
             public function __construct(
                 private readonly array $serviceDefinitions,
@@ -120,7 +100,6 @@ final class ContainerDefinitionBuilder {
                 private readonly array $servicePrepareDefinitions,
                 private readonly array $injectDefinitions,
                 private readonly array $serviceDelegateDefinitions,
-                private readonly array $configurationDefinitions
             ) {}
 
             public function getServiceDefinitions(): array {
@@ -141,10 +120,6 @@ final class ContainerDefinitionBuilder {
 
             public function getServiceDelegateDefinitions(): array {
                 return $this->serviceDelegateDefinitions;
-            }
-
-            public function getConfigurationDefinitions() : array {
-                return $this->configurationDefinitions;
             }
         };
     }

@@ -171,7 +171,6 @@ class CacheAwareContainerDefinitionCompilerTest extends TestCase {
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
-  <configurationDefinitions/>
   <servicePrepareDefinitions/>
   <serviceDelegateDefinitions/>
   <injectDefinitions/>
@@ -201,7 +200,6 @@ XML;
     </serviceDefinition>
   </serviceDefinitions>
   <aliasDefinitions/>
-  <configurationDefinitions/>
   <servicePrepareDefinitions/>
   <serviceDelegateDefinitions/>
   <injectDefinitions/>

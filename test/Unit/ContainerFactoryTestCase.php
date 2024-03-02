@@ -266,12 +266,6 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $this->getContainer(Fixtures::injectCustomStoreServices()->getPath());
     }
 
-    public function testCreateArbitraryStoreOnConfigurationNotPresent() {
-        self::expectException(ParameterStoreNotFound::class);
-        self::expectExceptionMessage('The ParameterStore "test-store" has not been added to this ContainerFactory. Please add it with ContainerFactory::addParameterStore before creating the container.');
-        $this->getContainer(Fixtures::configurationMissingStore()->getPath());
-    }
-
     public function profilesProvider() : array {
         return [
             ['from-prod', Profiles::fromList(['default', 'prod'])],
@@ -288,32 +282,6 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $subject = $container->get(Fixtures::injectConstructorServices()->injectProfilesStringService()->getName());
 
         self::assertSame($expected, $subject->val);
-    }
-
-    public function testConfigurationSharedInstance() {
-        $container = $this->getContainer(Fixtures::configurationServices()->getPath(), Profiles::fromList(['default', 'dev']));
-
-        self::assertSame(
-            $container->get(Fixtures::configurationServices()->myConfig()->getName()),
-            $container->get(Fixtures::configurationServices()->myConfig()->getName())
-        );
-    }
-
-    public function testConfigurationValues() {
-        $container = $this->getContainer(Fixtures::configurationServices()->getPath(), Profiles::fromList(['default', 'dev']));
-        /** @var AnnotatedContainerFixture\ConfigurationServices\MyConfig $subject */
-        $subject = $container->get(Fixtures::configurationServices()->myConfig()->getName());
-
-        self::assertSame('my-api-key', $subject->key);
-        self::assertSame(1234, $subject->port);
-        self::assertSame(getenv('USER'), $subject->user);
-        self::assertTrue($subject->testMode);
-    }
-
-    public function testNamedConfigurationInstanceOf() {
-        $container = $this->getContainer(Fixtures::namedConfigurationServices()->getPath());
-
-        self::assertInstanceOf(Fixtures::namedConfigurationServices()->myConfig()->getName(), $container->get('my-config'));
     }
 
     public function testMakeAutowiredObject() {
@@ -665,37 +633,6 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
     }
 
-    public function testLoggingConfiguration() : void {
-        $logger = new TestLogger();
-        $this->getContainer(Fixtures::configurationServices()->getPath(), logger: $logger);
-
-        $expected = [
-            'message' => sprintf(
-                'Shared configuration %s.',
-                Fixtures::configurationServices()->myConfig()->getName()
-            ),
-            'context' => [
-                'configuration' => Fixtures::configurationServices()->myConfig()->getName()
-            ]
-        ];
-        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
-    }
-
-    public function testLoggingNamedConfiguration() : void {
-        $logger = new TestLogger();
-        $this->getContainer(Fixtures::namedConfigurationServices()->getPath(), logger: $logger);
-
-        $expected = [
-            'message' => sprintf('Aliased name "my-config" to configuration %s.', Fixtures::namedConfigurationServices()->myConfig()->getName()),
-            'context' => [
-                'configuration' => Fixtures::namedConfigurationServices()->myConfig()->getName(),
-                'name' => 'my-config'
-            ]
-        ];
-
-        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
-    }
-
     public function testLoggingInjectNonServiceMethodParameterNotFromStore() : void {
         $logger = new TestLogger();
         $this->getContainer(Fixtures::injectConstructorServices()->getPath(), logger: $logger);
@@ -791,97 +728,6 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
     }
 
-    public function testLoggingInjectNonServiceNotFromStoreConfigurationProperty() : void {
-        $logger = new TestLogger();
-        $this->getContainer(
-            Fixtures::configurationServices()->getPath(),
-            logger: $logger
-        );
-
-        $expected = [
-            'message' => sprintf(
-                'Injecting value "1234" into %s::port.',
-                Fixtures::configurationServices()->myConfig()->getName()
-            ),
-            'context' => [
-                'configuration' => Fixtures::configurationServices()->myConfig()->getName(),
-                'property' => 'port',
-                'type' => 'int',
-                'value' => 1234
-            ]
-        ];
-        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
-    }
-
-    public function testLoggingInjectEnumFromConfigurationProperty() : void {
-        $logger = new TestLogger();
-        $this->getContainer(
-            Fixtures::configurationWithEnum()->getPath(),
-            logger: $logger
-        );
-
-        $expected = [
-            'message' => sprintf(
-                'Injecting enum "%s::Foo" into %s::enum.',
-                ConfigurationWithEnum\MyEnum::class,
-                Fixtures::configurationWithEnum()->configuration()->getName(),
-            ),
-            'context' => [
-                'configuration' => Fixtures::configurationWithEnum()->configuration()->getName(),
-                'property' => 'enum',
-                'type' => ConfigurationWithEnum\MyEnum::class,
-                'value' => ConfigurationWithEnum\MyEnum::Foo
-            ]
-        ];
-
-        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
-    }
-
-    public function testLoggingInjectValueFromStoreForConfigurationProperty() : void {
-        $logger = new TestLogger();
-        $this->getContainer(
-            Fixtures::configurationServices()->getPath(),
-            logger: $logger
-        );
-
-        $expected = [
-            'message' => sprintf(
-                'Injecting value from env ParameterStore for key "USER" into %s::user.',
-                Fixtures::configurationServices()->myConfig()->getName()
-            ),
-            'context' => [
-                'configuration' => Fixtures::configurationServices()->myConfig()->getName(),
-                'property' => 'user',
-                'type' => 'string',
-                'value' => 'USER',
-                'store' => 'env'
-            ]
-        ];
-        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
-    }
-
-    public function testLoggingInjectServiceForConfigurationProperty() : void {
-        $logger = new TestLogger();
-        $this->getContainer(
-            Fixtures::configurationInjectServiceFixture()->getPath(),
-            logger: $logger
-        );
-        $expected = [
-            'message' => sprintf(
-                'Injecting service %s from Container into %s::foo.',
-                Fixtures::configurationInjectServiceFixture()->fooService()->getName(),
-                Fixtures::configurationInjectServiceFixture()->fooConfig()->getName(),
-
-            ),
-            'context' => [
-                'configuration' => Fixtures::configurationInjectServiceFixture()->fooConfig()->getName(),
-                'property' => 'foo',
-                'type' => Fixtures::configurationInjectServiceFixture()->fooService()->getName(),
-                'value' => Fixtures::configurationInjectServiceFixture()->fooService()->getName(),
-            ]
-        ];
-        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
-    }
 
     public function testLoggingSkippingServicesBecauseProfileMismatch() : void {
         $logger = new TestLogger();
@@ -937,44 +783,4 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
     }
 
-    public function testLoggingInjectPropertyArrayNotMultiline() : void {
-        $logger = new TestLogger();
-        $this->getContainer(Fixtures::configurationWithArrayEnum()->getPath(), logger: $logger);
-
-        $expected = [
-            'message' => sprintf(
-                'Injecting value "[%s::Bar, %s::Qux]" into %s::cases.',
-                AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::class,
-                AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::class,
-                Fixtures::configurationWithArrayEnum()->myConfiguration()->getName()
-            ),
-            'context' => [
-                'configuration' => Fixtures::configurationWithArrayEnum()->myConfiguration()->getName(),
-                'property' => 'cases',
-                'type' => 'array',
-                'value' => [AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::Bar, AnnotatedContainerFixture\ConfigurationWithArrayEnum\FooEnum::Qux]
-            ]
-        ];
-
-        self::assertContains($expected, $logger->getLogsForLevel(LogLevel::INFO));
-    }
-
-    public function testCreatingConstructorPromotedConfiguration() : void {
-        $container = $this->getContainer(Fixtures::constructorPromotedConfigurationFixture()->getPath());
-
-        $configuration = $container->get(Fixtures::constructorPromotedConfigurationFixture()->constructorConfig()->getName());
-
-        self::assertInstanceOf(Fixtures::constructorPromotedConfigurationFixture()->constructorConfig()->getName(), $configuration);
-        self::assertSame('bar', $configuration->foo);
-        self::assertSame(42, $configuration->bar);
-    }
-
-    public function testCreatingAliasedConfiguration() : void {
-        $container = $this->getContainer(Fixtures::aliasedConfigurationFixture()->getPath());
-
-        $configuration = $container->get(Fixtures::aliasedConfigurationFixture()->appConfig()->getName());
-
-        self::assertInstanceOf(Fixtures::aliasedConfigurationFixture()->myAppConfig()->getName(), $configuration);
-        self::assertSame('my-app-name', $configuration->getAppName());
-    }
 }

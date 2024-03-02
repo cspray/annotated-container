@@ -11,7 +11,6 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceProfiles;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\DataProviderExpects\ExpectedServiceType;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasAliasDefinitionTestsTrait;
-use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoConfigurationDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoInjectDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
@@ -19,15 +18,14 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
-class ClassOnlyPrepareServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
+final class ClassOnlyPrepareServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasAliasDefinitionTestsTrait,
         HasServicePrepareDefinitionTestsTrait;
 
     use HasNoServiceDelegateDefinitionsTrait,
-        HasNoInjectDefinitionsTrait,
-        HasNoConfigurationDefinitionsTrait;
+        HasNoInjectDefinitionsTrait;
 
     protected function getFixtures() : array|Fixture {
         return Fixtures::classOnlyPrepareServices();
@@ -85,5 +83,9 @@ class ClassOnlyPrepareServicesTest extends AnnotatedTargetContainerDefinitionAna
         return [
             [new ExpectedServicePrepare(Fixtures::classOnlyPrepareServices()->fooImplementation(), 'setBar')]
         ];
+    }
+
+    protected function getExpectedEvents() : array {
+        return [];
     }
 }

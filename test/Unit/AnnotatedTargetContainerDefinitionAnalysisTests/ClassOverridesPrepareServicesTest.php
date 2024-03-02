@@ -26,8 +26,7 @@ class ClassOverridesPrepareServicesTest extends AnnotatedTargetContainerDefiniti
         HasServicePrepareDefinitionTestsTrait;
 
     use HasNoServiceDelegateDefinitionsTrait,
-        HasNoInjectDefinitionsTrait,
-        HasNoConfigurationDefinitionsTrait;
+        HasNoInjectDefinitionsTrait;
 
     protected function getFixtures() : array|Fixture {
         return Fixtures::classOverridesPrepareServices();

@@ -7,7 +7,6 @@ use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\StandardAliasDefinitionResolver;
-use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
@@ -93,14 +92,6 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         foreach ($definition->getServicePrepareDefinitions() as $servicePrepareDefinition) {
             $this->handleServicePrepareDefinition($state, $servicePrepareDefinition);
             $this->logServicePrepare($servicePrepareDefinition);
-        }
-
-        foreach ($definition->getConfigurationDefinitions() as $configurationDefinition) {
-            $this->handleConfigurationDefinition($state, $configurationDefinition);
-            $this->logConfigurationShared($configurationDefinition);
-            if ($configurationDefinition->getName() !== null) {
-                $this->logConfigurationNamed($configurationDefinition);
-            }
         }
 
         foreach ($definition->getAliasDefinitions() as $aliasDefinition) {
@@ -198,37 +189,12 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     /**
      * @deprecated
      */
-    final protected function logConfigurationShared(ConfigurationDefinition $configuration) : void {
-        $this->logger->info(
-            sprintf('Shared configuration %s.', $configuration->getClass()->getName()),
-            [
-                'configuration' => $configuration->getClass()->getName()
-            ]
-        );
-    }
-
-    /**
-     * @deprecated
-     */
     final protected function logServiceNamed(ServiceDefinition $service) : void {
         $this->logger->info(
             sprintf('Aliased name "%s" to service %s.', (string) $service->getName(), $service->getType()->getName()),
             [
                 'service' => $service->getType()->getName(),
                 'name' => $service->getName()
-            ]
-        );
-    }
-
-    /**
-     * @deprecated
-     */
-    final protected function logConfigurationNamed(ConfigurationDefinition $configuration) : void {
-        $this->logger->info(
-            sprintf('Aliased name "%s" to configuration %s.', (string) $configuration->getName(), $configuration->getClass()->getName()),
-            [
-                'configuration' => $configuration->getClass()->getName(),
-                'name' => $configuration->getName()
             ]
         );
     }
@@ -496,8 +462,6 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     abstract protected function handleServicePrepareDefinition(ContainerFactoryState $state, ServicePrepareDefinition $definition) : void;
 
     abstract protected function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition) : void;
-
-    abstract protected function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void;
 
     abstract protected function createAnnotatedContainer(ContainerFactoryState $state, Profiles $activeProfiles) : AnnotatedContainer;
 
