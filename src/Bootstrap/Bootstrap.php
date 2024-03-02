@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer\Bootstrap;
 use Auryn\Injector;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Cspray\AnnotatedContainer\Event\BootstrapEmitter;
 use Cspray\AnnotatedContainer\Profiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
@@ -17,24 +18,23 @@ use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\Exception\BackingContainerNotFound;
-use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
 use Cspray\PrecisionStopwatch\Marker;
 use Cspray\PrecisionStopwatch\Metrics;
 use Cspray\PrecisionStopwatch\Stopwatch;
 use DI\Container;
-use Psr\Log\LoggerInterface;
 
 final class Bootstrap {
 
+    private readonly ?BootstrapEmitter $emitter;
+
     private readonly BootstrappingDirectoryResolver $directoryResolver;
-    /**
-     * @deprecated
-     */
-    private readonly ?LoggerInterface $logger;
+
     private readonly ParameterStoreFactory $parameterStoreFactory;
+
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;
+
     private readonly ?ObserverFactory $observerFactory;
 
     private readonly ?ContainerFactory $containerFactory;
@@ -47,16 +47,16 @@ final class Bootstrap {
     private array $observers = [];
 
     public function __construct(
+        BootstrapEmitter $emitter = null,
         BootstrappingDirectoryResolver $directoryResolver = null,
-        LoggerInterface $logger = null,
         ParameterStoreFactory $parameterStoreFactory = null,
         DefinitionProviderFactory $definitionProviderFactory = null,
         ObserverFactory $observerFactory = null,
         Stopwatch $stopwatch = null,
         ContainerFactory $containerFactory = null
     ) {
+        $this->emitter = $emitter;
         $this->directoryResolver = $directoryResolver ?? $this->defaultDirectoryResolver();
-        $this->logger = $logger;
         $this->parameterStoreFactory = $parameterStoreFactory ?? new DefaultParameterStoreFactory();
         $this->definitionProviderFactory = $definitionProviderFactory;
         $this->observerFactory = $observerFactory;
@@ -87,6 +87,8 @@ final class Bootstrap {
         $configuration = $this->bootstrappingConfiguration($configurationFile);
         $analysisOptions = $this->analysisOptions($configuration, $profiles);
 
+        $this->emitter?->emitBeforeBootstrap($configuration);
+
         foreach ($configuration->getObservers() as $observer) {
             $this->addObserver($observer);
         }
@@ -104,7 +106,6 @@ final class Bootstrap {
             $configuration,
             $profiles,
             $containerDefinition,
-            $analysisOptions->getLogger()
         );
 
         $this->notifyContainerCreated($profiles, $containerDefinition, $container);
@@ -112,6 +113,13 @@ final class Bootstrap {
         $metrics = $this->stopwatch->stop();
         $analytics = $this->createAnalytics($metrics, $analysisPrepped, $analysisCompleted);
         $this->notifyAnalytics($analytics);
+
+        $this->emitter?->emitAfterBootstrap(
+            $configuration,
+            $containerDefinition,
+            $container,
+            $analytics
+        );
 
         $message = sprintf(
             'Took %fms to analyze and create your container. %fms was spent preparing for analysis. %fms was spent statically analyzing your codebase. %fms was spent wiring your container.',
@@ -208,7 +216,6 @@ final class Bootstrap {
         BootstrappingConfiguration $configuration,
         Profiles $activeProfiles,
         ContainerDefinition $containerDefinition,
-        ?LoggerInterface $logger
     ) : AnnotatedContainer {
         $containerFactory = $this->containerFactory();
 
@@ -217,9 +224,6 @@ final class Bootstrap {
         }
 
         $factoryOptions = ContainerFactoryOptionsBuilder::forProfiles($activeProfiles);
-        if ($logger !== null) {
-            $factoryOptions = $factoryOptions->withLogger($logger);
-        }
 
         return $containerFactory->createContainer($containerDefinition, $factoryOptions->build());
     }

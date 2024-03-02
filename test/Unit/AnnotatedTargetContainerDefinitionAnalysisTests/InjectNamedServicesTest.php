@@ -19,7 +19,7 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
-class InjectNamedServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class InjectNamedServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasAliasDefinitionTestsTrait,
         HasInjectDefinitionTestsTrait,

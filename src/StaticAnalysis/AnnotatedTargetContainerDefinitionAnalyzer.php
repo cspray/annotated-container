@@ -11,6 +11,7 @@ use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Event\AnalysisEmitter;
 use Cspray\AnnotatedContainer\Exception\InvalidScanDirectories;
 use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepare;
@@ -46,6 +47,7 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
     public function __construct(
         private readonly AnnotatedTargetParser $annotatedTargetCompiler,
         private readonly AnnotatedTargetDefinitionConverter $definitionConverter,
+        private readonly ?AnalysisEmitter $emitter = null
     ) {
     }
 
@@ -53,17 +55,17 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
      * Will parse source code, according to the passed $containerDefinitionCompileOptions, and construct a ContainerDefinition
      * instance based off of the resultant parsing.
      *
-     * @param ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions
+     * @param ContainerDefinitionAnalysisOptions $containerDefinitionAnalysisOptions
      * @return ContainerDefinition
      * @throws InvalidArgumentException
      * @throws InvalidScanDirectories
      * @throws InvalidServiceDelegate
      * @throws InvalidServicePrepare
      */
-    public function analyze(ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions) : ContainerDefinition {
-        $logger = $containerDefinitionCompileOptions->getLogger() ?? new NullLogger();
+    public function analyze(ContainerDefinitionAnalysisOptions $containerDefinitionAnalysisOptions) : ContainerDefinition {
+        $logger = $containerDefinitionAnalysisOptions->getLogger() ?? new NullLogger();
 
-        $scanDirs = $containerDefinitionCompileOptions->getScanDirectories();
+        $scanDirs = $containerDefinitionAnalysisOptions->getScanDirectories();
         if (empty($scanDirs)) {
             $exception = InvalidScanDirectories::fromEmptyList();
             $logger->error($exception->getMessage());
@@ -77,30 +79,36 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
         }
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
-        $consumer = $this->parse($containerDefinitionCompileOptions, $logger);
+
+        $this->emitter?->emitBeforeContainerAnalysis($containerDefinitionAnalysisOptions);
+
+        $consumer = $this->parse($containerDefinitionAnalysisOptions, $logger);
         // We need to add services from the DefinitionProvider first to ensure that any services required
         // to be defined, e.g. to satisfy a ServiceDelegate, are added to the container definition
         $containerDefinitionBuilder = $this->addThirdPartyServices(
-            $containerDefinitionCompileOptions,
+            $containerDefinitionAnalysisOptions,
             $containerDefinitionBuilder,
             $logger
         );
         $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer, $logger);
         $containerDefinitionBuilder = $this->addAliasDefinitions($containerDefinitionBuilder, $logger);
 
+        $containerDefinition = $containerDefinitionBuilder->build();
+
+        $this->emitter?->emitAfterContainerAnalysis($containerDefinitionAnalysisOptions, $containerDefinition);
         $logger->info('Annotated Container compiling finished.');
 
-        return $containerDefinitionBuilder->build();
+        return $containerDefinition;
     }
 
     /**
-     * @param ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions
+     * @param ContainerDefinitionAnalysisOptions $containerDefinitionAnalysisOptions
      * @param LoggerInterface $logger
      * @return DefinitionsCollection
      * @throws InvalidArgumentException
      */
     private function parse(
-        ContainerDefinitionAnalysisOptions $containerDefinitionCompileOptions,
+        ContainerDefinitionAnalysisOptions $containerDefinitionAnalysisOptions,
         LoggerInterface                    $logger
     ) : array {
         $consumer = new stdClass();
@@ -109,8 +117,10 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
         $consumer->serviceDelegateDefinitions = [];
         $consumer->injectDefinitions = [];
         $consumer->configurationDefinitions = [];
-        $attributeTypes = array_map(fn(AttributeType $attributeType) => objectType($attributeType->value), AttributeType::cases());
-        $dirs = $containerDefinitionCompileOptions->getScanDirectories();
+        $attributeTypes = array_map(
+            static fn(AttributeType $attributeType) => objectType($attributeType->value), AttributeType::cases()
+        );
+        $dirs = $containerDefinitionAnalysisOptions->getScanDirectories();
         $options = AnnotatedTargetParserOptionsBuilder::scanDirectories(...$dirs)
             ->filterAttributes(...$attributeTypes)
             ->build();
@@ -127,6 +137,7 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
 
             if ($definition instanceof ServiceDefinition) {
                 $consumer->serviceDefinitions[] = $definition;
+                $this->emitter?->emitAnalyzedServiceDefinitionFromAttribute($target, $definition);
                 $this->logServiceDefinition($target, $definition, $logger);
             } else if ($definition instanceof ServicePrepareDefinition) {
                 $consumer->servicePrepareDefinitions[] = $definition;
@@ -146,6 +157,7 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
                 $this->logConfigurationDefinition($target, $definition, $logger);
             }
         }
+
         /**
          * @var DefinitionsCollection $consumer
          */

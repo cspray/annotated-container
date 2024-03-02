@@ -22,7 +22,7 @@ use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\stringType;
 
-class AliasedConfigurationTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class AliasedConfigurationTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasConfigurationDefinitionTestsTrait,
         HasInjectDefinitionTestsTrait,

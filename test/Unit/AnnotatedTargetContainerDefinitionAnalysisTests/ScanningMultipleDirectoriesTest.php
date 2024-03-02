@@ -17,7 +17,7 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
-class ScanningMultipleDirectoriesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class ScanningMultipleDirectoriesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasAliasDefinitionTestsTrait;

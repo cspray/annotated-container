@@ -26,7 +26,7 @@ use function Cspray\Typiphy\nullType;
 use function Cspray\Typiphy\stringType;
 use function Cspray\Typiphy\typeUnion;
 
-class InjectConstructorServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class InjectConstructorServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasInjectDefinitionTestsTrait;

@@ -23,7 +23,7 @@ use function Cspray\Typiphy\floatType;
 use function Cspray\Typiphy\stringType;
 use function Cspray\Typiphy\typeUnion;
 
-class InjectPrepareServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class InjectPrepareServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasServicePrepareDefinitionTestsTrait,

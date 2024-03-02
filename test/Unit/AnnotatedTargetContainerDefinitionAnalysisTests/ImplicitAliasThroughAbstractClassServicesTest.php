@@ -18,7 +18,7 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
-class ImplicitAliasThroughAbstractClassServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class ImplicitAliasThroughAbstractClassServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasAliasDefinitionTestsTrait;

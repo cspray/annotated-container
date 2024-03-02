@@ -25,7 +25,7 @@ use Psr\Log\LoggerInterface;
 use function Cspray\AnnotatedContainer\service;
 use function Cspray\Typiphy\objectType;
 
-class ThirdPartyDelegatedServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class ThirdPartyDelegatedServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasServiceDelegateDefinitionTestsTrait;

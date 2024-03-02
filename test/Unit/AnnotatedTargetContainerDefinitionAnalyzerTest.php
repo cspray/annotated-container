@@ -222,6 +222,10 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
         $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');
     }
 
+    public function testAnalysisEventsEmittedInCorrectOrder() : void {
+
+    }
+
     public function testLogImplicitServiceDelegateHasUnionReturnType() {
         try {
             $this->runAnalysisDirectory(__DIR__ . '/LogicalErrorApps/ImplicitServiceDelegateUnionType');

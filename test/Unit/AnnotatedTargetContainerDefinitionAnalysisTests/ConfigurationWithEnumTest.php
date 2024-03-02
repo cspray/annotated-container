@@ -16,7 +16,7 @@ use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\objectType;
 
-class ConfigurationWithEnumTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class ConfigurationWithEnumTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasConfigurationDefinitionTestsTrait,
         HasInjectDefinitionTestsTrait;

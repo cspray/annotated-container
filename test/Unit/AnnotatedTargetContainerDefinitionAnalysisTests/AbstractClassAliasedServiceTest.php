@@ -15,10 +15,11 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEvents;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
-class AbstractClassAliasedServiceTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class AbstractClassAliasedServiceTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasAliasDefinitionTestsTrait;
@@ -78,6 +79,15 @@ class AbstractClassAliasedServiceTest extends AnnotatedTargetContainerDefinition
         return [
             [new ExpectedServiceProfiles(Fixtures::abstractClassAliasedService()->fooAbstract(), ['default'])],
             [new ExpectedServiceProfiles(Fixtures::abstractClassAliasedService()->fooImplementation(), ['default'])]
+        ];
+    }
+
+    protected function getExpectedEvents() : array {
+        return [
+            AnalysisEvents::BeforeContainerAnalysis,
+            AnalysisEvents::AnalyzedServiceDefinitionFromAttribute,
+            AnalysisEvents::AnalyzedServiceDefinitionFromAttribute,
+            AnalysisEvents::AfterContainerAnalysis,
         ];
     }
 

@@ -15,7 +15,7 @@ use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\stringType;
 
-class MultiPropConfigurationServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class MultiPropConfigurationServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasConfigurationDefinitionTestsTrait,
         HasInjectDefinitionTestsTrait;

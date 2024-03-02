@@ -18,7 +18,7 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
-class DelegatedServiceTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class DelegatedServiceTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasServiceDelegateDefinitionTestsTrait;

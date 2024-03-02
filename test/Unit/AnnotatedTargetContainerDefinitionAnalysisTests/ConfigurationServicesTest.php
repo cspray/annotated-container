@@ -17,7 +17,7 @@ use function Cspray\Typiphy\boolType;
 use function Cspray\Typiphy\intType;
 use function Cspray\Typiphy\stringType;
 
-class ConfigurationServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class ConfigurationServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasConfigurationDefinitionTestsTrait,
         HasInjectDefinitionTestsTrait;

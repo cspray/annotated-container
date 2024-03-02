@@ -21,7 +21,7 @@ use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\nullType;
 use function Cspray\Typiphy\typeUnion;
 
-class InjectServiceConstructorServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class InjectServiceConstructorServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasInjectDefinitionTestsTrait,

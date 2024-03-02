@@ -21,7 +21,7 @@ use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\AnnotatedContainer\service;
 
-class ThirdPartyServicesTest extends AnnotatedTargetContainerDefinitionCompilerTestCase {
+class ThirdPartyServicesTest extends AnnotatedTargetContainerDefinitionAnalyzerTestCase {
 
     use HasServiceDefinitionTestsTrait,
         HasAliasDefinitionTestsTrait;
