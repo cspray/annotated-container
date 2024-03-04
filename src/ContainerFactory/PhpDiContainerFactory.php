@@ -8,7 +8,6 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
-use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
@@ -35,10 +34,6 @@ if (!class_exists(Container::class)) {
  * A ContainerFactory that utilizes the php-di/php-di library.
  */
 final class PhpDiContainerFactory extends AbstractContainerFactory implements ContainerFactory {
-
-    protected function getBackingContainerType() : ObjectType {
-        return objectType(Container::class);
-    }
 
     protected function getContainerFactoryState() : ContainerFactoryState {
         return new PhpDiContainerFactoryState();
@@ -87,57 +82,24 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
     public function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition) : void {
         assert($state instanceof PhpDiContainerFactoryState);
         $targetClass = $definition->getTargetIdentifier()->getClass()->getName();
-        if ($definition->getTargetIdentifier()->isMethodParameter()) {
-            $method = $definition->getTargetIdentifier()->getMethodName();
-            $parameter = $definition->getTargetIdentifier()->getName();
+        $method = $definition->getTargetIdentifier()->getMethodName();
+        $parameter = $definition->getTargetIdentifier()->getName();
 
-            $value = $definition->getValue();
-            $store = $definition->getStoreName();
-            if ($store !== null) {
-                $parameterStore = $this->getParameterStore($store);
-                if ($parameterStore === null) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
-                }
-                $value = $parameterStore->fetch($definition->getType(), $value);
+        $value = $definition->getValue();
+        $store = $definition->getStoreName();
+        if ($store !== null) {
+            $parameterStore = $this->getParameterStore($store);
+            if ($parameterStore === null) {
+                throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
             }
-
-            $param = $definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)
-                ? get($value)
-                : $value;
-
-            $state->addMethodInject($targetClass, $method, $parameter, $param);
-        } else {
-            $property = $definition->getTargetIdentifier()->getName();
-
-            $value = $definition->getValue();
-            $store = $definition->getStoreName();
-            if ($store !== null) {
-                $parameterStore = $this->getParameterStore($store);
-                if ($parameterStore === null) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
-                }
-                $value = $parameterStore->fetch($definition->getType(), $value);
-            }
-
-            $param = $definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)
-                ? get($value)
-                : $value;
-
-            $state->addPropertyInject($targetClass, $property, $param);
+            $value = $parameterStore->fetch($definition->getType(), $value);
         }
 
-    }
+        $param = $definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)
+            ? get($value)
+            : $value;
 
-    public function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void {
-        assert($state instanceof PhpDiContainerFactoryState);
-        $configName = is_null($definition->getName()) ? $definition->getClass()->getName() : $definition->getName();
-        $state->addService($definition->getClass()->getName());
-        if (!is_null($definition->getName())) {
-            $state->addService($definition->getName());
-            $state->referenceService($definition->getName(), $definition->getClass()->getName());
-        }
-        assert(!is_null($configName));
-        $state->autowireService($definition->getClass()->getName());
+        $state->addMethodInject($targetClass, $method, $parameter, $param);
     }
 
     protected function createAnnotatedContainer(ContainerFactoryState $state, Profiles $activeProfiles) : AnnotatedContainer {
@@ -153,12 +115,6 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
                         $definitions[$service]->constructorParameter($param, $value);
                     }
                 }
-            }
-        }
-
-        foreach ($state->getPropertyInject() as $service => $properties) {
-            foreach ($properties as $property => $value) {
-                $definitions[$service]->property($property, $value);
             }
         }
 

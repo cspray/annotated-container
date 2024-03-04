@@ -10,7 +10,7 @@ use function DI\get;
 
 final class PhpDiContainerFactoryState implements ContainerFactoryState {
 
-    use HasMethodInjectState, HasPropertyInjectState, HasServicePrepareState;
+    use HasMethodInjectState, HasServicePrepareState;
 
     private array $services = [];
 
