@@ -199,23 +199,23 @@ TEXT;
                 return new class implements AnnotatedContainer {
 
                     public function getBackingContainer() : object {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                        throw new \RuntimeException(__METHOD__);
                     }
 
                     public function make(string $classType, AutowireableParameterSet $parameters = null) : object {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                        throw new \RuntimeException(__METHOD__);
                     }
 
                     public function invoke(callable $callable, AutowireableParameterSet $parameters = null) : mixed {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                        throw new \RuntimeException(__METHOD__);
                     }
 
                     public function get(string $id) {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                        throw new \RuntimeException(__METHOD__);
                     }
 
                     public function has(string $id) : bool {
-                        throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                        throw new \RuntimeException(__METHOD__);
                     }
                 };
             }

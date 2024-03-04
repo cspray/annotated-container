@@ -28,7 +28,7 @@ abstract class ServiceWiringListener implements AfterContainerCreation {
             }
 
             /**
-             * @param string $type
+             * @param class-string $type
              * @return list<ServiceFromServiceDefinition>
              */
             public function getServicesForType(string $type) : array {
