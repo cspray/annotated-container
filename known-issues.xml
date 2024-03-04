@@ -1,22 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="4.30.0@d0bc6e25d89f649e4f36a534f330f8bb4643dd69">
-  <file src="src/Bootstrap/Bootstrap.php">
-    <DeprecatedClass occurrences="5">
-      <code>?ObserverFactory</code>
-      <code>ObserverFactory</code>
-      <code>PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver $observer</code>
-      <code>array</code>
-      <code>private array $observers = [];</code>
-    </DeprecatedClass>
-    <DeprecatedMethod occurrences="1">
-      <code>getObservers</code>
-    </DeprecatedMethod>
-  </file>
-  <file src="src/Bootstrap/BootstrappingConfiguration.php">
-    <DeprecatedClass occurrences="1">
-      <code>list&lt;PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver&gt;</code>
-    </DeprecatedClass>
-  </file>
   <file src="src/Bootstrap/ComposerJsonScanningThirdPartyInitializerProvider.php">
     <MixedArrayAccess occurrences="1">
       <code>$composerData['extra']</code>
@@ -35,34 +18,13 @@
       <code>isDot</code>
     </UndefinedMethod>
   </file>
-  <file src="src/Bootstrap/ObserverFactory.php">
-    <DeprecatedClass occurrences="1">
-      <code>PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver</code>
-    </DeprecatedClass>
-  </file>
-  <file src="src/Bootstrap/ServiceWiringObserver.php">
-    <DeprecatedInterface occurrences="1">
-      <code>ServiceWiringObserver</code>
-    </DeprecatedInterface>
-    <LessSpecificReturnStatement occurrences="1">
-      <code>$services</code>
-    </LessSpecificReturnStatement>
-    <MoreSpecificReturnType occurrences="1">
-      <code>array</code>
-    </MoreSpecificReturnType>
-  </file>
-  <file src="src/Bootstrap/XmlBootstrappingConfiguration.php">
-    <DeprecatedClass occurrences="3">
-      <code>array</code>
-      <code>list&lt;PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver&gt;</code>
-      <code>private</code>
-    </DeprecatedClass>
-    <InvalidStringClass occurrences="1">
-      <code>new $observerClass()</code>
-    </InvalidStringClass>
-    <PropertyTypeCoercion occurrences="1">
-      <code>$observers</code>
-    </PropertyTypeCoercion>
+  <file src="src/Bootstrap/ServiceWiringListener.php">
+    <MixedArgument occurrences="1">
+      <code>$service</code>
+    </MixedArgument>
+    <MixedAssignment occurrences="1">
+      <code>$service</code>
+    </MixedAssignment>
   </file>
   <file src="src/Cli/Command/BuildCommand.php">
     <MixedArrayAccess occurrences="1">
@@ -85,9 +47,6 @@
     </MixedAssignment>
   </file>
   <file src="src/Cli/Command/InitCommand.php">
-    <DeprecatedMethod occurrences="1">
-      <code>getObserverClasses</code>
-    </DeprecatedMethod>
     <MixedArgument occurrences="3">
       <code>$composer</code>
       <code>$configName</code>
@@ -109,13 +68,6 @@
     </MixedAssignment>
   </file>
   <file src="src/Cli/Command/ValidateCommand.php">
-    <DeprecatedClass occurrences="2">
-      <code>PostAnalysisObserver</code>
-      <code>PostAnalysisObserver</code>
-    </DeprecatedClass>
-    <DeprecatedInterface occurrences="1">
-      <code>class($closure) implements PostAnalysisObserver {</code>
-    </DeprecatedInterface>
     <PossiblyInvalidArgument occurrences="3">
       <code>$configOption</code>
       <code>$configOption</code>

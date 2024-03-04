@@ -12,6 +12,7 @@ use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Event\ContainerFactoryEmitter;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\AnnotatedContainer\Profiles;
 use Cspray\Typiphy\ObjectType;
@@ -22,9 +23,11 @@ final class IlluminateContainerFactory extends AbstractContainerFactory {
 
     public function __construct(
         private readonly Container $container = new \Illuminate\Container\Container(),
-        AliasDefinitionResolver $aliasDefinitionResolver = null
+        ContainerFactoryEmitter $emitter = null,
+        AliasDefinitionResolver $aliasDefinitionResolver = null,
+
     ) {
-        parent::__construct($aliasDefinitionResolver);
+        parent::__construct($emitter, $aliasDefinitionResolver);
     }
 
     protected function getContainerFactoryState() : ContainerFactoryState {

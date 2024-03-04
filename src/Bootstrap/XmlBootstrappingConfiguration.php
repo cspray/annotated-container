@@ -28,15 +28,9 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
      */
     private readonly array $parameterStores;
 
-    /**
-     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
-     */
-    private readonly array $observers;
-
     public function __construct(
         private readonly string $xmlFile,
         private readonly ?ParameterStoreFactory $parameterStoreFactory = null,
-        private readonly ?ObserverFactory $observerFactory = null,
         private readonly ?DefinitionProviderFactory $definitionProviderFactory = null
     ) {
         if (!file_exists($this->xmlFile)) {
@@ -134,23 +128,6 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 }
             }
 
-            $observers = [];
-            $observerNodes = $xpath->query('/ac:annotatedContainer/ac:observers/ac:observer/text()');
-            if ($observerNodes instanceof DOMNodeList) {
-                foreach ($observerNodes as $observerNode) {
-                    $observerClass = (string) $observerNode->nodeValue;
-                    if (isset($this->observerFactory)) {
-                        $observer = $this->observerFactory->createObserver($observerClass);
-                    } else {
-                        if (!$this->isObserverType($observerClass)) {
-                            throw InvalidBootstrapConfiguration::fromConfiguredObserverWrongType($observerClass);
-                        }
-                        $observer = new $observerClass();
-                    }
-                    $observers[] = $observer;
-                }
-            }
-
             /** @var DOMNodeList $cacheDirNodes */
             $cacheDirNodes = $xpath->query('/ac:annotatedContainer/ac:cacheDir');
             $cache = null;
@@ -162,23 +139,10 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             $this->definitionProvider = $definitionProvider;
             $this->cacheDir = $cache;
             $this->parameterStores = $parameterStores;
-            $this->observers = $observers;
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors(false);
         }
-    }
-
-    private function isObserverType(string $observerClass) : bool {
-        if (!class_exists($observerClass)) {
-            return false;
-        }
-
-        return is_subclass_of($observerClass, PreAnalysisObserver::class) ||
-            is_subclass_of($observerClass, PostAnalysisObserver::class) ||
-            is_subclass_of($observerClass, ContainerCreatedObserver::class) ||
-            is_subclass_of($observerClass, ContainerAnalyticsObserver::class);
-
     }
 
     public function getScanDirectories() : array {
@@ -201,11 +165,4 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         return $this->cacheDir;
     }
 
-    /**
-     * @return list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
-     * @deprecated
-     */
-    public function getObservers() : array {
-        return $this->observers;
-    }
 }

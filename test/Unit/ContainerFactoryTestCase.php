@@ -5,6 +5,8 @@ namespace Cspray\AnnotatedContainer\Unit;
 use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\ContainerFactory\IlluminateContainerFactory;
+use Cspray\AnnotatedContainer\Event\Emitter;
+use Cspray\AnnotatedContainer\Event\Listener\ContainerFactory\BeforeContainerCreation;
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainer\Profiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
@@ -21,6 +23,7 @@ use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
+use Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener;
 use Cspray\AnnotatedContainerFixture;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
@@ -43,7 +46,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
     private Profiles $activeProfiles;
 
-    abstract protected function getContainerFactory() : ContainerFactory;
+    abstract protected function getContainerFactory(Emitter $emitter = new Emitter()) : ContainerFactory;
 
     abstract protected function getBackingContainerInstanceOf() : ObjectType;
 
@@ -58,13 +61,14 @@ abstract class ContainerFactoryTestCase extends TestCase {
         string $dir,
         Profiles $profiles = null,
         ParameterStore $parameterStore = null,
+        Emitter $emitter = new Emitter()
     ) : AnnotatedContainer {
         $compiler = $this->getContainerDefinitionCompiler();
         $optionsBuilder = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir);
         $containerDefinition = $compiler->analyze($optionsBuilder->build());
         $containerOptions = ContainerFactoryOptionsBuilder::forProfiles($profiles ?? Profiles::fromList(['default']));
 
-        $factory = $this->getContainerFactory();
+        $factory = $this->getContainerFactory($emitter);
         if ($parameterStore !== null) {
             $factory->addParameterStore($parameterStore);
         }
@@ -460,6 +464,22 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $containerFactory = $this->getContainerFactory();
 
         $assertions($containerFactory, $deserialize);
+    }
+
+    public function testContainerCreationEventsEmitted() : void {
+        $emitter = new Emitter();
+
+        $listener = new StubContainerFactoryListener();
+        $emitter->addBeforeContainerCreationListener($listener);
+        $emitter->addAfterContainerCreationListener($listener);
+
+        $this->getContainer(
+            Fixtures::singleConcreteService()->getPath(),
+            Profiles::fromList(['default']),
+            emitter: $emitter
+        );
+
+        self::assertSame(['BeforeContainerCreation', 'AfterContainerCreation'], $listener->getTriggeredEvents());
     }
 
 }
