@@ -142,4 +142,8 @@ final class Fixtures {
         return new DuplicateNamedServiceDifferentProfilesFixture();
     }
 
+    public static function thirdPartyKitchenSink() : ThirdPartyKitchenSinkFixture {
+        return new ThirdPartyKitchenSinkFixture();
+    }
+
 }
