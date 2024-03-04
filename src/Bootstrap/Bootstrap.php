@@ -6,6 +6,8 @@ use Auryn\Injector;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Event\BootstrapEmitter;
+use Cspray\AnnotatedContainer\Event\ContainerFactoryEmitter;
+use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Profiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
@@ -35,31 +37,22 @@ final class Bootstrap {
 
     private readonly ?DefinitionProviderFactory $definitionProviderFactory;
 
-    private readonly ?ObserverFactory $observerFactory;
-
-    private readonly ?ContainerFactory $containerFactory;
+    private readonly ContainerFactory $containerFactory;
 
     private readonly Stopwatch $stopwatch;
 
-    /**
-     * @var list<PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver>
-     */
-    private array $observers = [];
-
     public function __construct(
+        ContainerFactory $containerFactory,
         BootstrapEmitter $emitter = null,
         BootstrappingDirectoryResolver $directoryResolver = null,
         ParameterStoreFactory $parameterStoreFactory = null,
         DefinitionProviderFactory $definitionProviderFactory = null,
-        ObserverFactory $observerFactory = null,
         Stopwatch $stopwatch = null,
-        ContainerFactory $containerFactory = null
     ) {
         $this->emitter = $emitter;
         $this->directoryResolver = $directoryResolver ?? $this->defaultDirectoryResolver();
         $this->parameterStoreFactory = $parameterStoreFactory ?? new DefaultParameterStoreFactory();
         $this->definitionProviderFactory = $definitionProviderFactory;
-        $this->observerFactory = $observerFactory;
         $this->stopwatch = $stopwatch ?? new Stopwatch();
         $this->containerFactory = $containerFactory;
     }
@@ -71,10 +64,6 @@ final class Bootstrap {
         }
 
         return new RootDirectoryBootstrappingDirectoryResolver($rootDir);
-    }
-
-    public function addObserver(PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver $observer) : void {
-        $this->observers[] = $observer;
     }
 
     public function bootstrapContainer(
@@ -89,16 +78,9 @@ final class Bootstrap {
 
         $this->emitter?->emitBeforeBootstrap($configuration);
 
-        foreach ($configuration->getObservers() as $observer) {
-            $this->addObserver($observer);
-        }
-
-        $this->notifyPreAnalysis($profiles);
-
         $analysisPrepped = $this->stopwatch->mark();
 
         $containerDefinition = $this->runStaticAnalysis($configuration, $analysisOptions);
-        $this->notifyPostAnalysis($profiles, $containerDefinition);
 
         $analysisCompleted = $this->stopwatch->mark();
 
@@ -108,11 +90,8 @@ final class Bootstrap {
             $containerDefinition,
         );
 
-        $this->notifyContainerCreated($profiles, $containerDefinition, $container);
-
         $metrics = $this->stopwatch->stop();
         $analytics = $this->createAnalytics($metrics, $analysisPrepped, $analysisCompleted);
-        $this->notifyAnalytics($analytics);
 
         $this->emitter?->emitAfterBootstrap(
             $configuration,
@@ -129,7 +108,6 @@ final class Bootstrap {
         return new XmlBootstrappingConfiguration(
             $configFile,
             parameterStoreFactory: $this->parameterStoreFactory,
-            observerFactory: $this->observerFactory,
             definitionProviderFactory: $this->definitionProviderFactory
         );
     }
@@ -147,14 +125,6 @@ final class Bootstrap {
         }
 
         return $analysisOptions->build();
-    }
-
-    private function notifyPreAnalysis(Profiles $activeProfiles) : void {
-        foreach ($this->observers as $observer) {
-            if ($observer instanceof PreAnalysisObserver) {
-                $observer->notifyPreAnalysis($activeProfiles);
-            }
-        }
     }
 
     private function runStaticAnalysis(
@@ -181,56 +151,18 @@ final class Bootstrap {
         return $compiler;
     }
 
-    private function notifyPostAnalysis(Profiles $activeProfiles, ContainerDefinition $containerDefinition) : void {
-        foreach ($this->observers as $observer) {
-            if ($observer instanceof PostAnalysisObserver) {
-                $observer->notifyPostAnalysis($activeProfiles, $containerDefinition);
-            }
-        }
-    }
-
     private function createContainer(
         BootstrappingConfiguration $configuration,
         Profiles $activeProfiles,
         ContainerDefinition $containerDefinition,
     ) : AnnotatedContainer {
-        $containerFactory = $this->containerFactory();
-
         foreach ($configuration->getParameterStores() as $parameterStore) {
-            $containerFactory->addParameterStore($parameterStore);
+            $this->containerFactory->addParameterStore($parameterStore);
         }
 
         $factoryOptions = ContainerFactoryOptionsBuilder::forProfiles($activeProfiles);
 
-        return $containerFactory->createContainer($containerDefinition, $factoryOptions->build());
-    }
-
-    private function containerFactory() : ContainerFactory {
-        if ($this->containerFactory !== null) {
-            return $this->containerFactory;
-        }
-
-        if (class_exists(Injector::class)) {
-            return new AurynContainerFactory();
-        }
-
-        if (class_exists(Container::class)) {
-            return new PhpDiContainerFactory();
-        }
-
-        throw BackingContainerNotFound::fromMissingImplementation();
-    }
-
-    private function notifyContainerCreated(
-        Profiles $activeProfiles,
-        ContainerDefinition $containerDefinition,
-        AnnotatedContainer $container
-    ) : void {
-        foreach ($this->observers as $observer) {
-            if ($observer instanceof ContainerCreatedObserver) {
-                $observer->notifyContainerCreated($activeProfiles, $containerDefinition, $container);
-            }
-        }
+        return $this->containerFactory->createContainer($containerDefinition, $factoryOptions->build());
     }
 
     private function createAnalytics(
@@ -244,14 +176,6 @@ final class Bootstrap {
             $metrics->getDurationBetweenMarkers($prepCompleted, $analysisCompleted),
             $metrics->getDurationBetweenMarkers($analysisCompleted, $metrics->getEndMarker())
         );
-    }
-
-    private function notifyAnalytics(ContainerAnalytics $analytics) : void {
-        foreach ($this->observers as $observer) {
-            if ($observer instanceof ContainerAnalyticsObserver) {
-                $observer->notifyAnalytics($analytics);
-            }
-        }
     }
 
 }
