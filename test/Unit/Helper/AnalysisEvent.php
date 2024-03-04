@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Helper;
 
-enum AnalysisEvents {
+enum AnalysisEvent {
 
     case AnalyzedContainerDefinitionFromCache;
 
@@ -13,6 +13,7 @@ enum AnalysisEvents {
     case AnalyzedServiceDelegateDefinitionFromAttribute;
 
     case AnalyzedServicePrepareDefinitionFromAttribute;
+    case AddedAliasDefinition;
 
     case BeforeContainerAnalysis;
 

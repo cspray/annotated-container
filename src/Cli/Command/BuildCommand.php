@@ -82,7 +82,7 @@ SHELL;
             throw ConfigurationNotFound::fromMissingFile($configName);
         }
 
-        $config = new XmlBootstrappingConfiguration($configFile, $this->directoryResolver);
+        $config = new XmlBootstrappingConfiguration($configFile);
 
         $cacheDir = $config->getCacheDirectory();
         if (!isset($cacheDir)) {
@@ -99,11 +99,6 @@ SHELL;
         $containerDefinitionConsumer = $config->getContainerDefinitionProvider();
         if ($containerDefinitionConsumer !== null) {
             $compileOptions = $compileOptions->withDefinitionProvider($containerDefinitionConsumer);
-        }
-
-        $logger = $config->getLogger();
-        if ($logger !== null) {
-            $compileOptions = $compileOptions->withLogger($logger);
         }
 
         $this->getCompiler($cacheDir)->analyze($compileOptions->build());

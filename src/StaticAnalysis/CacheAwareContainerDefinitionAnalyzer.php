@@ -46,13 +46,6 @@ final class CacheAwareContainerDefinitionAnalyzer implements ContainerDefinition
         if (is_file($cacheFile)) {
             $containerDefinition = $this->containerDefinitionSerializer->deserialize(file_get_contents($cacheFile));
             if ($containerDefinition instanceof ContainerDefinition) {
-                $logger = $containerDefinitionAnalysisOptions->getLogger();
-                if ($logger !== null) {
-                    $logger->info(sprintf(
-                        'Skipping Annotated Container compiling. Using cached definition from %s.',
-                        $cacheFile
-                    ));
-                }
                 return $containerDefinition;
             }
         }

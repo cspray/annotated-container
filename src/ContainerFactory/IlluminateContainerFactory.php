@@ -8,7 +8,6 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
-use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
@@ -26,10 +25,6 @@ final class IlluminateContainerFactory extends AbstractContainerFactory {
         AliasDefinitionResolver $aliasDefinitionResolver = null
     ) {
         parent::__construct($aliasDefinitionResolver);
-    }
-
-    protected function getBackingContainerType() : ObjectType {
-        return objectType(\Illuminate\Container\Container::class);
     }
 
     protected function getContainerFactoryState() : ContainerFactoryState {
@@ -83,29 +78,12 @@ final class IlluminateContainerFactory extends AbstractContainerFactory {
 
     protected function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition) : void {
         assert($state instanceof IlluminateContainerFactoryState);
-        if ($definition->getTargetIdentifier()->isMethodParameter()) {
-            $state->addMethodInject(
-                $definition->getTargetIdentifier()->getClass()->getName(),
-                $definition->getTargetIdentifier()->getMethodName(),
-                $definition->getTargetIdentifier()->getName(),
-                $this->getInjectDefinitionValue($definition)
-            );
-        } else {
-            $state->addPropertyInject(
-                $definition->getTargetIdentifier()->getClass()->getName(),
-                $definition->getTargetIdentifier()->getName(),
-                $this->getInjectDefinitionValue($definition)
-            );
-        }
-    }
-
-    protected function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void {
-        assert($state instanceof IlluminateContainerFactoryState);
-        $state->addConcreteService($definition->getClass()->getName());
-        $name = $definition->getName();
-        if ($name !== null) {
-            $state->addNamedService($definition->getClass()->getName(), $name);
-        }
+        $state->addMethodInject(
+            $definition->getTargetIdentifier()->getClass()->getName(),
+            $definition->getTargetIdentifier()->getMethodName(),
+            $definition->getTargetIdentifier()->getName(),
+            $this->getInjectDefinitionValue($definition)
+        );
     }
 
     protected function createAnnotatedContainer(ContainerFactoryState $state, Profiles $activeProfiles) : AnnotatedContainer {
@@ -148,13 +126,6 @@ final class IlluminateContainerFactory extends AbstractContainerFactory {
                         $container->call([$created, $method], $params);
                     }
                     break;
-                }
-            }
-
-            foreach ($state->getPropertyInject() as $service => $properties) {
-                foreach ($properties as $property => $value) {
-                    $reflectionProperty = new \ReflectionProperty($service, $property);
-                    $reflectionProperty->setValue($created, $value);
                 }
             }
         });

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Event\Listener;
+namespace Cspray\AnnotatedContainer\Event\Listener\ContainerFactory;
 
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Profiles;

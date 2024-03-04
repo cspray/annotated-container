@@ -6,8 +6,8 @@ use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalytics;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
-use Cspray\AnnotatedContainer\Event\Listener\AfterBootstrap;
-use Cspray\AnnotatedContainer\Event\Listener\BeforeBootstrap;
+use Cspray\AnnotatedContainer\Event\Listener\Bootstrap\AfterBootstrap;
+use Cspray\AnnotatedContainer\Event\Listener\Bootstrap\BeforeBootstrap;
 
 final class StubBootstrapListener implements AfterBootstrap, BeforeBootstrap {
 

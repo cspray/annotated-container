@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Event;
 
 use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
+use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
@@ -11,7 +12,7 @@ use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedTarget\AnnotatedTarget;
 
-interface AnalysisEmitter {
+interface StaticAnalysisEmitter {
 
     public function emitBeforeContainerAnalysis(ContainerDefinitionAnalysisOptions $analysisOptions) : void;
 
@@ -35,10 +36,13 @@ interface AnalysisEmitter {
         InjectDefinition $injectDefinition,
     ) : void;
 
+    public function emitAddedAliasDefinition(AliasDefinition $aliasDefinition) : void;
+
     public function emitAnalyzedContainerDefinitionFromCache(
         ContainerDefinition $definition,
         string $cacheFile
     ) : void;
+
 
     public function emitAfterContainerAnalysis(
         ContainerDefinitionAnalysisOptions $analysisOptions,

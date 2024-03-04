@@ -9,7 +9,8 @@ use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\ContainerDefinitionAssertionsTrait;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
-use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEvents;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEvent;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEventCollection;
 use Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -28,12 +29,7 @@ abstract class AnnotatedTargetContainerDefinitionAnalyzerTestCase extends TestCa
      */
     abstract protected function getFixtures() : array|Fixture;
 
-    /**
-     * @return list<AnalysisEvents>
-     */
-    protected function getExpectedEvents() : array {
-        return [];
-    }
+    abstract protected function assertEmittedEvents(AnalysisEventCollection $analysisEventCollection) : void;
 
     protected function setUp() : void {
         $this->stubAnalysisListener = new StubAnalysisListener();
@@ -46,6 +42,7 @@ abstract class AnnotatedTargetContainerDefinitionAnalyzerTestCase extends TestCa
         $emitter->addAnalyzedServiceDefinitionFromAttributeListener($this->stubAnalysisListener);
         $emitter->addAnalyzedServiceDelegateDefinitionFromAttributeListener($this->stubAnalysisListener);
         $emitter->addAnalyzedServicePrepareDefinitionFromAttributeListener($this->stubAnalysisListener);
+        $emitter->addAddedAliasDefinitionListener($this->stubAnalysisListener);
         $emitter->addAfterContainerAnalysisListener($this->stubAnalysisListener);
 
         $analyzer = new AnnotatedTargetContainerDefinitionAnalyzer(
@@ -72,12 +69,8 @@ abstract class AnnotatedTargetContainerDefinitionAnalyzerTestCase extends TestCa
         $this->subject = $analyzer->analyze($builder->build());
     }
 
-    public function testEventsEmittedInCorrectOrder() : void {
-        $this->markTestSkipped('Removing Configuration work');
-        self::assertSame(
-            $this->getExpectedEvents(),
-            $this->stubAnalysisListener->getTriggeredEvents()
-        );
+    public function testAppropriateEventsEmitted() : void {
+        $this->assertEmittedEvents($this->stubAnalysisListener->getTriggeredEvents());
     }
 
     protected function getDefinitionProvider() : ?DefinitionProvider {

@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\StaticAnalysis;
 
-use Cspray\AnnotatedContainer\Definition\AliasDefinition;
 use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
@@ -10,7 +9,7 @@ use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
-use Cspray\AnnotatedContainer\Event\AnalysisEmitter;
+use Cspray\AnnotatedContainer\Event\StaticAnalysisEmitter;
 use Cspray\AnnotatedContainer\Exception\InvalidScanDirectories;
 use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepare;
@@ -20,12 +19,6 @@ use Cspray\AnnotatedTarget\AnnotatedTargetParser;
 use Cspray\AnnotatedTarget\AnnotatedTargetParserOptionsBuilder;
 use Cspray\AnnotatedTarget\Exception\InvalidArgumentException;
 use Cspray\Typiphy\ObjectType;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionParameter;
-use ReflectionProperty;
 use stdClass;
 use function Cspray\Typiphy\objectType;
 
@@ -45,7 +38,7 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
     public function __construct(
         private readonly AnnotatedTargetParser $annotatedTargetCompiler,
         private readonly AnnotatedTargetDefinitionConverter $definitionConverter,
-        private readonly ?AnalysisEmitter $emitter = null
+        private readonly ?StaticAnalysisEmitter $emitter = null
     ) {
     }
 
@@ -61,53 +54,43 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
      * @throws InvalidServicePrepare
      */
     public function analyze(ContainerDefinitionAnalysisOptions $containerDefinitionAnalysisOptions) : ContainerDefinition {
-        $logger = $containerDefinitionAnalysisOptions->getLogger() ?? new NullLogger();
-
         $scanDirs = $containerDefinitionAnalysisOptions->getScanDirectories();
         if (empty($scanDirs)) {
-            $exception = InvalidScanDirectories::fromEmptyList();
-            $logger->error($exception->getMessage());
-            throw $exception;
+            throw InvalidScanDirectories::fromEmptyList();
         }
 
         if (count(array_unique($scanDirs)) !== count($scanDirs)) {
-            $exception = InvalidScanDirectories::fromDuplicatedDirectories();
-            $logger->error($exception->getMessage(), ['sourcePaths' => $scanDirs]);
-            throw $exception;
+            throw InvalidScanDirectories::fromDuplicatedDirectories();
         }
 
         $containerDefinitionBuilder = ContainerDefinitionBuilder::newDefinition();
 
         $this->emitter?->emitBeforeContainerAnalysis($containerDefinitionAnalysisOptions);
 
-        $consumer = $this->parse($containerDefinitionAnalysisOptions, $logger);
+        $consumer = $this->parse($containerDefinitionAnalysisOptions);
         // We need to add services from the DefinitionProvider first to ensure that any services required
         // to be defined, e.g. to satisfy a ServiceDelegate, are added to the container definition
         $containerDefinitionBuilder = $this->addThirdPartyServices(
             $containerDefinitionAnalysisOptions,
             $containerDefinitionBuilder,
-            $logger
         );
-        $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer, $logger);
-        $containerDefinitionBuilder = $this->addAliasDefinitions($containerDefinitionBuilder, $logger);
+        $containerDefinitionBuilder = $this->addAnnotatedDefinitions($containerDefinitionBuilder, $consumer);
+        $containerDefinitionBuilder = $this->addAliasDefinitions($containerDefinitionBuilder);
 
         $containerDefinition = $containerDefinitionBuilder->build();
 
         $this->emitter?->emitAfterContainerAnalysis($containerDefinitionAnalysisOptions, $containerDefinition);
-        $logger->info('Annotated Container compiling finished.');
 
         return $containerDefinition;
     }
 
     /**
      * @param ContainerDefinitionAnalysisOptions $containerDefinitionAnalysisOptions
-     * @param LoggerInterface $logger
      * @return DefinitionsCollection
      * @throws InvalidArgumentException
      */
     private function parse(
         ContainerDefinitionAnalysisOptions $containerDefinitionAnalysisOptions,
-        LoggerInterface                    $logger
     ) : array {
         $consumer = new stdClass();
         $consumer->serviceDefinitions = [];
@@ -122,12 +105,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
             ->filterAttributes(...$attributeTypes)
             ->build();
 
-        $logger->info('Annotated Container compiling started.');
-        $logger->info(
-            sprintf('Scanning directories for Attributes: %s.', implode(' ', $dirs)),
-            ['sourcePaths' => $dirs]
-        );
-
         /** @var AnnotatedTarget $target */
         foreach ($this->annotatedTargetCompiler->parse($options) as $target) {
             $definition = $this->definitionConverter->convert($target);
@@ -135,20 +112,15 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
             if ($definition instanceof ServiceDefinition) {
                 $consumer->serviceDefinitions[] = $definition;
                 $this->emitter?->emitAnalyzedServiceDefinitionFromAttribute($target, $definition);
-                $this->logServiceDefinition($target, $definition, $logger);
             } else if ($definition instanceof ServicePrepareDefinition) {
                 $consumer->servicePrepareDefinitions[] = $definition;
-                $this->logServicePrepareDefinition($target, $definition, $logger);
+                $this->emitter?->emitAnalyzedServicePrepareDefinitionFromAttribute($target, $definition);
             } else if ($definition instanceof ServiceDelegateDefinition) {
                 $consumer->serviceDelegateDefinitions[] = $definition;
-                $this->logServiceDelegateDefinition($target, $definition, $logger);
+                $this->emitter?->emitAnalyzedServiceDelegateDefinitionFromAttribute($target, $definition);
             } else if ($definition instanceof InjectDefinition) {
                 $consumer->injectDefinitions[] = $definition;
-                if ($definition->getTargetIdentifier()->isMethodParameter()) {
-                    $this->logParameterInjectDefinition($target, $definition, $logger);
-                } else {
-                    $this->logPropertyInjectDefinition($target, $definition, $logger);
-                }
+                $this->emitter?->emitAnalyzedInjectDefinitionFromAttribute($target, $definition);
             }
         }
 
@@ -159,201 +131,9 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
         return $consumer;
     }
 
-    private function logServiceDefinition(
-        AnnotatedTarget $target,
-        ServiceDefinition $definition,
-        LoggerInterface $logger
-    ) : void {
-        $logger->info(
-            sprintf(
-                'Parsed ServiceDefinition from #[%s] Attribute on %s.',
-                $target->getAttributeReflection()->getName(),
-                $definition->getType()->getName()
-            ),
-            [
-                'attribute' => $target->getAttributeReflection()->getName(),
-                'target' => [
-                    'class' => $target->getTargetReflection()->getName()
-                ],
-                'definition' => [
-                    'type' => ServiceDefinition::class,
-                    'serviceType' => $definition->getType()->getName(),
-                    'name' => $definition->getName(),
-                    'profiles' => $definition->getProfiles(),
-                    'isPrimary' => $definition->isPrimary(),
-                    'isConcrete' => $definition->isConcrete(),
-                    'isAbstract' => $definition->isAbstract()
-                ]
-            ]
-        );
-    }
-
-    private function logServicePrepareDefinition(
-        AnnotatedTarget $target,
-        ServicePrepareDefinition $definition,
-        LoggerInterface $logger
-    ) : void {
-        $targetReflection = $target->getTargetReflection();
-        assert($targetReflection instanceof ReflectionMethod);
-        $logger->info(
-            sprintf(
-                'Parsed ServicePrepareDefinition from #[%s] Attribute on %s::%s.',
-                $target->getAttributeReflection()->getName(),
-                $definition->getService()->getName(), $definition->getMethod()
-            ),
-            [
-                'attribute' => $target->getAttributeReflection()->getName(),
-                'target' => [
-                    'class' => $targetReflection->getDeclaringClass()->getName(),
-                    'method' => $targetReflection->getName()
-                ],
-                'definition' => [
-                    'type' => ServicePrepareDefinition::class,
-                    'serviceType' => $definition->getService()->getName(),
-                    'prepareMethod' => $definition->getMethod()
-                ]
-            ]
-        );
-    }
-
-    private function logServiceDelegateDefinition(
-        AnnotatedTarget $target,
-        ServiceDelegateDefinition $definition,
-        LoggerInterface $logger
-    ) : void {
-        $targetReflection = $target->getTargetReflection();
-        assert($targetReflection instanceof ReflectionMethod);
-        $logger->info(
-            sprintf(
-                'Parsed ServiceDelegateDefinition from #[%s] Attribute on %s::%s.',
-                $target->getAttributeReflection()->getName(),
-                $targetReflection->getDeclaringClass()->getName(),
-                $target->getTargetReflection()->getName()
-            ),
-            [
-                'attribute' => $target->getAttributeReflection()->getName(),
-                'target' => [
-                    'class' => $targetReflection->getDeclaringClass()->getName(),
-                    'method' => $target->getTargetReflection()->getName()
-                ],
-                'definition' => [
-                    'type' => ServiceDelegateDefinition::class,
-                    'serviceType' => $definition->getServiceType()->getName(),
-                    'delegateType' => $definition->getDelegateType()->getName(),
-                    'delegateMethod' => $definition->getDelegateMethod()
-                ]
-            ]
-        );
-    }
-
-    private function logParameterInjectDefinition(
-        AnnotatedTarget $target,
-        InjectDefinition $definition,
-        LoggerInterface $logger
-    ) : void {
-        $targetReflection = $target->getTargetReflection();
-        assert($targetReflection instanceof ReflectionParameter);
-        $declaringClass = $targetReflection->getDeclaringClass();
-        assert($declaringClass instanceof ReflectionClass);
-        $logger->info(
-            sprintf(
-                'Parsed InjectDefinition from #[%s] Attribute on %s::%s(%s).',
-                $target->getAttributeReflection()->getName(),
-                $declaringClass->getName(),
-                $targetReflection->getDeclaringFunction()->getName(),
-                $targetReflection->getName()
-            ),
-            [
-                'attribute' => $target->getAttributeReflection()->getName(),
-                'target' => [
-                    'class' => $declaringClass->getName(),
-                    'method' => $targetReflection->getDeclaringFunction()->getName(),
-                    'parameter' => $targetReflection->getName()
-                ],
-                'definition' => [
-                    'type' => InjectDefinition::class,
-                    'serviceType' => $definition->getTargetIdentifier()->getClass()->getName(),
-                    'method' => $definition->getTargetIdentifier()->getMethodName(),
-                    'parameterType' => $definition->getType()->getName(),
-                    'parameter' => $definition->getTargetIdentifier()->getName(),
-                    'value' => $this->convertValueToJsonifiable($definition->getValue()),
-                    'store' => $definition->getStoreName(),
-                    'profiles' => $definition->getProfiles()
-                ]
-            ]
-        );
-    }
-
-    private function logPropertyInjectDefinition(
-        AnnotatedTarget $target,
-        InjectDefinition $definition,
-        LoggerInterface $logger
-    ) : void {
-        $targetReflection = $target->getTargetReflection();
-        assert($targetReflection instanceof ReflectionProperty);
-
-
-        $logger->info(
-            sprintf(
-                'Parsed InjectDefinition from #[%s] Attribute on %s::%s.',
-                $target->getAttributeReflection()->getName(),
-                $targetReflection->getDeclaringClass()->getName(),
-                $targetReflection->getName()
-            ),
-            [
-                'attribute' => $target->getAttributeReflection()->getName(),
-                'target' => [
-                    'class' => $targetReflection->getDeclaringClass()->getName(),
-                    'property' => $targetReflection->getName()
-                ],
-                'definition' => [
-                    'type' => InjectDefinition::class,
-                    'serviceType' => $definition->getTargetIdentifier()->getClass()->getName(),
-                    'property' => $definition->getTargetIdentifier()->getName(),
-                    'propertyType' => $definition->getType()->getName(),
-                    'value' => $this->convertValueToJsonifiable($definition->getValue()),
-                    'store' => $definition->getStoreName(),
-                    'profiles' => $definition->getProfiles()
-                ]
-            ]
-        );
-    }
-
-    private function convertValueToJsonifiable(mixed $value) : mixed {
-        if ($value instanceof \UnitEnum) {
-            return sprintf('%s::%s', $value::class, $value->name);
-        }
-
-        if (is_array($value)) {
-            $convertedValue = [];
-            /** @var mixed $v */
-            foreach ($value as $k => $v) {
-               $convertedValue[$k] = $this->convertValueToJsonifiable($v);
-            }
-            return $convertedValue;
-        }
-
-        return $value;
-    }
-
-    private function logAliasDefinition(AliasDefinition $aliasDefinition, LoggerInterface $logger) : void {
-        $logger->info(
-            sprintf(
-                'Added alias for abstract service %s to concrete service %s.',
-                $aliasDefinition->getAbstractService()->getName(),
-                $aliasDefinition->getConcreteService()->getName()
-            ),
-            [
-                'abstractService' => $aliasDefinition->getAbstractService()->getName(),
-                'concreteService' => $aliasDefinition->getConcreteService()->getName()
-            ]
-        );
-    }
-
     /**
      * @param ContainerDefinitionBuilder $containerDefinitionBuilder
      * @param DefinitionsCollection $consumer
-     * @param LoggerInterface $logger
      * @return ContainerDefinitionBuilder
      * @throws InvalidServiceDelegate
      * @throws InvalidServicePrepare
@@ -361,7 +141,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
     private function addAnnotatedDefinitions(
         ContainerDefinitionBuilder $containerDefinitionBuilder,
         array $consumer,
-        LoggerInterface $logger
     ) : ContainerDefinitionBuilder {
         foreach ($consumer['serviceDefinitions'] as $serviceDefinition) {
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDefinition($serviceDefinition);
@@ -379,11 +158,10 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
             $containerDefinitionBuilder = $containerDefinitionBuilder->withServiceDelegateDefinition($serviceDelegateDefinition);
         }
 
-        $concretePrepareDefinitions = array_filter($consumer['servicePrepareDefinitions'], function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder, $logger) {
+        $concretePrepareDefinitions = array_filter($consumer['servicePrepareDefinitions'], function (ServicePrepareDefinition $prepareDef) use ($containerDefinitionBuilder) {
             $serviceDef = $this->getServiceDefinition($containerDefinitionBuilder, $prepareDef->getService());
             if (is_null($serviceDef)) {
                 $exception = InvalidServicePrepare::fromClassNotService($prepareDef->getService()->getName(), $prepareDef->getMethod());
-                $logger->error($exception->getMessage());
                 throw $exception;
             }
             return $serviceDef->isConcrete();
@@ -433,7 +211,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
     private function addThirdPartyServices(
         ContainerDefinitionAnalysisOptions $compileOptions,
         ContainerDefinitionBuilder         $builder,
-        LoggerInterface                    $logger
     ) : ContainerDefinitionBuilder {
         $definitionProvider = $compileOptions->getDefinitionProvider();
         if ($definitionProvider !== null) {
@@ -450,29 +227,13 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
                 }
             };
             $definitionProvider->consume($context);
-
-            // We are doing this because adding a proper DefinitionProvider::toString method to the interface would
-            // require a BC break. Instead, we will make a check for this specific use case to ensure useful information
-            // gets logged without requiring a major version release
-            // TODO In v3 implement a proper DefinitionProvider::toString method and deprecate CompositeDefinitionProvider::__toString
-            $definitionProviderName = $definitionProvider instanceof CompositeDefinitionProvider ? (string) $definitionProvider : $definitionProvider::class;
-
-            $logger->info(
-                sprintf('Added services from %s to ContainerDefinition.', $definitionProviderName),
-                [
-                    'definitionProvider' => $definitionProviderName
-                ]
-            );
             return $context->getBuilder();
         } else {
-            $logger->info(
-                sprintf('No %s was provided.', DefinitionProvider::class)
-            );
             return $builder;
         }
     }
 
-    private function addAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder, LoggerInterface $logger) : ContainerDefinitionBuilder {
+    private function addAliasDefinitions(ContainerDefinitionBuilder $containerDefinitionBuilder) : ContainerDefinitionBuilder {
         /** @var list<ObjectType> $abstractTypes */
         /** @var list<ObjectType> $concreteTypes */
         $abstractTypes = [];
@@ -494,7 +255,7 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
                         ->withConcrete($concreteType)
                         ->build();
                     $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition($aliasDefinition);
-                    $this->logAliasDefinition($aliasDefinition, $logger);
+                    $this->emitter?->emitAddedAliasDefinition($aliasDefinition);
                 }
             }
         }

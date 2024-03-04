@@ -13,6 +13,8 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEvent;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEventCollection;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
@@ -65,4 +67,10 @@ class NonAnnotatedServicesTest extends AnnotatedTargetContainerDefinitionAnalyze
         ];
     }
 
+    protected function assertEmittedEvents(AnalysisEventCollection $analysisEventCollection) : void {
+        self::assertCount(3, $analysisEventCollection);
+        self::assertSame(AnalysisEvent::BeforeContainerAnalysis, $analysisEventCollection->first());
+        self::assertCount(1, $analysisEventCollection->filter(AnalysisEvent::AnalyzedServiceDefinitionFromAttribute));
+        self::assertSame(AnalysisEvent::AfterContainerAnalysis, $analysisEventCollection->last());
+    }
 }

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Event\Listener;
+namespace Cspray\AnnotatedContainer\Event\Listener\StaticAnalysis;
 
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedTarget\AnnotatedTarget;

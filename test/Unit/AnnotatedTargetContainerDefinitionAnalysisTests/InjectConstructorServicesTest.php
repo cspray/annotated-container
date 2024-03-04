@@ -14,6 +14,8 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEvent;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEventCollection;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 use function Cspray\Typiphy\arrayType;
@@ -219,5 +221,13 @@ class InjectConstructorServicesTest extends AnnotatedTargetContainerDefinitionAn
             [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectProfilesStringService(), ['default'])],
             [new ExpectedServiceProfiles(Fixtures::injectConstructorServices()->injectTypeUnionService(), ['default'])]
         ];
+    }
+
+    protected function assertEmittedEvents(AnalysisEventCollection $analysisEventCollection) : void {
+        self::assertCount(26, $analysisEventCollection);
+        self::assertSame(AnalysisEvent::BeforeContainerAnalysis, $analysisEventCollection->first());
+        self::assertCount(11, $analysisEventCollection->filter(AnalysisEvent::AnalyzedServiceDefinitionFromAttribute));
+        self::assertCount(13, $analysisEventCollection->filter(AnalysisEvent::AnalyzedInjectDefinitionFromAttribute));
+        self::assertSame(AnalysisEvent::AfterContainerAnalysis, $analysisEventCollection->last());
     }
 }

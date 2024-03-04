@@ -14,7 +14,8 @@ use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTes
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServiceDelegateDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasNoServicePrepareDefinitionsTrait;
 use Cspray\AnnotatedContainer\Unit\AnnotatedTargetContainerDefinitionAnalysisTests\HasTestsTrait\HasServiceDefinitionTestsTrait;
-use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEvents;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEvent;
+use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEventCollection;
 use Cspray\AnnotatedContainerFixture\Fixture;
 use Cspray\AnnotatedContainerFixture\Fixtures;
 
@@ -79,13 +80,12 @@ final class AbstractClassAliasedServiceTest extends AnnotatedTargetContainerDefi
         ];
     }
 
-    protected function getExpectedEvents() : array {
-        return [
-            AnalysisEvents::BeforeContainerAnalysis,
-            AnalysisEvents::AnalyzedServiceDefinitionFromAttribute,
-            AnalysisEvents::AnalyzedServiceDefinitionFromAttribute,
-            AnalysisEvents::AfterContainerAnalysis,
-        ];
+    protected function assertEmittedEvents(AnalysisEventCollection $analysisEventCollection) : void {
+        self::assertCount(5, $analysisEventCollection);
+        self::assertSame(AnalysisEvent::BeforeContainerAnalysis, $analysisEventCollection->first());
+        self::assertCount(2, $analysisEventCollection->filter(AnalysisEvent::AnalyzedServiceDefinitionFromAttribute));
+        self::assertCount(1, $analysisEventCollection->filter(AnalysisEvent::AddedAliasDefinition));
+        self::assertSame(AnalysisEvent::AfterContainerAnalysis, $analysisEventCollection->last());
     }
 
 }

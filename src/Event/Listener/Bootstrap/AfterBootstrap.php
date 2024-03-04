@@ -1,12 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Event\Listener;
+namespace Cspray\AnnotatedContainer\Event\Listener\Bootstrap;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalytics;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
-use Cspray\AnnotatedContainer\Event\Listener;
 
 interface AfterBootstrap {
 

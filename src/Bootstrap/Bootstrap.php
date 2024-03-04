@@ -85,7 +85,7 @@ final class Bootstrap {
         $this->stopwatch->start();
 
         $configuration = $this->bootstrappingConfiguration($configurationFile);
-        $analysisOptions = $this->analysisOptions($configuration, $profiles);
+        $analysisOptions = $this->analysisOptions($configuration);
 
         $this->emitter?->emitBeforeBootstrap($configuration);
 
@@ -121,22 +121,6 @@ final class Bootstrap {
             $analytics
         );
 
-        $message = sprintf(
-            'Took %fms to analyze and create your container. %fms was spent preparing for analysis. %fms was spent statically analyzing your codebase. %fms was spent wiring your container.',
-            $analytics->totalTime->timeTakenInMilliseconds(),
-            $analytics->timePreppingForAnalysis->timeTakenInMilliseconds(),
-            $analytics->timeTakenForAnalysis->timeTakenInMilliseconds(),
-            $analytics->timeTakenCreatingContainer->timeTakenInMilliseconds()
-        );
-        $analysisOptions->getLogger()?->info(
-            $message,
-            [
-                'total_time_in_ms' => $analytics->totalTime->timeTakenInMilliseconds(),
-                'pre_analysis_time_in_ms' => $analytics->timePreppingForAnalysis->timeTakenInMilliseconds(),
-                'post_analysis_time_in_ms' => $analytics->timeTakenForAnalysis->timeTakenInMilliseconds(),
-                'container_wired_time_in_ms' => $analytics->timeTakenCreatingContainer->timeTakenInMilliseconds()
-            ]
-        );
         return $container;
     }
 
@@ -144,7 +128,6 @@ final class Bootstrap {
         $configFile = $this->directoryResolver->getConfigurationPath($configurationFile);
         return new XmlBootstrappingConfiguration(
             $configFile,
-            directoryResolver: $this->directoryResolver,
             parameterStoreFactory: $this->parameterStoreFactory,
             observerFactory: $this->observerFactory,
             definitionProviderFactory: $this->definitionProviderFactory
@@ -152,7 +135,7 @@ final class Bootstrap {
     }
 
 
-    private function analysisOptions(BootstrappingConfiguration $configuration, Profiles $activeProfiles) : ContainerDefinitionAnalysisOptions {
+    private function analysisOptions(BootstrappingConfiguration $configuration) : ContainerDefinitionAnalysisOptions {
         $scanPaths = [];
         foreach ($configuration->getScanDirectories() as $scanDirectory) {
             $scanPaths[] = $this->directoryResolver->getPathFromRoot($scanDirectory);
@@ -161,12 +144,6 @@ final class Bootstrap {
         $containerDefinitionConsumer = $configuration->getContainerDefinitionProvider();
         if ($containerDefinitionConsumer !== null) {
             $analysisOptions = $analysisOptions->withDefinitionProvider($containerDefinitionConsumer);
-        }
-
-        $profilesAllowLogging = count(array_intersect($activeProfiles->toArray(), $configuration->getLoggingExcludedProfiles())) === 0;
-        $logger = $this->logger ?? $configuration->getLogger();
-        if ($logger !== null && $profilesAllowLogging) {
-            $analysisOptions = $analysisOptions->withLogger($logger);
         }
 
         return $analysisOptions->build();
