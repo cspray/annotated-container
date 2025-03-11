@@ -1,11 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Cspray\AnnotatedContainer\Definition;
 
 use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 use Cspray\AnnotatedContainer\Reflection\Type;
-use Cspray\AnnotatedContainer\Reflection\TypeIntersect;
-use Cspray\AnnotatedContainer\Reflection\TypeUnion;
 
 /**
  * A definition that provides details on values that should be injected into method parameters or Configuration properties

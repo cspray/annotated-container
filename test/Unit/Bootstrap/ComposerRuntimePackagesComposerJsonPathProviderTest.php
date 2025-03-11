@@ -18,7 +18,6 @@ class ComposerRuntimePackagesComposerJsonPathProviderTest extends TestCase {
             $vendorDir . '/cspray/precision-stopwatch/composer.json',
             $vendorDir . '/illuminate/container/composer.json',
             $vendorDir . '/illuminate/contracts/composer.json',
-            $vendorDir . '/jetbrains/phpstorm-attributes/composer.json',
             $vendorDir . '/laravel/serializable-closure/composer.json',
             $vendorDir . '/nikic/php-parser/composer.json',
             $vendorDir . '/php-di/invoker/composer.json',

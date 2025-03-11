@@ -2,8 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Definition\Serializer;
 
-use DOMDocument;
-
 final class SerializedContainerDefinition {
 
     /**

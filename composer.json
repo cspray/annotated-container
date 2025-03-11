@@ -26,7 +26,6 @@
   },
   "require-dev": {
     "illuminate/container": "^10.11",
-    "jetbrains/phpstorm-attributes": "^1.1",
     "php-di/php-di": "^7.0",
     "psr/log": "^3.0",
     "rdlowrey/auryn": "^1.4",

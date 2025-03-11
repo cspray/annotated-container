@@ -8,8 +8,6 @@ namespace Cspray\AnnotatedContainer\Autowire;
 interface AutowireableInvoker {
 
     /**
-     *
-     *
      * @param callable $callable
      * @param AutowireableParameterSet|null $parameters
      * @return mixed
