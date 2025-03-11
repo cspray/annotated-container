@@ -2,8 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [v3.0.0](https://github.com/cspray/annotated-container/tree/v3.0.0) - 2024-12-15
 
@@ -11,9 +10,61 @@ The v3.0 release represents a substantial improvement in several areas of the pr
 
 ### Added
 
+- Version attribute to the `annotated-container.xml` XML configuration. In future iterations work may be done to ensure versions for your configuration are compatible with the version of the library installed.
+- A more complete event system with informative events being emitted throughout the entire Annotated Container lifecycle. Previously, this functionality was much more limited and provided by Bootstrap observers.
+- A Definition factory that allows creating all definitions, except for a `ContainerDefinition`, in a more complete, concise manner. Previously, this functionality was provided by Definition Builders using a Fluent API.
+- More feature-complete caching system for a `ContainerDefinition`. Previously, this was powered by direct calls to PHP's filesystem functions. Now a purpose-built interface, `Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache`, allows whatever caching strategy is most appropriate.
+- A `Cspray\AnnotatedContainer\Filesystem\Filesystem` interface and implementation that allows for executing common tasks on a file. Previously, the native PHP functions for accessing a filesystem were being used. This change was primarily implemented to improve testability without requiring for a heavyweight abstraction from a third-party library.
+- `Cspray\AnnotatedContainer\Profiles` value object that indicates what profiles are active when a container is created.
+- Normalized the conventions around setting up the Annotated Container CLI tool. You can now use `Cspray\AnnotatedContainer\Cli\AnnotatedContainerCliRunner` in your own scripts, allowing you to easily customize caching, among other things.
+- A bootstrapping utility class, `Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration` that allows consistently creating the `ContainerDefinitionAnalysisOptions` to be used.
+- A discrete interface, `Cspray\AnnotatedContainer\Bootstrap\PackagesComposerJsonPathProvider`, to determine what path should be used when scanning a `composer.json` for third-party dependencies. This is utilized by the CLI tool to generate the appropriate configuration file.
+- A discrete `DefaultDefinitionProviderFactory` implementation, previously this functionality was inlined into the bootstrap.
+
 ### Changed
 
+- **Updated the required PHP version to 8.2!**
+- Updated the version of `nikic/php-parser` used to 5.3.
+- All interactions with the `Bootstrap` object are available through named, static methods. The `Bootstrap` constructor is now private and the `new` construct cannot be used. Generally speaking, you should make use of the new `Bootstrap::fromAnnotatedContainerConventions` method.
+- Container factory to use is no longer implicit and must be explicitly provided during your bootstrapping.
+- `AnnotatedContainer::getBackingContainer` was renamed to `backingContainer`.
+- All Definitions that had a nullable `attribute` method were changed to require a non-null Attribute value. Please see the ADR "Require Definitions To Provide Attribute" for more information.
+- Improved the `XmlContainerDefinitionSerializer` and corresponding XSD to remove redundant information being stored in the Attribute.
+- The `AnnotatedContainerVersion` class was updated to use the `composer/runtime` dependency directly, instead of using `ocramius/package-versions`.
+- Added template parameters to the `AutowireableFactory::make` method, allowing more type information to be conveyed.
+- Several implementations had their `get` prefix removed, as it was redundant and not necessary.
+- Moved test code that was in `fixture_src` under `test/Fixture`.
+- When utilizing the `composer.json` configuration for configuring third-party initializers, more checks are made to ensure that a valid data structure has been passed. Previously, this had undefined behavior when invalid data types or values were present.
+
+### Fixed
+
+- Several places where `declare(strict_types=1)` was not properly set.
+- Fixed an error where the interface `AutowireableParameterSet` was implementing a template instead of extending it.
+
 ### Removed
+
+- All code associated with Bootstrap observers, including but not limited to:
+  - `Cspray\AnnotatedContainer\Bootstrap\ObserverFactory`
+  - `Cspray\AnnotatedContainer\Bootstrap\ContainerAnalyticsObserver`
+  - `Cspray\AnnotatedContainer\Bootstrap\ContainerCreatedObserver`
+  - `Cspray\AnnotatedContainer\Bootstrap\PostAnalysisObserver`
+  - `Cspray\AnnotatedContainer\Bootstrap\PreAnalysisObserver`
+  - `Cspray\AnnotatedContainer\Bootstrap\ServiceWiringObserver` (See `ServiceWiringListener`)
+  - `Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializer::getObserverClasses`
+- All Definition builder objects, except for the `ContainerDefinitionBuilder`. See the new `DefinitionFactory` for equivalent functionality.
+- The `ActiveProfiles` value object. See the new `Profiles` value object for a replacement.
+- All code associated with Configuration, including but not limited to:
+  - `Cspray\AnnotatedContainer\Definition\ConfigurationDefinition`
+  - `Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder`
+  - `Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute`
+  - `Cspray\AnnotatedContainer\Attribute\Configuration`
+- Removed built-in file caching used in bootstrapping. This functionality is replaced by implementing your own `ContainerDefinitionCache` implementation, or explicitly using the `FileBackedContainerDefinitionCache` provided out-of-the-box.
+- Removed built-in logging used throughout the library. This functionality will be replaced at a future date with a set of listeners that will log the same information. These listeners will require installing a separate repo and explicitly opting in.
+- Removed the following Composer dependencies:
+  - brick/varexporter
+  - cspray/typiphy
+  - ocramius/package-versions
+  - psr/log
 
 ## [v2.4.0](https://github.com/cspray/annotated-container/tree/v2.4.0) - 2024-06-08
 
