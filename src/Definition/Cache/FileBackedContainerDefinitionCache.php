@@ -5,7 +5,6 @@ namespace Cspray\AnnotatedContainer\Definition\Cache;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\Serializer\ContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Definition\Serializer\SerializedContainerDefinition;
-use Cspray\AnnotatedContainer\Definition\Serializer\XmlContainerDefinitionSerializer;
 use Cspray\AnnotatedContainer\Exception\CacheDirectoryNotFound;
 use Cspray\AnnotatedContainer\Exception\CacheDirectoryNotWritable;
 use Cspray\AnnotatedContainer\Exception\MismatchedContainerDefinitionSerializerVersions;
