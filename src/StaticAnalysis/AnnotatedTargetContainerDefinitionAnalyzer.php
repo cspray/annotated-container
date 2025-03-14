@@ -279,7 +279,10 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
         foreach ($abstractTypes as $abstractType) {
             foreach ($concreteTypes as $concreteType) {
                 $abstractTypeString = $abstractType->name();
-                assert(class_exists($abstractTypeString), "The type $abstractTypeString does not exist");
+                assert(
+                    class_exists($abstractTypeString) || interface_exists($abstractTypeString),
+                    "The type $abstractTypeString does not exist"
+                );
                 if (is_subclass_of($concreteType->name(), $abstractTypeString)) {
                     $aliasDefinition = definitionFactory()->aliasDefinition($abstractType, $concreteType);
                     $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition($aliasDefinition);
