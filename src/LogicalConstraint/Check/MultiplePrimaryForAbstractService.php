@@ -68,7 +68,10 @@ TEXT;
         foreach ($containerDefinition->serviceDefinitions() as $service) {
             if ($service->isConcrete()) {
                 $serviceDefinitionType = $serviceDefinition->type()->name();
-                assert(class_exists($serviceDefinitionType));
+                assert(
+                    class_exists($serviceDefinitionType) || interface_exists($serviceDefinitionType),
+                    "The type $serviceDefinitionType does not exist"
+                );
                 if (is_subclass_of($service->type()->name(), $serviceDefinitionType)) {
                     yield $service;
                 }

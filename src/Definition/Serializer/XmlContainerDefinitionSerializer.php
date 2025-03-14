@@ -305,7 +305,10 @@ final class XmlContainerDefinitionSerializer implements ContainerDefinitionSeria
 
         foreach ($serviceDefinitions as $serviceDefinition) {
             $serviceType = $xpath->query('cd:type/text()', $serviceDefinition)[0]->nodeValue;
-            assert(class_exists($serviceType));
+            assert(
+                class_exists($serviceType) || interface_exists($serviceType),
+                "The type $serviceType does not exist"
+            );
             $isConcrete = $xpath->query('@isConcrete', $serviceDefinition)[0]->nodeValue === 'true';
             $attr = unserialize(base64_decode(
                 $xpath->query('cd:attribute/text()', $serviceDefinition)[0]?->nodeValue
