@@ -358,7 +358,10 @@ final class XmlContainerDefinitionSerializer implements ContainerDefinitionSeria
             $method = $xpath->query('cd:method/text()', $prepareDefinition)[0]->nodeValue;
             $attr = unserialize(base64_decode($xpath->query('cd:attribute/text()', $prepareDefinition)[0]?->nodeValue));
 
-            assert(class_exists($service));
+            assert(
+                class_exists($service) || interface_exists($service),
+                "The type $service does not exist"
+            );
             assert($method !== null && $method !== '');
 
             $builder = $builder->withServicePrepareDefinition(
@@ -379,7 +382,11 @@ final class XmlContainerDefinitionSerializer implements ContainerDefinitionSeria
             $delegateMethod = $xpath->query('cd:delegateMethod/text()', $delegateDefinition)[0]->nodeValue;
             $attr = unserialize(base64_decode($xpath->query('cd:attribute/text()', $delegateDefinition)[0]?->nodeValue));
 
-            assert(class_exists($service));
+            assert(
+                class_exists($service) || interface_exists($service),
+                "The type $service does not exist"
+            );
+            // we are not checking for interface_exists() because a delegate must be a concrete type
             assert(class_exists($delegateType));
             assert($delegateMethod !== null && $delegateMethod !== '');
 
