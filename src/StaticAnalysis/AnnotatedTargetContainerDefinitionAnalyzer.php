@@ -189,7 +189,10 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
             foreach ($abstractPrepareDefinitions as $abstractPrepareDefinition) {
                 $concreteServiceName = $concretePrepareDefinition->service()->name();
                 $abstractServiceName = $abstractPrepareDefinition->service()->name();
-                assert(class_exists($abstractServiceName));
+                assert(
+                    class_exists($abstractServiceName) || interface_exists($abstractServiceName),
+                    "The type $abstractServiceName does not exist"
+                );
                 if (is_subclass_of($concreteServiceName, $abstractServiceName)) {
                     $hasAbstractPrepare = true;
                     break;
@@ -277,9 +280,12 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
         }
 
         foreach ($abstractTypes as $abstractType) {
+            $abstractTypeString = $abstractType->name();
+            assert(
+                class_exists($abstractTypeString) || interface_exists($abstractTypeString),
+                "The type $abstractTypeString does not exist"
+            );
             foreach ($concreteTypes as $concreteType) {
-                $abstractTypeString = $abstractType->name();
-                assert(class_exists($abstractTypeString), "The type $abstractTypeString does not exist");
                 if (is_subclass_of($concreteType->name(), $abstractTypeString)) {
                     $aliasDefinition = definitionFactory()->aliasDefinition($abstractType, $concreteType);
                     $containerDefinitionBuilder = $containerDefinitionBuilder->withAliasDefinition($aliasDefinition);
