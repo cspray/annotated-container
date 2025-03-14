@@ -57,7 +57,10 @@ final class TypeFactory {
             default => null,
         };
         if ($type === null) {
-            assert(class_exists($name));
+            assert(
+                class_exists($name) || interface_exists($name),
+                "The type $name does not exist"
+            );
             $type = $this->class($name);
         }
 
