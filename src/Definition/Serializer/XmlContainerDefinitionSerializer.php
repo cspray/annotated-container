@@ -334,7 +334,11 @@ final class XmlContainerDefinitionSerializer implements ContainerDefinitionSeria
             $abstract = $xpath->query('cd:abstractService/text()', $aliasDefinition)[0]->nodeValue;
             $concrete = $xpath->query('cd:concreteService/text()', $aliasDefinition)[0]->nodeValue;
 
-            assert(class_exists($abstract));
+            assert(
+                class_exists($abstract) || interface_exists($abstract),
+                "The type $abstract does not exist"
+            );
+            // we are not checking for interface_exists() here because an interface cannot be a concrete service
             assert(class_exists($concrete));
 
             $builder = $builder->withAliasDefinition(
