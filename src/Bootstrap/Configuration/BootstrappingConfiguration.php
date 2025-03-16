@@ -1,12 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Bootstrap;
+namespace Cspray\AnnotatedContainer\Bootstrap\Configuration;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
 use Cspray\AnnotatedContainer\Event\Listener;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
-use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 
 interface BootstrappingConfiguration {
 
@@ -21,12 +20,12 @@ interface BootstrappingConfiguration {
     public function containerDefinitionProvider() : ?DefinitionProvider;
 
     /**
-     * @return list<ParameterStore>
+     * @return Listener
      */
     public function parameterStores() : array;
 
     /**
-     * @return list<Listener>
+     * @return Listener
      */
     public function listeners() : array;
 }

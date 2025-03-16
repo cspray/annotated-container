@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\ComposerRuntimePackagesComposerJsonPathProvider;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ComposerRuntimePackagesComposerJsonPathProvider;
 use PHPUnit\Framework\TestCase;
 
 class ComposerRuntimePackagesComposerJsonPathProviderTest extends TestCase {

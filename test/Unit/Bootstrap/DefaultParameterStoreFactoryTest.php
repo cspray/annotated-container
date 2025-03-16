@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\DefaultParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultParameterStoreFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidParameterStore;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;

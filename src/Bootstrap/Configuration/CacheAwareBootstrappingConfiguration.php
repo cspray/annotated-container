@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Bootstrap;
+namespace Cspray\AnnotatedContainer\Bootstrap\Configuration;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;

@@ -4,13 +4,13 @@ namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
-use Cspray\AnnotatedContainer\Bootstrap\CacheAwareBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\CacheAwareBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalytics;
-use Cspray\AnnotatedContainer\Bootstrap\ServiceFromServiceDefinition;
-use Cspray\AnnotatedContainer\Bootstrap\ServiceGatherer;
-use Cspray\AnnotatedContainer\Bootstrap\ServiceWiringListener;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceFromServiceDefinition;
+use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceGatherer;
+use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceWiringListener;
 use Cspray\AnnotatedContainer\ContainerFactory\AurynContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
@@ -22,6 +22,8 @@ use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Event\Listener\Bootstrap\AfterBootstrap;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
+use Cspray\AnnotatedContainer\Fixture\CustomServiceAttribute\Repository;
+use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\Profiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
@@ -29,13 +31,11 @@ use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;
-use Cspray\AnnotatedContainer\Fixture\CustomServiceAttribute\Repository;
-use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\PrecisionStopwatch\KnownIncrementingPreciseTime;
 use Cspray\PrecisionStopwatch\Stopwatch;
-use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream as VirtualFilesystem;
 use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
+use PHPUnit\Framework\TestCase;
 
 final class BootstrapTest extends TestCase {
 

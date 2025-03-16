@@ -2,23 +2,21 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\DefaultDefinitionProviderFactory;
-use Cspray\AnnotatedContainer\Bootstrap\DefaultListenerFactory;
-use Cspray\AnnotatedContainer\Bootstrap\DefaultParameterStoreFactory;
-use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
-use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
-use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultDefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultListenerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\XmlBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
+use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\StaticAnalysis\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;
-use Cspray\AnnotatedContainer\Fixture\Fixtures;
-use org\bovigo\vfs\vfsStream as VirtualFilesystem;
-use org\bovigo\vfs\vfsStreamDirectory as VirtualDirectory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use function Cspray\AnnotatedContainer\Reflection\types;

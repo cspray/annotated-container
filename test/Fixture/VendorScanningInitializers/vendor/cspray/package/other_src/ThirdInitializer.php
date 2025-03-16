@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Fixture\VendorScanningInitializers\Vendor\Package;
 
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializer;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializer;
 
 class ThirdInitializer extends ThirdPartyInitializer {
 

@@ -2,12 +2,11 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\ComposerJsonScanningThirdPartyInitializerProvider;
-use Cspray\AnnotatedContainer\Bootstrap\PackagesComposerJsonPathProvider;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializer;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\ComposerJsonScanningThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\PackagesComposerJsonPathProvider;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializer;
 use Cspray\AnnotatedContainer\Exception\InvalidThirdPartyInitializer;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
-use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\Fixture\VendorScanningInitializers\Vendor\Package\FirstInitializer;
 use Cspray\AnnotatedContainer\Fixture\VendorScanningInitializers\Vendor\Package\SecondInitializer;
 use Cspray\AnnotatedContainer\Fixture\VendorScanningInitializers\Vendor\Package\ThirdInitializer;

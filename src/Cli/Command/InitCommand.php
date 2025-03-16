@@ -3,8 +3,8 @@
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Exception\PotentialConfigurationOverwrite;

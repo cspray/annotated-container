@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\Event;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalytics;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 

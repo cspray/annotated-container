@@ -2,14 +2,14 @@
 
 namespace Cspray\AnnotatedContainer\Cli;
 
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
-use Cspray\AnnotatedContainer\Bootstrap\ComposerJsonScanningThirdPartyInitializerProvider;
-use Cspray\AnnotatedContainer\Bootstrap\ComposerRuntimePackagesComposerJsonPathProvider;
-use Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration;
-use Cspray\AnnotatedContainer\Bootstrap\PackagesComposerJsonPathProvider;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializerProvider;
-use Cspray\AnnotatedContainer\Bootstrap\VendorPresenceBasedBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\ComposerJsonScanningThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\VendorPresenceBasedBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ComposerRuntimePackagesComposerJsonPathProvider;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\PackagesComposerJsonPathProvider;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Command\BuildCommand;
 use Cspray\AnnotatedContainer\Cli\Command\CacheClearCommand;
 use Cspray\AnnotatedContainer\Cli\Command\Command;
@@ -85,7 +85,7 @@ final class AnnotatedContainerCliRunner {
         $howToEnable = wordwrap(sprintf(
             'A %s object must be provided. This can be accomplished by running the "init" command.',
             BootstrappingConfiguration::class
-        ));
+        ), 80);
         assert($howToEnable !== '');
         return new DisabledCommand($commandName, $howToEnable);
     }
@@ -97,7 +97,7 @@ final class AnnotatedContainerCliRunner {
         $configClass = BootstrappingConfiguration::class;
         $howToEnable = "A $configClass object with a cache() method that returns a non-null value. For more information, " .
             "read /docs/how-to/03-caching-container-definition.md.";
-        $howToEnable = wordwrap($howToEnable);
+        $howToEnable = wordwrap($howToEnable, 80);
         assert($howToEnable !== '');
         return new DisabledCommand($commandName, $howToEnable);
     }

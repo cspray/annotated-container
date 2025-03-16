@@ -3,9 +3,9 @@
 namespace Cspray\AnnotatedContainer\Unit\Cli\Command;
 
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializer;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializer;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Command\InitCommand;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;

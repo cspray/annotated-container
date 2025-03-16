@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Bootstrap;
+namespace Cspray\AnnotatedContainer\Bootstrap\Initializer;
 
 interface ThirdPartyInitializerProvider {
 
     /**
-     * @return list<ThirdPartyInitializer>
+     * @return ThirdPartyInitializer
      */
     public function thirdPartyInitializers() : array;
 }

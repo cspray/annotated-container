@@ -1,7 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Bootstrap;
+namespace Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver;
 
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\PackagesComposerJsonPathProvider;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializer;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Exception\InvalidThirdPartyInitializer;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
 

@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\Unit\Cli;
 
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Cli\AnnotatedContainerCliRunner;
 use Cspray\AnnotatedContainer\Cli\Command\BuildCommand;
 use Cspray\AnnotatedContainer\Cli\Command\CacheClearCommand;
@@ -66,9 +66,9 @@ final class AnnotatedContainerCliRunnerTest extends TestCase {
         $expected = <<<TEXT
 To enable "build":
 
-A $boostrappingConfig object
-with a cache() method that returns a non-null value. For more information,
-read /docs/how-to/03-caching-container-definition.md.
+A $boostrappingConfig
+object with a cache() method that returns a non-null value. For more
+information, read /docs/how-to/03-caching-container-definition.md.
 
 TEXT;
 
@@ -88,9 +88,9 @@ TEXT;
         $expected = <<<TEXT
 To enable "cache-clear":
 
-A $boostrappingConfig object
-with a cache() method that returns a non-null value. For more information,
-read /docs/how-to/03-caching-container-definition.md.
+A $boostrappingConfig
+object with a cache() method that returns a non-null value. For more
+information, read /docs/how-to/03-caching-container-definition.md.
 
 TEXT;
 
@@ -134,8 +134,8 @@ TEXT;
         $expected = <<<TEXT
 To enable "validate":
 
-A $bootstrappingConfig object
-must be provided. This can be accomplished by running the "init" command.
+A $bootstrappingConfig
+object must be provided. This can be accomplished by running the "init" command.
 
 TEXT;
 

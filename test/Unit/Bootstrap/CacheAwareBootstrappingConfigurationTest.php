@@ -2,8 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
-use Cspray\AnnotatedContainer\Bootstrap\CacheAwareBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\CacheAwareBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Bootstrap;
+namespace Cspray\AnnotatedContainer\Bootstrap\Listener;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
@@ -29,10 +29,10 @@ abstract class ServiceWiringListener implements AfterContainerCreation {
             /**
              * @template T of object
              * @param class-string<T> $type
-             * @return list<ServiceFromServiceDefinition<T>>
+             * @return ServiceFromServiceDefinition
              */
             public function servicesForType(string $type) : array {
-                /** @var list<ServiceFromServiceDefinition<T>> $services */
+                /** @var ServiceFromServiceDefinition $services */
                 $services = [];
                 foreach ($this->containerDefinition->serviceDefinitions() as $serviceDefinition) {
                     if ($serviceDefinition->isAbstract()) {
