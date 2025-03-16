@@ -33,6 +33,7 @@ final class Bootstrap {
         ContainerFactory $containerFactory,
         Emitter $emitter,
         ParameterStoreFactory $parameterStoreFactory = new DefaultParameterStoreFactory(),
+        ListenerFactory $listenerFactory = new DefaultListenerFactory(),
         DefinitionProviderFactory $definitionProviderFactory = new DefaultDefinitionProviderFactory(),
         BootstrappingDirectoryResolver $directoryResolver = new VendorPresenceBasedBootstrappingDirectoryResolver(),
         Filesystem $filesystem = new PhpFunctionsFilesystem()
@@ -41,7 +42,8 @@ final class Bootstrap {
             $filesystem,
             $directoryResolver->configurationPath('annotated-container.xml'),
             $parameterStoreFactory,
-            $definitionProviderFactory
+            $definitionProviderFactory,
+            $listenerFactory
         );
 
         return self::fromCompleteSetup(
@@ -74,6 +76,8 @@ final class Bootstrap {
         $profiles ??= Profiles::defaultOnly();
 
         $this->stopwatch->start();
+
+        // add listeners from bootstrapping configuration to emitter
 
         $analysisOptions = $this->analysisOptions($this->bootstrappingConfiguration);
 

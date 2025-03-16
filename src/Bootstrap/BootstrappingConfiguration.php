@@ -4,6 +4,7 @@ namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
+use Cspray\AnnotatedContainer\Event\Listener;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 
@@ -23,4 +24,9 @@ interface BootstrappingConfiguration {
      * @return list<ParameterStore>
      */
     public function parameterStores() : array;
+
+    /**
+     * @return list<Listener>
+     */
+    public function listeners() : array;
 }

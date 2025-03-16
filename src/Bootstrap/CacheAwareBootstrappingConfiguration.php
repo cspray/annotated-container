@@ -30,4 +30,8 @@ final class CacheAwareBootstrappingConfiguration implements BootstrappingConfigu
     public function parameterStores() : array {
         return $this->configuration->parameterStores();
     }
+
+    public function listeners() : array {
+        // TODO: Implement listeners() method.
+    }
 }

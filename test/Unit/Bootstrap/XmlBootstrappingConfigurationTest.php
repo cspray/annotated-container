@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
 use Cspray\AnnotatedContainer\Bootstrap\DefaultDefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\DefaultListenerFactory;
 use Cspray\AnnotatedContainer\Bootstrap\DefaultParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\DefinitionProviderFactory;
 use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
@@ -64,6 +65,7 @@ XML;
             '/my/path/to/annotated-container.xml',
             new DefaultParameterStoreFactory(),
             new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
     }
 
@@ -91,6 +93,7 @@ XML;
             '/path/to/annotated-container.xml',
             new DefaultParameterStoreFactory(),
             new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
 
         self::assertSame(
@@ -124,6 +127,7 @@ XML;
             '/path/annotated-container.xml',
             new DefaultParameterStoreFactory(),
             new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
         $provider = $configuration->containerDefinitionProvider();
         self::assertInstanceOf(
@@ -158,6 +162,7 @@ XML;
             'annotated-container.xml',
             new DefaultParameterStoreFactory(),
             new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
 
         self::assertNull($config->containerDefinitionProvider());
@@ -182,6 +187,7 @@ XML;
             'annotated-container.xml',
             new DefaultParameterStoreFactory(),
             new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
         self::assertNull($config->cache());
     }
@@ -205,6 +211,7 @@ XML;
             'annotated-container.xml',
             new DefaultParameterStoreFactory(),
             new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
 
         self::assertNull($config->cache());
@@ -232,6 +239,7 @@ XML;
             'annotated-container.xml',
             new DefaultParameterStoreFactory(),
             new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
 
         self::assertCount(1, $config->parameterStores());
@@ -271,6 +279,7 @@ XML;
             'annotated-container.xml',
             $parameterStoreFactory,
             new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
 
         self::assertCount(1, $config->parameterStores());
@@ -304,7 +313,8 @@ XML;
             $this->filesystem,
             'annotated-container.xml',
             new DefaultParameterStoreFactory(),
-            $consumerFactory
+            $consumerFactory,
+            new DefaultListenerFactory()
         );
 
         $provider = $config->containerDefinitionProvider();
@@ -347,7 +357,8 @@ XML;
             $this->filesystem,
             'annotated-container.xml',
             new DefaultParameterStoreFactory(),
-            new DefaultDefinitionProviderFactory()
+            new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
 
         self::assertSame(
@@ -369,7 +380,8 @@ XML;
             $this->filesystem,
             'annotated-container.xml',
             new DefaultParameterStoreFactory(),
-            new DefaultDefinitionProviderFactory()
+            new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
         );
     }
 }

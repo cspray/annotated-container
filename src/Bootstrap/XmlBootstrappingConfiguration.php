@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
+use Cspray\AnnotatedContainer\Event\Listener;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
 use Cspray\AnnotatedContainer\StaticAnalysis\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
@@ -33,7 +34,8 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         private readonly Filesystem $filesystem,
         private readonly string $xmlFile,
         private readonly ParameterStoreFactory $parameterStoreFactory,
-        private readonly DefinitionProviderFactory $definitionProviderFactory
+        private readonly DefinitionProviderFactory $definitionProviderFactory,
+        private readonly ListenerFactory $listenerFactory,
     ) {
         if (!$this->filesystem->isFile($this->xmlFile)) {
             throw InvalidBootstrapConfiguration::fromFileMissing($this->xmlFile);
@@ -140,6 +142,13 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
      */
     public function parameterStores() : array {
         return $this->parameterStores;
+    }
+
+    /**
+     * @return list<Listener>
+     */
+    public function listeners() : array {
+        // TODO: Implement listeners() method.
     }
 
     public function cache() : ?ContainerDefinitionCache {
