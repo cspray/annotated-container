@@ -4,7 +4,7 @@ _default:
     just --list --unsorted
 
 # Install all dependencies necesesary to run Annotated Container tools
-install: _install_labrador_cs _install_phpunit _install_psalm _install_ac
+install: _install_labrador_cs _install_phpunit _install_psalm _install_phploc _install_ac
 
 _install_ac:
     composer install
@@ -17,6 +17,9 @@ _install_phpunit:
 
 _install_psalm:
     cd tools/psalm && composer install
+
+_install_phploc:
+    cd tools/phploc && composer install
 
 # Run unit tests
 test *FLAGS:
@@ -46,6 +49,9 @@ code-lint:
 # Resolve fixable code-linting issues
 code-lint-fix:
     @./tools/labrador-cs/vendor/bin/phpcbf -p --standard=./tools/labrador-cs/vendor/cspray/labrador-coding-standard/ruleset.xml --exclude=Generic.Files.LineLength src test
+
+loc:
+    @./tools/phploc/vendor/bin/phploc src
 
 # Run all CI checks. ALL checks will run, regardless of failures
 ci-check:
