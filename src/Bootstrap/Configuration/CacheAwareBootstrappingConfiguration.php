@@ -32,6 +32,6 @@ final class CacheAwareBootstrappingConfiguration implements BootstrappingConfigu
     }
 
     public function listeners() : array {
-        // TODO: Implement listeners() method.
+        return $this->configuration->listeners();
     }
 }

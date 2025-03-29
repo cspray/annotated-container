@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\ComposerJsonScanningThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ComposerJsonScanningThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Bootstrap\Initializer\PackagesComposerJsonPathProvider;
 use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializer;
 use Cspray\AnnotatedContainer\Exception\InvalidThirdPartyInitializer;

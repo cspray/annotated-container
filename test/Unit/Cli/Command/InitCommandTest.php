@@ -14,6 +14,9 @@ use Cspray\AnnotatedContainer\Cli\Output\TerminalOutput;
 use Cspray\AnnotatedContainer\Exception\ComposerAutoloadNotFound;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
 use Cspray\AnnotatedContainer\Unit\Helper\InMemoryOutput;
+use Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener;
+use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener;
+use Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubInput;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -343,20 +346,35 @@ XML;
                 ]
             ], JSON_THROW_ON_ERROR));
 
-        $thirdPartyInitializer = $this->createMock(ThirdPartyInitializer::class);
-        $thirdPartyInitializer->expects($this->once())
+        $firstInitializer = $this->createMock(ThirdPartyInitializer::class);
+        $firstInitializer->expects($this->once())
             ->method('packageName')
             ->willReturn('cspray/package-name');
-        $thirdPartyInitializer->expects($this->once())
+        $firstInitializer->expects($this->once())
             ->method('relativeScanDirectories')
             ->willReturn(['src', 'lib']);
-        $thirdPartyInitializer->expects($this->once())
+        $firstInitializer->expects($this->once())
             ->method('definitionProviderClass')
             ->willReturn(StubDefinitionProvider::class);
+        $firstInitializer->expects($this->once())
+            ->method('listeners')
+            ->willReturn([StubAnalysisListener::class]);
+
+        $secondInitializer = $this->createMock(ThirdPartyInitializer::class);
+        $secondInitializer->expects($this->once())
+            ->method('relativeScanDirectories')
+            ->willReturn([]);
+        $secondInitializer->expects($this->never())->method('packageName');
+        $secondInitializer->expects($this->once())
+            ->method('definitionProviderClass')
+            ->willReturn(null);
+        $secondInitializer->expects($this->once())
+            ->method('listeners')
+            ->willReturn([StubBootstrapListener::class, StubContainerFactoryListener::class]);
 
         $this->thirdPartyInitializerProvider->expects($this->once())
             ->method('thirdPartyInitializers')
-            ->willReturn([$thirdPartyInitializer]);
+            ->willReturn([$firstInitializer, $secondInitializer]);
 
         $version = AnnotatedContainerVersion::version();
         $definitionProvider = StubDefinitionProvider::class;
@@ -381,6 +399,11 @@ XML;
   <definitionProviders>
     <definitionProvider>$definitionProvider</definitionProvider>
   </definitionProviders>
+  <listeners>
+    <listener>Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener</listener>
+    <listener>Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener</listener>
+    <listener>Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener</listener>
+  </listeners>
 </annotatedContainer>
 
 XML;

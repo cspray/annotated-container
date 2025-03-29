@@ -6,6 +6,10 @@ use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\CacheAwareBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultDefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultListenerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\XmlBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\ContainerAnalytics;
 use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceFromServiceDefinition;
@@ -22,13 +26,16 @@ use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Event\Listener\Bootstrap\AfterBootstrap;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
+use Cspray\AnnotatedContainer\Filesystem\PhpFunctionsFilesystem;
 use Cspray\AnnotatedContainer\Fixture\CustomServiceAttribute\Repository;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\Profiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener;
 use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener;
+use Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;
 use Cspray\PrecisionStopwatch\KnownIncrementingPreciseTime;
@@ -484,5 +491,56 @@ XML;
             Fixtures::singleConcreteService()->fooImplementation()->name(),
             $service
         );
+    }
+
+    public function testBootstrapWithConfiguredListenersAutomaticallyAddsThemToEmitter() : void {
+        $emitter = new Emitter();
+        $containerFactory = new PhpDiContainerFactory($emitter);
+        $directoryResolver = new FixtureBootstrappingDirectoryResolver();
+        $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd" version="dev-main">
+    <scanDirectories>
+        <source>
+            <dir>SingleConcreteService</dir>
+        </source>
+    </scanDirectories>
+    <listeners>
+      <listener>Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener</listener>
+      <listener>Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener</listener>
+      <listener>Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener</listener>
+    </listeners>
+</annotatedContainer>
+XML;
+        VirtualFilesystem::newFile('annotated-container.xml')->at($this->vfs)->setContent($xml);
+
+        $bootstrap = Bootstrap::fromCompleteSetup(
+            $configuration = new XmlBootstrappingConfiguration(
+                new PhpFunctionsFilesystem(),
+                $directoryResolver->configurationPath('annotated-container.xml'),
+                new DefaultParameterStoreFactory(),
+                new DefaultDefinitionProviderFactory(),
+                new DefaultListenerFactory()
+            ),
+            $containerFactory,
+            $emitter,
+            $directoryResolver,
+        );
+
+        $bootstrap->bootstrapContainer();
+
+        self::assertCount(3, $configuration->listeners());
+
+        $stubAnalysis = $configuration->listeners()[0];
+        self::assertInstanceOf(StubAnalysisListener::class, $stubAnalysis);
+        self::assertCount(3, $stubAnalysis->getTriggeredEvents());
+
+        $stubBootstrap = $configuration->listeners()[1];
+        self::assertInstanceOf(StubBootstrapListener::class, $stubBootstrap);
+        self::assertCount(2, $stubBootstrap->getTriggeredEvents());
+
+        $stubFactory = $configuration->listeners()[2];
+        self::assertInstanceOf(StubContainerFactoryListener::class, $stubFactory);
+        self::assertCount(2, $stubFactory->getTriggeredEvents());
     }
 }

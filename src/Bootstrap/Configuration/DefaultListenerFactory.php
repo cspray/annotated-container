@@ -6,7 +6,12 @@ use Cspray\AnnotatedContainer\Event\Listener;
 
 final class DefaultListenerFactory implements ListenerFactory {
 
+    /**
+     * @param string|class-string<Listener> $identifier
+     * @return Listener
+     */
     public function createListener(string $identifier) : Listener {
-        // TODO: Implement createListener() method.
+        assert(is_a($identifier, Listener::class, true));
+        return new $identifier();
     }
 }

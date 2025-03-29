@@ -52,11 +52,6 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                 $this->injector->delegate(Profiles::class, fn() => $this->state->activeProfiles());
             }
 
-            /**
-             * @template T
-             * @param class-string<T>|non-empty-string $id
-             * @return ($id is class-string<T> ? T : mixed)
-             */
             public function get(string $id) {
                 try {
                     if (!$this->has($id)) {
@@ -70,9 +65,7 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
                         $id = $namedType->name();
                     }
 
-                    /** @var T|mixed $value */
-                    $value = $this->injector->make($id);
-                    return $value;
+                    return $this->injector->make($id);
                 } catch (InjectionException $injectionException) {
                     throw ContainerException::fromCaughtThrowable($injectionException);
                 }

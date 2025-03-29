@@ -9,7 +9,7 @@ use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefin
  */
 final class ContainerDefinitionAnalysisOptionsBuilder {
 
-    /** @var list<string> */
+    /** @var list<non-empty-string> */
     private array $directories = [];
 
     private ?DefinitionProvider $consumer = null;
@@ -20,10 +20,10 @@ final class ContainerDefinitionAnalysisOptionsBuilder {
     /**
      * Specify the directories that should be parsed when generating the ContainerDefinition
      *
-     * @param string ...$directories
+     * @param non-empty-string ...$directories
      * @return static
      */
-    public static function scanDirectories(string...$directories) : self {
+    public static function scanDirectories(string ...$directories) : self {
         $instance = new self();
         $instance->directories = array_values($directories);
         return $instance;
@@ -48,7 +48,7 @@ final class ContainerDefinitionAnalysisOptionsBuilder {
             $this->consumer,
         ) implements ContainerDefinitionAnalysisOptions {
             /**
-             * @param list<string> $directories
+             * @param non-empty-list<non-empty-string> $directories
              * @param DefinitionProvider|null $consumer
              */
             public function __construct(

@@ -22,4 +22,8 @@ final class FirstInitializer extends ThirdPartyInitializer {
     public function packageName() : string {
         return 'cspray/package';
     }
+
+    public function listeners() : array {
+        return [];
+    }
 }

@@ -6,14 +6,19 @@ use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultDefinitionProviderF
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultListenerFactory;
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\ListenerFactory;
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\XmlBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
+use Cspray\AnnotatedContainer\Event\Listener;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\StaticAnalysis\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
+use Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener;
+use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener;
+use Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProviderWithDependencies;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;
@@ -381,5 +386,76 @@ XML;
             new DefaultDefinitionProviderFactory(),
             new DefaultListenerFactory()
         );
+    }
+
+    public function testConfigurationFileWithListenersPresentReturnsCorrectInstance() : void {
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd" version="dev-main">
+    <scanDirectories>
+        <source>
+            <dir>src</dir>
+        </source>
+    </scanDirectories>
+    <listeners>
+      <listener>Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener</listener>
+      <listener>Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener</listener>
+      <listener>Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener</listener>
+    </listeners>
+</annotatedContainer>
+XML;
+
+        $this->mockFilePresentFilesystemInteractions('annotated-container.xml', $goodXml);
+
+        $configuration = new XmlBootstrappingConfiguration(
+            $this->filesystem,
+            'annotated-container.xml',
+            new DefaultParameterStoreFactory(),
+            new DefaultDefinitionProviderFactory(),
+            new DefaultListenerFactory()
+        );
+
+        self::assertCount(3, $configuration->listeners());
+        self::assertContainsOnlyInstancesOf(Listener::class, $configuration->listeners());
+        self::assertInstanceOf(StubAnalysisListener::class, $configuration->listeners()[0]);
+        self::assertInstanceOf(StubBootstrapListener::class, $configuration->listeners()[1]);
+        self::assertInstanceOf(StubContainerFactoryListener::class, $configuration->listeners()[2]);
+    }
+
+    public function testConfigurationFileWithListenersUsesListenerFactoryForCreation() : void {
+        $goodXml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd" version="dev-main">
+    <scanDirectories>
+        <source>
+            <dir>src</dir>
+        </source>
+    </scanDirectories>
+    <listeners>
+      <listener>Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener</listener>
+    </listeners>
+</annotatedContainer>
+XML;
+
+        $this->mockFilePresentFilesystemInteractions('annotated-container.xml', $goodXml);
+
+        $listener = $this->createMock(Listener::class);
+        $listenerFactory = $this->createMock(ListenerFactory::class);
+        $listenerFactory->expects($this->once())
+            ->method('createListener')
+            ->with(StubAnalysisListener::class)
+            ->willReturn($listener);
+
+        $configuration = new XmlBootstrappingConfiguration(
+            $this->filesystem,
+            'annotated-container.xml',
+            new DefaultParameterStoreFactory(),
+            new DefaultDefinitionProviderFactory(),
+            $listenerFactory
+        );
+
+        self::assertCount(1, $configuration->listeners());
+        self::assertContainsOnlyInstancesOf(Listener::class, $configuration->listeners());
+        self::assertSame($listener, $configuration->listeners()[0]);
     }
 }

@@ -88,7 +88,9 @@ final class Bootstrap {
 
         $this->stopwatch->start();
 
-        // add listeners from bootstrapping configuration to emitter
+        foreach ($this->bootstrappingConfiguration->listeners() as $listener) {
+            $this->emitter->addListener($listener);
+        }
 
         $analysisOptions = $this->analysisOptions($this->bootstrappingConfiguration);
 

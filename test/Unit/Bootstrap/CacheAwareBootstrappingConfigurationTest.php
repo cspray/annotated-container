@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Bootstrap\Configuration\CacheAwareBootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
+use Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -16,7 +17,8 @@ final class CacheAwareBootstrappingConfigurationTest extends TestCase {
         return [
             'scanDirectories' => ['scanDirectories', ['dir']],
             'containerDefinitionProvider' => ['containerDefinitionProvider', new StubDefinitionProvider()],
-            'parameterStores' => ['parameterStores', [new StubParameterStore()]]
+            'parameterStores' => ['parameterStores', [new StubParameterStore()]],
+            'listeners' => ['listeners', [new StubAnalysisListener()]]
         ];
     }
 

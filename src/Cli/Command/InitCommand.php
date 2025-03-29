@@ -288,6 +288,8 @@ SHELL;
         $vendor = $scanDirectories->appendChild(
             $dom->createElementNS(self::XML_SCHEMA, 'vendor')
         );
+
+        $listeners = [];
         foreach ($this->initializerProvider->thirdPartyInitializers() as $thirdPartyInitializer) {
             $packageRelativeScanDirectories = $thirdPartyInitializer->relativeScanDirectories();
             if (count($packageRelativeScanDirectories) > 0) {
@@ -314,6 +316,21 @@ SHELL;
                     $dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $providerClass)
                 );
             }
+
+            $listeners = array_merge($listeners, $thirdPartyInitializer->listeners());
+        }
+
+        if (count($listeners) > 0) {
+            $listenersNode = $dom->createElementNS(
+                self::XML_SCHEMA,
+                'listeners'
+            );
+            foreach ($listeners as $listener) {
+                $listenersNode->appendChild(
+                    $dom->createElementNS(self::XML_SCHEMA, 'listener', $listener)
+                );
+            }
+            $root->appendChild($listenersNode);
         }
 
         $schemaPath = dirname(__DIR__, 3) . '/annotated-container.xsd';

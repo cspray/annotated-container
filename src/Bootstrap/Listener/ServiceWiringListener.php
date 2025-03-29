@@ -29,10 +29,10 @@ abstract class ServiceWiringListener implements AfterContainerCreation {
             /**
              * @template T of object
              * @param class-string<T> $type
-             * @return ServiceFromServiceDefinition
+             * @return list<ServiceFromServiceDefinition>
              */
             public function servicesForType(string $type) : array {
-                /** @var ServiceFromServiceDefinition $services */
+                /** @var list<ServiceFromServiceDefinition> $services */
                 $services = [];
                 foreach ($this->containerDefinition->serviceDefinitions() as $serviceDefinition) {
                     if ($serviceDefinition->isAbstract()) {

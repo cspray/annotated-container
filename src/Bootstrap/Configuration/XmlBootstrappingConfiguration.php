@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Bootstrap\Configuration;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
 use Cspray\AnnotatedContainer\Event\Listener;
 use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
@@ -24,9 +25,14 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     private readonly ?DefinitionProvider $definitionProvider;
 
     /**
-     * @var Listener
+     * @var list<ParameterStore>
      */
     private readonly array $parameterStores;
+
+    /**
+     * @var list<Listener>
+     */
+    private readonly array $listeners;
 
     public function __construct(
         private readonly Filesystem $filesystem,
@@ -117,9 +123,21 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 }
             }
 
+            $listeners = [];
+            $listenerNodes = $xpath->query('/ac:annotatedContainer/ac:listeners/ac:listener/text()');
+            if ($listenerNodes instanceof DOMNodeList) {
+                foreach ($listenerNodes as $listenerNode) {
+                    assert(isset($listenerNode->nodeValue));
+                    $listenerType = trim($listenerNode->nodeValue);
+                    $listener = $this->listenerFactory->createListener($listenerType);
+                    $listeners[] = $listener;
+                }
+            }
+
             $this->directories = $scanDirectories;
             $this->definitionProvider = $definitionProvider;
             $this->parameterStores = $parameterStores;
+            $this->listeners = $listeners;
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors(false);
@@ -136,17 +154,17 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     }
 
     /**
-     * @return Listener
+     * @return list<ParameterStore>
      */
     public function parameterStores() : array {
         return $this->parameterStores;
     }
 
     /**
-     * @return Listener
+     * @return list<Listener>
      */
     public function listeners() : array {
-        // TODO: Implement listeners() method.
+        return $this->listeners;
     }
 
     public function cache() : ?ContainerDefinitionCache {

@@ -6,6 +6,9 @@ use Cspray\AnnotatedContainer\Event\Listener;
 
 interface ListenerFactory {
 
+    /**
+     * @param string|class-string<Listener> $identifier
+     * @return Listener
+     */
     public function createListener(string $identifier) : Listener;
-
 }

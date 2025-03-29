@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="5.24.0@462c80e31c34e58cc4f750c656be3927e80e550e">
-  <file src="src/Bootstrap/ServiceWiringListener.php">
+  <file src="src/Bootstrap/Configuration/ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$scanPaths]]></code>
+    </ArgumentTypeCoercion>
+  </file>
+  <file src="src/Bootstrap/Listener/ServiceWiringListener.php">
     <MixedArgument>
       <code><![CDATA[$service]]></code>
     </MixedArgument>
@@ -66,7 +71,7 @@
                         [$serviceDelegateDefinition->classMethod()->class()->name(), $serviceDelegateDefinition->classMethod()->methodName()],
                         $this->parametersForServiceDelegateToArray($injector, $state, $serviceDelegateDefinition),
                     )]]></code>
-      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$this->injector->make($id)]]></code>
     </MixedReturnStatement>
   </file>
   <file src="src/ContainerFactory/ContainerFactoryOptionsBuilder.php">
@@ -234,11 +239,8 @@
     </InvalidArgument>
   </file>
   <file src="src/StaticAnalysis/ContainerDefinitionAnalysisOptionsBuilder.php">
-    <LessSpecificReturnStatement>
+    <InvalidArgument>
       <code><![CDATA[$this->directories]]></code>
-    </LessSpecificReturnStatement>
-    <MoreSpecificReturnType>
-      <code><![CDATA[array]]></code>
-    </MoreSpecificReturnType>
+    </InvalidArgument>
   </file>
 </files>

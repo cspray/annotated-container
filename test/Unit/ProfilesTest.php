@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Closure;
 
-class ProfilesTest extends TestCase {
+final class ProfilesTest extends TestCase {
 
     public function testProfilesFromListReturnsCorrectArray() : void {
         $subject = Profiles::fromList(['default', 'dev', 'prod']);

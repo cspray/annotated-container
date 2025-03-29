@@ -31,4 +31,7 @@ class ContainerDefinitionAnalysisOptionsBuilderTest extends TestCase {
 
         self::assertSame($expected, $compilerOptions->definitionProvider());
     }
+
+    public function testNoScanDirectoriesProvidedThrowsExceptionWhenBuilt() : void {
+    }
 }

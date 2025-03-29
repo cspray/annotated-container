@@ -3,6 +3,7 @@
 namespace Cspray\AnnotatedContainer\Bootstrap\Configuration;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
 use Cspray\AnnotatedContainer\Event\Listener;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
@@ -20,12 +21,12 @@ interface BootstrappingConfiguration {
     public function containerDefinitionProvider() : ?DefinitionProvider;
 
     /**
-     * @return Listener
+     * @return list<ParameterStore>
      */
     public function parameterStores() : array;
 
     /**
-     * @return Listener
+     * @return list<Listener>
      */
     public function listeners() : array;
 }
