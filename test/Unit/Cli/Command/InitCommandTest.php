@@ -124,6 +124,13 @@ DESCRIPTION
        will be defined unless options are passed. If you use this configuration 
        option please review Defining Class Configurations detailed below.
        
+    5. Setup configuration to register Listener implementations in the 
+       Emitter. You can provide multiple --listener options when executing this 
+       command to define configured values. The value passed to this option 
+       MUST be a fully-qualified class name. By default, no listeners will be 
+       defined unless options are passed. If you use this configuration option 
+       please review Defining Class Configurations detailed below.
+       
     Resolving File Paths
     ============================================================================
     
@@ -159,7 +166,14 @@ OPTIONS
         Add a ParameterStore to the ContainerFactory. This can be used to allow 
         injecting custom values with the Inject Attribute. Please be sure to 
         review Defining Class Configurations if you use this value.
+
+    --listener="Fully\Qualified\Class\Name"
     
+        Add a Listener to the Emitter. This can allow custom functionality to 
+        respond when certain events or actions occur during Annotated Container's
+        lifecycle. Please be sure to review Defining Class Configurations if you 
+        use this value.
+
 SHELL;
 
         self::assertSame($expected, $this->subject->help());
@@ -531,6 +545,63 @@ XML;
         self::assertSame(0, $exitCode);
     }
 
+    public function testSingleListenerRespected() : void {
+        $this->directoryResolver->expects($this->once())
+            ->method('configurationPath')
+            ->with('annotated-container.xml')
+            ->willReturn('/config/dir/annotated-container.xml');
+
+        $this->directoryResolver->expects($this->once())
+            ->method('rootPath')
+            ->with('composer.json')
+            ->willReturn('/root/composer.json');
+
+        $this->filesystem->expects($this->exactly(2))
+            ->method('exists')
+            ->willReturnMap([
+                ['/config/dir/annotated-container.xml', false],
+                ['/root/composer.json', true]
+            ]);
+
+        $this->filesystem->expects($this->once())
+            ->method('read')
+            ->with('/root/composer.json')
+            ->willReturn(json_encode([
+                'autoload' => [
+                    'psr-4' => [
+                        'Another\\Namespace\\' => ['src']
+                    ]
+                ],
+            ], JSON_THROW_ON_ERROR));
+
+        $version = AnnotatedContainerVersion::version();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd" version="$version">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+    <vendor/>
+  </scanDirectories>
+  <definitionProviders/>
+  <listeners>
+    <listener>MyListenerClass</listener>
+  </listeners>
+</annotatedContainer>
+
+XML;
+
+        $this->filesystem->expects($this->once())
+            ->method('write')
+            ->with('/config/dir/annotated-container.xml', $expected);
+
+        $input = new StubInput(['listener' => 'MyListenerClass'], ['init']);
+        $exitCode = $this->subject->handle($input, $this->output);
+
+        self::assertSame(0, $exitCode);
+    }
+
     public function testMultipleParameterStoresRespected() : void {
         $this->directoryResolver->expects($this->once())
             ->method('configurationPath')
@@ -589,6 +660,64 @@ XML;
         self::assertSame(0, $exitCode);
     }
 
+    public function testMultipleListenersRespected() : void {
+        $this->directoryResolver->expects($this->once())
+            ->method('configurationPath')
+            ->with('annotated-container.xml')
+            ->willReturn('/config/dir/annotated-container.xml');
+
+        $this->directoryResolver->expects($this->once())
+            ->method('rootPath')
+            ->with('composer.json')
+            ->willReturn('/root/composer.json');
+
+        $this->filesystem->expects($this->exactly(2))
+            ->method('exists')
+            ->willReturnMap([
+                ['/config/dir/annotated-container.xml', false],
+                ['/root/composer.json', true]
+            ]);
+
+        $this->filesystem->expects($this->once())
+            ->method('read')
+            ->with('/root/composer.json')
+            ->willReturn(json_encode([
+                'autoload' => [
+                    'psr-4' => [
+                        'Another\\Namespace\\' => ['src']
+                    ]
+                ],
+            ], JSON_THROW_ON_ERROR));
+
+        $version = AnnotatedContainerVersion::version();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd" version="$version">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+    <vendor/>
+  </scanDirectories>
+  <definitionProviders/>
+  <listeners>
+    <listener>MyListenerClassOne</listener>
+    <listener>MyListenerClassTwo</listener>
+  </listeners>
+</annotatedContainer>
+
+XML;
+
+        $this->filesystem->expects($this->once())
+            ->method('write')
+            ->with('/config/dir/annotated-container.xml', $expected);
+
+        $input = new StubInput(['listener' => ['MyListenerClassOne', 'MyListenerClassTwo']], ['init']);
+        $exitCode = $this->subject->handle($input, $this->output);
+
+        self::assertSame(0, $exitCode);
+    }
+
     public function testDefinitionProviderBooleanThrowsException() : void {
         $this->expectException(InvalidOptionType::class);
         $this->expectExceptionMessage('The option "definition-provider" MUST NOT be a flag-only option.');
@@ -610,6 +739,14 @@ XML;
         $this->expectExceptionMessage('The option "parameter-store" MUST NOT be a flag-only option.');
 
         $input = new StubInput(['parameter-store' => true], ['init']);
+        $this->subject->handle($input, $this->output);
+    }
+
+    public function testListenerBooleanThrowsException() : void {
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "listener" MUST NOT be a flag-only option.');
+
+        $input = new StubInput(['listener' => true], ['init']);
         $this->subject->handle($input, $this->output);
     }
 
