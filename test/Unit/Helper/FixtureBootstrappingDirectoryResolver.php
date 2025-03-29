@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Helper;
 
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 
 final class FixtureBootstrappingDirectoryResolver implements BootstrappingDirectoryResolver {

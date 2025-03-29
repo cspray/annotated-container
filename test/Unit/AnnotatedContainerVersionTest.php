@@ -6,7 +6,7 @@ use Composer\InstalledVersions;
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
 use PHPUnit\Framework\TestCase;
 
-class AnnotatedContainerVersionTest extends TestCase {
+final class AnnotatedContainerVersionTest extends TestCase {
 
     public function testGetApiVersionReturnsVersionFileContents() : void {
         self::assertSame(

@@ -2,8 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Exception;
 
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializer;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializer;
 
 final class InvalidThirdPartyInitializer extends Exception {
 

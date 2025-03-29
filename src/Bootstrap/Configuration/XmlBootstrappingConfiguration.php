@@ -1,19 +1,19 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\Bootstrap;
+namespace Cspray\AnnotatedContainer\Bootstrap\Configuration;
 
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
+use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
+use Cspray\AnnotatedContainer\Event\Listener;
+use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
 use Cspray\AnnotatedContainer\StaticAnalysis\CompositeDefinitionProvider;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
-use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
-use Cspray\AnnotatedContainer\Exception\InvalidBootstrapConfiguration;
-use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefinitionProvider;
 use DOMDocument;
 use DOMElement;
 use DOMNodeList;
 use DOMXPath;
-
 use function libxml_use_internal_errors;
 
 final class XmlBootstrappingConfiguration implements BootstrappingConfiguration {
@@ -29,18 +29,24 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
      */
     private readonly array $parameterStores;
 
+    /**
+     * @var list<Listener>
+     */
+    private readonly array $listeners;
+
     public function __construct(
         private readonly Filesystem $filesystem,
         private readonly string $xmlFile,
         private readonly ParameterStoreFactory $parameterStoreFactory,
-        private readonly DefinitionProviderFactory $definitionProviderFactory
+        private readonly DefinitionProviderFactory $definitionProviderFactory,
+        private readonly ListenerFactory $listenerFactory,
     ) {
         if (!$this->filesystem->isFile($this->xmlFile)) {
             throw InvalidBootstrapConfiguration::fromFileMissing($this->xmlFile);
         }
 
         try {
-            $schemaFile = dirname(__DIR__, 2) . '/annotated-container.xsd';
+            $schemaFile = dirname(__DIR__, 3) . '/annotated-container.xsd';
             $dom = new DOMDocument();
             $dom->loadXML($this->filesystem->read($this->xmlFile));
             libxml_use_internal_errors(true);
@@ -117,9 +123,21 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 }
             }
 
+            $listeners = [];
+            $listenerNodes = $xpath->query('/ac:annotatedContainer/ac:listeners/ac:listener/text()');
+            if ($listenerNodes instanceof DOMNodeList) {
+                foreach ($listenerNodes as $listenerNode) {
+                    assert(isset($listenerNode->nodeValue));
+                    $listenerType = trim($listenerNode->nodeValue);
+                    $listener = $this->listenerFactory->createListener($listenerType);
+                    $listeners[] = $listener;
+                }
+            }
+
             $this->directories = $scanDirectories;
             $this->definitionProvider = $definitionProvider;
             $this->parameterStores = $parameterStores;
+            $this->listeners = $listeners;
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors(false);
@@ -140,6 +158,13 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
      */
     public function parameterStores() : array {
         return $this->parameterStores;
+    }
+
+    /**
+     * @return list<Listener>
+     */
+    public function listeners() : array {
+        return $this->listeners;
     }
 
     public function cache() : ?ContainerDefinitionCache {

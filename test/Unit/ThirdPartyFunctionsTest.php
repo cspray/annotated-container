@@ -10,7 +10,7 @@ use function Cspray\AnnotatedContainer\Definition\servicePrepare;
 use function Cspray\AnnotatedContainer\Definition\service;
 use function Cspray\AnnotatedContainer\Reflection\types;
 
-class ThirdPartyFunctionsTest extends TestCase {
+final class ThirdPartyFunctionsTest extends TestCase {
 
     use ContainerDefinitionAssertionsTrait;
 

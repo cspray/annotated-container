@@ -2,8 +2,8 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\DelegatedParameterStoreFactory;
-use Cspray\AnnotatedContainer\Bootstrap\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DelegatedParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\ParameterStoreFactory;
 use Cspray\AnnotatedContainer\Unit\Helper\StubParameterStore;
 use PHPUnit\Framework\TestCase;
 

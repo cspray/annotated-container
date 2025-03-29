@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\DefaultDefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultDefinitionProviderFactory;
 use Cspray\AnnotatedContainer\Exception\InvalidDefinitionProvider;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;

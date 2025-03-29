@@ -15,7 +15,6 @@ use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Event\StaticAnalysisEmitter;
 use Cspray\AnnotatedContainer\Exception\InvalidScanDirectories;
-use Cspray\AnnotatedContainer\Exception\InvalidServiceDelegate;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepare;
 use Cspray\AnnotatedContainer\Internal\AttributeType;
 use Cspray\AnnotatedContainer\Reflection\Type;
@@ -52,7 +51,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
      * @return ContainerDefinition
      * @throws InvalidArgumentException
      * @throws InvalidScanDirectories
-     * @throws InvalidServiceDelegate
      * @throws InvalidServicePrepare
      */
     public function analyze(ContainerDefinitionAnalysisOptions $containerDefinitionAnalysisOptions) : ContainerDefinition {
@@ -137,7 +135,6 @@ final class AnnotatedTargetContainerDefinitionAnalyzer implements ContainerDefin
      * @param ContainerDefinitionBuilder $containerDefinitionBuilder
      * @param DefinitionsCollection $consumer
      * @return ContainerDefinitionBuilder
-     * @throws InvalidServiceDelegate
      * @throws InvalidServicePrepare
      */
     private function addAnnotatedDefinitions(

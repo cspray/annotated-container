@@ -2,9 +2,9 @@
 
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
-use Cspray\AnnotatedContainer\Bootstrap\ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Cli\Exception\ProfileNotString;
 use Cspray\AnnotatedContainer\Cli\Input\Input;
 use Cspray\AnnotatedContainer\Cli\Output\TerminalOutput;

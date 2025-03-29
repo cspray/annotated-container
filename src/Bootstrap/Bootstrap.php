@@ -3,6 +3,17 @@
 namespace Cspray\AnnotatedContainer\Bootstrap;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultDefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultListenerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefinitionProviderFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\ListenerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\ParameterStoreFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\XmlBootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\VendorPresenceBasedBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
@@ -33,6 +44,7 @@ final class Bootstrap {
         ContainerFactory $containerFactory,
         Emitter $emitter,
         ParameterStoreFactory $parameterStoreFactory = new DefaultParameterStoreFactory(),
+        ListenerFactory $listenerFactory = new DefaultListenerFactory(),
         DefinitionProviderFactory $definitionProviderFactory = new DefaultDefinitionProviderFactory(),
         BootstrappingDirectoryResolver $directoryResolver = new VendorPresenceBasedBootstrappingDirectoryResolver(),
         Filesystem $filesystem = new PhpFunctionsFilesystem()
@@ -41,7 +53,8 @@ final class Bootstrap {
             $filesystem,
             $directoryResolver->configurationPath('annotated-container.xml'),
             $parameterStoreFactory,
-            $definitionProviderFactory
+            $definitionProviderFactory,
+            $listenerFactory
         );
 
         return self::fromCompleteSetup(
@@ -74,6 +87,10 @@ final class Bootstrap {
         $profiles ??= Profiles::defaultOnly();
 
         $this->stopwatch->start();
+
+        foreach ($this->bootstrappingConfiguration->listeners() as $listener) {
+            $this->emitter->addListener($listener);
+        }
 
         $analysisOptions = $this->analysisOptions($this->bootstrappingConfiguration);
 

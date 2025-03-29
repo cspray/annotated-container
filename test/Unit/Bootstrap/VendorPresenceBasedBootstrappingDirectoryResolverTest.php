@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Unit\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\VendorPresenceBasedBootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\VendorPresenceBasedBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

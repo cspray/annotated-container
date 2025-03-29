@@ -32,6 +32,7 @@
 
       <xs:element name="definitionProviders" type="definitionProvidersType" minOccurs="0" maxOccurs="1" />
       <xs:element name="parameterStores" type="parameterStoresType" minOccurs="0" maxOccurs="1" />
+      <xs:element name="listeners" type="listenersType" minOccurs="0" maxOccurs="1" />
     </xs:all>
     <xs:attribute name="version" type="xs:string" use="required" />
   </xs:complexType>
@@ -86,5 +87,10 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="listenersType">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="listener" type="xs:token" />
+    </xs:sequence>
+  </xs:complexType>
 
 </xs:schema>

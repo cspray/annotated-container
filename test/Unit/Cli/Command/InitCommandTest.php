@@ -3,9 +3,9 @@
 namespace Cspray\AnnotatedContainer\Unit\Cli\Command;
 
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializer;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializer;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Command\InitCommand;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
@@ -14,6 +14,9 @@ use Cspray\AnnotatedContainer\Cli\Output\TerminalOutput;
 use Cspray\AnnotatedContainer\Exception\ComposerAutoloadNotFound;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
 use Cspray\AnnotatedContainer\Unit\Helper\InMemoryOutput;
+use Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener;
+use Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener;
+use Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener;
 use Cspray\AnnotatedContainer\Unit\Helper\StubDefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\StubInput;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -121,6 +124,13 @@ DESCRIPTION
        will be defined unless options are passed. If you use this configuration 
        option please review Defining Class Configurations detailed below.
        
+    5. Setup configuration to register Listener implementations in the 
+       Emitter. You can provide multiple --listener options when executing this 
+       command to define configured values. The value passed to this option 
+       MUST be a fully-qualified class name. By default, no listeners will be 
+       defined unless options are passed. If you use this configuration option 
+       please review Defining Class Configurations detailed below.
+       
     Resolving File Paths
     ============================================================================
     
@@ -156,7 +166,14 @@ OPTIONS
         Add a ParameterStore to the ContainerFactory. This can be used to allow 
         injecting custom values with the Inject Attribute. Please be sure to 
         review Defining Class Configurations if you use this value.
+
+    --listener="Fully\Qualified\Class\Name"
     
+        Add a Listener to the Emitter. This can allow custom functionality to 
+        respond when certain events or actions occur during Annotated Container's
+        lifecycle. Please be sure to review Defining Class Configurations if you 
+        use this value.
+
 SHELL;
 
         self::assertSame($expected, $this->subject->help());
@@ -343,20 +360,35 @@ XML;
                 ]
             ], JSON_THROW_ON_ERROR));
 
-        $thirdPartyInitializer = $this->createMock(ThirdPartyInitializer::class);
-        $thirdPartyInitializer->expects($this->once())
+        $firstInitializer = $this->createMock(ThirdPartyInitializer::class);
+        $firstInitializer->expects($this->once())
             ->method('packageName')
             ->willReturn('cspray/package-name');
-        $thirdPartyInitializer->expects($this->once())
+        $firstInitializer->expects($this->once())
             ->method('relativeScanDirectories')
             ->willReturn(['src', 'lib']);
-        $thirdPartyInitializer->expects($this->once())
+        $firstInitializer->expects($this->once())
             ->method('definitionProviderClass')
             ->willReturn(StubDefinitionProvider::class);
+        $firstInitializer->expects($this->once())
+            ->method('listeners')
+            ->willReturn([StubAnalysisListener::class]);
+
+        $secondInitializer = $this->createMock(ThirdPartyInitializer::class);
+        $secondInitializer->expects($this->once())
+            ->method('relativeScanDirectories')
+            ->willReturn([]);
+        $secondInitializer->expects($this->never())->method('packageName');
+        $secondInitializer->expects($this->once())
+            ->method('definitionProviderClass')
+            ->willReturn(null);
+        $secondInitializer->expects($this->once())
+            ->method('listeners')
+            ->willReturn([StubBootstrapListener::class, StubContainerFactoryListener::class]);
 
         $this->thirdPartyInitializerProvider->expects($this->once())
             ->method('thirdPartyInitializers')
-            ->willReturn([$thirdPartyInitializer]);
+            ->willReturn([$firstInitializer, $secondInitializer]);
 
         $version = AnnotatedContainerVersion::version();
         $definitionProvider = StubDefinitionProvider::class;
@@ -381,6 +413,11 @@ XML;
   <definitionProviders>
     <definitionProvider>$definitionProvider</definitionProvider>
   </definitionProviders>
+  <listeners>
+    <listener>Cspray\AnnotatedContainer\Unit\Helper\StubAnalysisListener</listener>
+    <listener>Cspray\AnnotatedContainer\Unit\Helper\StubBootstrapListener</listener>
+    <listener>Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener</listener>
+  </listeners>
 </annotatedContainer>
 
 XML;
@@ -508,6 +545,63 @@ XML;
         self::assertSame(0, $exitCode);
     }
 
+    public function testSingleListenerRespected() : void {
+        $this->directoryResolver->expects($this->once())
+            ->method('configurationPath')
+            ->with('annotated-container.xml')
+            ->willReturn('/config/dir/annotated-container.xml');
+
+        $this->directoryResolver->expects($this->once())
+            ->method('rootPath')
+            ->with('composer.json')
+            ->willReturn('/root/composer.json');
+
+        $this->filesystem->expects($this->exactly(2))
+            ->method('exists')
+            ->willReturnMap([
+                ['/config/dir/annotated-container.xml', false],
+                ['/root/composer.json', true]
+            ]);
+
+        $this->filesystem->expects($this->once())
+            ->method('read')
+            ->with('/root/composer.json')
+            ->willReturn(json_encode([
+                'autoload' => [
+                    'psr-4' => [
+                        'Another\\Namespace\\' => ['src']
+                    ]
+                ],
+            ], JSON_THROW_ON_ERROR));
+
+        $version = AnnotatedContainerVersion::version();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd" version="$version">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+    <vendor/>
+  </scanDirectories>
+  <definitionProviders/>
+  <listeners>
+    <listener>MyListenerClass</listener>
+  </listeners>
+</annotatedContainer>
+
+XML;
+
+        $this->filesystem->expects($this->once())
+            ->method('write')
+            ->with('/config/dir/annotated-container.xml', $expected);
+
+        $input = new StubInput(['listener' => 'MyListenerClass'], ['init']);
+        $exitCode = $this->subject->handle($input, $this->output);
+
+        self::assertSame(0, $exitCode);
+    }
+
     public function testMultipleParameterStoresRespected() : void {
         $this->directoryResolver->expects($this->once())
             ->method('configurationPath')
@@ -566,6 +660,64 @@ XML;
         self::assertSame(0, $exitCode);
     }
 
+    public function testMultipleListenersRespected() : void {
+        $this->directoryResolver->expects($this->once())
+            ->method('configurationPath')
+            ->with('annotated-container.xml')
+            ->willReturn('/config/dir/annotated-container.xml');
+
+        $this->directoryResolver->expects($this->once())
+            ->method('rootPath')
+            ->with('composer.json')
+            ->willReturn('/root/composer.json');
+
+        $this->filesystem->expects($this->exactly(2))
+            ->method('exists')
+            ->willReturnMap([
+                ['/config/dir/annotated-container.xml', false],
+                ['/root/composer.json', true]
+            ]);
+
+        $this->filesystem->expects($this->once())
+            ->method('read')
+            ->with('/root/composer.json')
+            ->willReturn(json_encode([
+                'autoload' => [
+                    'psr-4' => [
+                        'Another\\Namespace\\' => ['src']
+                    ]
+                ],
+            ], JSON_THROW_ON_ERROR));
+
+        $version = AnnotatedContainerVersion::version();
+        $expected = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<annotatedContainer xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd" version="$version">
+  <scanDirectories>
+    <source>
+      <dir>src</dir>
+    </source>
+    <vendor/>
+  </scanDirectories>
+  <definitionProviders/>
+  <listeners>
+    <listener>MyListenerClassOne</listener>
+    <listener>MyListenerClassTwo</listener>
+  </listeners>
+</annotatedContainer>
+
+XML;
+
+        $this->filesystem->expects($this->once())
+            ->method('write')
+            ->with('/config/dir/annotated-container.xml', $expected);
+
+        $input = new StubInput(['listener' => ['MyListenerClassOne', 'MyListenerClassTwo']], ['init']);
+        $exitCode = $this->subject->handle($input, $this->output);
+
+        self::assertSame(0, $exitCode);
+    }
+
     public function testDefinitionProviderBooleanThrowsException() : void {
         $this->expectException(InvalidOptionType::class);
         $this->expectExceptionMessage('The option "definition-provider" MUST NOT be a flag-only option.');
@@ -587,6 +739,14 @@ XML;
         $this->expectExceptionMessage('The option "parameter-store" MUST NOT be a flag-only option.');
 
         $input = new StubInput(['parameter-store' => true], ['init']);
+        $this->subject->handle($input, $this->output);
+    }
+
+    public function testListenerBooleanThrowsException() : void {
+        $this->expectException(InvalidOptionType::class);
+        $this->expectExceptionMessage('The option "listener" MUST NOT be a flag-only option.');
+
+        $input = new StubInput(['listener' => true], ['init']);
         $this->subject->handle($input, $this->output);
     }
 

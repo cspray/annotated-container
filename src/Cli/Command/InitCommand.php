@@ -3,8 +3,8 @@
 namespace Cspray\AnnotatedContainer\Cli\Command;
 
 use Cspray\AnnotatedContainer\AnnotatedContainerVersion;
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingDirectoryResolver;
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializerProvider;
+use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializerProvider;
 use Cspray\AnnotatedContainer\Cli\Exception\ComposerConfigurationNotFound;
 use Cspray\AnnotatedContainer\Cli\Exception\InvalidOptionType;
 use Cspray\AnnotatedContainer\Cli\Exception\PotentialConfigurationOverwrite;
@@ -103,6 +103,13 @@ DESCRIPTION
        will be defined unless options are passed. If you use this configuration 
        option please review Defining Class Configurations detailed below.
        
+    5. Setup configuration to register Listener implementations in the 
+       Emitter. You can provide multiple --listener options when executing this 
+       command to define configured values. The value passed to this option 
+       MUST be a fully-qualified class name. By default, no listeners will be 
+       defined unless options are passed. If you use this configuration option 
+       please review Defining Class Configurations detailed below.
+       
     Resolving File Paths
     ============================================================================
     
@@ -138,7 +145,14 @@ OPTIONS
         Add a ParameterStore to the ContainerFactory. This can be used to allow 
         injecting custom values with the Inject Attribute. Please be sure to 
         review Defining Class Configurations if you use this value.
+
+    --listener="Fully\Qualified\Class\Name"
     
+        Add a Listener to the Emitter. This can allow custom functionality to 
+        respond when certain events or actions occur during Annotated Container's
+        lifecycle. Please be sure to review Defining Class Configurations if you 
+        use this value.
+
 SHELL;
     }
 
@@ -200,6 +214,11 @@ SHELL;
         $parameterStore = $input->option('parameter-store');
         if (is_bool($parameterStore)) {
             throw InvalidOptionType::fromBooleanOption('parameter-store');
+        }
+
+        $listener = $input->option('listener');
+        if (is_bool($listener)) {
+            throw InvalidOptionType::fromBooleanOption('listener');
         }
     }
 
@@ -288,6 +307,14 @@ SHELL;
         $vendor = $scanDirectories->appendChild(
             $dom->createElementNS(self::XML_SCHEMA, 'vendor')
         );
+
+        $listeners = [];
+        $listenerInput = $input->option('listener');
+        if (is_string($listenerInput)) {
+            $listeners[] = $listenerInput;
+        } elseif (is_array($listenerInput)) {
+            $listeners = $listenerInput;
+        }
         foreach ($this->initializerProvider->thirdPartyInitializers() as $thirdPartyInitializer) {
             $packageRelativeScanDirectories = $thirdPartyInitializer->relativeScanDirectories();
             if (count($packageRelativeScanDirectories) > 0) {
@@ -314,6 +341,22 @@ SHELL;
                     $dom->createElementNS(self::XML_SCHEMA, 'definitionProvider', $providerClass)
                 );
             }
+
+            $listeners = array_merge($listeners, $thirdPartyInitializer->listeners());
+        }
+
+        if (count($listeners) > 0) {
+            $listenersNode = $dom->createElementNS(
+                self::XML_SCHEMA,
+                'listeners'
+            );
+            foreach ($listeners as $listener) {
+                assert(is_string($listener));
+                $listenersNode->appendChild(
+                    $dom->createElementNS(self::XML_SCHEMA, 'listener', $listener)
+                );
+            }
+            $root->appendChild($listenersNode);
         }
 
         $schemaPath = dirname(__DIR__, 3) . '/annotated-container.xsd';

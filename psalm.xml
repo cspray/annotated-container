@@ -36,7 +36,7 @@
         <MissingTemplateParam>
             <errorLevel type="suppress">
                 <!-- This anonymous class is 100% documented with the appropriate template param but it is not getting picked up properly -->
-                <file name="src/Bootstrap/ServiceWiringListener.php" />
+                <file name="src/Bootstrap/Listener/ServiceWiringListener.php" />
             </errorLevel>
         </MissingTemplateParam>
     </issueHandlers>

@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Fixture\VendorScanningInitializers\Vendor\Package;
 
-use Cspray\AnnotatedContainer\Bootstrap\ThirdPartyInitializer;
+use Cspray\AnnotatedContainer\Bootstrap\Initializer\ThirdPartyInitializer;
 
 class ThirdInitializer extends ThirdPartyInitializer {
 
@@ -16,5 +16,9 @@ class ThirdInitializer extends ThirdPartyInitializer {
 
     public function packageName() : string {
         return 'cspray/package';
+    }
+
+    public function listeners() : array {
+        return [];
     }
 }

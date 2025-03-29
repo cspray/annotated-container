@@ -224,7 +224,7 @@ By default, boostrapping expects all the path fragments in your configuration to
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;use Cspray\AnnotatedContainer\Bootstrap\DefaultDefinitionProviderFactory;use Cspray\AnnotatedContainer\Bootstrap\DefaultParameterStoreFactory;use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;use Cspray\AnnotatedContainer\Event\Emitter;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultDefinitionProviderFactory;use Cspray\AnnotatedContainer\Bootstrap\Configuration\DefaultParameterStoreFactory;use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;use Cspray\AnnotatedContainer\Event\Emitter;
 
 // This method is an implementation provided by the reader
 $directoryResolver = MyDirectoryResolver::create();
@@ -252,12 +252,7 @@ Setting up caching is something that you must explicitly opt into during your bo
 
 namespace Acme\Demo;
 
-use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
-use Cspray\AnnotatedContainer\Bootstrap\CacheAwareBootstrappingConfigurationProvider;
-use Cspray\AnnotatedContainer\Bootstrap\DefaultDefinitionProviderFactory;
-use Cspray\AnnotatedContainer\Bootstrap\DefaultParameterStoreFactory;
-use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfigurationProvider;use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
-use Cspray\AnnotatedContainer\Definition\Cache\FileBackedContainerDefinitionCache;use Cspray\AnnotatedContainer\Definition\Serializer\XmlContainerDefinitionSerializer;use Cspray\AnnotatedContainer\Event\Emitter;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;use Cspray\AnnotatedContainer\Bootstrap\CacheAwareBootstrappingConfigurationProvider;use Cspray\AnnotatedContainer\Bootstrap\XmlBootstrappingConfigurationProvider;use Cspray\AnnotatedContainer\Definition\Cache\FileBackedContainerDefinitionCache;use Cspray\AnnotatedContainer\Definition\Serializer\XmlContainerDefinitionSerializer;use Cspray\AnnotatedContainer\Event\Emitter;
 
 $container = Bootstrap::from(new Emitter())
     ->bootstrapContainer(

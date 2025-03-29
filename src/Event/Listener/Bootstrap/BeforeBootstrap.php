@@ -2,7 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Event\Listener\Bootstrap;
 
-use Cspray\AnnotatedContainer\Bootstrap\BootstrappingConfiguration;
+use Cspray\AnnotatedContainer\Bootstrap\Configuration\BootstrappingConfiguration;
 use Cspray\AnnotatedContainer\Event\Listener;
 
 interface BeforeBootstrap extends Listener {
