@@ -18,6 +18,7 @@ jobs:
           php-version: 8.2
           extensions: xdebug
           tools: composer:2
+          ini-file: development
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
       - name: Setup problem matchers for PHPUnit
@@ -41,6 +42,7 @@ jobs:
         with:
           php-version: 8.2
           tools: composer:2
+          ini-file: development
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
       - name: Composer (Annotated Container)
@@ -60,6 +62,7 @@ jobs:
         with:
           php-version: 8.2
           tools: composer:2, cs2pr, phpcs
+          ini-file: development
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
       - name: Composer (Annotated Container)
