@@ -128,9 +128,9 @@ final class YiiDiContainerFactory extends AbstractContainerFactory implements Co
 
         $state->addInstance(ActiveProfiles::class, $activeProfiles);
 
-        return new readonly class ($state) implements AnnotatedContainer {
-            private Container $container;
-            private Injector $injector;
+        return new class ($state) implements AnnotatedContainer {
+            private readonly Container $container;
+            private readonly Injector $injector;
 
             public function __construct(YiiDiContainerFactoryState $state)
             {
