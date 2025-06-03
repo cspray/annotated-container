@@ -37,7 +37,8 @@
     "vimeo/psalm": "^4.24",
     "illuminate/container": "^10.11",
     "jetbrains/phpstorm-attributes": "^1.1",
-    "yiisoft/di": "^1.4"
+    "yiisoft/di": "^1.4",
+    "yiisoft/injector": "^1.2"
   },
   "bin": ["bin/annotated-container"],
   "autoload": {

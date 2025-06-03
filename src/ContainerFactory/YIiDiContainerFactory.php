@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer\ContainerFactory;
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
@@ -12,6 +13,7 @@ use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\AnnotatedContainer\Exception\UnsupportedOperation;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
@@ -19,12 +21,19 @@ use Cspray\Typiphy\ObjectType;
 use RuntimeException;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
+use Yiisoft\Injector\Injector;
 use function assert;
 use function Cspray\Typiphy\objectType;
 
 // @codeCoverageIgnoreStart
 if (!class_exists(Container::class)) {
     throw new RuntimeException("To enable the YiiDiContainerFactory please install yiisoft/di 1.4+!");
+}
+// @codeCoverageIgnoreEnd
+
+// @codeCoverageIgnoreStart
+if (!class_exists(Injector::class)) {
+    throw new RuntimeException("To enable the YiiDiContainerFactory please install yiisoft/injector 1.2+!");
 }
 
 // @codeCoverageIgnoreEnd
@@ -76,6 +85,9 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
         $state->addServicePrepare($definition->getService()->getName(), $definition->getMethod());
     }
 
+    /**
+     * @throws ParameterStoreNotFound
+     */
     protected function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition): void
     {
         assert($state instanceof YiiDiContainerFactoryState);
@@ -108,6 +120,7 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
         return new readonly class ($state) implements AnnotatedContainer {
             private Container $container;
+            private Injector $injector;
 
             public function __construct(YiiDiContainerFactoryState $state)
             {
@@ -119,6 +132,7 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
                     ->withStrictMode();
 
                 $this->container = new Container($config);
+                $this->injector = (new Injector($this->container))->withCacheReflections(); // TODO: check memory usage with cache reflections
             }
 
             public function getBackingContainer(): object
@@ -128,8 +142,7 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
             public function make(string $classType, ?AutowireableParameterSet $parameters = null): object
             {
-                // TODO: implement me
-                throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                return $this->injector->make($classType, $this->convertAutowireableParameterSet($parameters));
             }
 
             public function invoke(callable $callable, ?AutowireableParameterSet $parameters = null): mixed
@@ -149,6 +162,20 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
             public function has(string $id): bool
             {
                 return $this->container->has($id);
+            }
+
+            private function convertAutowireableParameterSet(?AutowireableParameterSet $parameters = null): array
+            {
+                $params = [];
+                if (!is_null($parameters)) {
+                    /** @var AutowireableParameter $parameter */
+                    foreach ($parameters as $parameter) {
+                        $name = $parameter->getName();
+                        $value = $parameter->isServiceIdentifier() ? $this->injector->make($parameter->getValue()->getName()) : $parameter->getValue();
+                        $params[$name] = $value;
+                    }
+                }
+                return $params;
             }
         };
     }
