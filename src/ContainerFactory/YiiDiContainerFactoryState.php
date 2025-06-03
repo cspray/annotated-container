@@ -84,7 +84,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
                 if ($constructor === ArrayDefinition::CONSTRUCTOR) {
                     $def[$constructor] ??= [];
                     foreach ($val as $param => $value) {
-                        $def[$constructor][$param] = $value instanceof ContainerReference ? Reference::to($value->name) : $value;
+                        $def[$constructor][$param] = $this->parameterValueOrReference($value);
                     }
                 }
             }
@@ -101,8 +101,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
                 ];
             }
             foreach ($path as $property => $value) {
-                // TODO: check case with container reference one more carefully ($value->name or $value->type->getName())
-                $def["\$$property"] = $value instanceof ContainerReference ? Reference::to($value->name) : $value;
+                $def["\$$property"] = $this->parameterValueOrReference($value);
             }
             $definitions[$class] = $def;
         }
@@ -125,12 +124,26 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
             if ($definitions[$service]) {
                 $def = is_string($definitions[$service]) ? [ArrayDefinition::CLASS_NAME => $definitions[$service]] : $definitions[$service];
                 foreach ($methods as $method) {
-                    $def["$method()"] = [];
+                    $params = [];
+                    foreach ($this->parametersForMethod($service, $method) as $param => $value) {
+                        $params[$param] = $this->parameterValueOrReference($value);
+                    }
+                    $def["$method()"] = $params;
                 }
                 $definitions[$service] = $def;
             }
         }
 
         return $definitions;
+    }
+
+    /**
+     * @throws InvalidConfigException
+     */
+    private function parameterValueOrReference(mixed $value): mixed
+    {
+        // TODO: check case with container reference more carefully
+        //   especially for property inject ($value->name or $value->type->getName())
+        return $value instanceof ContainerReference ? Reference::to($value->name) : $value;
     }
 }

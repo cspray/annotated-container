@@ -147,8 +147,7 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
             public function invoke(callable $callable, ?AutowireableParameterSet $parameters = null): mixed
             {
-                // TODO: implement me
-                throw UnsupportedOperation::fromMethodNotSupported(__METHOD__);
+                return $this->injector->invoke($callable, $this->convertAutowireableParameterSet($parameters));
             }
 
             public function get(string $id)
@@ -171,7 +170,12 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
                     /** @var AutowireableParameter $parameter */
                     foreach ($parameters as $parameter) {
                         $name = $parameter->getName();
-                        $value = $parameter->isServiceIdentifier() ? $this->injector->make($parameter->getValue()->getName()) : $parameter->getValue();
+                        if ($parameter->isServiceIdentifier()) {
+                            $serviceIdentifier = $parameter->getValue()->getName();
+                            $value = $this->container->has($serviceIdentifier) ? $this->container->get($serviceIdentifier) : $this->make($serviceIdentifier);
+                        } else {
+                            $value = $parameter->getValue();
+                        }
                         $params[$name] = $value;
                     }
                 }
