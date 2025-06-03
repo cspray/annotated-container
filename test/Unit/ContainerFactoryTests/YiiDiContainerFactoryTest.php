@@ -82,4 +82,11 @@ class YiiDiContainerFactoryTest extends ContainerFactoryTestCase
     {
         $this->markTestSkipped('Configuration is not supported yet');
     }
+
+    public function testLoggingInjectPropertyArrayNotMultiline(): void
+    {
+        $this->markTestSkipped('Configuration is not supported yet');
+    }
+
+
 }

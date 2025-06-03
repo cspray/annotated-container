@@ -83,7 +83,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
                 if ($constructor === ArrayDefinition::CONSTRUCTOR) {
                     $def[$constructor] ??= [];
                     foreach ($val as $param => $value) {
-                        $def[$constructor][$param] = Reference::to($value->name);
+                        $def[$constructor][$param] = $value instanceof ContainerReference ? Reference::to($value->name) : $value;
                     }
                 }
             }
@@ -100,7 +100,8 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
                 ];
             }
             foreach ($path as $property => $value) {
-                $def["\$$property"] = Reference::to($value->type->getName());
+                // TODO: check case with container reference one more carefully ($value->name or $value->type->getName())
+                $def["\$$property"] = $value instanceof ContainerReference ? Reference::to($value->name) : $value;
             }
             $definitions[$class] = $def;
         }
