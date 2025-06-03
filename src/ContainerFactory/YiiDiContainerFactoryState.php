@@ -14,12 +14,13 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
 {
     use HasMethodInjectState;
     use HasPropertyInjectState;
+    use HasServicePrepareState;
 
     private array $abstractServices = [];
     private array $concreteServices = [];
-    /** @var array<string>  */
+    /** @var array<string> */
     private array $namedServices = [];
-    /** @var array<string>  */
+    /** @var array<string> */
     private array $aliases = [];
     private array $instances = [];
 
@@ -76,7 +77,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         $methodInject = $this->getMethodInject();
 
         foreach ($methodInject as $class => $path) {
-            $def = $definitions[$class] ?? ['class' => $class];
+            $def = $definitions[$class] ?? [ArrayDefinition::CLASS_NAME => $class];
 
             foreach ($path as $method => $val) {
                 $constructor = "$method()";
@@ -93,10 +94,10 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         $propertiesInject = $this->getPropertyInject();
 
         foreach ($propertiesInject as $class => $path) {
-            $def = $definitions[$class] ?? ['class' => $class];
+            $def = $definitions[$class] ?? [ArrayDefinition::CLASS_NAME => $class];
             if (is_string($def)) {
                 $def = [
-                    'class' => $class,
+                    ArrayDefinition::CLASS_NAME => $class,
                 ];
             }
             foreach ($path as $property => $value) {
@@ -118,6 +119,16 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
 
         foreach ($this->concreteServices as $concrete) {
             $definitions[$concrete] = $definitions[$concrete] ?? $concrete;
+        }
+
+        foreach ($this->getServicePrepares() as $service => $methods) {
+            if ($definitions[$service]) {
+                $def = is_string($definitions[$service]) ? [ArrayDefinition::CLASS_NAME => $definitions[$service]] : $definitions[$service];
+                foreach ($methods as $method) {
+                    $def["$method()"] = [];
+                }
+                $definitions[$service] = $def;
+            }
         }
 
         return $definitions;

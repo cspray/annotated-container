@@ -72,7 +72,8 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
     protected function handleServicePrepareDefinition(ContainerFactoryState $state, ServicePrepareDefinition $definition): void
     {
-        // TODO: implement me
+        assert($state instanceof YiiDiContainerFactoryState);
+        $state->addServicePrepare($definition->getService()->getName(), $definition->getMethod());
     }
 
     protected function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition): void
