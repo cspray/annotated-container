@@ -3,6 +3,8 @@
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
+use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
+use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
@@ -14,13 +16,15 @@ use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\AnnotatedContainer\Exception\UnsupportedOperation;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\Typiphy\ObjectType;
+use RuntimeException;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
+use function assert;
 use function Cspray\Typiphy\objectType;
 
 // @codeCoverageIgnoreStart
 if (!class_exists(Container::class)) {
-    throw new \RuntimeException("To enable the YiiDiContainerFactory please install yiisoft/di 1.4+!");
+    throw new RuntimeException("To enable the YiiDiContainerFactory please install yiisoft/di 1.4+!");
 }
 
 // @codeCoverageIgnoreEnd
@@ -40,7 +44,7 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
     protected function handleServiceDefinition(ContainerFactoryState $state, ServiceDefinition $definition): void
     {
-        \assert($state instanceof YiiDiContainerFactoryState);
+        assert($state instanceof YiiDiContainerFactoryState);
         if ($definition->isAbstract()) {
             $state->addAbstractService($definition->getType()->getName());
         } else {
@@ -48,13 +52,13 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
         }
         $alias = $definition->getName();
         if ($alias !== null) {
-            $state->addNamedService($definition->getType()->getName(), $alias);
+            $state->addNamedService($alias, $definition->getType()->getName());
         }
     }
 
     protected function handleAliasDefinition(ContainerFactoryState $state, AliasDefinitionResolution $resolution): void
     {
-        \assert($state instanceof YiiDiContainerFactoryState);
+        assert($state instanceof YiiDiContainerFactoryState);
         $definition = $resolution->getAliasDefinition();
         if ($definition !== null) {
             $state->addAlias($definition->getAbstractService()->getName(), $definition->getConcreteService()->getName());
@@ -73,7 +77,7 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
     protected function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition): void
     {
-        \assert($state instanceof YiiDiContainerFactoryState);
+        assert($state instanceof YiiDiContainerFactoryState);
         if ($definition->getTargetIdentifier()->isMethodParameter()) {
             $state->addMethodInject(
                 $definition->getTargetIdentifier()->getClass()->getName(),
@@ -97,16 +101,23 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
     protected function createAnnotatedContainer(ContainerFactoryState $state, ActiveProfiles $activeProfiles): AnnotatedContainer
     {
-        \assert($state instanceof YiiDiContainerFactoryState);
+        assert($state instanceof YiiDiContainerFactoryState);
 
-        $config = ContainerConfig::create()
-            ->withDefinitions($state->createDefinitions())
-            ->withStrictMode(false); // TODO: review and check strict mode
+        $state->addInstance(ActiveProfiles::class, $activeProfiles);
 
-        $container = new Container($config);
-        return new readonly class ($container) implements AnnotatedContainer {
-            public function __construct(private Container $container)
+        return new readonly class ($state) implements AnnotatedContainer {
+            private Container $container;
+
+            public function __construct(YiiDiContainerFactoryState $state)
             {
+                $state->addInstance(AutowireableFactory::class, $this);
+                $state->addInstance(AutowireableInvoker::class, $this);
+
+                $config = ContainerConfig::create()
+                    ->withDefinitions($state->createDefinitions())
+                    ->withStrictMode();
+
+                $this->container = new Container($config);
             }
 
             public function getBackingContainer(): object

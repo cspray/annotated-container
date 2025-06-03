@@ -2,9 +2,13 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Exception;
 use Yiisoft\Definitions\ArrayDefinition;
 use Yiisoft\Definitions\Exception\InvalidConfigException;
 use Yiisoft\Definitions\Reference;
+use function array_key_exists;
+use function array_map;
+use function is_string;
 
 final class YiiDiContainerFactoryState implements ContainerFactoryState
 {
@@ -13,10 +17,15 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
 
     private array $abstractServices = [];
     private array $concreteServices = [];
+    /** @var array<string>  */
     private array $namedServices = [];
+    /** @var array<string>  */
     private array $aliases = [];
+    private array $instances = [];
 
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     public function addConcreteService(string $name): void
     {
@@ -28,7 +37,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         $this->abstractServices[$name] = $name;
     }
 
-    public function addNamedService(string $service, string $name): void
+    public function addNamedService(string $name, string $service): void
     {
         $this->namedServices[$name] = $service;
     }
@@ -38,17 +47,28 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         $this->aliases[$abstract] = $concrete;
     }
 
+    public function getAliases(): array
+    {
+        return $this->aliases;
+    }
+
+    public function addInstance(string $name, object $instance): void
+    {
+        $this->instances[$name] = $instance;
+    }
+
     /**
      * @throws InvalidConfigException
+     * @throws Exception
      */
     public function createDefinitions(): array
     {
-        $definitions = \array_map(fn($concrete) => $concrete, $this->aliases);
+        $definitions = array_map(fn($concrete): string => $concrete, $this->aliases);
 
         foreach ($this->namedServices as $name => $service) {
-            if (\array_key_exists($name, $definitions) && $definitions[$name] !== $service) {
+            if (array_key_exists($name, $definitions) && $definitions[$name] !== $service) {
                 // TODO: should this exception be removed?
-                throw new \Exception("duplicate alias '{$name}' detected, please check");
+                throw new Exception("duplicate alias '$name' while trying to define named service");
             }
             $definitions[$name] = $service;
         }
@@ -74,7 +94,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
 
         foreach ($propertiesInject as $class => $path) {
             $def = $definitions[$class] ?? ['class' => $class];
-            if (\is_string($def)) {
+            if (is_string($def)) {
                 $def = [
                     'class' => $class,
                 ];
@@ -83,6 +103,20 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
                 $def["\$$property"] = Reference::to($value->type->getName());
             }
             $definitions[$class] = $def;
+        }
+
+        foreach ($this->instances as $key => $value) {
+            if (array_key_exists($key, $definitions) && $definitions[$key] !== $value) {
+                // TODO: remove me
+                throw new Exception("Duplicate alias '$key' while trying to define value");
+            }
+            $definitions[$key] = $value;
+
+//            $definitions[$key] = $definitions[$key] ?? $value;
+        }
+
+        foreach ($this->concreteServices as $concrete) {
+            $definitions[$concrete] = $definitions[$concrete] ?? $concrete;
         }
 
         return $definitions;
