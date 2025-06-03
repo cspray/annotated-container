@@ -20,6 +20,7 @@ use Cspray\Typiphy\ObjectType;
 use RuntimeException;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
+use Yiisoft\Di\Reference\TagReference;
 use Yiisoft\Injector\Injector;
 use function assert;
 use function Cspray\Typiphy\objectType;
@@ -38,7 +39,7 @@ if (!class_exists(Injector::class)) {
 // @codeCoverageIgnoreEnd
 
 
-final class YIiDiContainerFactory extends AbstractContainerFactory implements ContainerFactory
+final class YiiDiContainerFactory extends AbstractContainerFactory implements ContainerFactory
 {
     protected function getBackingContainerType(): ObjectType
     {
@@ -113,7 +114,12 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
     protected function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition): void
     {
-        // TODO: Configuration attribute is deprecated. Should this method be implemented?
+        assert($state instanceof YiiDiContainerFactoryState);
+        $state->addConcreteService($definition->getClass()->getName());
+        $name = $definition->getName();
+        if ($name !== null) {
+            $state->addNamedService($name, $definition->getClass()->getName());
+        }
     }
 
     protected function createAnnotatedContainer(ContainerFactoryState $state, ActiveProfiles $activeProfiles): AnnotatedContainer
@@ -133,10 +139,25 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
                 $config = ContainerConfig::create()
                     ->withDefinitions($state->createDefinitions())
-                    ->withStrictMode();
+                    ->withStrictMode()
+                    ->withValidate(false);
 
                 $this->container = new Container($config);
-                $this->injector = (new Injector($this->container))->withCacheReflections(); // TODO: check memory usage with cache reflections
+                $this->injector = (new Injector($this->container))->withCacheReflections();
+
+                $servicesWithReadOnlyProperties = $this->container->get(TagReference::id(YiiDiContainerFactoryState::TAG_INJECT_READ_ONLY_PROPERTIES));
+
+                foreach ($servicesWithReadOnlyProperties as $service) {
+                    $properties = $state->getReadOnlyPropertyInjectsForService($service::class);
+                    /**
+                     * @var \ReflectionProperty $reflectionProperty
+                     * @var mixed $def
+                     */
+                    foreach ($properties as [$reflectionProperty, $def]) {
+                        $value = $def instanceof ContainerReference ? $this->container->get($def->type->getName()) : $def;
+                        $reflectionProperty->setValue($service, $value);
+                    }
+                }
             }
 
             public function getBackingContainer(): object
