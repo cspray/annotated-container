@@ -3,12 +3,11 @@
 namespace Cspray\AnnotatedContainer\Unit\ContainerFactoryTests;
 
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\YIiDiContainerFactory;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\Unit\ContainerFactoryTestCase;
 use Cspray\Typiphy\ObjectType;
-use DI\Container;
+use Yiisoft\Di\Container;
 use function Cspray\Typiphy\objectType;
 
 class YiiDiContainerFactoryTest extends ContainerFactoryTestCase {
