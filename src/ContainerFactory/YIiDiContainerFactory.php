@@ -15,7 +15,6 @@ use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
-use Cspray\AnnotatedContainer\Exception\UnsupportedOperation;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\Typiphy\ObjectType;
 use RuntimeException;
@@ -76,7 +75,12 @@ final class YIiDiContainerFactory extends AbstractContainerFactory implements Co
 
     protected function handleServiceDelegateDefinition(ContainerFactoryState $state, ServiceDelegateDefinition $definition): void
     {
-        // TODO: implement me
+        assert($state instanceof YiiDiContainerFactoryState);
+        $state->addServiceDelegate(
+            $definition->getServiceType()->getName(),
+            $definition->getDelegateType()->getName(),
+            $definition->getDelegateMethod()
+        );
     }
 
     protected function handleServicePrepareDefinition(ContainerFactoryState $state, ServicePrepareDefinition $definition): void

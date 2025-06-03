@@ -2,11 +2,12 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
+use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Exception;
+use Psr\Container\ContainerInterface;
 use Yiisoft\Definitions\ArrayDefinition;
 use Yiisoft\Definitions\Exception\InvalidConfigException;
 use Yiisoft\Definitions\Reference;
-use function array_key_exists;
 use function array_map;
 use function is_string;
 
@@ -18,8 +19,13 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
 
     private array $abstractServices = [];
     private array $concreteServices = [];
+
     /** @var array<string> */
     private array $namedServices = [];
+
+    /** @var array<class-string, array<string, string>> */
+    private array $serviceDelegate = [];
+
     /** @var array<string> */
     private array $aliases = [];
     private array $instances = [];
@@ -58,6 +64,11 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         $this->instances[$name] = $instance;
     }
 
+    public function addServiceDelegate(string $service, string $delegate, string $delegateMethod): void
+    {
+        $this->serviceDelegate[$service] = [$delegate, $delegateMethod];
+    }
+
     /**
      * @throws InvalidConfigException
      * @throws Exception
@@ -66,11 +77,14 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
     {
         $definitions = array_map(fn($concrete): string => $concrete, $this->aliases);
 
+        foreach ($this->serviceDelegate as $service => [$delegate, $method]) {
+            $definitions[$service] = static function (AutowireableInvoker $invoker, ContainerInterface $container) use ($delegate, $method){
+                $factory = $container->has($delegate) ? $container->get($delegate) : $invoker->make($delegate);
+                return $invoker->invoke($factory->$method(...));
+            };
+        }
+
         foreach ($this->namedServices as $name => $service) {
-            if (array_key_exists($name, $definitions) && $definitions[$name] !== $service) {
-                // TODO: should this exception be removed?
-                throw new Exception("duplicate alias '$name' while trying to define named service");
-            }
             $definitions[$name] = $service;
         }
 
@@ -107,13 +121,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         }
 
         foreach ($this->instances as $key => $value) {
-            if (array_key_exists($key, $definitions) && $definitions[$key] !== $value) {
-                // TODO: remove me
-                throw new Exception("Duplicate alias '$key' while trying to define value");
-            }
-            $definitions[$key] = $value;
-
-//            $definitions[$key] = $definitions[$key] ?? $value;
+            $definitions[$key] = $definitions[$key] ?? $value;
         }
 
         foreach ($this->concreteServices as $concrete) {
@@ -124,10 +132,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
             if ($definitions[$service]) {
                 $def = is_string($definitions[$service]) ? [ArrayDefinition::CLASS_NAME => $definitions[$service]] : $definitions[$service];
                 foreach ($methods as $method) {
-                    $params = [];
-                    foreach ($this->parametersForMethod($service, $method) as $param => $value) {
-                        $params[$param] = $this->parameterValueOrReference($value);
-                    }
+                    $params = array_map(fn ($value) => $this->parameterValueOrReference($value), $this->parametersForMethod($service, $method));
                     $def["$method()"] = $params;
                 }
                 $definitions[$service] = $def;
