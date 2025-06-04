@@ -49,7 +49,7 @@ final class YiiDiContainerFactory extends AbstractContainerFactory implements Co
 
     protected function getContainerFactoryState(ContainerDefinition $containerDefinition): ContainerFactoryState
     {
-        return new YiiDiContainerFactoryState();
+        return new YiiDiContainerFactoryState($containerDefinition);
     }
 
     protected function handleServiceDefinition(ContainerFactoryState $state, ServiceDefinition $definition): void

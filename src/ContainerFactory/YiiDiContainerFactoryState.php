@@ -3,13 +3,17 @@
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
-use Exception;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use ReflectionException;
 use ReflectionProperty;
 use Yiisoft\Definitions\ArrayDefinition;
 use Yiisoft\Definitions\Exception\InvalidConfigException;
 use Yiisoft\Definitions\Reference;
 use function array_map;
+use function Cspray\Typiphy\arrayType;
 use function is_string;
 
 final class YiiDiContainerFactoryState implements ContainerFactoryState
@@ -35,7 +39,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
     private array $aliases = [];
     private array $instances = [];
 
-    public function __construct()
+    public function __construct(private readonly ContainerDefinition $containerDefinition)
     {
     }
 
@@ -80,16 +84,18 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
     }
 
     /**
+     * @throws ContainerExceptionInterface
      * @throws InvalidConfigException
-     * @throws Exception
+     * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
     public function createDefinitions(): array
     {
         $definitions = array_map(fn($concrete): string => $concrete, $this->aliases);
 
         foreach ($this->serviceDelegate as $service => [$delegate, $method]) {
-            $definitions[$service] = static function (AutowireableInvoker $invoker, ContainerInterface $container) use ($delegate, $method){
-                $factory = $container->has($delegate) ? $container->get($delegate) : $invoker->make($delegate);
+            $definitions[$service] = static function (AutowireableInvoker $invoker) use ($delegate, $method) {
+                $factory = $invoker->make($delegate);
                 return $invoker->invoke($factory->$method(...));
             };
         }
@@ -102,15 +108,40 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
 
         foreach ($methodInject as $class => $path) {
             $def = $definitions[$class] ?? [ArrayDefinition::CLASS_NAME => $class];
-
+            $convertDefinitionToClosure = false;
             foreach ($path as $method => $val) {
                 $constructor = "$method()";
                 if ($constructor === ArrayDefinition::CONSTRUCTOR) {
                     $def[$constructor] ??= [];
                     foreach ($val as $param => $value) {
-                        $def[$constructor][$param] = $this->parameterValueOrReference($value);
+                        if ($value instanceof ServiceCollectorReference) {
+                            $convertDefinitionToClosure = true;
+                        }
+                        $def[$constructor][$param] = $this->parameterValueOrReference($value, $class);
                     }
                 }
+            }
+            if ($convertDefinitionToClosure) {
+                $def = function (ContainerInterface $container) use ($def) {
+                    $definition = ArrayDefinition::fromConfig($def);
+                    $class = $definition->getClass();
+
+                    $constructorArguments = array_map(
+                        fn($param) => $param instanceof ServiceCollectorReference
+                            ? $this->parameterValueOrReference($param, $class, $container)
+                            : $param
+                        , $definition->getConstructorArguments()
+                    );
+
+                    $definition = $definition->merge(
+                        ArrayDefinition::fromPreparedData(
+                            $class,
+                            $constructorArguments,
+                            $definition->getMethodsAndProperties()
+                        ));
+
+                    return $definition->resolve($container);
+                };
             }
             $definitions[$class] = $def;
         }
@@ -128,7 +159,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
                 $reflectionProperty = new ReflectionProperty($class, $property);
                 if ($reflectionProperty->isPublic() && !$reflectionProperty->isReadOnly()) {
                     // Yii DI natively supports property injection only for public and writable properties
-                    $def["\$$property"] = $this->parameterValueOrReference($value);
+                    $def["\$$property"] = $this->parameterValueOrReference($value, $class);
                 } else {
                     // add tag to service classes that have non-public or read-only properties
                     // for injecting them manually after container creation
@@ -153,7 +184,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
             if ($definitions[$service]) {
                 $def = is_string($definitions[$service]) ? [ArrayDefinition::CLASS_NAME => $definitions[$service]] : $definitions[$service];
                 foreach ($methods as $method) {
-                    $params = array_map(fn ($value) => $this->parameterValueOrReference($value), $this->parametersForMethod($service, $method));
+                    $params = array_map(fn($value) => $this->parameterValueOrReference($value, $service), $this->parametersForMethod($service, $method));
                     $def["$method()"] = $params;
                 }
                 $definitions[$service] = $def;
@@ -165,10 +196,35 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
 
     /**
      * @throws InvalidConfigException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    private function parameterValueOrReference(mixed $value): mixed
+    private function parameterValueOrReference(mixed $value, string $service, ?ContainerInterface $container = null): mixed
     {
-        return $value instanceof ContainerReference ? Reference::to($value->name) : $value;
+        if ($value instanceof ContainerReference) {
+            return Reference::to($value->name);
+        }
+
+        if ($value instanceof ServiceCollectorReference && ($value->collectionType === arrayType() || !is_null($container))) {
+            if (is_null($container)) {
+                return $value;
+            }
+            $values = [];
+            foreach ($this->containerDefinition->getServiceDefinitions() as $serviceDefinition) {
+                if ($serviceDefinition->isAbstract() || $serviceDefinition->getType()->getName() === $service) {
+                    continue;
+                }
+
+                if (is_a($serviceDefinition->getType()->getName(), $value->valueType->getName(), true)) {
+                    $values[] = $value->collectionType !== arrayType()
+                        ? $container->get($serviceDefinition->getType()->getName())
+                        : Reference::to($serviceDefinition->getType()->getName());
+                }
+            }
+            return $value->listOf->toCollection($values);
+        }
+
+        return $value;
     }
 
 }
