@@ -174,6 +174,10 @@ final class AnnotatedTargetDefinitionConverter {
     }
 
     private function buildConfigurationDefinition(AnnotatedTarget $target) : ConfigurationDefinition {
+        trigger_error(
+            'The #[Configuration] Attribute and related functionality will be removed in 3.0. Please use a normal #[Service] attribute instead.',
+            E_USER_DEPRECATED,
+        );
         $builder = ConfigurationDefinitionBuilder::forClass(objectType($target->getTargetReflection()->getName()));
         $attributeInstance = $target->getAttributeInstance();
         assert($attributeInstance instanceof ConfigurationAttribute);
@@ -250,7 +254,7 @@ final class AnnotatedTargetDefinitionConverter {
             if ($paramType !== mixedType() && $reflectionType->allowsNull()) {
                 $paramType = typeUnion($paramType, nullType());
             }
-        } else if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
+        } elseif ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
             $types = [];
             foreach ($reflectionType->getTypes() as $type) {
                 assert($type instanceof ReflectionNamedType);
@@ -280,5 +284,4 @@ final class AnnotatedTargetDefinitionConverter {
             default => objectType($type)
         };
     }
-
 }

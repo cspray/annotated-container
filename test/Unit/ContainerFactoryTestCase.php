@@ -4,7 +4,6 @@ namespace Cspray\AnnotatedContainer\Unit;
 
 use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
-use Cspray\AnnotatedContainer\ContainerFactory\IlluminateContainerFactory;
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
@@ -18,7 +17,6 @@ use Cspray\AnnotatedContainer\Definition\AliasDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinitionBuilder;
-use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
 use Cspray\AnnotatedContainer\Serializer\ContainerDefinitionSerializer;
@@ -54,6 +52,10 @@ abstract class ContainerFactoryTestCase extends TestCase {
     abstract protected function getContainerFactory(ActiveProfiles $activeProfiles) : ContainerFactory;
 
     abstract protected function getBackingContainerInstanceOf() : ObjectType;
+
+    protected function supportsInjectingMultipleNamedServices() : bool {
+        return true;
+    }
 
     private function getContainerDefinitionCompiler() : ContainerDefinitionAnalyzer {
         return new AnnotatedTargetContainerDefinitionAnalyzer(
@@ -279,7 +281,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $this->getContainer(Fixtures::configurationMissingStore()->getPath());
     }
 
-    public function profilesProvider() : array {
+    public static function profilesProvider() : array {
         return [
             ['from-prod', ['default', 'prod']],
             ['from-test', ['default', 'test']],
@@ -287,9 +289,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         ];
     }
 
-    /**
-     * @dataProvider profilesProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('profilesProvider')]
     public function testInjectProfilesMethodParam(string $expected, array $profiles)  {
         $container = $this->getContainer(Fixtures::injectConstructorServices()->getPath(), $profiles);
         $subject = $container->get(Fixtures::injectConstructorServices()->injectProfilesStringService()->getName());
@@ -377,9 +377,9 @@ abstract class ContainerFactoryTestCase extends TestCase {
     }
 
     public function testInjectingNamedServices() : void {
-        if ($this->getBackingContainerInstanceOf()->getName() === Container::class) {
+        if (!$this->supportsInjectingMultipleNamedServices()) {
             $this->markTestSkipped(
-                IlluminateContainerFactory::class . ' does not support injecting multiple named services.'
+                $this->getBackingContainerInstanceOf()->getName() . ' does not support injecting multiple named services.'
             );
         }
 
@@ -470,24 +470,16 @@ abstract class ContainerFactoryTestCase extends TestCase {
         self::assertFalse($container->has('test-foo'));
     }
 
-    public function deserializeContainerProvider() : array {
+    public static function deserializeContainerProvider() : array {
         return [
             [Fixtures::injectCustomStoreServices(), function(ContainerFactory $containerFactory, ContainerDefinition $deserialize) {
-                $store = $this->getMockBuilder(ParameterStore::class)->getMock();
-                $store->expects($this->once())
-                    ->method('getName')
-                    ->willReturn('test-store');
-
-                $store->expects($this->once())
-                    ->method('fetch')
-                    ->with($this->isInstanceOf(NamedType::class), 'key')
-                    ->willReturn('the store key value');
+                $store = new StubParameterStore();
                 $containerFactory->addParameterStore($store);
 
                 $container = $containerFactory->createContainer($deserialize);
                 $service = $container->get(Fixtures::injectCustomStoreServices()->scalarInjector()->getName());
 
-                self::assertSame('the store key value', $service->key);
+                self::assertSame('from test-store key', $service->key);
             }],
             [Fixtures::injectConstructorServices(), function(ContainerFactory $containerFactory, ContainerDefinition $deserialize) {
                 $container = $containerFactory->createContainer($deserialize);
@@ -499,9 +491,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
         ];
     }
 
-    /**
-     * @dataProvider deserializeContainerProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('deserializeContainerProvider')]
     public function testDeserializingContainerWithInjectAllowsServiceCreation(Fixture $fixture, callable $assertions) {
         $serializer = new ContainerDefinitionSerializer();
         $containerDefinition = $this->getContainerDefinitionCompiler()->analyze(
@@ -765,7 +755,6 @@ abstract class ContainerFactoryTestCase extends TestCase {
                 'Injecting service %s from Container into %s::__construct($foo).',
                 Fixtures::injectServiceConstructorServices()->fooImplementation()->getName(),
                 Fixtures::injectServiceConstructorServices()->serviceInjector()->getName(),
-
             ),
             'context' => [
                 'service' => Fixtures::injectServiceConstructorServices()->serviceInjector()->getName(),
@@ -882,7 +871,6 @@ abstract class ContainerFactoryTestCase extends TestCase {
                 'Injecting service %s from Container into %s::foo.',
                 Fixtures::configurationInjectServiceFixture()->fooService()->getName(),
                 Fixtures::configurationInjectServiceFixture()->fooConfig()->getName(),
-
             ),
             'context' => [
                 'configuration' => Fixtures::configurationInjectServiceFixture()->fooConfig()->getName(),
@@ -987,5 +975,58 @@ abstract class ContainerFactoryTestCase extends TestCase {
 
         self::assertInstanceOf(Fixtures::aliasedConfigurationFixture()->myAppConfig()->getName(), $configuration);
         self::assertSame('my-app-name', $configuration->getAppName());
+    }
+
+    public function testCreatingServiceWithInjectServiceCollection() : void {
+        $container = $this->getContainer(Fixtures::injectServiceCollection()->getPath());
+
+        $collectionInjector = $container->get(Fixtures::injectServiceCollection()->collectionInjector()->getName());
+
+        self::assertCount(3, $collectionInjector->services);
+        self::assertContainsOnlyInstancesOf(
+            Fixtures::injectServiceCollection()->fooInterface()->getName(),
+            $collectionInjector->services
+        );
+    }
+
+    public function testCreatingServiceWithInjectServiceDomainCollection() : void {
+        $container = $this->getContainer(Fixtures::injectServiceDomainCollection()->getPath());
+
+        $collectionInjector = $container->get(Fixtures::injectServiceDomainCollection()->collectionInjector()->getName());
+
+        self::assertCount(3, $collectionInjector->collection->services);
+        self::assertContainsOnlyInstancesOf(
+            Fixtures::injectServiceDomainCollection()->fooInterface()->getName(),
+            $collectionInjector->collection->services
+        );
+    }
+
+    public function testCreatingServiceWithInjectServiceCollectionDecorator() : void {
+        $container = $this->getContainer(Fixtures::injectServiceCollectionDecorator()->getPath());
+
+        $fooService = $container->get(Fixtures::injectServiceCollectionDecorator()->fooService()->getName());
+
+        self::assertInstanceOf(
+            Fixtures::injectServiceCollectionDecorator()->fooService()->getName(),
+            $fooService
+        );
+        self::assertInstanceOf(
+            Fixtures::injectServiceCollectionDecorator()->compositeFoo()->getName(),
+            $fooService->foo
+        );
+        self::assertCount(3, $fooService->foo->foos);
+        $fooClasses = array_map(static fn(object $foo) => $foo::class, $fooService->foo->foos);
+        self::assertContains(
+            Fixtures::injectServiceCollectionDecorator()->fooImplementation()->getName(),
+            $fooClasses
+        );
+        self::assertContains(
+            Fixtures::injectServiceCollectionDecorator()->barImplementation()->getName(),
+            $fooClasses
+        );
+        self::assertContains(
+            Fixtures::injectServiceCollectionDecorator()->bazImplementation()->getName(),
+            $fooClasses
+        );
     }
 }

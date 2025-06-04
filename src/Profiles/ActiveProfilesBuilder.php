@@ -17,7 +17,12 @@ final class ActiveProfilesBuilder {
      */
     private array $profiles = [];
 
-    private function __construct() {}
+    private function __construct() {
+        trigger_error(
+            'The ' . ActiveProfilesBuilder::class . ' is being removed in 3.0. There is no corresponding feature replacing this. Please use a static constructor on the new Profiles class instead.',
+            E_USER_DEPRECATED
+        );
+    }
 
     /**
      * Ensures that the 'default' profile is included.
@@ -40,12 +45,12 @@ final class ActiveProfilesBuilder {
      * @param string ...$profiles
      * @return $this
      */
-    public function add(string... $profiles) : self {
+    public function add(string...$profiles) : self {
         if (empty($profiles)) {
             throw new InvalidArgumentException('When adding a profile at least 1 value must be provided.');
-        } else if (in_array('default', $profiles)) {
+        } elseif (in_array('default', $profiles)) {
             throw new InvalidArgumentException("The 'default' profile is already active and should not be added explicitly.");
-        } else if (!empty($dupes = array_intersect($this->profiles, $profiles))) {
+        } elseif (!empty($dupes = array_intersect($this->profiles, $profiles))) {
             throw new InvalidArgumentException(sprintf(
                 "The '%s' %s already active and cannot be added again.",
                 join("', '", $dupes),
@@ -101,5 +106,4 @@ final class ActiveProfilesBuilder {
     public function build() : array {
         return ['default', ...$this->profiles];
     }
-
 }

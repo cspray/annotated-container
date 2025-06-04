@@ -9,6 +9,7 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
@@ -19,15 +20,18 @@ use DI\Container;
 use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\Typiphy\ObjectType;
 use DI\ContainerBuilder;
+use DI\Definition\ArrayDefinition;
 use UnitEnum;
 use function Cspray\Typiphy\objectType;
 use function DI\decorate;
 use function DI\get;
 
 // @codeCoverageIgnoreStart
+// phpcs:disable
 if (!class_exists(Container::class)) {
     throw new \RuntimeException("To enable the PhpDiContainerFactory please install php-di/php-di 7+!");
 }
+// phpcs:enable
 // @codeCoverageIgnoreEnd
 
 
@@ -40,8 +44,8 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
         return objectType(Container::class);
     }
 
-    protected function getContainerFactoryState() : ContainerFactoryState {
-        return new PhpDiContainerFactoryState();
+    protected function getContainerFactoryState(ContainerDefinition $containerDefinition) : ContainerFactoryState {
+        return new PhpDiContainerFactoryState($containerDefinition);
     }
 
     protected function handleServiceDefinition(ContainerFactoryState $state, ServiceDefinition $definition) : void {
@@ -86,46 +90,20 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
     public function handleInjectDefinition(ContainerFactoryState $state, InjectDefinition $definition) : void {
         assert($state instanceof PhpDiContainerFactoryState);
-        $targetClass = $definition->getTargetIdentifier()->getClass()->getName();
         if ($definition->getTargetIdentifier()->isMethodParameter()) {
-            $method = $definition->getTargetIdentifier()->getMethodName();
-            $parameter = $definition->getTargetIdentifier()->getName();
-
-            $value = $definition->getValue();
-            $store = $definition->getStoreName();
-            if ($store !== null) {
-                $parameterStore = $this->getParameterStore($store);
-                if ($parameterStore === null) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
-                }
-                $value = $parameterStore->fetch($definition->getType(), $value);
-            }
-
-            $param = $definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)
-                ? get($value)
-                : $value;
-
-            $state->addMethodInject($targetClass, $method, $parameter, $param);
+            $state->addMethodInject(
+                $definition->getTargetIdentifier()->getClass()->getName(),
+                $definition->getTargetIdentifier()->getMethodName(),
+                $definition->getTargetIdentifier()->getName(),
+                $this->getInjectDefinitionValue($definition)
+            );
         } else {
-            $property = $definition->getTargetIdentifier()->getName();
-
-            $value = $definition->getValue();
-            $store = $definition->getStoreName();
-            if ($store !== null) {
-                $parameterStore = $this->getParameterStore($store);
-                if ($parameterStore === null) {
-                    throw ParameterStoreNotFound::fromParameterStoreNotAddedToContainerFactory($store);
-                }
-                $value = $parameterStore->fetch($definition->getType(), $value);
-            }
-
-            $param = $definition->getType() instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)
-                ? get($value)
-                : $value;
-
-            $state->addPropertyInject($targetClass, $property, $param);
+            $state->addPropertyInject(
+                $definition->getTargetIdentifier()->getClass()->getName(),
+                $definition->getTargetIdentifier()->getName(),
+                $this->getInjectDefinitionValue($definition)
+            );
         }
-
     }
 
     public function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void {

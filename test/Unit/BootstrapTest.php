@@ -39,7 +39,6 @@ final class BootstrapTest extends TestCase {
     private VirtualDirectory $vfs;
 
     protected function setUp() : void {
-        parent::setUp();
         $this->vfs = VirtualFilesystem::setup();
     }
 
@@ -908,5 +907,4 @@ XML;
 
         self::assertSame($container, $actual);
     }
-
 }

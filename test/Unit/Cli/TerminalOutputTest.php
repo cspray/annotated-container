@@ -14,8 +14,6 @@ class TerminalOutputTest extends TestCase {
     private TerminalOutput $subject;
 
     protected function setUp() : void {
-        parent::setUp();
-
         $this->stdout = new InMemoryOutput();
         $this->stderr = new InMemoryOutput();
         $this->subject = new TerminalOutput($this->stdout, $this->stderr);
@@ -85,7 +83,7 @@ class TerminalOutputTest extends TestCase {
         ], $this->stdout->getContents());
     }
 
-    public function colorProvider() : array {
+    public static function colorProvider() : array {
         return [
             ['fg:black', '30'],
             ['bg:black', '40'],
@@ -106,9 +104,7 @@ class TerminalOutputTest extends TestCase {
         ];
     }
 
-    /**
-     * @dataProvider colorProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('colorProvider')]
     public function testWriteFormatsColorTag(string $color, string $code) : void {
         $this->subject->stdout->write(sprintf(
             'Now we need to have <%s>some stylized text</%1$s>',
@@ -127,5 +123,4 @@ class TerminalOutputTest extends TestCase {
             "Need to have \033[47m\033[30mboth back and fore\033[0m\033[0m" . PHP_EOL
         ], $this->stdout->getContents());
     }
-
 }

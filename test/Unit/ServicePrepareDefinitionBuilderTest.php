@@ -26,19 +26,21 @@ class ServicePrepareDefinitionBuilderTest extends TestCase {
     public function testExceptionThrownIfMethodEmpty() {
         $this->expectException(InvalidServicePrepareDefinition::class);
         $this->expectExceptionMessage('A method for a ServicePrepareDefinition must not be blank.');
-        ServicePrepareDefinitionBuilder::forMethod(objectType($this::class), '')->build();
+        ServicePrepareDefinitionBuilder::forMethod(objectType(static::class), '')->build();
     }
 
     public function testWithAttributeIsImmutable() : void {
         $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(
-            Fixtures::interfacePrepareServices()->fooInterface(), 'setBar'
+            Fixtures::interfacePrepareServices()->fooInterface(),
+            'setBar'
         );
         self::assertNotSame($prepareDefinition, $prepareDefinition->withAttribute(new ServicePrepare()));
     }
 
     public function testNoAttributeDefinitionAttributeIsNull() : void {
         $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(
-            Fixtures::interfacePrepareServices()->fooInterface(), 'setBar'
+            Fixtures::interfacePrepareServices()->fooInterface(),
+            'setBar'
         )->build();
 
         self::assertNull($prepareDefinition->getAttribute());
@@ -46,7 +48,8 @@ class ServicePrepareDefinitionBuilderTest extends TestCase {
 
     public function testWithAttributeDefinitionAttributeIsSameInstance() : void {
         $prepareDefinition = ServicePrepareDefinitionBuilder::forMethod(
-            Fixtures::interfacePrepareServices()->fooInterface(), 'setBar'
+            Fixtures::interfacePrepareServices()->fooInterface(),
+            'setBar'
         )->withAttribute($attr = new ServicePrepare())->build();
 
         self::assertSame($attr, $prepareDefinition->getAttribute());

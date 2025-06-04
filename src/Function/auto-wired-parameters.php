@@ -17,7 +17,7 @@ use Traversable;
  * @param AutowireableParameter ...$parameters
  * @return AutowireableParameterSet
  */
-function autowiredParams(AutowireableParameter... $parameters) : AutowireableParameterSet {
+function autowiredParams(AutowireableParameter...$parameters) : AutowireableParameterSet {
     return new class(...$parameters) implements AutowireableParameterSet {
 
         /**
@@ -25,7 +25,7 @@ function autowiredParams(AutowireableParameter... $parameters) : AutowireablePar
          */
         private array $parameters = [];
 
-        public function __construct(AutowireableParameter... $parameters) {
+        public function __construct(AutowireableParameter...$parameters) {
             array_map(fn($p) => $this->add($p), $parameters);
         }
 
@@ -77,7 +77,8 @@ function serviceParam(string $name, ObjectType $service) : AutowireableParameter
         public function __construct(
             private readonly string $name,
             private readonly ObjectType $value
-        ) {}
+        ) {
+        }
 
         public function getName() : string {
             return $this->name;
@@ -98,7 +99,6 @@ function serviceParam(string $name, ObjectType $service) : AutowireableParameter
  * passed to the parameter.
  *
  * @param string $name
- * @param mixed $value
  * @return AutowireableParameter
  * @throws InvalidAutowireParameter
  */
@@ -111,7 +111,8 @@ function rawParam(string $name, mixed $value) : AutowireableParameter {
         public function __construct(
             private readonly string $name,
             private readonly mixed $value
-        ) {}
+        ) {
+        }
 
         public function getName() : string {
             return $this->name;

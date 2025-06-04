@@ -20,6 +20,10 @@ use JetBrains\PhpStorm\Deprecated;
 abstract class ServiceWiringObserver implements ContainerCreatedObserver {
 
     final public function notifyContainerCreated(ActiveProfiles $activeProfiles, ContainerDefinition $containerDefinition, AnnotatedContainer $container) : void {
+        trigger_error(
+            'The ' . ServiceWiringObserver::class . ' is being removed in 3.0. Corresponding functionality will be available using a new Event system. Please be prepared to update this code when upgrading Annotated Container to 3+.',
+            E_USER_DEPRECATED
+        );
         $serviceGatherer = new class($containerDefinition, $container) implements ServiceGatherer {
 
             private readonly ContainerDefinition $containerDefinition;
@@ -76,7 +80,8 @@ abstract class ServiceWiringObserver implements ContainerCreatedObserver {
                     public function __construct(
                         private readonly object $service,
                         private readonly ServiceDefinition $definition
-                    ) {}
+                    ) {
+                    }
 
                     public function getService() : object {
                         return $this->service;
@@ -86,12 +91,10 @@ abstract class ServiceWiringObserver implements ContainerCreatedObserver {
                         return $this->definition;
                     }
                 };
-
             }
         };
         $this->wireServices($container, $serviceGatherer);
     }
 
     abstract protected function wireServices(AnnotatedContainer $container, ServiceGatherer $gatherer) : void;
-
 }

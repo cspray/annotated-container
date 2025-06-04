@@ -29,9 +29,11 @@ use UnitEnum;
 use function Cspray\Typiphy\objectType;
 
 // @codeCoverageIgnoreStart
+// phpcs:disable
 if (!class_exists(Injector::class)) {
     throw new \RuntimeException("To enable the AurynContainerFactory please install rdlowrey/auryn!");
 }
+// phpcs:enable
 // @codeCoverageIgnoreEnd
 
 /**
@@ -43,8 +45,8 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
         return objectType(Injector::class);
     }
 
-    protected function getContainerFactoryState() : AurynContainerFactoryState {
-        return new AurynContainerFactoryState();
+    protected function getContainerFactoryState(ContainerDefinition $containerDefinition) : AurynContainerFactoryState {
+        return new AurynContainerFactoryState($containerDefinition);
     }
 
     protected function handleServiceDefinition(ContainerFactoryState $state, ServiceDefinition $definition) : void {
@@ -93,27 +95,13 @@ final class AurynContainerFactory extends AbstractContainerFactory implements Co
         if ($definition->getTargetIdentifier()->isMethodParameter()) {
             $method = $definition->getTargetIdentifier()->getMethodName();
             $parameterName = $definition->getTargetIdentifier()->getName();
-
             $value = $this->getInjectDefinitionValue($definition);
-            if ($value instanceof ContainerReference) {
-                $key = $parameterName;
-                $nameType = $state->getTypeForName($value->name);
-                if ($nameType !== null) {
-                    $value = $nameType->getName();
-                } else {
-                    $value = $value->name;
-                }
-            } else {
-                $key = ':' . $parameterName;
-            }
-
-            $state->addMethodInject($injectTargetType, $method, $key, $value);
+            $state->addMethodInject($injectTargetType, $method, $parameterName, $value);
         } else {
             $property = $definition->getTargetIdentifier()->getName();
             $value = $this->getInjectDefinitionValue($definition);
             $state->addPropertyInject($injectTargetType, $property, $value);
         }
-
     }
 
     protected function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void {

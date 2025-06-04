@@ -3,11 +3,14 @@
 namespace Cspray\AnnotatedContainer\ContainerFactory;
 
 use Auryn\Injector;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\Typiphy\ObjectType;
 
 final class AurynContainerFactoryState implements ContainerFactoryState {
 
-    use HasMethodInjectState, HasPropertyInjectState, HasServicePrepareState;
+    use HasMethodInjectState, HasPropertyInjectState, HasServicePrepareState {
+        HasMethodInjectState::addMethodInject as addResolvedMethodInject;
+    }
 
     public readonly Injector $injector;
 
@@ -17,8 +20,48 @@ final class AurynContainerFactoryState implements ContainerFactoryState {
     private array $nameTypeMap = [];
 
 
-    public function __construct() {
+    public function __construct(
+        private readonly ContainerDefinition $containerDefinition
+    ) {
         $this->injector = new Injector();
+    }
+
+
+    /**
+     * @param class-string $class
+     * @param non-empty-string $method
+     * @param non-empty-string $param
+     * @return void
+     * @throws \Auryn\InjectionException
+     */
+    public function addMethodInject(string $class, string $method, string $param, mixed $value) : void {
+        if ($value instanceof ContainerReference) {
+            $key = $param;
+            $nameType = $this->getTypeForName($value->name);
+            if ($nameType !== null) {
+                $value = $nameType->getName();
+            } else {
+                $value = $value->name;
+            }
+        } elseif ($value instanceof ServiceCollectorReference) {
+            $key = '+' . $param;
+            $values = [];
+            foreach ($this->containerDefinition->getServiceDefinitions() as $serviceDefinition) {
+                if ($serviceDefinition->isAbstract() || $serviceDefinition->getType()->getName() === $class) {
+                    continue;
+                }
+
+                if (is_a($serviceDefinition->getType()->getName(), $value->valueType->getName(), true)) {
+                    $values[] = $this->injector->make($serviceDefinition->getType()->getName());
+                }
+            }
+
+            $value = static fn() => $value->listOf->toCollection($values);
+        } else {
+            $key = ':' . $param;
+        }
+
+        $this->addResolvedMethodInject($class, $method, $key, $value);
     }
 
     /**
@@ -37,5 +80,4 @@ final class AurynContainerFactoryState implements ContainerFactoryState {
     public function getTypeForName(string $name) : ?ObjectType {
         return $this->nameTypeMap[$name] ?? null;
     }
-
 }

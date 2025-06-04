@@ -29,15 +29,7 @@ use Psr\Log\LoggerInterface;
 final class Bootstrap {
 
     private readonly BootstrappingDirectoryResolver $directoryResolver;
-    /**
-     * @deprecated
-     */
-    private readonly ?LoggerInterface $logger;
     private readonly ParameterStoreFactory $parameterStoreFactory;
-    private readonly ?DefinitionProviderFactory $definitionProviderFactory;
-    private readonly ?ObserverFactory $observerFactory;
-
-    private readonly ?ContainerFactory $containerFactory;
 
     private readonly Stopwatch $stopwatch;
 
@@ -48,20 +40,26 @@ final class Bootstrap {
 
     public function __construct(
         BootstrappingDirectoryResolver $directoryResolver = null,
-        LoggerInterface $logger = null,
+        /**
+         * @deprecated
+         */
+        private readonly ?LoggerInterface $logger = null,
         ParameterStoreFactory $parameterStoreFactory = null,
-        DefinitionProviderFactory $definitionProviderFactory = null,
-        ObserverFactory $observerFactory = null,
+        private readonly ?DefinitionProviderFactory $definitionProviderFactory = null,
+        private readonly ?ObserverFactory $observerFactory = null,
         Stopwatch $stopwatch = null,
-        ContainerFactory $containerFactory = null
+        private readonly ?ContainerFactory $containerFactory = null
     ) {
         $this->directoryResolver = $directoryResolver ?? $this->defaultDirectoryResolver();
-        $this->logger = $logger;
         $this->parameterStoreFactory = $parameterStoreFactory ?? new DefaultParameterStoreFactory();
-        $this->definitionProviderFactory = $definitionProviderFactory;
-        $this->observerFactory = $observerFactory;
         $this->stopwatch = $stopwatch ?? new Stopwatch();
-        $this->containerFactory = $containerFactory;
+
+        if ($this->observerFactory !== null) {
+            trigger_error(
+                'The Observer system is being replaced in 3.0 with an Event system. There will no longer be a ' . ObserverFactory::class . ' and will be removed as a dependency to ' . Bootstrap::class,
+                E_USER_DEPRECATED
+            );
+        }
     }
 
     private function defaultDirectoryResolver() : BootstrappingDirectoryResolver {
@@ -74,6 +72,10 @@ final class Bootstrap {
     }
 
     public function addObserver(PreAnalysisObserver|PostAnalysisObserver|ContainerCreatedObserver|ContainerAnalyticsObserver $observer) : void {
+        trigger_error(
+            'The Observer system is being removed from ' . Bootstrap::class . ' in 3.0.',
+            E_USER_DEPRECATED
+        );
         $this->observers[] = $observer;
     }
 
@@ -100,13 +102,22 @@ final class Bootstrap {
             public function __construct(
                 /** @var list<non-empty-string> */
                 private readonly array $profiles
-            ) {}
+            ) {
+            }
 
             public function getProfiles() : array {
+                trigger_error(
+                    'The ' . ActiveProfiles::class . ' interface is being removed in 3.0. Please use the new Profiles interface instead.',
+                    E_USER_DEPRECATED
+                );
                 return $this->profiles;
             }
 
             public function isActive(string $profile) : bool {
+                trigger_error(
+                    'The ' . ActiveProfiles::class . ' interface is being removed in 3.0. Please use the new Profiles interface instead.',
+                    E_USER_DEPRECATED
+                );
                 return in_array($profile, $this->profiles, true);
             }
         };
@@ -292,5 +303,4 @@ final class Bootstrap {
             }
         }
     }
-
 }

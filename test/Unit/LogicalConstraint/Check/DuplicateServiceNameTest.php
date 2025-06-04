@@ -54,9 +54,7 @@ TEXT;
         ];
     }
 
-    /**
-     * @dataProvider duplicateServiceNameProfiles
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('duplicateServiceNameProfiles')]
     public function testServiceWithMultipleNamesOnDifferentProfilesHasNoViolation(string $profile) : void {
         $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
             Fixtures::duplicateNamedServiceDifferentProfiles()->getPath()
@@ -68,5 +66,4 @@ TEXT;
 
         self::assertCount(0, $violations);
     }
-
 }

@@ -52,7 +52,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             throw InvalidBootstrapConfiguration::fromFileMissing($this->xmlFile);
         }
 
-        try{
+        try {
             $schemaFile = dirname(__DIR__, 2) . '/annotated-container.xsd';
             $dom = new DOMDocument();
             $dom->load($this->xmlFile);
@@ -101,7 +101,6 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                     );
                     $scanDirectories[] = $vendorScanPath;
                 }
-
             }
 
             $definitionProvider = null;
@@ -112,7 +111,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 $definitionProviderType = trim($definitionProviderNode->nodeValue);
                 if (isset($this->definitionProviderFactory)) {
                     $definitionProviders[] = $this->definitionProviderFactory->createProvider($definitionProviderType);
-                } else{
+                } else {
                     if (!class_exists($definitionProviderType) ||
                         !is_subclass_of($definitionProviderType, DefinitionProvider::class)) {
                         throw InvalidBootstrapConfiguration::fromConfiguredDefinitionProviderWrongType($definitionProviderType);
@@ -160,11 +159,25 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 }
             }
 
+            if ($observers !== []) {
+                trigger_error(
+                    'There are Observer implementations found in your configuration. This feature will be removed in 3.0 and replaced with an Event system. Your configuration will need to be changed when upgrading to Annotated Container 3+.',
+                    E_USER_DEPRECATED
+                );
+            }
+
             /** @var DOMNodeList $cacheDirNodes */
             $cacheDirNodes = $xpath->query('/ac:annotatedContainer/ac:cacheDir');
             $cache = null;
             if (count($cacheDirNodes) === 1) {
                 $cache = $cacheDirNodes[0]->textContent;
+            }
+
+            if ($cache !== null) {
+                trigger_error(
+                    'A cache directory is defined in your configuration. The ability to define a cache through configuration is removed in v3 and must setup as part of your bootstrapping code.',
+                    E_USER_DEPRECATED
+                );
             }
 
             $loggingFileNodes = $xpath->query('/ac:annotatedContainer/ac:logging/ac:file/text()');
@@ -181,11 +194,18 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
                 $fileLogger = new FileLogger($dateTimeProvider, $loggingFilePath);
                 $stdoutLogger = new StdoutLogger($dateTimeProvider);
                 $logger = new CompositeLogger($fileLogger, $stdoutLogger);
-            } else if ($hasLoggingFile) {
+            } elseif ($hasLoggingFile) {
                 $loggingFilePath = $this->directoryResolver->getLogPath($loggingFileNodes[0]->nodeValue);
                 $logger = new FileLogger($dateTimeProvider, $loggingFilePath);
-            } else if ($hasStdoutFile) {
+            } elseif ($hasStdoutFile) {
                 $logger = new StdoutLogger($dateTimeProvider);
+            }
+
+            if ($logger !== null) {
+                trigger_error(
+                    'There is logging set in your configuration. In 3.0 logging has been moved to its own library using the new Event system. Please see cspray/annotated-container-logging to emulate this functionality.',
+                    E_USER_DEPRECATED
+                );
             }
 
             $excludedProfilesNodes = $xpath->query('/ac:annotatedContainer/ac:logging/ac:exclude/ac:profile/text()');
@@ -219,7 +239,6 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             is_subclass_of($observerClass, PostAnalysisObserver::class) ||
             is_subclass_of($observerClass, ContainerCreatedObserver::class) ||
             is_subclass_of($observerClass, ContainerAnalyticsObserver::class);
-
     }
 
     public function getScanDirectories() : array {

@@ -15,15 +15,11 @@ use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
 use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
-use Cspray\AnnotatedContainer\Exception\ContainerException;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
 use Cspray\AnnotatedContainer\Profiles\ActiveProfiles;
-use Cspray\AnnotatedContainer\Profiles\ActiveProfilesBuilder;
 use Cspray\Typiphy\ObjectType;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use stdClass;
-use Throwable;
 use UnitEnum;
 
 abstract class AbstractContainerFactory implements ContainerFactory {
@@ -70,23 +66,13 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     private function createContainerState(ContainerDefinition $containerDefinition, array $activeProfiles) : ContainerFactoryState {
         $definition = new ProfilesAwareContainerDefinition($containerDefinition, $activeProfiles);
-        $state = $this->getContainerFactoryState();
+        $state = $this->getContainerFactoryState($definition);
 
         foreach ($definition->getServiceDefinitions() as $serviceDefinition) {
             $this->handleServiceDefinition($state, $serviceDefinition);
             $this->logServiceShared($serviceDefinition);
             if ($serviceDefinition->getName() !== null) {
                 $this->logServiceNamed($serviceDefinition);
-            }
-        }
-
-        // We're doing inject definitions first because these could influence the way a service is created
-        foreach ($definition->getInjectDefinitions() as $injectDefinition) {
-            $this->handleInjectDefinition($state, $injectDefinition);
-            if ($injectDefinition->getTargetIdentifier()->isMethodParameter()) {
-                $this->logInjectingMethodParameter($injectDefinition);
-            } else {
-                $this->logInjectingProperty($injectDefinition);
             }
         }
 
@@ -114,6 +100,16 @@ abstract class AbstractContainerFactory implements ContainerFactory {
             $this->logAliasingService($resolution, $aliasDefinition->getAbstractService());
         }
 
+        // We're doing inject definitions first because these could influence the way a service is created
+        foreach ($definition->getInjectDefinitions() as $injectDefinition) {
+            $this->handleInjectDefinition($state, $injectDefinition);
+            if ($injectDefinition->getTargetIdentifier()->isMethodParameter()) {
+                $this->logInjectingMethodParameter($injectDefinition);
+            } else {
+                $this->logInjectingProperty($injectDefinition);
+            }
+        }
+
         return $state;
     }
 
@@ -126,13 +122,22 @@ abstract class AbstractContainerFactory implements ContainerFactory {
             public function __construct(
                 /** @var list<non-empty-string> */
                 private readonly array $profiles
-            ) {}
+            ) {
+            }
 
             public function getProfiles() : array {
+                trigger_error(
+                    'The ' . ActiveProfiles::class . ' interface is being removed in 3.0. Please use the new Profiles interface instead.',
+                    E_USER_DEPRECATED
+                );
                 return $this->profiles;
             }
 
             public function isActive(string $profile) : bool {
+                trigger_error(
+                    'The ' . ActiveProfiles::class . ' interface is being removed in 3.0. Please use the new Profiles interface instead.',
+                    E_USER_DEPRECATED
+                );
                 return in_array($profile, $this->profiles, true);
             }
         };
@@ -172,7 +177,13 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         }
 
         $type = $definition->getType();
-        if ($type instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)) {
+        if ($value instanceof ListOf) {
+            $value = new ServiceCollectorReference(
+                $value,
+                $value->type(),
+                $type
+            );
+        } elseif ($type instanceof ObjectType && !is_a($definition->getType()->getName(), UnitEnum::class, true)) {
             $value = new ContainerReference($value, $type);
         }
 
@@ -355,7 +366,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
                         'value' => $inject->getValue()
                     ]
                 );
-            } else if ($inject->getType() instanceof ObjectType) {
+            } elseif ($inject->getType() instanceof ObjectType && !($inject->getValue() instanceof ListOf)) {
                 $this->logger->info(
                     sprintf(
                         'Injecting service %s from Container into %s::%s($%s).',
@@ -433,7 +444,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
                         'value' => $inject->getValue()
                     ]
                 );
-            } else if ($inject->getType() instanceof ObjectType) {
+            } elseif ($inject->getType() instanceof ObjectType) {
                 $this->logger->info(
                     sprintf(
                         'Injecting service %s from Container into %s::%s.',
@@ -514,7 +525,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
 
     abstract protected function getBackingContainerType() : ObjectType;
 
-    abstract protected function getContainerFactoryState() : ContainerFactoryState;
+    abstract protected function getContainerFactoryState(ContainerDefinition $containerDefinition) : ContainerFactoryState;
 
     abstract protected function handleServiceDefinition(ContainerFactoryState $state, ServiceDefinition $definition) : void;
 
@@ -529,5 +540,4 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     abstract protected function handleConfigurationDefinition(ContainerFactoryState $state, ConfigurationDefinition $definition) : void;
 
     abstract protected function createAnnotatedContainer(ContainerFactoryState $state, ActiveProfiles $activeProfiles) : AnnotatedContainer;
-
 }

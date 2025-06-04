@@ -32,7 +32,6 @@ class BuildCommandTest extends TestCase {
     private VirtualDirectory $vfs;
 
     protected function setUp() : void {
-        parent::setUp();
         $this->subject = new BuildCommand(
             new FixtureBootstrappingDirectoryResolver()
         );
@@ -326,5 +325,4 @@ XML;
         self::assertFileExists('vfs://root/annotated-container.log');
         self::assertStringContainsString('Annotated Container compiling started.', file_get_contents('vfs://root/annotated-container.log'));
     }
-
 }

@@ -16,7 +16,6 @@ trait HasMethodInjectState {
      * @param class-string $class
      * @param non-empty-string $method
      * @param non-empty-string $param
-     * @param mixed $value
      * @return void
      */
     public function addMethodInject(string $class, string $method, string $param, mixed $value) : void {
@@ -40,5 +39,4 @@ trait HasMethodInjectState {
     public function getMethodInject() : array {
         return $this->methodInject;
     }
-
 }
