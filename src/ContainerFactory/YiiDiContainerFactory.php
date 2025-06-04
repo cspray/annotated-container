@@ -9,6 +9,7 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolution;
 use Cspray\AnnotatedContainer\Definition\ConfigurationDefinition;
+use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
 use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
@@ -46,7 +47,7 @@ final class YiiDiContainerFactory extends AbstractContainerFactory implements Co
         return objectType(Container::class);
     }
 
-    protected function getContainerFactoryState(): ContainerFactoryState
+    protected function getContainerFactoryState(ContainerDefinition $containerDefinition): ContainerFactoryState
     {
         return new YiiDiContainerFactoryState();
     }
