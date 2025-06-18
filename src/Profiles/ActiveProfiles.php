@@ -3,16 +3,14 @@
 namespace Cspray\AnnotatedContainer\Profiles;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateActiveProfilesInFavorOfConcreteValueObject;
-use JetBrains\PhpStorm\Deprecated;
 
 /**
  * An implicitly shared Service provided by Annotated Container that provides the list of active profiles when the
  * Container was created.
+ *
+ * @deprecated
  */
-#[
-    DeprecateActiveProfilesInFavorOfConcreteValueObject,
-    Deprecated('Please see DeprecateActiveProfilesInFavorOfConcreteValueObject ADR')
-]
+#[DeprecateActiveProfilesInFavorOfConcreteValueObject]
 interface ActiveProfiles {
 
     /**

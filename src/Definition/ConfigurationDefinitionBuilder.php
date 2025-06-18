@@ -5,14 +5,14 @@ namespace Cspray\AnnotatedContainer\Definition;
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateConfigurationInFavorOfCustomServiceAttribute;
 use Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute;
 use Cspray\Typiphy\ObjectType;
-use JetBrains\PhpStorm\Deprecated;
 
 /**
  * The preferred method for creating ConfigurationDefinition.
+ *
+ * @deprecated
  */
 #[
-    DeprecateConfigurationInFavorOfCustomServiceAttribute,
-    Deprecated('See ADR record DeprecatedConfigurationInFavorOfCustomServiceAttribute')
+    DeprecateConfigurationInFavorOfCustomServiceAttribute
 ]
 final class ConfigurationDefinitionBuilder {
 

@@ -3,15 +3,14 @@
 namespace Cspray\AnnotatedContainer\Profiles;
 
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateActiveProfilesInFavorOfConcreteValueObject;
-use JetBrains\PhpStorm\Deprecated;
+use InvalidArgumentException;
 
 /**
  * An ActiveProfilesParser that will take a comma-separated string and turn it into a list of active profiles.
+ *
+ * @deprecated
  */
-#[
-    DeprecateActiveProfilesInFavorOfConcreteValueObject,
-    Deprecated('Please see DeprecateActiveProfilesInFavorOfConcreteValueObject ADR')
-]
+#[DeprecateActiveProfilesInFavorOfConcreteValueObject]
 final class CsvActiveProfilesParser implements ActiveProfilesParser {
 
     /**
@@ -25,7 +24,7 @@ final class CsvActiveProfilesParser implements ActiveProfilesParser {
      * ',,' or ', , ' would result in an exception as this would result in an empty list of profiles.
      *
      * @param string $profiles A comma-separated string to turn into a list of strings
-     * @throws \InvalidArgumentException If the string is empty or would result in an empty list
+     * @throws InvalidArgumentException If the string is empty or would result in an empty list
      * @return string[]
      */
     public function parse(string $profiles) : array {
@@ -34,11 +33,11 @@ final class CsvActiveProfilesParser implements ActiveProfilesParser {
             E_USER_DEPRECATED
         );
         if (empty($profiles)) {
-            throw new \InvalidArgumentException('The profiles to parse cannot be an empty string.');
+            throw new InvalidArgumentException('The profiles to parse cannot be an empty string.');
         }
         $parsedProfiles = preg_split('/\s*,\s*/', trim($profiles), flags: PREG_SPLIT_NO_EMPTY);
         if (empty($parsedProfiles)) {
-            throw new \InvalidArgumentException(sprintf("The profile string '%s' results in no valid profiles.", $profiles));
+            throw new InvalidArgumentException(sprintf("The profile string '%s' results in no valid profiles.", $profiles));
         }
         return $parsedProfiles;
     }
