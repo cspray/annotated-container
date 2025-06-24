@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.24.0@462c80e31c34e58cc4f750c656be3927e80e550e">
+<files psalm-version="5.26.1@d747f6500b38ac4f7dfc5edbcae6e4b637d7add0">
   <file src="src/AnnotatedContainer.php">
     <PossiblyUnusedMethod>
       <code><![CDATA[getBackingContainer]]></code>
@@ -720,6 +720,17 @@
     <ArgumentTypeCoercion>
       <code><![CDATA[$name]]></code>
     </ArgumentTypeCoercion>
+    <DeprecatedClass>
+      <code><![CDATA[$serviceDefinitionBuilder]]></code>
+      <code><![CDATA[AliasDefinitionBuilder::forAbstract($abstract)]]></code>
+      <code><![CDATA[InjectDefinitionBuilder::forService($service)]]></code>
+      <code><![CDATA[InjectDefinitionBuilder::forService($service)]]></code>
+      <code><![CDATA[ServiceDelegateDefinitionBuilder::forService($service)]]></code>
+      <code><![CDATA[ServicePrepareDefinitionBuilder::forMethod($service, $method)]]></code>
+      <code><![CDATA[if ($method === 'forConcrete') {
+        $methodArgs[] = $isPrimary;
+    }]]></code>
+    </DeprecatedClass>
     <MixedArgument>
       <code><![CDATA[$profiles]]></code>
       <code><![CDATA[$profiles]]></code>
@@ -805,7 +816,14 @@
       <code><![CDATA[$name]]></code>
     </ArgumentTypeCoercion>
     <DeprecatedClass>
+      <code><![CDATA[AliasDefinitionBuilder::forAbstract(objectType($abstract))]]></code>
       <code><![CDATA[ConfigurationDefinitionBuilder::forClass(objectType($type))]]></code>
+      <code><![CDATA[InjectDefinitionBuilder::forService(objectType($type))]]></code>
+      <code><![CDATA[InjectDefinitionBuilder::forService(objectType($type))]]></code>
+      <code><![CDATA[ServiceDefinitionBuilder::forAbstract($type)]]></code>
+      <code><![CDATA[ServiceDefinitionBuilder::forConcrete($type, $isPrimary === 'true')]]></code>
+      <code><![CDATA[ServiceDelegateDefinitionBuilder::forService(objectType($service))]]></code>
+      <code><![CDATA[ServicePrepareDefinitionBuilder::forMethod(objectType($service), $method)]]></code>
     </DeprecatedClass>
     <InvalidArgument>
       <code><![CDATA[$serviceProfiles]]></code>
@@ -844,6 +862,11 @@
     </UndefinedPropertyFetch>
   </file>
   <file src="src/StaticAnalysis/AnnotatedTargetContainerDefinitionAnalyzer.php">
+    <DeprecatedClass>
+      <code><![CDATA[AliasDefinitionBuilder::forAbstract($abstractType)]]></code>
+      <code><![CDATA[ServiceDefinitionBuilder::forAbstract($serviceDelegateDefinition->getServiceType())]]></code>
+      <code><![CDATA[ServiceDefinitionBuilder::forConcrete($serviceDelegateDefinition->getServiceType())]]></code>
+    </DeprecatedClass>
     <DeprecatedInterface>
       <code><![CDATA[$consumer]]></code>
       <code><![CDATA[ConfigurationDefinition]]></code>
@@ -860,6 +883,14 @@
   <file src="src/StaticAnalysis/AnnotatedTargetDefinitionConverter.php">
     <DeprecatedClass>
       <code><![CDATA[ConfigurationDefinitionBuilder::forClass(objectType($target->getTargetReflection()->getName()))]]></code>
+      <code><![CDATA[InjectDefinitionBuilder]]></code>
+      <code><![CDATA[InjectDefinitionBuilder::forService($serviceType)]]></code>
+      <code><![CDATA[InjectDefinitionBuilder::forService(objectType($targetReflection->getDeclaringClass()->getName()))]]></code>
+      <code><![CDATA[ServiceDefinitionBuilder::forAbstract($serviceType)]]></code>
+      <code><![CDATA[ServiceDefinitionBuilder::forConcrete($serviceType, $attribute->isPrimary())]]></code>
+      <code><![CDATA[ServiceDelegateDefinitionBuilder::forService(objectType($returnType->getName()))]]></code>
+      <code><![CDATA[ServiceDelegateDefinitionBuilder::forService(objectType($service))]]></code>
+      <code><![CDATA[ServicePrepareDefinitionBuilder::forMethod(objectType($prepareType), $method)]]></code>
     </DeprecatedClass>
     <DeprecatedInterface>
       <code><![CDATA[ConfigurationDefinition]]></code>
