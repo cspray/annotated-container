@@ -7,7 +7,6 @@ use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionException;
 use ReflectionProperty;
 use Yiisoft\Definitions\ArrayDefinition;
 use Yiisoft\Definitions\Exception\InvalidConfigException;
@@ -87,89 +86,25 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
      * @throws ContainerExceptionInterface
      * @throws InvalidConfigException
      * @throws NotFoundExceptionInterface
-     * @throws ReflectionException
      */
     public function createDefinitions(): array
     {
         $definitions = array_map(fn($concrete): string => $concrete, $this->aliases);
 
         foreach ($this->serviceDelegate as $service => [$delegate, $method]) {
-            $definitions[$service] = static function (AutowireableInvoker $invoker) use ($delegate, $method) {
-                $factory = $invoker->make($delegate);
-                return $invoker->invoke($factory->$method(...));
-            };
+            $definitions[$service] = static fn (AutowireableInvoker $invoker): mixed => $invoker->invoke($invoker->make($delegate)->$method(...));
         }
 
         foreach ($this->namedServices as $name => $service) {
             $definitions[$name] = $service;
         }
 
-        $methodInject = $this->getMethodInject();
-
-        foreach ($methodInject as $class => $path) {
-            $def = $definitions[$class] ?? [ArrayDefinition::CLASS_NAME => $class];
-            $convertDefinitionToClosure = false;
-            foreach ($path as $method => $val) {
-                $constructor = "$method()";
-                if ($constructor === ArrayDefinition::CONSTRUCTOR) {
-                    $def[$constructor] ??= [];
-                    foreach ($val as $param => $value) {
-                        if ($value instanceof ServiceCollectorReference) {
-                            $convertDefinitionToClosure = true;
-                        }
-                        $def[$constructor][$param] = $this->parameterValueOrReference($value, $class);
-                    }
-                }
-            }
-            if ($convertDefinitionToClosure) {
-                $def = function (ContainerInterface $container) use ($def) {
-                    $definition = ArrayDefinition::fromConfig($def);
-                    $class = $definition->getClass();
-
-                    $constructorArguments = array_map(
-                        fn($param) => $param instanceof ServiceCollectorReference
-                            ? $this->parameterValueOrReference($param, $class, $container)
-                            : $param
-                        , $definition->getConstructorArguments()
-                    );
-
-                    $definition = $definition->merge(
-                        ArrayDefinition::fromPreparedData(
-                            $class,
-                            $constructorArguments,
-                            $definition->getMethodsAndProperties()
-                        ));
-
-                    return $definition->resolve($container);
-                };
-            }
-            $definitions[$class] = $def;
+        foreach ($this->getMethodInject() as $class => $methods) {
+            $definitions[$class] = $this->createMethodInjectConfig($class, $methods);
         }
 
-        $propertiesInject = $this->getPropertyInject();
-
-        foreach ($propertiesInject as $class => $path) {
-            $def = $definitions[$class] ?? [ArrayDefinition::CLASS_NAME => $class];
-            if (is_string($def)) {
-                $def = [
-                    ArrayDefinition::CLASS_NAME => $class,
-                ];
-            }
-            foreach ($path as $property => $value) {
-                $reflectionProperty = new ReflectionProperty($class, $property);
-                if ($reflectionProperty->isPublic() && !$reflectionProperty->isReadOnly()) {
-                    // Yii DI natively supports property injection only for public and writable properties
-                    $def["\$$property"] = $this->parameterValueOrReference($value, $class);
-                } else {
-                    // add tag to service classes that have non-public or read-only properties
-                    // for injecting them manually after container creation
-                    $def['tags'] ??= [];
-                    $def['tags'][] = self::TAG_INJECT_READ_ONLY_PROPERTIES;
-                    $this->readOnlyPropertyInject[$class] ??= [];
-                    $this->readOnlyPropertyInject[$class][] = [$reflectionProperty, $value];
-                }
-            }
-            $definitions[$class] = $def;
+        foreach ($this->getPropertyInject() as $class => $methods) {
+            $definitions[$class] = $this->createPropertyInjectConfig($class, $methods);
         }
 
         foreach ($this->instances as $key => $value) {
@@ -180,14 +115,14 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
             $definitions[$concrete] = $definitions[$concrete] ?? $concrete;
         }
 
-        foreach ($this->getServicePrepares() as $service => $methods) {
-            if ($definitions[$service]) {
-                $def = is_string($definitions[$service]) ? [ArrayDefinition::CLASS_NAME => $definitions[$service]] : $definitions[$service];
+        foreach ($this->getServicePrepares() as $class => $methods) {
+            if ($definitions[$class]) {
+                $config = is_string($definitions[$class]) ? [ArrayDefinition::CLASS_NAME => $definitions[$class]] : $definitions[$class];
                 foreach ($methods as $method) {
-                    $params = array_map(fn($value) => $this->parameterValueOrReference($value, $service), $this->parametersForMethod($service, $method));
-                    $def["$method()"] = $params;
+                    $params = array_map(fn($value) => $this->parameterValueOrReference($value, $class), $this->parametersForMethod($class, $method));
+                    $config["$method()"] = $params;
                 }
-                $definitions[$service] = $def;
+                $definitions[$class] = $config;
             }
         }
 
@@ -199,7 +134,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    private function parameterValueOrReference(mixed $value, string $service, ?ContainerInterface $container = null): mixed
+    private function parameterValueOrReference(mixed $value, string $class, ?ContainerInterface $container = null): mixed
     {
         if ($value instanceof ContainerReference) {
             return Reference::to($value->name);
@@ -209,22 +144,91 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
             if (is_null($container)) {
                 return $value;
             }
+
             $values = [];
+
             foreach ($this->containerDefinition->getServiceDefinitions() as $serviceDefinition) {
-                if ($serviceDefinition->isAbstract() || $serviceDefinition->getType()->getName() === $service) {
+                $service = $serviceDefinition->getType()->getName();
+
+                if ($serviceDefinition->isAbstract() || $service === $class) {
                     continue;
                 }
 
-                if (is_a($serviceDefinition->getType()->getName(), $value->valueType->getName(), true)) {
+                if (is_a($service, $value->valueType->getName(), true)) {
                     $values[] = $value->collectionType !== arrayType()
-                        ? $container->get($serviceDefinition->getType()->getName())
-                        : Reference::to($serviceDefinition->getType()->getName());
+                        ? $container->get($service)
+                        : Reference::to($service);
                 }
             }
+
             return $value->listOf->toCollection($values);
         }
 
         return $value;
+    }
+
+    private function convertDefinitionConfigToClosure(array $config): \Closure
+    {
+        return function (ContainerInterface $container) use ($config) {
+            $definition = ArrayDefinition::fromConfig($config);
+            $class = $definition->getClass();
+
+            $constructorArguments = array_map(
+                fn($value) => $value instanceof ServiceCollectorReference
+                    ? $this->parameterValueOrReference($value, $class, $container)
+                    : $value
+                , $definition->getConstructorArguments()
+            );
+
+            $definition = $definition->merge(
+                ArrayDefinition::fromPreparedData(
+                    $class,
+                    $constructorArguments,
+                    $definition->getMethodsAndProperties()
+                ));
+
+            return $definition->resolve($container);
+        };
+    }
+
+    private function createMethodInjectConfig(string $class, array $methods): array | \Closure
+    {
+        $config = [ArrayDefinition::CLASS_NAME => $class];
+        $convertDefinitionToClosure = false;
+        foreach ($methods as $method => $val) {
+            $constructor = "$method()";
+            if ($constructor === ArrayDefinition::CONSTRUCTOR) {
+                $config[$constructor] ??= [];
+                foreach ($val as $param => $value) {
+                    if ($value instanceof ServiceCollectorReference) {
+                        $convertDefinitionToClosure = true;
+                    }
+                    $config[$constructor][$param] = $this->parameterValueOrReference($value, $class);
+                }
+            }
+        }
+        return $convertDefinitionToClosure ? $this->convertDefinitionConfigToClosure($config) : $config;
+    }
+
+    private function createPropertyInjectConfig(string $class, array $methods)
+    {
+        $config = [ArrayDefinition::CLASS_NAME => $class];
+
+        foreach ($methods as $property => $value) {
+            $reflectionProperty = new ReflectionProperty($class, $property);
+            if ($reflectionProperty->isPublic() && !$reflectionProperty->isReadOnly()) {
+                // Yii DI natively supports property injection only for public and writable properties
+                $config["\$$property"] = $this->parameterValueOrReference($value, $class);
+            } else {
+                // add tag to service classes that have non-public or read-only properties
+                // for injecting them manually after container creation
+                $config['tags'] ??= [];
+                $config['tags'][] = self::TAG_INJECT_READ_ONLY_PROPERTIES;
+                $this->readOnlyPropertyInject[$class] ??= [];
+                $this->readOnlyPropertyInject[$class][] = [$reflectionProperty, $value];
+            }
+        }
+        return $config;
     }
 
 }
