@@ -6,14 +6,13 @@ use Cspray\AnnotatedContainer\Profiles;
 
 /**
  * A set of options used by a ContainerFactory when creating your Container.
- *
- * @see ContainerFactoryOptionsBuilder
  */
 final readonly class ContainerFactoryOptions {
 
     private function __construct(
         private Profiles $profiles,
-    ) {}
+    ) {
+    }
 
     public static function fromProfiles(Profiles $profiles) : self {
         return new self($profiles);

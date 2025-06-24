@@ -2,7 +2,6 @@
 
 namespace Cspray\AnnotatedContainer\Internal;
 
-
 use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 
 final readonly class InjectDefinitionFromFunctionalApi implements InjectAttribute {
@@ -16,7 +15,8 @@ final readonly class InjectDefinitionFromFunctionalApi implements InjectAttribut
         private mixed $value,
         private array $profiles,
         private ?string $from
-    ) {}
+    ) {
+    }
 
     public function value() : mixed {
         return $this->value;

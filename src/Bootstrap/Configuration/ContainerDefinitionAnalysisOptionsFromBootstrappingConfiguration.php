@@ -19,12 +19,18 @@ final class ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration {
         foreach ($this->configuration->scanDirectories() as $scanDirectory) {
             $scanPaths[] = $this->directoryResolver->rootPath($scanDirectory);
         }
-        $analysisOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$scanPaths);
+        /** @var list<non-empty-string> $scanPaths */
         $containerDefinitionConsumer = $this->configuration->containerDefinitionProvider();
-        if ($containerDefinitionConsumer !== null) {
-            $analysisOptions = $analysisOptions->withDefinitionProvider($containerDefinitionConsumer);
+
+        if ($containerDefinitionConsumer === null) {
+            $analysisOptions = ContainerDefinitionAnalysisOptions::fromScanDirectories($scanPaths);
+        } else {
+            $analysisOptions = ContainerDefinitionAnalysisOptions::fromScanDirectoriesAndDefinitionProvider(
+                $scanPaths,
+                $containerDefinitionConsumer
+            );
         }
 
-        return $analysisOptions->build();
+        return $analysisOptions;
     }
 }

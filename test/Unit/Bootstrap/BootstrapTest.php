@@ -30,6 +30,7 @@ use Cspray\AnnotatedContainer\Filesystem\PhpFunctionsFilesystem;
 use Cspray\AnnotatedContainer\Fixture\CustomServiceAttribute\Repository;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\Profiles;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
@@ -411,9 +412,9 @@ final class BootstrapTest extends TestCase {
         $directoryResolver = new FixtureBootstrappingDirectoryResolver();
 
         $cacheKey = CacheKey::fromContainerDefinitionAnalysisOptions(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                $directoryResolver->rootPath('SingleConcreteService')
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [$directoryResolver->rootPath('SingleConcreteService')]
+            )
         );
         $cache = $this->getMockBuilder(ContainerDefinitionCache::class)->getMock();
         $cache->expects($this->once())

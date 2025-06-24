@@ -7,7 +7,6 @@ use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptions;
-use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinitionBuilder;
@@ -16,12 +15,14 @@ use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Exception\InvalidAlias;
 use Cspray\AnnotatedContainer\Exception\MultipleInjectOnSameParameter;
 use Cspray\AnnotatedContainer\Exception\ParameterStoreNotFound;
+use Cspray\AnnotatedContainer\Fixture\DelegatedServiceWithInjectedParameter\FooService;
+use Cspray\AnnotatedContainer\Fixture\DelegatedServiceWithInjectedParameter\ServiceInterface;
 use Cspray\AnnotatedContainer\Profiles;
 use Cspray\AnnotatedContainer\Reflection\Type;
 use Cspray\AnnotatedContainer\Reflection\TypeUnion;
 use Cspray\AnnotatedContainer\Reflection\TypeIntersect;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Unit\Helper\HasMockDefinitions;
 use Cspray\AnnotatedContainer\Unit\Helper\StubContainerFactoryListener;
@@ -65,8 +66,8 @@ abstract class ContainerFactoryTestCase extends TestCase {
         Emitter $emitter = new Emitter()
     ) : AnnotatedContainer {
         $compiler = $this->getContainerDefinitionCompiler();
-        $optionsBuilder = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir);
-        $containerDefinition = $compiler->analyze($optionsBuilder->build());
+        $optionsBuilder = ContainerDefinitionAnalysisOptions::fromScanDirectories([$dir]);
+        $containerDefinition = $compiler->analyze($optionsBuilder);
         $containerOptions = ContainerFactoryOptions::fromProfiles($profiles ?? Profiles::fromList(['default']));
 
         $factory = $this->getContainerFactory($emitter);
@@ -453,7 +454,7 @@ abstract class ContainerFactoryTestCase extends TestCase {
     public function testDeserializingContainerWithInjectAllowsServiceCreation(Fixture $fixture, callable $assertions) {
         $serializer = new XmlContainerDefinitionSerializer();
         $containerDefinition = $this->getContainerDefinitionCompiler()->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($fixture->getPath())->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories([$fixture->getPath()])
         );
 
         $serialized = $serializer->serialize($containerDefinition);
@@ -625,10 +626,10 @@ abstract class ContainerFactoryTestCase extends TestCase {
     public function testCreatingDelegatedServiceWithInstancedFactoryWithInjectDefinition() : void {
         $container = $this->getContainer(__DIR__ . '/../../Fixture/DelegatedServiceWithInjectedParameter');
 
-        $service = $container->get(\Cspray\AnnotatedContainer\Fixture\DelegatedServiceWithInjectedParameter\ServiceInterface::class);
+        $service = $container->get(ServiceInterface::class);
 
         self::assertInstanceOf(
-            \Cspray\AnnotatedContainer\Fixture\DelegatedServiceWithInjectedParameter\FooService::class,
+            FooService::class,
             $service
         );
         self::assertSame('my injected value', $service->value);

@@ -11,9 +11,7 @@ use Cspray\AnnotatedContainer\Exception\CacheDirectoryNotFound;
 use Cspray\AnnotatedContainer\Exception\CacheDirectoryNotWritable;
 use Cspray\AnnotatedContainer\Exception\MismatchedContainerDefinitionSerializerVersions;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
-use org\bovigo\vfs\vfsStream;
-use org\bovigo\vfs\vfsStreamDirectory;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +25,7 @@ final class FileBackedContainerDefinitionCacheTest extends TestCase {
         $this->serializer = $this->createMock(ContainerDefinitionSerializer::class);
         $this->filesystem = $this->createMock(Filesystem::class);
         $this->cacheKey = CacheKey::fromContainerDefinitionAnalysisOptions(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories('foo', 'bar', 'baz')->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(['foo', 'bar', 'baz'])
         );
     }
 

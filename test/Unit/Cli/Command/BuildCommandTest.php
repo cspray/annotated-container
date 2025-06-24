@@ -21,7 +21,7 @@ class BuildCommandTest extends TestCase {
     private TerminalOutput $output;
     private FixtureBootstrappingDirectoryResolver $directoryResolver;
     private BuildCommand $subject;
-    private MockObject&ContainerDefinitionAnalysisOptions $analysisOptions;
+    private ContainerDefinitionAnalysisOptions $analysisOptions;
     private MockObject&ContainerDefinitionCache $cache;
 
     protected function setUp() : void {
@@ -30,8 +30,10 @@ class BuildCommandTest extends TestCase {
         $this->output = new TerminalOutput($this->stdout, $this->stderr);
 
         $this->cache = $this->createMock(ContainerDefinitionCache::class);
-        $this->analysisOptions = $this->createMock(ContainerDefinitionAnalysisOptions::class);
         $this->directoryResolver = new FixtureBootstrappingDirectoryResolver();
+        $this->analysisOptions = ContainerDefinitionAnalysisOptions::fromScanDirectories(
+            [$this->directoryResolver->rootPath('SingleConcreteService')]
+        );
 
         $this->subject = new BuildCommand(
             $this->cache,
@@ -80,12 +82,6 @@ SHELL;
     }
 
     public function testBuildRemovesAndSetsCorrectCacheEntryAndSendsCorrectOutput() : void {
-        $this->analysisOptions->method('scanDirectories')
-            ->willReturn([$this->directoryResolver->rootPath('SingleConcreteService')]);
-
-        $this->analysisOptions->method('definitionProvider')
-            ->willReturn(null);
-
         $cacheKeyMatchesExpected = function (CacheKey $cacheKey) {
             return md5($this->directoryResolver->rootPath('SingleConcreteService'))
                 === $cacheKey->asString();

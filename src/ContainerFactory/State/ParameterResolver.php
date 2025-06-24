@@ -54,15 +54,15 @@ final class ParameterResolver {
     }
 
     /**
-     * @param object $containerBuilder
+     * @param object $container
      * @param list<InjectDefinition> $definitions
      * @return array<non-empty-string, mixed>
      */
-    private function listOfInjectDefinitionsToArray(object $containerBuilder, ContainerFactoryState $state, array $definitions) : array {
+    private function listOfInjectDefinitionsToArray(object $container, ContainerFactoryState $state, array $definitions) : array {
         $params = [];
         foreach ($definitions as $injectDefinition) {
             $injectParameterValue = $this->injectParameterValueProvider->resolveInjectParameterValue(
-                $containerBuilder,
+                $container,
                 $state,
                 $injectDefinition
             );

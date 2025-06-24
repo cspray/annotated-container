@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint\Check;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\Fixture\LogicalConstraints\LogicalConstraintFixtures;
@@ -25,9 +25,9 @@ final class NonPublicServicePrepareTest extends LogicalConstraintTestCase {
 
     public function testServicePrepareIsPublicMethodHasNoViolations() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::interfacePrepareServices()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [Fixtures::interfacePrepareServices()->getPath()]
+            )
         );
 
         $collection = $this->subject->constraintViolations($definition, Profiles::fromList(['default']));
@@ -37,9 +37,9 @@ final class NonPublicServicePrepareTest extends LogicalConstraintTestCase {
 
     public function testServicePrepareIsPrivateMethodHasCorrectViolation() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                LogicalConstraintFixtures::privateServicePrepare()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [LogicalConstraintFixtures::privateServicePrepare()->getPath()]
+            )
         );
 
         $collection = $this->subject->constraintViolations($definition, Profiles::fromList(['default']));
@@ -57,9 +57,9 @@ final class NonPublicServicePrepareTest extends LogicalConstraintTestCase {
 
     public function testServicePrepareIsProtectedMethodHasCorrectViolation() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                LogicalConstraintFixtures::protectedServicePrepare()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [LogicalConstraintFixtures::protectedServicePrepare()->getPath()]
+            )
         );
 
         $collection = $this->subject->constraintViolations($definition, Profiles::fromList(['default']));

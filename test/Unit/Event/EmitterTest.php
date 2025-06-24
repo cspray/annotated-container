@@ -20,7 +20,6 @@ use Cspray\AnnotatedContainer\Event\Listener\Bootstrap\BeforeBootstrap;
 use Cspray\AnnotatedContainer\Event\Listener\ContainerFactory\AfterContainerCreation;
 use Cspray\AnnotatedContainer\Event\Listener\ContainerFactory\BeforeContainerCreation;
 use Cspray\AnnotatedContainer\Event\Listener\ContainerFactory\InjectingMethodParameter;
-use Cspray\AnnotatedContainer\Event\Listener\ContainerFactory\InjectingProperty;
 use Cspray\AnnotatedContainer\Event\Listener\ContainerFactory\ServiceAliasResolution;
 use Cspray\AnnotatedContainer\Event\Listener\ContainerFactory\ServiceDelegated;
 use Cspray\AnnotatedContainer\Event\Listener\ContainerFactory\ServiceFilteredDueToProfiles;
@@ -66,7 +65,7 @@ final class EmitterTest extends TestCase {
             BeforeContainerAnalysis::class => [
                 BeforeContainerAnalysis::class,
                 fn() => [
-                    $this->getMockBuilder(ContainerDefinitionAnalysisOptions::class)->getMock(),
+                    ContainerDefinitionAnalysisOptions::fromScanDirectories(['src']),
                 ],
                 fn(ContainerDefinitionAnalysisOptions $analysisOptions) => $this->subject->emitBeforeContainerAnalysis($analysisOptions)
             ],
@@ -158,7 +157,7 @@ final class EmitterTest extends TestCase {
             AfterContainerAnalysis::class => [
                 AfterContainerAnalysis::class,
                 fn() => [
-                    $this->getMockBuilder(ContainerDefinitionAnalysisOptions::class)->getMock(),
+                    ContainerDefinitionAnalysisOptions::fromScanDirectories(['src']),
                     $this->getMockBuilder(ContainerDefinition::class)->getMock(),
                 ],
                 fn(ContainerDefinitionAnalysisOptions $analysisOptions, ContainerDefinition $containerDefinition) =>

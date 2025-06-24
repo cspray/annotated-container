@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint\Check;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\NonPublicServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\Fixture\LogicalConstraints\LogicalConstraintFixtures;
@@ -23,9 +23,9 @@ final class NonPublicServiceDelegateTest extends LogicalConstraintTestCase {
     }
 
     public function testServiceDelegateIsPublicMethodHasNoLogicalConstraints() : void {
-        $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-            Fixtures::implicitServiceDelegateType()->getPath()
-        )->build();
+        $options = ContainerDefinitionAnalysisOptions::fromScanDirectories(
+            [Fixtures::implicitServiceDelegateType()->getPath()]
+        );
 
         $definition = $this->analyzer->analyze($options);
 
@@ -35,9 +35,9 @@ final class NonPublicServiceDelegateTest extends LogicalConstraintTestCase {
     }
 
     public function testServiceDelegateIsProtectedMethodHasCorrectLogicalConstraint() : void {
-        $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-            LogicalConstraintFixtures::protectedServiceDelegate()->getPath()
-        )->build();
+        $options = ContainerDefinitionAnalysisOptions::fromScanDirectories(
+            [LogicalConstraintFixtures::protectedServiceDelegate()->getPath()]
+        );
 
         $definition = $this->analyzer->analyze($options);
 
@@ -52,9 +52,9 @@ final class NonPublicServiceDelegateTest extends LogicalConstraintTestCase {
     }
 
     public function testServiceDelegateIsPrivateMethodHasCorrectLogicalConstraint() : void {
-        $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-            LogicalConstraintFixtures::privateServiceDelegate()->getPath()
-        )->build();
+        $options = ContainerDefinitionAnalysisOptions::fromScanDirectories(
+            [LogicalConstraintFixtures::privateServiceDelegate()->getPath()]
+        );
 
         $definition = $this->analyzer->analyze($options);
 

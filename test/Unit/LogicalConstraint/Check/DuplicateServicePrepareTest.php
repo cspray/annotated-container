@@ -6,7 +6,7 @@ use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServicePrepare;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProviderContext;
@@ -28,9 +28,9 @@ final class DuplicateServicePrepareTest extends LogicalConstraintTestCase {
 
     public function testNoDuplicatePreparesHasZeroViolations() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::multiplePrepareServices()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [Fixtures::multiplePrepareServices()->getPath()]
+            )
         );
 
         $results = $this->subject->constraintViolations($definition, Profiles::fromList(['default']));
@@ -40,9 +40,9 @@ final class DuplicateServicePrepareTest extends LogicalConstraintTestCase {
 
     public function testDuplicatePreparesHasViolation() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                LogicalConstraintFixtures::duplicateServicePrepare()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [LogicalConstraintFixtures::duplicateServicePrepare()->getPath()]
+            )
         );
 
         $results = $this->subject->constraintViolations($definition, Profiles::fromList(['default']));
@@ -75,9 +75,8 @@ TEXT;
 
     public function testDuplicatePreparesWithDefinitionProviderHasViolation() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::singleConcreteService()->getPath()
-            )->withDefinitionProvider(
+            ContainerDefinitionAnalysisOptions::fromScanDirectoriesAndDefinitionProvider(
+                [Fixtures::singleConcreteService()->getPath()],
                 new class implements DefinitionProvider {
                     public function consume(DefinitionProviderContext $context) : void {
                         $context->addServicePrepareDefinition(
@@ -92,7 +91,7 @@ TEXT;
                         );
                     }
                 }
-            )->build()
+            )
         );
 
         $results = $this->subject->constraintViolations($definition, Profiles::fromList(['default']));

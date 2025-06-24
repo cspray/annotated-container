@@ -11,7 +11,7 @@ use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 interface BootstrappingConfiguration {
 
     /**
-     * @return list<string>
+     * @return list<non-empty-string>
      */
     public function scanDirectories() : array;
 
