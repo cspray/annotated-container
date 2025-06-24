@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\ContainerFactory\State;
 
+use Closure;
 use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\ListOf;
@@ -230,5 +231,29 @@ final class ContainerFactoryState {
         }
 
         return null;
+    }
+
+    /**
+     * @param Closure(string):object $serviceCreator
+     * @return array|object
+     */
+    public function serviceCollectorReferenceToListOfServices(
+        ServiceCollectorReference $reference,
+        InjectDefinition $definition,
+        Closure $serviceCreator
+    ) : array|object {
+        $values = [];
+        foreach ($this->serviceDefinitions() as $serviceDefinition) {
+            if ($serviceDefinition->isAbstract() ||
+                $serviceDefinition->type()->equals($definition->service()) ||
+                !is_a($serviceDefinition->type()->name(), $reference->valueType->name(), true)
+            ) {
+                continue;
+            }
+
+            $values[] = $serviceCreator($serviceDefinition->type()->name());
+        }
+
+        return $reference->listOf->toCollection($values);
     }
 }

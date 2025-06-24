@@ -89,10 +89,7 @@ have `php-di/php-di` installed.
 // app bootstrap in __DIR__ . '/app.php'
 require __DIR__ . '/vendor/autoload.php';
 
-use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
-use Cspray\AnnotatedContainer\Event\Emitter;
-use Cspray\AnnotatedContainer\Profiles;
-use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;use Cspray\AnnotatedContainer\ContainerFactory\PhpDi\PhpDiContainerFactory;use Cspray\AnnotatedContainer\Event\Emitter;use Cspray\AnnotatedContainer\Profiles;
 
 $emitter = new Emitter();
 

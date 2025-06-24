@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\Unit\ContainerFactory;
 
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\PhpDi\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Reflection\Type;
 use DI\Container;

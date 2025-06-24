@@ -3,6 +3,10 @@
 namespace Cspray\AnnotatedContainer\Unit;
 
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
+use Cspray\AnnotatedContainer\Internal\InjectDefinitionFromFunctionalApi;
+use Cspray\AnnotatedContainer\Internal\ServiceDelegateFromFunctionalApi;
+use Cspray\AnnotatedContainer\Internal\ServiceFromFunctionalApi;
+use Cspray\AnnotatedContainer\Internal\ServicePrepareFromFunctionalApi;
 use PHPUnit\Framework\TestCase;
 use function Cspray\AnnotatedContainer\Definition\inject;
 use function Cspray\AnnotatedContainer\Definition\serviceDelegate;
@@ -24,6 +28,19 @@ final class ThirdPartyFunctionsTest extends TestCase {
         );
     }
 
+    public function testServiceHasCorrectAttributeAssociatedWithIt() : void {
+        $type = Fixtures::singleConcreteService()->fooImplementation();
+        $serviceDefinition = service($type);
+
+        self::assertInstanceOf(
+            ServiceFromFunctionalApi::class,
+            $serviceDefinition->attribute()
+        );
+        self::assertNull($serviceDefinition->attribute()->name());
+        self::assertFalse($serviceDefinition->attribute()->isPrimary());
+        self::assertSame([], $serviceDefinition->attribute()->profiles());
+    }
+
     public function testAbstractDefinedServiceIsAbstract() {
         $serviceDefinition = service(Fixtures::implicitAliasedServices()->fooInterface());
 
@@ -33,51 +50,58 @@ final class ThirdPartyFunctionsTest extends TestCase {
     public function testAbstractDefinedServiceGetName() {
         $serviceDefinition = service(Fixtures::implicitAliasedServices()->fooInterface(), 'fooService');
 
-        $this->assertSame('fooService', $serviceDefinition->name());
+        self::assertSame('fooService', $serviceDefinition->name());
+        self::assertSame('fooService', $serviceDefinition->attribute()->name());
     }
 
     public function testAbstractDefinedServiceGetProfiles() {
         $serviceDefinition = service(Fixtures::implicitAliasedServices()->fooInterface(), profiles: ['default', 'dev']);
 
-        $this->assertSame(['default', 'dev'], $serviceDefinition->profiles());
+        self::assertSame(['default', 'dev'], $serviceDefinition->profiles());
+        self::assertSame(['default', 'dev'], $serviceDefinition->attribute()->profiles());
     }
 
     public function testSingleConcreteServiceIsConcrete() {
         $serviceDefinition = service(Fixtures::singleConcreteService()->fooImplementation());
 
-        $this->assertTrue($serviceDefinition->isConcrete());
+        self::assertTrue($serviceDefinition->isConcrete());
     }
 
     public function testSingleConcreteServiceIsPrimary() {
         $serviceDefinition = service(Fixtures::singleConcreteService()->fooImplementation(), isPrimary: true);
 
-        $this->assertTrue($serviceDefinition->isPrimary());
+        self::assertTrue($serviceDefinition->isPrimary());
+        self::assertTrue($serviceDefinition->attribute()->isPrimary());
     }
 
     public function testServiceDelegateDefinition() {
         $serviceDelegateDefinition = serviceDelegate(Fixtures::delegatedService()->serviceFactory(), 'createService');
 
-        $this->assertSame(Fixtures::delegatedService()->serviceInterface()->name(), $serviceDelegateDefinition->service()->name());
-        $this->assertSame(Fixtures::delegatedService()->serviceFactory()->name(), $serviceDelegateDefinition->classMethod()->class()->name());
-        $this->assertSame('createService', $serviceDelegateDefinition->classMethod()->methodName());
-        $this->assertSame(['default'], $serviceDelegateDefinition->profiles());
+        self::assertSame(Fixtures::delegatedService()->serviceInterface()->name(), $serviceDelegateDefinition->service()->name());
+        self::assertSame(Fixtures::delegatedService()->serviceFactory()->name(), $serviceDelegateDefinition->classMethod()->class()->name());
+        self::assertSame('createService', $serviceDelegateDefinition->classMethod()->methodName());
+        self::assertSame(['default'], $serviceDelegateDefinition->profiles());
+        self::assertInstanceOf(ServiceDelegateFromFunctionalApi::class, $serviceDelegateDefinition->attribute());
+        self::assertNull($serviceDelegateDefinition->attribute()->service());
     }
 
     public function testServiceDelegateDefinitionWithExplicitProfiles() : void {
         $serviceDelegateDefinition = serviceDelegate(Fixtures::delegatedService()->serviceFactory(), 'createService', ['the', 'love', 'plug']);
 
-        $this->assertSame(Fixtures::delegatedService()->serviceInterface()->name(), $serviceDelegateDefinition->service()->name());
-        $this->assertSame(Fixtures::delegatedService()->serviceFactory()->name(), $serviceDelegateDefinition->classMethod()->class()->name());
-        $this->assertSame('createService', $serviceDelegateDefinition->classMethod()->methodName());
-        $this->assertSame(['the', 'love', 'plug'], $serviceDelegateDefinition->profiles());
+        self::assertSame(Fixtures::delegatedService()->serviceInterface()->name(), $serviceDelegateDefinition->service()->name());
+        self::assertSame(Fixtures::delegatedService()->serviceFactory()->name(), $serviceDelegateDefinition->classMethod()->class()->name());
+        self::assertSame('createService', $serviceDelegateDefinition->classMethod()->methodName());
+        self::assertSame(['the', 'love', 'plug'], $serviceDelegateDefinition->profiles());
+        self::assertSame(['the', 'love', 'plug'], $serviceDelegateDefinition->attribute()->profiles());
     }
 
     public function testServicePrepareDefinition() {
         $servicePrepareDefinition = servicePrepare(Fixtures::interfacePrepareServices()->fooInterface(), 'setBar');
 
-        $this->assertServicePrepareTypes([
+        self::assertServicePrepareTypes([
             [Fixtures::interfacePrepareServices()->fooInterface()->name(), 'setBar']
         ], [$servicePrepareDefinition]);
+        self::assertInstanceOf(ServicePrepareFromFunctionalApi::class, $servicePrepareDefinition->attribute());
     }
 
     public function testInjectMethodParam() {
@@ -89,15 +113,33 @@ final class ThirdPartyFunctionsTest extends TestCase {
             42
         );
 
-        $this->assertSame(Fixtures::injectConstructorServices()->injectFloatService(), $inject->service());
-        $this->assertSame(Fixtures::injectConstructorServices()->injectFloatService(), $inject->classMethodParameter()->class());
-        $this->assertSame('__construct', $inject->classMethodParameter()->methodName());
-        $this->assertSame('dessert', $inject->classMethodParameter()->parameterName());
-        $this->assertSame(types()->int(), $inject->classMethodParameter()->type());
-        $this->assertFalse($inject->classMethodParameter()->isStatic());
-        $this->assertSame(42, $inject->value());
-        $this->assertSame(['default'], $inject->profiles());
-        $this->assertNull($inject->storeName());
+        self::assertSame(Fixtures::injectConstructorServices()->injectFloatService(), $inject->service());
+        self::assertSame(Fixtures::injectConstructorServices()->injectFloatService(), $inject->classMethodParameter()->class());
+        self::assertSame('__construct', $inject->classMethodParameter()->methodName());
+        self::assertSame('dessert', $inject->classMethodParameter()->parameterName());
+        self::assertSame(types()->int(), $inject->classMethodParameter()->type());
+        self::assertFalse($inject->classMethodParameter()->isStatic());
+        self::assertSame(42, $inject->value());
+        self::assertSame(['default'], $inject->profiles());
+        self::assertNull($inject->storeName());
+    }
+
+    public function testInjectHasCorrectAttribute() : void {
+        $inject = inject(
+            Fixtures::injectConstructorServices()->injectFloatService(),
+            '__construct',
+            'dessert',
+            types()->int(),
+            42
+        );
+
+        self::assertInstanceOf(
+            InjectDefinitionFromFunctionalApi::class,
+            $inject->attribute()
+        );
+        self::assertSame(42, $inject->attribute()->value());
+        self::assertSame([], $inject->attribute()->profiles());
+        self::assertNull($inject->attribute()->from());
     }
 
     public function testInjectMethodParamProfiles() {
@@ -110,7 +152,8 @@ final class ThirdPartyFunctionsTest extends TestCase {
             ['foo', 'bar', 'baz']
         );
 
-        $this->assertSame(['foo', 'bar', 'baz'], $inject->profiles());
+        self::assertSame(['foo', 'bar', 'baz'], $inject->profiles());
+        self::assertSame(['foo', 'bar', 'baz'], $inject->attribute()->profiles());
     }
 
     public function testInjectMethodParamStoreName() {
@@ -123,6 +166,7 @@ final class ThirdPartyFunctionsTest extends TestCase {
             from: 'store-name'
         );
 
-        $this->assertSame('store-name', $inject->storeName());
+        self::assertSame('store-name', $inject->storeName());
+        self::assertSame('store-name', $inject->attribute()->from());
     }
 }

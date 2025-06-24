@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\Unit\ContainerFactory;
 
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactory\IlluminateContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\Illuminate\IlluminateContainerFactory;
 use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Reflection\Type;
 use Illuminate\Contracts\Container\Container;

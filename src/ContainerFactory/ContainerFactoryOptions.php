@@ -9,12 +9,22 @@ use Cspray\AnnotatedContainer\Profiles;
  *
  * @see ContainerFactoryOptionsBuilder
  */
-interface ContainerFactoryOptions {
+final readonly class ContainerFactoryOptions {
+
+    private function __construct(
+        private Profiles $profiles,
+    ) {}
+
+    public static function fromProfiles(Profiles $profiles) : self {
+        return new self($profiles);
+    }
 
     /**
      * A list of profiles that should be considered active.
      *
      * @return Profiles
      */
-    public function profiles() : Profiles;
+    public function profiles() : Profiles {
+        return $this->profiles;
+    }
 }

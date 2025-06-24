@@ -2,10 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
-use Cspray\AnnotatedContainer\Attribute\Inject;
-use Cspray\AnnotatedContainer\Attribute\Service;
-use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
-use Cspray\AnnotatedContainer\Attribute\ServicePrepare;
+use Cspray\AnnotatedContainer\Internal\InjectDefinitionFromFunctionalApi;
 use Cspray\AnnotatedContainer\Internal\ServiceDelegateFromFunctionalApi;
 use Cspray\AnnotatedContainer\Internal\ServiceFromFunctionalApi;
 use Cspray\AnnotatedContainer\Internal\ServicePrepareFromFunctionalApi;
@@ -77,7 +74,7 @@ function inject(
         $method,
         $type,
         $paramName,
-        new Inject($value, $from, $profiles)
+        new InjectDefinitionFromFunctionalApi($value, $profiles, $from)
     );
 }
 

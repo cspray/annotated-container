@@ -56,94 +56,7 @@ abstract class AbstractContainerFactory implements ContainerFactory {
         return $container;
     }
 
-    /**
-     * @param ContainerBuilder $containerBuilder
-     * @return array<non-empty-string, mixed>
-     */
-    final protected function parametersForServiceConstructorToArray(
-        object                $containerBuilder,
-        ContainerFactoryState $state,
-        ServiceDefinition     $serviceDefinition
-    ) : array {
-        return $this->listOfInjectDefinitionsToArray(
-            $containerBuilder,
-            $state,
-            $state->constructorInjectDefinitionsForServiceDefinition($serviceDefinition)
-        );
-    }
 
-    /**
-     * @param ContainerBuilder $containerBuilder
-     * @return array<non-empty-string, mixed>
-     */
-    final protected function parametersForServicePrepareToArray(
-        object                   $containerBuilder,
-        ContainerFactoryState    $state,
-        ServicePrepareDefinition $definition,
-    ) : array {
-        return $this->listOfInjectDefinitionsToArray(
-            $containerBuilder,
-            $state,
-            $state->injectDefinitionsForServicePrepareDefinition($definition)
-        );
-    }
-
-    /**
-     * @param ContainerBuilder $containerBuilder
-     * @return array<non-empty-string, mixed>
-     */
-    final protected function parametersForServiceDelegateToArray(
-        object                    $containerBuilder,
-        ContainerFactoryState     $state,
-        ServiceDelegateDefinition $definition,
-    ) : array {
-        return $this->listOfInjectDefinitionsToArray(
-            $containerBuilder,
-            $state,
-            $state->injectDefinitionsForServiceDelegateDefinition($definition)
-        );
-    }
-
-    /**
-     * @param IntermediaryContainer $container
-     * @param ServiceCollectorReference $reference
-     * @return list<object>|object
-     */
-    final protected function serviceCollectorReferenceToListOfServices(
-        object $container,
-        ContainerFactoryState $state,
-        InjectDefinition $definition,
-        ServiceCollectorReference $reference
-    ) : array|object {
-        $values = [];
-        foreach ($state->serviceDefinitions() as $serviceDefinition) {
-            if ($serviceDefinition->isAbstract() ||
-                $serviceDefinition->type()->equals($definition->service()) ||
-                !is_a($serviceDefinition->type()->name(), $reference->valueType->name(), true)
-            ) {
-                continue;
-            }
-
-            $values[] = $this->retrieveServiceFromIntermediaryContainer($container, $serviceDefinition);
-        }
-
-        return $reference->listOf->toCollection($values);
-    }
-
-    /**
-     * @param ContainerBuilder $containerBuilder
-     * @param list<InjectDefinition> $definitions
-     * @return array<non-empty-string, mixed>
-     */
-    private function listOfInjectDefinitionsToArray(object $containerBuilder, ContainerFactoryState $state, array $definitions) : array {
-        $params = [];
-        foreach ($definitions as $injectDefinition) {
-            $injectParameterValue = $this->resolveParameterForInjectDefinition($containerBuilder, $state, $injectDefinition);
-            $params[$injectParameterValue->name] = $injectParameterValue->value;
-        }
-
-        return $params;
-    }
 
     /**
      * Add a custom ParameterStore, allowing you to Inject arbitrary values into your Services.
@@ -157,21 +70,4 @@ abstract class AbstractContainerFactory implements ContainerFactory {
     }
 
     abstract protected function createAnnotatedContainer(ContainerFactoryState $state) : AnnotatedContainer;
-
-    /**
-     * @param ContainerBuilder $containerBuilder
-     */
-    abstract protected function resolveParameterForInjectDefinition(
-        object                $containerBuilder,
-        ContainerFactoryState $state,
-        InjectDefinition      $definition,
-    ) : InjectParameterValue;
-
-    /**
-     * @param IntermediaryContainer $container
-     */
-    abstract protected function retrieveServiceFromIntermediaryContainer(
-        object $container,
-        ServiceDefinition $definition
-    ) : object;
 }

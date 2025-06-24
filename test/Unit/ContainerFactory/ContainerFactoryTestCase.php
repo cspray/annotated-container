@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
@@ -66,13 +67,13 @@ abstract class ContainerFactoryTestCase extends TestCase {
         $compiler = $this->getContainerDefinitionCompiler();
         $optionsBuilder = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir);
         $containerDefinition = $compiler->analyze($optionsBuilder->build());
-        $containerOptions = ContainerFactoryOptionsBuilder::forProfiles($profiles ?? Profiles::fromList(['default']));
+        $containerOptions = ContainerFactoryOptions::fromProfiles($profiles ?? Profiles::fromList(['default']));
 
         $factory = $this->getContainerFactory($emitter);
         if ($parameterStore !== null) {
             $factory->addParameterStore($parameterStore);
         }
-        return $factory->createContainer($containerDefinition, $containerOptions->build());
+        return $factory->createContainer($containerDefinition, $containerOptions);
     }
 
     public function testCreateServiceNotHasThrowsException() {

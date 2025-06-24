@@ -37,9 +37,9 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
     public function __construct(
         private readonly Filesystem $filesystem,
         private readonly string $xmlFile,
-        private readonly ParameterStoreFactory $parameterStoreFactory,
-        private readonly DefinitionProviderFactory $definitionProviderFactory,
-        private readonly ListenerFactory $listenerFactory,
+        private readonly ParameterStoreFactory $parameterStoreFactory = new DefaultParameterStoreFactory(),
+        private readonly DefinitionProviderFactory $definitionProviderFactory = new DefaultDefinitionProviderFactory(),
+        private readonly ListenerFactory $listenerFactory = new DefaultListenerFactory(),
     ) {
         if (!$this->filesystem->isFile($this->xmlFile)) {
             throw InvalidBootstrapConfiguration::fromFileMissing($this->xmlFile);

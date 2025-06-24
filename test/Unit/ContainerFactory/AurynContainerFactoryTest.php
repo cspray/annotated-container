@@ -3,7 +3,7 @@
 namespace Cspray\AnnotatedContainer\Unit\ContainerFactory;
 
 use Auryn\Injector;
-use Cspray\AnnotatedContainer\ContainerFactory\AurynContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\Auryn\AurynContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Reflection\Type;

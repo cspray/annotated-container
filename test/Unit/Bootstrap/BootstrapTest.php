@@ -15,10 +15,10 @@ use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectory
 use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceGatherer;
 use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceWiringListener;
-use Cspray\AnnotatedContainer\ContainerFactory\AurynContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\Auryn\AurynContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
-use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\PhpDi\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\Definition\Cache\CacheKey;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
