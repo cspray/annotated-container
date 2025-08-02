@@ -15,8 +15,7 @@ use function array_map;
 use function Cspray\Typiphy\arrayType;
 use function is_string;
 
-final class YiiDiContainerFactoryState implements ContainerFactoryState
-{
+final class YiiDiContainerFactoryState implements ContainerFactoryState {
     const TAG_INJECT_READ_ONLY_PROPERTIES = '__inject_read_only_properties';
 
     use HasMethodInjectState;
@@ -38,47 +37,38 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
     private array $aliases = [];
     private array $instances = [];
 
-    public function __construct(private readonly ContainerDefinition $containerDefinition)
-    {
+    public function __construct(private readonly ContainerDefinition $containerDefinition) {
     }
 
-    public function addConcreteService(string $name): void
-    {
+    public function addConcreteService(string $name): void {
         $this->concreteServices[$name] = $name;
     }
 
-    public function addAbstractService(string $name): void
-    {
+    public function addAbstractService(string $name): void {
         $this->abstractServices[$name] = $name;
     }
 
-    public function addNamedService(string $name, string $service): void
-    {
+    public function addNamedService(string $name, string $service): void {
         $this->namedServices[$name] = $service;
     }
 
-    public function addAlias(string $abstract, string $concrete): void
-    {
+    public function addAlias(string $abstract, string $concrete): void {
         $this->aliases[$abstract] = $concrete;
     }
 
-    public function getAliases(): array
-    {
+    public function getAliases(): array {
         return $this->aliases;
     }
 
-    public function addInstance(string $name, object $instance): void
-    {
+    public function addInstance(string $name, object $instance): void {
         $this->instances[$name] = $instance;
     }
 
-    public function addServiceDelegate(string $service, string $delegate, string $delegateMethod): void
-    {
+    public function addServiceDelegate(string $service, string $delegate, string $delegateMethod): void {
         $this->serviceDelegate[$service] = [$delegate, $delegateMethod];
     }
 
-    public function getReadOnlyPropertyInjectsForService(string $service): array
-    {
+    public function getReadOnlyPropertyInjectsForService(string $service): array {
         return $this->readOnlyPropertyInject[$service] ?? [];
     }
 
@@ -87,8 +77,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
      * @throws InvalidConfigException
      * @throws NotFoundExceptionInterface
      */
-    public function createDefinitions(): array
-    {
+    public function createDefinitions(): array {
         $definitions = array_map(fn($concrete): string => $concrete, $this->aliases);
 
         foreach ($this->serviceDelegate as $service => [$delegate, $method]) {
@@ -134,8 +123,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    private function parameterValueOrReference(mixed $value, string $class, ?ContainerInterface $container = null): mixed
-    {
+    private function parameterValueOrReference(mixed $value, string $class, ?ContainerInterface $container = null): mixed {
         if ($value instanceof ContainerReference) {
             return Reference::to($value->name);
         }
@@ -167,8 +155,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         return $value;
     }
 
-    private function convertDefinitionConfigToClosure(array $config): \Closure
-    {
+    private function convertDefinitionConfigToClosure(array $config): \Closure {
         return function (ContainerInterface $container) use ($config) {
             $definition = ArrayDefinition::fromConfig($config);
             $class = $definition->getClass();
@@ -176,8 +163,8 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
             $constructorArguments = array_map(
                 fn($value) => $value instanceof ServiceCollectorReference
                     ? $this->parameterValueOrReference($value, $class, $container)
-                    : $value
-                , $definition->getConstructorArguments()
+                    : $value,
+                $definition->getConstructorArguments()
             );
 
             $definition = $definition->merge(
@@ -185,14 +172,14 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
                     $class,
                     $constructorArguments,
                     $definition->getMethodsAndProperties()
-                ));
+                )
+            );
 
             return $definition->resolve($container);
         };
     }
 
-    private function createMethodInjectConfig(string $class, array $methods): array | \Closure
-    {
+    private function createMethodInjectConfig(string $class, array $methods): array | \Closure {
         $config = [ArrayDefinition::CLASS_NAME => $class];
         $convertDefinitionToClosure = false;
         foreach ($methods as $method => $val) {
@@ -210,8 +197,7 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         return $convertDefinitionToClosure ? $this->convertDefinitionConfigToClosure($config) : $config;
     }
 
-    private function createPropertyInjectConfig(string $class, array $methods)
-    {
+    private function createPropertyInjectConfig(string $class, array $methods) {
         $config = [ArrayDefinition::CLASS_NAME => $class];
 
         foreach ($methods as $property => $value) {
@@ -230,5 +216,4 @@ final class YiiDiContainerFactoryState implements ContainerFactoryState
         }
         return $config;
     }
-
 }

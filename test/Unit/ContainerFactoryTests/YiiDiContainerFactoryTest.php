@@ -10,17 +10,13 @@ use Cspray\Typiphy\ObjectType;
 use Yiisoft\Di\Container;
 use function Cspray\Typiphy\objectType;
 
-class YiiDiContainerFactoryTest extends ContainerFactoryTestCase
-{
+class YiiDiContainerFactoryTest extends ContainerFactoryTestCase {
 
-    protected function getContainerFactory(ActiveProfiles $activeProfiles): ContainerFactory
-    {
+    protected function getContainerFactory(ActiveProfiles $activeProfiles): ContainerFactory {
         return new YiiDiContainerFactory();
     }
 
-    protected function getBackingContainerInstanceOf(): ObjectType
-    {
+    protected function getBackingContainerInstanceOf(): ObjectType {
         return objectType(Container::class);
     }
-
 }
