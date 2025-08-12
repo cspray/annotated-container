@@ -109,7 +109,9 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
 
-$container = (new Bootstrap())->bootstrapContainer();
+$container = Bootstrap::fromAnnotatedContainerConventions(
+    new YourContainerFactory()
+)->bootstrapContainer();
 
 $emitter = $container->get(BlobStorageEventEmitter::class);
 $emitter->onStore(fn(string $identifier) -> echo "Stored $identifier");

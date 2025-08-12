@@ -10,7 +10,7 @@
 6. [Injecting Scalar Values](./tutorials/06-injecting-scalar-values.md)
 7. [Autowire Aware Factory](./tutorials/08-autowire-aware-factory.md)
 8. [Autowire aware Invoker](./tutorials/09-autowire-aware-invoker.md)
-9. [Annotated Container Observer](./tutorials/10-annotated-container-observers.md)
+9. [Annotated Container Observer](./tutorials/10-annotated-container-events)
 
 ## How To
 

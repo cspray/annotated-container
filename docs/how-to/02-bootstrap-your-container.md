@@ -16,7 +16,7 @@ If successful, you'll get a configuration file named `annotated-container.xml` i
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainer 
     xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd"
-    version="2.4.0">
+    version="3.0.0">
   <scanDirectories>
     <source>
       <dir>src</dir>
@@ -59,7 +59,7 @@ Now, upgrade the configuration to let bootstrapping know which class to use.
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainer 
     xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd"
-    version="2.4.0">
+    version="3.0.0">
   <scanDirectories>
     <source>
       <dir>src</dir>
@@ -84,6 +84,9 @@ Somewhere in your source code:
 namespace Acme\Demo;
 
 use Cspray\Annotatedcontainer\ContainerFactory\ParameterStore;
+use Cspray\AnnotatedContainer\Reflection\Type;
+use Cspray\AnnotatedContainer\Reflection\TypeUnion;
+use Cspray\AnnotatedContainer\Reflection\TypeIntersect;
 
 final class MyCustomParameterStore implements ParameterStore {
 
@@ -104,7 +107,7 @@ Next, update your configuration.
 <?xml version="1.0" encoding="UTF-8"?>
 <annotatedContainer 
     xmlns="https://annotated-container.cspray.io/schema/annotated-container.xsd"
-    version="2.4.0">
+    version="3.0.0">
   <scanDirectories>
     <source>
       <dir>src</dir>
@@ -186,7 +189,7 @@ You have the ability to control specific aspects of the Bootstrapping process by
 
 #### Specifying Profiles
 
-The only argument, `$profiles`, passed to `bootstrapContainer` should be an instance of `Cspray\AnnotatedContainer\Profiles`. This value object has a variety of static constructor methods on it that allow creating an instance with the appropriate values for your use case. If you don't provide any instance of this value object the active profiles will be `['default']`. If you specify your own `Profiles` instance it is HIGHLY RECOMMENDED you included the `default` profile. Otherwise, it is highly expected that your Container will not be wired correctly.
+The only argument, `$profiles`, passed to `bootstrapContainer` should be an instance of `Cspray\AnnotatedContainer\Profiles`. This value object has a variety of static constructor methods on it that allow creating an instance with the appropriate values for your use case. If you don't provide any instance of this value object the active profiles will be `['default']`. If you specify your own `Profiles` instance it is HIGHLY RECOMMENDED you include the `default` profile. Otherwise, it is highly expected that your Container will not be wired correctly.
 
 ```php
 <?php declare(strict_types=1);
@@ -194,12 +197,10 @@ The only argument, `$profiles`, passed to `bootstrapContainer` should be an inst
 namespace Acme\Demo;
 
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
-use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Profiles;
 
 $container = Bootstrap::fromAnnotatedContainerConventions(
     new YourContainerFactory(),
-    new Emitter()
 )->bootstrapContainer(Profiles::fromList(['default', 'prod']));
 ```
 

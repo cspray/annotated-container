@@ -93,8 +93,11 @@ Now that we have our services properly annotated it is important to update the b
 <?php
 
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
+use Cspray\AnnotatedContainer\Profiles;
 
-$container = (new Bootstrap())->bootstrapContainer(profiles: ['default', 'cloud']);
+$container = Bootstrap::fromAnnotatedContainerConventions(
+    new YourContainerFactory(),
+)->bootstrapContainer(Profiles::fromList(['default', 'cloud']));
 ```
 
 If we were on a local machine we'd want to build the options with the following code:
@@ -103,8 +106,11 @@ If we were on a local machine we'd want to build the options with the following 
 <?php
 
 use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
+use Cspray\AnnotatedContainer\Profiles;
 
-$container = (new Bootstrap())->bootstrapContainer(profiles: ['default', 'local']);
+$container = Bootstrap::fromAnnotatedContainerConventions(
+    new YourContainerFactory(),
+)->bootstrapContainer(Profiles::fromList(['default', 'local']));
 ```
 
 It is important...**always include the 'default' profile**! Many services will not be annotated with a specific profile and will be implicitly added to the 'default' profile. Failure to include it in the list of active profiles will likely make the vast majority of services configured incorrectly or unavailable.
