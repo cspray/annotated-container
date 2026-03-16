@@ -32,7 +32,9 @@
     "jetbrains/phpstorm-attributes": "^1.1",
     "php-di/php-di": "^7.0",
     "rdlowrey/auryn": "^1.4",
-    "roave/security-advisories": "dev-latest"
+    "roave/security-advisories": "dev-latest",
+    "yiisoft/di": "^1.4",
+    "yiisoft/injector": "^1.2"
   },
   "bin": ["bin/annotated-container"],
   "autoload": {
