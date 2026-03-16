@@ -2,6 +2,7 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateDefinitionBuilderImplementations;
 use Cspray\AnnotatedContainer\Attribute\InjectAttribute;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Internal\MethodParameterInjectTargetIdentifier;
@@ -11,6 +12,10 @@ use Cspray\Typiphy\Type;
 use Cspray\Typiphy\TypeIntersect;
 use Cspray\Typiphy\TypeUnion;
 
+/**
+ * @deprecated
+ */
+#[DeprecateDefinitionBuilderImplementations]
 final class InjectDefinitionBuilder {
 
     private ObjectType $service;

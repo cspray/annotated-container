@@ -6,17 +6,16 @@ use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\ConfigurationCannotBe
 use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateConfigurationInFavorOfCustomServiceAttribute;
 use Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute;
 use Cspray\Typiphy\ObjectType;
-use JetBrains\PhpStorm\Deprecated;
 
 /**
  * Defines a Configuration object.
  *
  * @see ConfigurationDefinitionBuilder
+ * @deprecated
  */
 #[
     ConfigurationCannotBeAssignedProfiles,
-    DeprecateConfigurationInFavorOfCustomServiceAttribute,
-    Deprecated('See ADR record DeprecatedConfigurationInFavorOfCustomServiceAttribute')
+    DeprecateConfigurationInFavorOfCustomServiceAttribute
 ]
 interface ConfigurationDefinition {
 

@@ -2,10 +2,15 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateDefinitionBuilderImplementations;
 use Cspray\AnnotatedContainer\Attribute\ServicePrepareAttribute;
 use Cspray\AnnotatedContainer\Exception\InvalidServicePrepareDefinition;
 use Cspray\Typiphy\ObjectType;
 
+/**
+ * @deprecated
+ */
+#[DeprecateDefinitionBuilderImplementations]
 final class ServicePrepareDefinitionBuilder {
 
     private ObjectType $service;

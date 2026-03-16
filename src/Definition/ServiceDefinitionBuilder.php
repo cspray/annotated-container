@@ -2,9 +2,14 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateDefinitionBuilderImplementations;
 use Cspray\AnnotatedContainer\Attribute\ServiceAttribute;
 use Cspray\Typiphy\ObjectType;
 
+/**
+ * @deprecated
+ */
+#[DeprecateDefinitionBuilderImplementations]
 final class ServiceDefinitionBuilder {
 
     /**

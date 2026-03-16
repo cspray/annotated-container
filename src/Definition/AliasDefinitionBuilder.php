@@ -2,11 +2,15 @@
 
 namespace Cspray\AnnotatedContainer\Definition;
 
+use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\DeprecateDefinitionBuilderImplementations;
 use Cspray\Typiphy\ObjectType;
 
 /**
  * The preferred method for constructing AliasDefinition instances.
+ *
+ * @deprecated
  */
+#[DeprecateDefinitionBuilderImplementations]
 final class AliasDefinitionBuilder {
 
     private ObjectType $abstractType;
