@@ -10,6 +10,6 @@ interface AnalyzedContainerDefinitionFromCache extends Listener {
 
     public function handleAnalyzedContainerDefinitionFromCache(
         ContainerDefinition $containerDefinition,
-        CacheKey $cacheKey,
+        string $cacheKey,
     ) : void;
 }
