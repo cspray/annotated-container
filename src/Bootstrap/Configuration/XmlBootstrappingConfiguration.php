@@ -19,7 +19,7 @@ use function libxml_use_internal_errors;
 final class XmlBootstrappingConfiguration implements BootstrappingConfiguration {
 
     /**
-     * @var list<string>
+     * @var list<non-empty-string>
      */
     private readonly array $directories;
     private readonly ?DefinitionProvider $definitionProvider;
@@ -46,6 +46,10 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
         }
 
         try {
+            // There are several assertions on the types of data we expect in the below code. This is because we
+            // expect the schema to define a document that specifies certain minimum lengths and expectations of
+            // data being present. Validating the schema will throw an error if these expectations are not met, and
+            // there's no way to test type expectations because if there are any it will not pass schema validation.
             $schemaFile = dirname(__DIR__, 3) . '/annotated-container.xsd';
             $dom = new DOMDocument();
             $dom->loadXML($this->filesystem->read($this->xmlFile));
@@ -61,7 +65,7 @@ final class XmlBootstrappingConfiguration implements BootstrappingConfiguration 
             $scanDirectories = [];
             foreach ($scanDirectoriesNodes as $scanDirectory) {
                 $sourceDirectory = $scanDirectory->nodeValue;
-                assert($sourceDirectory !== null);
+                assert($sourceDirectory !== null && $sourceDirectory !== '');
                 $scanDirectories[] = $sourceDirectory;
             }
 
