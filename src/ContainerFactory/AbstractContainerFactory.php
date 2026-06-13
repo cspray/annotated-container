@@ -6,14 +6,8 @@ use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\AliasDefinitionResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\AliasResolution\StandardAliasDefinitionResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\State\ContainerFactoryState;
-use Cspray\AnnotatedContainer\ContainerFactory\State\InjectParameterValue;
-use Cspray\AnnotatedContainer\ContainerFactory\State\ServiceCollectorReference;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
-use Cspray\AnnotatedContainer\Definition\InjectDefinition;
 use Cspray\AnnotatedContainer\Definition\ProfilesAwareContainerDefinition;
-use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
-use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
-use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
 use Cspray\AnnotatedContainer\Event\ContainerFactoryEmitter;
 use Cspray\AnnotatedContainer\Profiles;
 

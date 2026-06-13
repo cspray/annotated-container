@@ -1,10 +1,16 @@
 # Autowire Aware Invoker
 
-It is common in PHP to use callables for a wide variety of functionality. Annotated Container provides functionality to invoke a callable and recursively autowire the dependencies it requires from available services. The Container returned from a `ContainerFactory` is a [type intersect](https://www.php.net/manual/en/language.types.declarations.php#language.types.declarations.composite.intersection) that includes the `Cspray\AnnotatedContainer\AutowireableInvoker`. You can depend on this type in your constructors to invoke autowired callables!
+It is common in PHP to use callables for a wide variety of functionality. Annotated Container provides functionality to
+invoke a callable and recursively autowire the dependencies it requires from available services. The Container returned
+from a `ContainerFactory` is a [type intersect](https://www.php.net/manual/en/language.types.declarations.php#language.types.declarations.composite.intersection) that includes the `Cspray\AnnotatedContainer\AutowireableInvoker`.
+You can depend on this type in your constructors to invoke autowired callables!
 
 ## Example
 
-In our example we're going to create some callables that interact with `Widget` implementations. Some of those implementations depend on services from the Container, while other implementations depend on scalar values that must be provided when you create the object. Before we look at how to use the `AutowireableInvoker` let's take a look at an example codebase.
+In our example we're going to create some callables that interact with `Widget` implementations. Some of those
+implementations depend on services from the Container, while other implementations depend on scalar values that must be 
+provided when you create the object. Before we look at how to use the `AutowireableInvoker` let's take a look at an
+example codebase.
 
 ```php
 <?php declare(strict_types=1);
