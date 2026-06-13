@@ -5,12 +5,13 @@ namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint\Check;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceName;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\Fixture\LogicalConstraints\DuplicateServiceName\BarService;
 use Cspray\AnnotatedContainer\Fixture\LogicalConstraints\DuplicateServiceName\FooService;
 use Cspray\AnnotatedContainer\Fixture\LogicalConstraints\LogicalConstraintFixtures;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class DuplicateServiceNameTest extends LogicalConstraintTestCase {
 
@@ -24,9 +25,9 @@ final class DuplicateServiceNameTest extends LogicalConstraintTestCase {
     }
 
     public function testServiceWithMultipleNamesReturnsCorrectViolation() : void {
-        $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-            LogicalConstraintFixtures::duplicateServiceName()->getPath()
-        )->build();
+        $options = ContainerDefinitionAnalysisOptions::fromScanDirectories(
+            [LogicalConstraintFixtures::duplicateServiceName()->getPath()]
+        );
 
         $definition = $this->analyzer->analyze($options);
 
@@ -55,11 +56,11 @@ TEXT;
         ];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('duplicateServiceNameProfiles')]
+    #[DataProvider('duplicateServiceNameProfiles')]
     public function testServiceWithMultipleNamesOnDifferentProfilesHasNoViolation(string $profile) : void {
-        $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-            Fixtures::duplicateNamedServiceDifferentProfiles()->getPath()
-        )->build();
+        $options = ContainerDefinitionAnalysisOptions::fromScanDirectories(
+            [Fixtures::duplicateNamedServiceDifferentProfiles()->getPath()]
+        );
 
         $definition = $this->getAnalyzer()->analyze($options);
 

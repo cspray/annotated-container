@@ -10,7 +10,7 @@ use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationCollec
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedTarget\PhpParserAnnotatedTargetParser;
@@ -29,9 +29,9 @@ class LogicalConstraintValidatorTest extends TestCase {
 
     public function testLogicalValidatorPassesContainerDefinitionToLogicalConstraintChecks() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::singleConcreteService()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [Fixtures::singleConcreteService()->getPath()]
+            )
         );
 
         $profiles = Profiles::fromList(['default']);
@@ -50,9 +50,9 @@ class LogicalConstraintValidatorTest extends TestCase {
 
     public function testLogicalValidatorMergesLogicalConstraintViolations() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::singleConcreteService()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [Fixtures::singleConcreteService()->getPath()]
+            )
         );
 
         $profiles = Profiles::fromList(['default']);

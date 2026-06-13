@@ -2,7 +2,8 @@
 
 [![Unit Tests](https://github.com/cspray/annotated-container/actions/workflows/php.yml/badge.svg)](https://github.com/cspray/annotated-container/actions/workflows/php.yml)
 
-A Dependency Injection framework for creating an autowired, feature-rich, [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible Container using PHP 8 Attributes!
+A Dependency Injection framework for creating an autowired, feature-rich, [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible Container using
+PHP 8 Attributes!
 
 - Designate an interface as a Service and easily configure which concrete implementations to use
 - Delegate service construction to a factory
@@ -15,7 +16,9 @@ A Dependency Injection framework for creating an autowired, feature-rich, [PSR-1
 
 ## Quick Start
 
-This quick start is intended to get you familiar with Annotated Container's core functionality and get a working Container created. First, a simple example showing how an interface can be aliased to a concrete Service. After that we'll show you how to get a Container to create the Service.
+This quick start is intended to get you familiar with Annotated Container's core functionality and get a working 
+Container created. First, a simple example showing how an interface can be aliased to a concrete Service. After that 
+we'll show you how to get a Container to create the Service.
 
 ### Code Example
 
@@ -54,19 +57,28 @@ This example is built upon in the docs. Check out the tutorials for more example
 
 ### Bootstrapping Your Container
 
-Annotated Container ships with a built-in CLI tool to easily create a configuration detailing how to build your Container and a corresponding `Cspray\AnnotatedContainer\Bootstrap\Bootstrap` implementation to create your Container using that configuration. It is highly recommended to use the provided tooling to create your Container.
+Annotated Container ships with a built-in CLI tool to easily create a configuration detailing how to build your 
+Container and a corresponding `Cspray\AnnotatedContainer\Bootstrap\Bootstrap` implementation to create your Container 
+using that configuration. It is highly recommended to use the provided tooling to create your Container.
 
-> The CLI tool offers extensive documentation detailing how to run commands and what options are available. If you're ever looking for more info run: `./vendor/bin/annotated-container help`
+> The CLI tool offers extensive documentation detailing how to run commands and what options are available. If you're 
+> ever looking for more info run: `./vendor/bin/annotated-container help`
 
-The first step is to create the configuration. By default, the tooling will look at your `composer.json` to determine what directories to scan and create a directory that the ContainerDefinition can be cached in. Run the following command to complete this step. 
+The first step is to create the configuration. By default, the tooling will look at your `composer.json` to determine 
+what directories to scan and create a directory that the ContainerDefinition can be cached in. Run the following 
+command to complete this step. 
 
 ```
 ./vendor/bin/annotated-container init
 ```
 
-The configuration file will be created in the root of your project named "annotated-container.xml". The cache directory will also be created in the root of your project named ".annotated-container-cache". Check out the command's help documentation for available options, including how to customize these values.
+The configuration file will be created in the root of your project named "annotated-container.xml". The cache directory 
+will also be created in the root of your project named ".annotated-container-cache". Check out the command's help 
+documentation for available options, including how to customize these values.
 
-Be sure to review the generated configuration! A "normal" Composer setup might result in a configuration that looks like the following. If there are any directories that should be scanned but aren't listed in `<source></source>` be sure to include them. Conversely, if there are directories included that _shouldn't_ be scanned be sure to remove them.
+Be sure to review the generated configuration! A "normal" Composer setup might result in a configuration that looks 
+like the following. If there are any directories that should be scanned but aren't listed in `<source></source>` be
+sure to include them. Conversely, if there are directories included that _shouldn't_ be scanned be sure to remove them.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -89,10 +101,7 @@ have `php-di/php-di` installed.
 // app bootstrap in __DIR__ . '/app.php'
 require __DIR__ . '/vendor/autoload.php';
 
-use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;
-use Cspray\AnnotatedContainer\Event\Emitter;
-use Cspray\AnnotatedContainer\Profiles;
-use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
+use Cspray\AnnotatedContainer\Bootstrap\Bootstrap;use Cspray\AnnotatedContainer\ContainerFactory\PhpDi\PhpDiContainerFactory;use Cspray\AnnotatedContainer\Event\Emitter;use Cspray\AnnotatedContainer\Profiles;
 
 $emitter = new Emitter();
 
@@ -122,7 +131,9 @@ composer require cspray/annotated-container
 
 ### Choose a Backing Container
 
-AnnotatedContainer does not provide any of the actual Container functionality. We provide Attributes and definition objects that can determine how actual implementations are intended to be setup. AnnotatedContainer currently supports the following backing Containers:
+AnnotatedContainer does not provide any of the actual Container functionality. We provide Attributes and definition 
+objects that can determine how actual implementations are intended to be setup. AnnotatedContainer currently supports
+the following backing Containers:
 
 #### [rdlowrey/auryn](https://github.com/rdlowrey/auryn)
 
@@ -144,13 +155,20 @@ composer require illuminate/container
 
 ## Documentation
 
-This library is thoroughly documented in-repo under the `/docs` directory. The documentation is split into three parts; Tutorials, How Tos, and References.
+This library is thoroughly documented in-repo under the `/docs` directory. The documentation is split into three parts; 
+Tutorials, How Tos, and References.
 
-**Tutorials** are where you'll want to start. It'll expand on the examples in the "Quick Start" and teach you how to do most of the things you'll want to do with the library. This documentation tends to split the difference between the amount of code and the amount of explanation.
+**Tutorials** are where you'll want to start. It'll expand on the examples in the "Quick Start" and teach you how to do
+most of the things you'll want to do with the library. This documentation tends to split the difference between the 
+amount of code and the amount of explanation.
 
-**How Tos** are where you'll go to get step-by-step guides on how to achieve specific functionality. These documents tend to be more code and less explanation. We assume you've gotten an understanding of the library and have questions on how to do something beyond the "normal" use cases. 
+**How Tos** are where you'll go to get step-by-step guides on how to achieve specific functionality. These documents 
+tend to be more code and less explanation. We assume you've gotten an understanding of the library and have questions 
+on how to do something beyond the "normal" use cases. 
 
-**References** are where you can get into the real internal, technical workings of the library. List of APIs and more technically-explicit documentation can be found here. References may be a lot of code, a lot of explanation, or a split between the two depending on the context.
+**References** are where you can get into the real internal, technical workings of the library. List of APIs and more 
+technically-explicit documentation can be found here. References may be a lot of code, a lot of explanation, or a split 
+between the two depending on the context.
 
 ## Roadmap
 

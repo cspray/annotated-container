@@ -7,6 +7,7 @@ use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
 use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\CacheAwareContainerDefinitionAnalyzer;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
@@ -29,7 +30,7 @@ class CacheAwareContainerDefinitionAnalyzerTest extends TestCase {
 
     public function testContainerDefinitionCacheHitDoesNotCallUnderlyingAnalyzer() {
         $dir = Fixtures::implicitAliasedServices()->getPath();
-        $analysisOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)->build();
+        $analysisOptions = ContainerDefinitionAnalysisOptions::fromScanDirectories([$dir]);
         $containerDefinition = $this->annotatedTargetContainerDefinitionAnalyzer->analyze($analysisOptions);
         $this->cache->expects($this->once())
             ->method('get')
@@ -53,7 +54,7 @@ class CacheAwareContainerDefinitionAnalyzerTest extends TestCase {
 
     public function testContainerDefinitionCacheMissesDoesCallUnderlyingAnalyzer() : void {
         $dir = Fixtures::implicitAliasedServices()->getPath();
-        $analysisOptions = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($dir)->build();
+        $analysisOptions = ContainerDefinitionAnalysisOptions::fromScanDirectories([$dir]);
         $containerDefinition = $this->annotatedTargetContainerDefinitionAnalyzer->analyze($analysisOptions);
 
         $expectedCacheKey = CacheKey::fromContainerDefinitionAnalysisOptions($analysisOptions);

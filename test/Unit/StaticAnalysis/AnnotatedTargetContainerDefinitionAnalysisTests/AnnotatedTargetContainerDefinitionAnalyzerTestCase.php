@@ -5,7 +5,7 @@ namespace Cspray\AnnotatedContainer\Unit\StaticAnalysis\AnnotatedTargetContainer
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\ContainerDefinitionAssertionsTrait;
 use Cspray\AnnotatedContainer\Unit\Helper\AnalysisEventCollection;
@@ -20,7 +20,7 @@ abstract class AnnotatedTargetContainerDefinitionAnalyzerTestCase extends TestCa
 
     private AnnotatedTargetContainerDefinitionAnalyzer $analyzer;
 
-    private ContainerDefinitionAnalysisOptionsBuilder $builder;
+    private ContainerDefinitionAnalysisOptions $analysisOptions;
 
     private StubAnalysisListener $stubAnalysisListener;
 
@@ -52,10 +52,11 @@ abstract class AnnotatedTargetContainerDefinitionAnalyzerTestCase extends TestCa
             $dirs[] = $fixture->getPath();
         }
 
-        $this->builder = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$dirs);
         $consumer = $this->getDefinitionProvider();
         if (!is_null($consumer)) {
-            $this->builder = $this->builder->withDefinitionProvider($consumer);
+            $this->analysisOptions = ContainerDefinitionAnalysisOptions::fromScanDirectoriesAndDefinitionProvider($dirs, $consumer);
+        } else {
+            $this->analysisOptions = ContainerDefinitionAnalysisOptions::fromScanDirectories($dirs);
         }
     }
 
@@ -69,6 +70,6 @@ abstract class AnnotatedTargetContainerDefinitionAnalyzerTestCase extends TestCa
     }
 
     final protected function getSubject() : ContainerDefinition {
-        return $this->analyzer->analyze($this->builder->build());
+        return $this->analyzer->analyze($this->analysisOptions);
     }
 }

@@ -10,54 +10,73 @@ This document lists the functions for each purpose.
 ## Defining Services
 
 ```php
-\Cspray\AnnotatedContainer\service(
-    \Cspray\Typiphy\ObjectType $service,
+<?php
+
+use Cspray\AnnotatedContainer\Reflection\Type;
+use Cspray\AnnotatedContainer\Reflection\TypeUnion;
+use Cspray\AnnotatedContainer\Reflection\TypeIntersect;
+use Cspray\AnnotatedContainer\Definition\InjectDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
+use Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+use function Cspray\AnnotatedContainer\Definition\inject;
+use function Cspray\AnnotatedContainer\Definition\service;
+use function Cspray\AnnotatedContainer\Definition\serviceDelegate;
+use function Cspray\AnnotatedContainer\Definition\servicePrepare;
+
+service(
+    Type $service,
     ?string $name = null,
     array $profiles = [],
     bool $isPrimary = false
-) : \Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+) : ServiceDefinition;
 
-\Cspray\AnnotatedContainer\alias(
-    \Cspray\Typiphy\ObjectType $abstract,
-    \Cspray\Typiphy\ObjectType $concrete
-) : \Cspray\AnnotatedContainer\Definition\AliasDefinition;
+serviceDelegate(
+    Type $factoryClass,
+    string $factoryMethod,
+    array $profiles = []
+) : ServiceDelegateDefinition;
 
-\Cspray\AnnotatedContainer\serviceDelegate(
-    \Cspray\Typiphy\ObjectType $factoryClass,
-    string $factoryMethod
-) : \Cspray\AnnotatedContainer\Definition\ServiceDelegateDefinition;
-
-\Cspray\AnnotatedContainer\servicePrepare(
-    \Cspray\Typiphy\ObjectType $service,
+servicePrepare(
+    Type $service,
     string $method
-) : \Cspray\AnnotatedContainer\Definition\ServicePrepareDefinition;
+) : ServicePrepareDefinition;
 
-\Cspray\AnnotatedContainer\inject(
-    \Cspray\Typiphy\ObjectType $service,
+inject(
+    Type $service,
     string $method,
     string $paramName,
-    \Cspray\Typiphy\Type|\Cspray\Typiphy\TypeUnion|\Cspray\Typiphy\TypeIntersect $type,
+    Type|TypeUnion|TypeIntersect $type,
     mixed $value,
     array $profiles = [],
     string $from = null
-) : \Cspray\AnnotatedContainer\Definition\InjectDefinition;
+) : InjectDefinition;
 
 ```
 
 ## Autowireable Parameters
 
 ```php
-\Cspray\AnnotatedContainer\autowiredParams(
-    \Cspray\AnnotatedContainer\AutowireableParameter... $parameters
-) : \Cspray\AnnotatedContainer\AutowireableParameterSet;
+<?php
 
-\Cspray\AnnotatedContainer\serviceParam(
-    string $name,
-    \Cspray\Typiphy\ObjectType $service
-) : \Cspray\AnnotatedContainer\AutowireableParameter;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameter;
+use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+use Cspray\AnnotatedContainer\Reflection\Type;
+use function Cspray\AnnotatedContainer\Autowire\autowiredParams;
+use function Cspray\AnnotatedContainer\Autowire\rawParam;
+use function Cspray\AnnotatedContainer\Autowire\serviceParam;
 
-\Cspray\AnnotatedContainer\rawParam(
+autowiredParams(
+    AutowireableParameter... $parameters
+) : AutowireableParameterSet;
+
+rawParam(
     string $name,
     mixed $value
-) : \Cspray\AnnotatedContainer\AutowireableParameter;
+) : AutowireableParameter;
+
+serviceParam(
+    string $name,
+    Type $service
+) : AutowireableParameter;
 ```

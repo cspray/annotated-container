@@ -6,6 +6,7 @@ use Cspray\AnnotatedContainer\Attribute\ServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\DuplicateServiceDelegate;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
@@ -27,9 +28,9 @@ final class DuplicateServiceDelegateTest extends LogicalConstraintTestCase {
 
     public function testNoDuplicateDelegateHasNoViolations() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::implicitServiceDelegateType()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [Fixtures::implicitServiceDelegateType()->getPath()]
+            )
         );
 
         $violations = $this->subject->constraintViolations($definition, Profiles::defaultOnly());
@@ -39,9 +40,9 @@ final class DuplicateServiceDelegateTest extends LogicalConstraintTestCase {
 
     public function testDuplicateDelegateAttributeForSameServiceHasCorrectViolation() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                LogicalConstraintFixtures::duplicateServiceDelegate()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [LogicalConstraintFixtures::duplicateServiceDelegate()->getPath()]
+            )
         );
 
         $violations = $this->subject->constraintViolations($definition, Profiles::defaultOnly());
@@ -69,9 +70,8 @@ TEXT;
 
     public function testDuplicateDelegateAddedWithFunctionalApi() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::implicitServiceDelegateType()->getPath()
-            )->withDefinitionProvider(
+            ContainerDefinitionAnalysisOptions::fromScanDirectoriesAndDefinitionProvider(
+                [Fixtures::implicitServiceDelegateType()->getPath()],
                 new class implements DefinitionProvider {
 
                     public function consume(DefinitionProviderContext $context) : void {
@@ -83,7 +83,7 @@ TEXT;
                         );
                     }
                 }
-            )->build()
+            )
         );
 
         $violations = $this->subject->constraintViolations($definition, Profiles::defaultOnly());

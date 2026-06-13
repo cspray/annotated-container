@@ -15,7 +15,7 @@ use Cspray\AnnotatedContainer\Exception\InvalidSerializedContainerDefinition;
 use Cspray\AnnotatedContainer\Exception\InvalidInjectDefinition;
 use Cspray\AnnotatedContainer\Exception\MismatchedContainerDefinitionSerializerVersions;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
-use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\Unit\Helper\HasMockDefinitions;
 use Cspray\AnnotatedContainer\Unit\Helper\UnserializableObject;
 use Cspray\AnnotatedContainer\Fixture\Fixture;
@@ -1213,7 +1213,7 @@ XML;
         $subject = new XmlContainerDefinitionSerializer();
 
         $containerDefinition = $compiler->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories($fixture->getPath())->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories([$fixture->getPath()])
         );
 
         $expected = $subject->serialize($containerDefinition);

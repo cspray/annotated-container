@@ -15,10 +15,10 @@ use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectory
 use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceFromServiceDefinition;
 use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceGatherer;
 use Cspray\AnnotatedContainer\Bootstrap\Listener\ServiceWiringListener;
-use Cspray\AnnotatedContainer\ContainerFactory\AurynContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\Auryn\AurynContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
 use Cspray\AnnotatedContainer\ContainerFactory\ParameterStore;
-use Cspray\AnnotatedContainer\ContainerFactory\PhpDiContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\PhpDi\PhpDiContainerFactory;
 use Cspray\AnnotatedContainer\Definition\Cache\CacheKey;
 use Cspray\AnnotatedContainer\Definition\Cache\ContainerDefinitionCache;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
@@ -30,6 +30,7 @@ use Cspray\AnnotatedContainer\Filesystem\PhpFunctionsFilesystem;
 use Cspray\AnnotatedContainer\Fixture\CustomServiceAttribute\Repository;
 use Cspray\AnnotatedContainer\Fixture\Fixtures;
 use Cspray\AnnotatedContainer\Profiles;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\Helper\FixtureBootstrappingDirectoryResolver;
@@ -411,9 +412,9 @@ final class BootstrapTest extends TestCase {
         $directoryResolver = new FixtureBootstrappingDirectoryResolver();
 
         $cacheKey = CacheKey::fromContainerDefinitionAnalysisOptions(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                $directoryResolver->rootPath('SingleConcreteService')
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [$directoryResolver->rootPath('SingleConcreteService')]
+            )
         );
         $cache = $this->getMockBuilder(ContainerDefinitionCache::class)->getMock();
         $cache->expects($this->once())

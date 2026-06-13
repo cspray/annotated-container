@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.24.0@462c80e31c34e58cc4f750c656be3927e80e550e">
-  <file src="src/Bootstrap/Configuration/ContainerDefinitionAnalysisOptionsFromBootstrappingConfiguration.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$scanPaths]]></code>
-    </ArgumentTypeCoercion>
-  </file>
+<files psalm-version="5.26.1@d747f6500b38ac4f7dfc5edbcae6e4b637d7add0">
   <file src="src/Bootstrap/Listener/ServiceWiringListener.php">
     <MixedArgument>
       <code><![CDATA[$service]]></code>
@@ -31,27 +26,16 @@
                     }]]></code>
     </MixedReturnTypeCoercion>
   </file>
-  <file src="src/ContainerFactory/AbstractContainerFactory.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$reference->valueType->name()]]></code>
-    </ArgumentTypeCoercion>
-    <MixedAssignment>
-      <code><![CDATA[$params[$injectParameterValue->name]]]></code>
-    </MixedAssignment>
-    <MixedInferredReturnType>
-      <code><![CDATA[list<object>|object]]></code>
-    </MixedInferredReturnType>
-    <MixedReturnStatement>
-      <code><![CDATA[$reference->listOf->toCollection($values)]]></code>
-    </MixedReturnStatement>
-  </file>
-  <file src="src/ContainerFactory/AurynContainerFactory.php">
+  <file src="src/ContainerFactory/Auryn/AurynContainerFactory.php">
     <MethodSignatureMismatch>
       <code><![CDATA[$id]]></code>
     </MethodSignatureMismatch>
     <MissingClosureReturnType>
-      <code><![CDATA[fn() => $this->serviceCollectorReferenceToListOfServices($containerBuilder, $state, $definition, $value)]]></code>
+      <code><![CDATA[fn() => $state->serviceCollectorReferenceToListOfServices(]]></code>
     </MissingClosureReturnType>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$container->make(...)]]></code>
+    </MixedArgumentTypeCoercion>
     <MixedAssignment>
       <code><![CDATA[$parameterValue]]></code>
       <code><![CDATA[$params[$name]]]></code>
@@ -60,80 +44,96 @@
     <MixedInferredReturnType>
       <code><![CDATA[T]]></code>
       <code><![CDATA[object]]></code>
-      <code><![CDATA[object]]></code>
     </MixedInferredReturnType>
     <MixedMethodCall>
+      <code><![CDATA[make]]></code>
       <code><![CDATA[name]]></code>
     </MixedMethodCall>
     <MixedReturnStatement>
-      <code><![CDATA[$container->make($definition->type()->name())]]></code>
       <code><![CDATA[$injector->execute(
                         [$serviceDelegateDefinition->classMethod()->class()->name(), $serviceDelegateDefinition->classMethod()->methodName()],
-                        $this->parametersForServiceDelegateToArray($injector, $state, $serviceDelegateDefinition),
+                        $parameterResolver->resolveParametersForServiceDelegate($injector, $state, $serviceDelegateDefinition),
                     )]]></code>
       <code><![CDATA[$this->injector->make($id)]]></code>
     </MixedReturnStatement>
   </file>
-  <file src="src/ContainerFactory/ContainerFactoryOptionsBuilder.php">
-    <PropertyNotSetInConstructor>
-      <code><![CDATA[$activeProfiles]]></code>
-    </PropertyNotSetInConstructor>
-  </file>
-  <file src="src/ContainerFactory/IlluminateContainerFactory.php">
-    <MethodSignatureMismatch>
-      <code><![CDATA[$id]]></code>
-    </MethodSignatureMismatch>
+  <file src="src/ContainerFactory/Illuminate/IlluminateContainerBinder.php">
     <MissingClosureReturnType>
-      <code><![CDATA[fn() => $containerBuilder->get($value->name)]]></code>
-      <code><![CDATA[fn() => $this->serviceCollectorReferenceToListOfServices($containerBuilder, $state, $definition, $value)]]></code>
       <code><![CDATA[static fn(Closure $closure) => $closure()]]></code>
       <code><![CDATA[static fn(Closure $closure) => $closure()]]></code>
     </MissingClosureReturnType>
     <MixedArgument>
       <code><![CDATA[$value]]></code>
     </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$key]]></code>
+    </MixedArgumentTypeCoercion>
     <MixedAssignment>
-      <code><![CDATA[$params[$parameter->name()]]]></code>
       <code><![CDATA[$target]]></code>
-      <code><![CDATA[$value]]></code>
       <code><![CDATA[$value]]></code>
     </MixedAssignment>
     <MixedInferredReturnType>
-      <code><![CDATA[object]]></code>
-      <code><![CDATA[object]]></code>
       <code><![CDATA[object]]></code>
     </MixedInferredReturnType>
     <MixedReturnStatement>
       <code><![CDATA[$container->call(
                         [$target, $serviceDelegateDefinition->classMethod()->methodName()],
-                        array_map(static fn(Closure $closure) => $closure(), $this->parametersForServiceDelegateToArray($container, $state, $serviceDelegateDefinition)),
+                        array_map(
+                            static fn(Closure $closure) => $closure(),
+                            $this->parameterResolver->resolveParametersForServiceDelegate(
+                                $container,
+                                $this->state,
+                                $serviceDelegateDefinition
+                            )
+                        ),
                     )]]></code>
-      <code><![CDATA[$container->get($definition->type()->name())]]></code>
-      <code><![CDATA[$container->get($definition->type()->name())]]></code>
+    </MixedReturnStatement>
+  </file>
+  <file src="src/ContainerFactory/Illuminate/IlluminateContainerFactory.php">
+    <MethodSignatureMismatch>
+      <code><![CDATA[$id]]></code>
+    </MethodSignatureMismatch>
+    <MissingClosureReturnType>
+      <code><![CDATA[fn() => $container->get($value->name)]]></code>
+      <code><![CDATA[fn() => $state->serviceCollectorReferenceToListOfServices($value, $injectDefinition, $container->get(...))]]></code>
+    </MissingClosureReturnType>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$container->get(...)]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$params[$parameter->name()]]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <MixedInferredReturnType>
+      <code><![CDATA[object]]></code>
+    </MixedInferredReturnType>
+    <MixedMethodCall>
+      <code><![CDATA[get]]></code>
+      <code><![CDATA[get]]></code>
+    </MixedMethodCall>
+    <MixedReturnStatement>
       <code><![CDATA[$object]]></code>
     </MixedReturnStatement>
     <NoValue>
       <code><![CDATA[$object]]></code>
     </NoValue>
   </file>
-  <file src="src/ContainerFactory/PhpDiContainerFactory.php">
-    <InvalidArgument>
-      <code><![CDATA[$container]]></code>
-      <code><![CDATA[$container]]></code>
-    </InvalidArgument>
+  <file src="src/ContainerFactory/PhpDi/PhpDiContainerFactory.php">
     <MethodSignatureMismatch>
       <code><![CDATA[$id]]></code>
     </MethodSignatureMismatch>
     <MixedArgument>
       <code><![CDATA[$value->name()]]></code>
     </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$container->get(...)]]></code>
+    </MixedArgumentTypeCoercion>
     <MixedAssignment>
       <code><![CDATA[$params[$parameter->name()]]]></code>
       <code><![CDATA[$value]]></code>
       <code><![CDATA[$value]]></code>
     </MixedAssignment>
     <MixedInferredReturnType>
-      <code><![CDATA[object]]></code>
       <code><![CDATA[object]]></code>
     </MixedInferredReturnType>
     <MixedMethodCall>
@@ -142,9 +142,8 @@
     <MixedReturnStatement>
       <code><![CDATA[$container->call(
                          [$serviceDelegateDefinition->classMethod()->class()->name(), $serviceDelegateDefinition->classMethod()->methodName()],
-                         $this->parametersForServiceDelegateToArray($container, $state, $serviceDelegateDefinition),
+                         $parameterResolver->resolveParametersForServiceDelegate($container, $state, $serviceDelegateDefinition),
                      )]]></code>
-      <code><![CDATA[$container->get($definition->type()->name())]]></code>
       <code><![CDATA[$object]]></code>
     </MixedReturnStatement>
     <PossiblyUndefinedMethod>
@@ -157,14 +156,26 @@
   </file>
   <file src="src/ContainerFactory/State/ContainerFactoryState.php">
     <ArgumentTypeCoercion>
+      <code><![CDATA[$reference->valueType->name()]]></code>
       <code><![CDATA[array_keys($scoredInjectDefinitions)]]></code>
     </ArgumentTypeCoercion>
     <InvalidDocblock>
       <code><![CDATA[$prioritizedParams]]></code>
     </InvalidDocblock>
+    <MixedInferredReturnType>
+      <code><![CDATA[array|object]]></code>
+    </MixedInferredReturnType>
+    <MixedReturnStatement>
+      <code><![CDATA[$reference->listOf->toCollection($values)]]></code>
+    </MixedReturnStatement>
     <PossiblyInvalidArgument>
       <code><![CDATA[$type]]></code>
     </PossiblyInvalidArgument>
+  </file>
+  <file src="src/ContainerFactory/State/ParameterResolver.php">
+    <MixedAssignment>
+      <code><![CDATA[$params[$injectParameterValue->name]]]></code>
+    </MixedAssignment>
   </file>
   <file src="src/Definition/DefinitionFactory.php">
     <ArgumentTypeCoercion>
@@ -236,11 +247,6 @@
     </ArgumentTypeCoercion>
     <InvalidArgument>
       <code><![CDATA[$dirs]]></code>
-    </InvalidArgument>
-  </file>
-  <file src="src/StaticAnalysis/ContainerDefinitionAnalysisOptionsBuilder.php">
-    <InvalidArgument>
-      <code><![CDATA[$this->directories]]></code>
     </InvalidArgument>
   </file>
 </files>

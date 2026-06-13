@@ -15,7 +15,7 @@ use Cspray\AnnotatedContainer\Bootstrap\Configuration\XmlBootstrappingConfigurat
 use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\BootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\Bootstrap\DirectoryResolver\VendorPresenceBasedBootstrappingDirectoryResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
-use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptions;
 use Cspray\AnnotatedContainer\Definition\ContainerDefinition;
 use Cspray\AnnotatedContainer\Event\Emitter;
 use Cspray\AnnotatedContainer\Filesystem\Filesystem;
@@ -42,7 +42,7 @@ final class Bootstrap {
 
     public static function fromAnnotatedContainerConventions(
         ContainerFactory $containerFactory,
-        Emitter $emitter,
+        Emitter $emitter = new Emitter(),
         ParameterStoreFactory $parameterStoreFactory = new DefaultParameterStoreFactory(),
         ListenerFactory $listenerFactory = new DefaultListenerFactory(),
         DefinitionProviderFactory $definitionProviderFactory = new DefaultDefinitionProviderFactory(),
@@ -156,9 +156,9 @@ final class Bootstrap {
             $this->containerFactory->addParameterStore($parameterStore);
         }
 
-        $factoryOptions = ContainerFactoryOptionsBuilder::forProfiles($activeProfiles);
+        $factoryOptions = ContainerFactoryOptions::fromProfiles($activeProfiles);
 
-        return $this->containerFactory->createContainer($containerDefinition, $factoryOptions->build());
+        return $this->containerFactory->createContainer($containerDefinition, $factoryOptions);
     }
 
     private function createAnalytics(

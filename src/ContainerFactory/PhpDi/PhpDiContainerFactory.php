@@ -1,21 +1,25 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\AnnotatedContainer\ContainerFactory;
+namespace Cspray\AnnotatedContainer\ContainerFactory\PhpDi;
 
 use Cspray\AnnotatedContainer\AnnotatedContainer;
 use Cspray\AnnotatedContainer\Autowire\AutowireableFactory;
 use Cspray\AnnotatedContainer\Autowire\AutowireableInvoker;
 use Cspray\AnnotatedContainer\Autowire\AutowireableParameterSet;
+use Cspray\AnnotatedContainer\ContainerFactory\AbstractContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\ContainerFactory;
+use Cspray\AnnotatedContainer\ContainerFactory\State\ContainerFactoryState;
 use Cspray\AnnotatedContainer\ContainerFactory\State\ContainerReference;
 use Cspray\AnnotatedContainer\ContainerFactory\State\InjectParameterValue;
+use Cspray\AnnotatedContainer\ContainerFactory\State\InjectParameterValueProvider;
+use Cspray\AnnotatedContainer\ContainerFactory\State\ParameterResolver;
 use Cspray\AnnotatedContainer\ContainerFactory\State\ServiceCollectorReference;
 use Cspray\AnnotatedContainer\ContainerFactory\State\ValueFetchedFromParameterStore;
 use Cspray\AnnotatedContainer\Definition\InjectDefinition;
-use Cspray\AnnotatedContainer\ContainerFactory\State\ContainerFactoryState;
 use Cspray\AnnotatedContainer\Definition\ServiceDefinition;
+use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use Cspray\AnnotatedContainer\Profiles;
 use DI\Container;
-use Cspray\AnnotatedContainer\Exception\ServiceNotFound;
 use DI\ContainerBuilder;
 use DI\Definition\Reference;
 use function DI\autowire;
@@ -41,6 +45,7 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
     protected function createAnnotatedContainer(ContainerFactoryState $state) : AnnotatedContainer {
         $containerBuilder = new ContainerBuilder();
+        $parameterResolver = new ParameterResolver($this->injectParameterValueProvider());
 
         $definitions = [];
         $servicePrepareDefinitions = [];
@@ -50,14 +55,14 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
             if ($serviceDelegateDefinition === null) {
                 $definitions[$serviceDefinition->type()->name()] = autowire();
 
-                foreach ($this->parametersForServiceConstructorToArray($containerBuilder, $state, $serviceDefinition) as $param => $value) {
+                foreach ($parameterResolver->resolveParametersForServiceConstructor($containerBuilder, $state, $serviceDefinition) as $param => $value) {
                     $definitions[$serviceDefinition->type()->name()]->constructorParameter($param, $value);
                 }
             } else {
-                $definitions[$serviceDefinition->type()->name()] = function (Container $container) use($state, $serviceDelegateDefinition) : object {
+                $definitions[$serviceDefinition->type()->name()] = function (Container $container) use($state, $serviceDelegateDefinition, $parameterResolver) : object {
                      return $container->call(
                          [$serviceDelegateDefinition->classMethod()->class()->name(), $serviceDelegateDefinition->classMethod()->methodName()],
-                         $this->parametersForServiceDelegateToArray($container, $state, $serviceDelegateDefinition),
+                         $parameterResolver->resolveParametersForServiceDelegate($container, $state, $serviceDelegateDefinition),
                      );
                 };
             }
@@ -76,11 +81,11 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
 
             $servicePrepares = $state->servicePrepareDefinitionsForServiceDefinition($serviceDefinition);
             if ($servicePrepares !== []) {
-                $servicePrepareDefinitions[$serviceDefinition->type()->name()] = decorate(function (object $object, Container $container) use($servicePrepares, $state) : mixed {
+                $servicePrepareDefinitions[$serviceDefinition->type()->name()] = decorate(function (object $object, Container $container) use($servicePrepares, $state, $parameterResolver) : mixed {
                     foreach ($servicePrepares as $servicePrepare) {
                         $container->call(
                             [$object, $servicePrepare->classMethod()->methodName()],
-                            $this->parametersForServicePrepareToArray($container, $state, $servicePrepare),
+                            $parameterResolver->resolveParametersForServicePrepare($container, $state, $servicePrepare),
                         );
                     }
 
@@ -175,26 +180,26 @@ final class PhpDiContainerFactory extends AbstractContainerFactory implements Co
         };
     }
 
-    protected function resolveParameterForInjectDefinition(object $containerBuilder, ContainerFactoryState $state, InjectDefinition $definition,) : InjectParameterValue {
-        $value = $definition->value();
+    protected function injectParameterValueProvider() : InjectParameterValueProvider {
+        return new class implements InjectParameterValueProvider {
 
-        if ($value instanceof ContainerReference) {
-            $value = get($value->name);
-        } elseif ($value instanceof ServiceCollectorReference) {
-            $value = factory(fn(Container $container) : mixed => $this->serviceCollectorReferenceToListOfServices(
-                $container,
-                $state,
-                $definition,
-                $value
-            ));
-        } elseif ($value instanceof ValueFetchedFromParameterStore) {
-            $value = factory($value->get(...));
-        }
+            public function resolveInjectParameterValue(object $container, ContainerFactoryState $state, InjectDefinition $injectDefinition) : InjectParameterValue {
+                $value = $injectDefinition->value();
 
-        return new InjectParameterValue($definition->classMethodParameter()->parameterName(), $value);
-    }
+                if ($value instanceof ContainerReference) {
+                    $value = get($value->name);
+                } elseif ($value instanceof ServiceCollectorReference) {
+                    $value = factory(fn(Container $container) : mixed => $state->serviceCollectorReferenceToListOfServices(
+                        $value,
+                        $injectDefinition,
+                        $container->get(...),
+                    ));
+                } elseif ($value instanceof ValueFetchedFromParameterStore) {
+                    $value = factory($value->get(...));
+                }
 
-    protected function retrieveServiceFromIntermediaryContainer(object $container, ServiceDefinition $definition) : object {
-        return $container->get($definition->type()->name());
+                return new InjectParameterValue($injectDefinition->classMethodParameter()->parameterName(), $value);
+            }
+        };
     }
 }

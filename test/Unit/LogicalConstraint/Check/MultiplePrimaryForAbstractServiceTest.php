@@ -5,6 +5,7 @@ namespace Cspray\AnnotatedContainer\Unit\LogicalConstraint\Check;
 use Cspray\AnnotatedContainer\LogicalConstraint\Check\MultiplePrimaryForAbstractService;
 use Cspray\AnnotatedContainer\LogicalConstraint\LogicalConstraintViolationType;
 use Cspray\AnnotatedContainer\Profiles;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\Fixture\Fixture;
@@ -25,9 +26,9 @@ final class MultiplePrimaryForAbstractServiceTest extends LogicalConstraintTestC
 
     public function testSinglePrimaryPerServiceHasNoViolations() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                Fixtures::primaryAliasedServices()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [Fixtures::primaryAliasedServices()->getPath()]
+            )
         );
 
         $violations = $this->subject->constraintViolations($definition, Profiles::fromList(['default']));
@@ -37,9 +38,9 @@ final class MultiplePrimaryForAbstractServiceTest extends LogicalConstraintTestC
 
     public function testMultiplePrimaryServiceAttributedHasCorrectViolation() : void {
         $definition = $this->analyzer->analyze(
-            ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(
-                LogicalConstraintFixtures::multiplePrimaryService()->getPath()
-            )->build()
+            ContainerDefinitionAnalysisOptions::fromScanDirectories(
+                [LogicalConstraintFixtures::multiplePrimaryService()->getPath()]
+            )
         );
 
         $violations = $this->subject->constraintViolations($definition, Profiles::fromList(['default']));

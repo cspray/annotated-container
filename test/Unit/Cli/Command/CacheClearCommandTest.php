@@ -20,7 +20,7 @@ final class CacheClearCommandTest extends TestCase {
     private TerminalOutput $output;
 
     private MockObject&ContainerDefinitionCache $cache;
-    private MockObject&ContainerDefinitionAnalysisOptions $analysisOptions;
+    private ContainerDefinitionAnalysisOptions $analysisOptions;
     private FixtureBootstrappingDirectoryResolver $directoryResolver;
 
     private CacheClearCommand $subject;
@@ -33,7 +33,9 @@ final class CacheClearCommandTest extends TestCase {
         $this->directoryResolver = new FixtureBootstrappingDirectoryResolver();
 
         $this->cache = $this->createMock(ContainerDefinitionCache::class);
-        $this->analysisOptions = $this->createMock(ContainerDefinitionAnalysisOptions::class);
+        $this->analysisOptions = ContainerDefinitionAnalysisOptions::fromScanDirectories(
+            [$this->directoryResolver->rootPath('SingleConcreteService')]
+        );
 
         $this->subject = new CacheClearCommand(
             $this->cache,
@@ -77,12 +79,6 @@ SHELL;
     }
 
     public function testCallingCommandCallsCacheRemoveWithCorrectCacheKey() : void {
-        $this->analysisOptions->method('scanDirectories')
-            ->willReturn([$this->directoryResolver->rootPath('SingleConcreteService')]);
-
-        $this->analysisOptions->method('definitionProvider')
-            ->willReturn(null);
-
         $this->cache->expects($this->once())
             ->method('remove')
             ->with($this->callback(

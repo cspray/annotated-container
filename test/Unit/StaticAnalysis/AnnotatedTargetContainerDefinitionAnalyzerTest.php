@@ -13,6 +13,7 @@ use Cspray\AnnotatedContainer\Exception\ServiceDelegateReturnsUnionType;
 use Cspray\AnnotatedContainer\Exception\ServiceDelegateReturnsUnknownType;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetContainerDefinitionAnalyzer;
 use Cspray\AnnotatedContainer\StaticAnalysis\AnnotatedTargetDefinitionConverter;
+use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptions;
 use Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder;
 use Cspray\AnnotatedContainer\StaticAnalysis\DefinitionProvider;
 use Cspray\AnnotatedContainer\Unit\ContainerDefinitionAssertionsTrait;
@@ -41,13 +42,13 @@ class AnnotatedTargetContainerDefinitionAnalyzerTest extends TestCase {
         if (is_string($dir)) {
             $dir = [$dir];
         }
-        $options = ContainerDefinitionAnalysisOptionsBuilder::scanDirectories(...$dir);
-
         if ($consumer !== null) {
-            $options = $options->withDefinitionProvider($consumer);
+            $options = ContainerDefinitionAnalysisOptions::fromScanDirectoriesAndDefinitionProvider($dir, $consumer);
+        } else {
+            $options = ContainerDefinitionAnalysisOptions::fromScanDirectories($dir);
         }
 
-        return $this->subject->analyze($options->build());
+        return $this->subject->analyze($options);
     }
 
     public function testEmptyScanDirectoriesThrowsException() : void {

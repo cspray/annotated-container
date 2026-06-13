@@ -2,9 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v3.0.0](https://github.com/cspray/annotated-container/tree/v3.0.0) - 2024-12-15
+## [v3.0.0](https://github.com/cspray/annotated-container/tree/v3.0.0)
 
 The v3.0 release represents a substantial improvement in several areas of the project, but also includes several backwards compatability breaks; particularly if you were using container caching, providing Definitions via a DefinitionProvider, or utilizing the Bootstrap observer system.
 
@@ -27,7 +28,6 @@ The v3.0 release represents a substantial improvement in several areas of the pr
 - Updated the version of `nikic/php-parser` used to 5.3.
 - All interactions with the `Bootstrap` object are available through named, static methods. The `Bootstrap` constructor is now private and the `new` construct cannot be used. Generally speaking, you should make use of the new `Bootstrap::fromAnnotatedContainerConventions` method.
 - Container factory to use is no longer implicit and must be explicitly provided during your bootstrapping.
-- `AnnotatedContainer::getBackingContainer` was renamed to `backingContainer`.
 - All Definitions that had a nullable `attribute` method were changed to require a non-null Attribute value. Please see the ADR "Require Definitions To Provide Attribute" for more information.
 - Improved the `XmlContainerDefinitionSerializer` and corresponding XSD to remove redundant information being stored in the Attribute.
 - The `AnnotatedContainerVersion` class was updated to use the `composer/runtime` dependency directly, instead of using `ocramius/package-versions`.
@@ -35,6 +35,7 @@ The v3.0 release represents a substantial improvement in several areas of the pr
 - Several implementations had their `get` prefix removed, as it was redundant and not necessary.
 - Moved test code that was in `fixture_src` under `test/Fixture`.
 - When utilizing the `composer.json` configuration for configuring third-party initializers, more checks are made to ensure that a valid data structure has been passed. Previously, this had undefined behavior when invalid data types or values were present.
+- Refactored the `ContainerFactoryOptions` interface into a value object.
 
 ### Fixed
 
@@ -58,6 +59,8 @@ The v3.0 release represents a substantial improvement in several areas of the pr
   - `Cspray\AnnotatedContainer\Definition\ConfigurationDefinitionBuilder`
   - `Cspray\AnnotatedContainer\Attribute\ConfigurationAttribute`
   - `Cspray\AnnotatedContainer\Attribute\Configuration`
+- Removed the `Cspray\AnnotatedContainer\ContainerFactory\ContainerFactoryOptionsBuilder` object. Please use the `ContainerFactoryOptions` value object directly instead.
+- Removed the `Cspray\AnnotatedContainer\StaticAnalysis\ContainerDefinitionAnalysisOptionsBuilder`. Please use the `ContainerFactoryOptions` value object directly instead.
 - Removed built-in file caching used in bootstrapping. This functionality is replaced by implementing your own `ContainerDefinitionCache` implementation, or explicitly using the `FileBackedContainerDefinitionCache` provided out-of-the-box.
 - Removed built-in logging used throughout the library. This functionality will be replaced at a future date with a set of listeners that will log the same information. These listeners will require installing a separate repo and explicitly opting in.
 - Removed the following Composer dependencies:
@@ -71,7 +74,7 @@ The v3.0 release represents a substantial improvement in several areas of the pr
 ### Added
 
 - Added the ability to inject a collection of services as an array or a custom collection by passing an implementation of `Cspray\AnnotatedContainer\ContainerFactory\ListOf` to an `#[Inject]` attribute.
-- Added `Cspray\AnnotatedContainer\ContainerFactory\ListOfAsArray` implementation of to allow implementing a collection of services as an array out-of-the-box 
+- Added `Cspray\AnnotatedContainer\ContainerFactory\ListOfAsArray` implementation of to allow implementing a collection of services as an array out-of-the-box
 
 ### Deprecated
 
@@ -117,14 +120,14 @@ In v3 caching functionality is drastically improved and much more control is pro
 ### Changed
 
 - Changed static analysis step to no longer throw an error if a ServiceDelegate is encountered without an explicitly
-defined Service. Now, a ServiceDefinition will be implicitly added as if the corresponding class was added with all 
-default parameters using the functional API.
+  defined Service. Now, a ServiceDefinition will be implicitly added as if the corresponding class was added with all
+  default parameters using the functional API.
 
 ### Deprecated
 
 - All observers have been deprecated. They will be replaced in 3.0.0. Please see our ADR document for more details.
-- All implementations in Cspray\AnnotatedContainer\Profiles have been deprecated. They will be replaced with a single 
-value object in 3.0.0. Please see our ADR document for more details.
+- All implementations in Cspray\AnnotatedContainer\Profiles have been deprecated. They will be replaced with a single
+  value object in 3.0.0. Please see our ADR document for more details.
 
 ## [v2.2.0](https://github.com/cspray/annotated-container/tree/v2.2.0) - 2023-05-29
 
@@ -330,7 +333,7 @@ This release only deprecates code constructs replaced in v2.
 
 ## [v1.3.0](https://github.com/cspray/annotated-container/tree/v1.3.0) - 2022-08-06
 
-### Added 
+### Added
 
 - Added an event system for programmatic access to the ContainerDefinition and Container before and after each is created.
 
@@ -415,7 +418,7 @@ This release only deprecates code constructs replaced in v2.
 ### Removed
 
 - Removed the ability to mark a `#[Service]` as shared or not. All services are shared by default, and you cannot "unshare" a service. This functionality has a lot of odd behavior around it and other mechanisms should be used to gain this functionality.
-- Removed the `AnnotatedTarget`, `AnnotatatedTargetParser`, and `StaticAnalysisAnnotatedTargetParser`. 
+- Removed the `AnnotatedTarget`, `AnnotatatedTargetParser`, and `StaticAnalysisAnnotatedTargetParser`.
 
 ### Changed
 
@@ -432,7 +435,7 @@ This release only deprecates code constructs replaced in v2.
 
 - A new `fixture_src/` directory that stores example source code used for the automated test suite.
 - Several improvements to the way that Fixtures are handled in the test suite such that the code examples in `fixture_src/` have a first-class representation in the test suite through the `Cspray\AnnotatedContainerFixture\Fixtures` class.
-- Implementations for 
+- Implementations for
 
 ### Changed
 
@@ -490,7 +493,7 @@ This release only deprecates code constructs replaced in v2.
 - An error in the README documentation referencing an incorrect variable.
 - Directory paths in all tests point to new directory structure.
 - A dev-only dependency, `mikey179/vfsStream` was inadvertently included in the `require` section. This dependency is now properly a `require-dev` dependency.
-- Arguments passed to Attributes better differentiates between compile and runtime values by introducing an AnnotationValue. Many 
+- Arguments passed to Attributes better differentiates between compile and runtime values by introducing an AnnotationValue. Many
 
 ### Removed
 
@@ -532,7 +535,7 @@ This release only deprecates code constructs replaced in v2.
   on a `Service` constructor or `ServicePrepare` method.
 - `InjectorDefinitionCompiler` to turn annotated PHP source code in a directory into an `InjectorDefinition` which defines how to construct
   the corresponding `Injector`. An implementation using PHP-Parser is also provided.
-- `InjectorFactory` to take an `InjectorDefinition` and turn it into a DI container. An implementation that 
+- `InjectorFactory` to take an `InjectorDefinition` and turn it into a DI container. An implementation that
   wires an Auryn `Injector` is also provided.
 
 

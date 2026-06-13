@@ -113,9 +113,6 @@ final class AnnotatedContainerCliRunner {
      * @param list<string> $argv
      */
     public function run(array $argv) : void {
-        $this->commandExecutor->execute(
-            (new InputParser())->parse($argv),
-            new TerminalOutput()
-        );
+        $this->commandExecutor->execute((new InputParser())->parse($argv), new TerminalOutput());
     }
 }

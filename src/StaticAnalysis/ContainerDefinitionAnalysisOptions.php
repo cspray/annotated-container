@@ -7,14 +7,46 @@ use Cspray\AnnotatedContainer\ArchitecturalDecisionRecords\SingleEntrypointDefin
 /**
  * Represents configurable details for the compilation of a ContainerDefinition.
  */
-interface ContainerDefinitionAnalysisOptions {
+final readonly class ContainerDefinitionAnalysisOptions {
+
+    /**
+     * @param list<non-empty-string> $scanDirectories
+     * @param DefinitionProvider|null $definitionProvider
+     */
+    private function __construct(
+        private array $scanDirectories,
+        private ?DefinitionProvider $definitionProvider,
+    ) {
+    }
+
+    /**
+     * @param list<non-empty-string> $scanDirectories
+     * @return self
+     */
+    public static function fromScanDirectories(array $scanDirectories) : self {
+        return new self($scanDirectories, null);
+    }
+
+    /**
+     * @param list<non-empty-string> $scanDirectories
+     * @param DefinitionProvider $definitionProvider
+     * @return self
+     */
+    public static function fromScanDirectoriesAndDefinitionProvider(
+        array $scanDirectories,
+        DefinitionProvider $definitionProvider,
+    ) : self {
+        return new self($scanDirectories, $definitionProvider);
+    }
 
     /**
      * Return a list of directories to scan for annotated services.
      *
      * @return list<non-empty-string>
      */
-    public function scanDirectories() : array;
+    public function scanDirectories() : array {
+        return $this->scanDirectories;
+    }
 
     /**
      * If you need to modify the ContainerDefinitionBuilder return a proper consumer, otherwise null.
@@ -24,5 +56,7 @@ interface ContainerDefinitionAnalysisOptions {
      * @return DefinitionProvider|null
      */
     #[SingleEntrypointDefinitionProvider]
-    public function definitionProvider() : ?DefinitionProvider;
+    public function definitionProvider() : ?DefinitionProvider {
+        return $this->definitionProvider;
+    }
 }
